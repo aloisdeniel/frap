@@ -10,7 +10,7 @@ pub mod material;
 pub mod world;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 9] = [
+pub static ALL_OPS: [&OperatorSpec; 11] = [
     &image::OPSPEC_IMAGE_OT_NEW,
     &image::OPSPEC_IMAGE_OT_OPEN,
     &image::OPSPEC_IMAGE_OT_PACK,
@@ -18,6 +18,8 @@ pub static ALL_OPS: [&OperatorSpec; 9] = [
     &image::OPSPEC_IMAGE_OT_SAVE,
     &image::OPSPEC_IMAGE_OT_SAVE_AS,
     &image::OPSPEC_IMAGE_OT_UNPACK,
+    &material::OPSPEC_MATERIAL_OT_COPY,
     &material::OPSPEC_MATERIAL_OT_NEW,
+    &material::OPSPEC_MATERIAL_OT_PASTE,
     &world::OPSPEC_WORLD_OT_NEW,
 ];

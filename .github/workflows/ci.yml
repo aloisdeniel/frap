@@ -161,6 +161,9 @@ jobs:
         run: cargo clippy -p frap-cli --features draco-sys,basisu-encode --locked -- -D warnings
       - name: codec tests with the optional backends
         run: cargo test -p frap-codec-mesh -p frap-imbuf --features frap-codec-mesh/draco-sys,frap-imbuf/basisu-encode --locked
+      # M8 W0 (decision log M8W0-9): the frap-lua spike's vendored Lua 5.4 (WP 8.10).
+      - name: frap-lua with the lua feature
+        run: cargo clippy -p frap-lua --features lua --all-targets --locked -- -D warnings
 
   cc-only:
     name: clean container with only cc/c++ (default features)

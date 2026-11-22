@@ -11,7 +11,12 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 23] = [
+pub static E0: [EnumItem; 3] = [
+    EnumItem { identifier: "BEZIER", name: "Bézier", description: "New keys will be Bézier", value: 2 },
+    EnumItem { identifier: "LIN", name: "Linear", description: "New keys will be linear", value: 1 },
+    EnumItem { identifier: "CONST", name: "Constant", description: "New keys will be constant", value: 0 },
+];
+pub static E1: [EnumItem; 23] = [
     EnumItem { identifier: "DEFAULT", name: "Default", description: "", value: 0 },
     EnumItem { identifier: "Available", name: "Available", description: "Insert a keyframe on each of the already existing F-Curves", value: -1 },
     EnumItem { identifier: "Location", name: "Location", description: "Insert a keyframe on each of the location channels", value: -2 },
@@ -36,6 +41,106 @@ pub static E0: [EnumItem; 23] = [
     EnumItem { identifier: "WholeCharacter", name: "Whole Character", description: "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)", value: -21 },
     EnumItem { identifier: "WholeCharacterSelected", name: "Whole Character (Selected Bones Only)", description: "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)", value: -22 },
 ];
+}
+
+// ---------------------------------------------------------------- anim.channels_bake
+/// Props of `anim.channels_bake`, RNA order.
+pub static CHANNELS_BAKE_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "use_scene_range", name: "Use Scene Range", description: "If enabled, the scene start and end frame will be used to determine the bake range", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "range", name: "Frame Range", description: "The custom range in which to create new keys. Only used when not using the scene range", kind: PropKind::Int { default: Defaults::Array(&[0, 0]), hard: (-2147483648, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(2), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "step", name: "Frame Step", description: "At which interval to add keys", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.009999999776482582, 3.4028234663852886e38), soft: (1.0, 16.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "remove_outside_range", name: "Remove Outside Range", description: "Removes keys outside the given range, leaving only the newly baked", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "interpolation_type", name: "Interpolation Type", description: "Choose the interpolation type with which new keys will be added", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("BEZIER"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "bake_modifiers", name: "Bake Modifiers", description: "Bake Modifiers into keyframes and delete them after", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ANIM_OT_channels_bake`
+pub static OPSPEC_ANIM_OT_CHANNELS_BAKE: OperatorSpec = OperatorSpec {
+    idname: "anim.channels_bake",
+    bl_idname: "ANIM_OT_channels_bake",
+    label: "Bake Channels",
+    description: "Create keyframes following the current shape of F-Curves of selected channels",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &CHANNELS_BAKE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `anim.channels_bake`.
+pub mod channels_bake {
+    /// `InterpolationType`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum InterpolationType {
+        /// "BEZIER"
+        Bezier,
+        /// "LIN"
+        Lin,
+        /// "CONST"
+        Const,
+    }
+    impl InterpolationType {
+        /// Every variant, in RNA item order.
+        pub const ALL: [InterpolationType; 3] = [InterpolationType::Bezier, InterpolationType::Lin, InterpolationType::Const];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                InterpolationType::Bezier => "BEZIER",
+                InterpolationType::Lin => "LIN",
+                InterpolationType::Const => "CONST",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "BEZIER" => Some(InterpolationType::Bezier),
+                "LIN" => Some(InterpolationType::Lin),
+                "CONST" => Some(InterpolationType::Const),
+                _ => None,
+            }
+        }
+    }
+    impl Default for InterpolationType {
+        fn default() -> Self {
+            InterpolationType::Bezier
+        }
+    }
+    impl frap_rna::FromValue for InterpolationType {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `anim.channels_bake` (Bake Channels).
+#[derive(Debug, Clone)]
+pub struct ChannelsBake {
+    /// If enabled, the scene start and end frame will be used to determine the bake range; default true [ANIMATABLE]
+    pub use_scene_range: Prop<bool>,
+    /// The custom range in which to create new keys. Only used when not using the scene range; INT [ANIMATABLE]
+    pub range: Prop<[i32; 2]>,
+    /// At which interval to add keys; default 1 [ANIMATABLE]
+    pub step: Prop<f32>,
+    /// Removes keys outside the given range, leaving only the newly baked; default false [ANIMATABLE]
+    pub remove_outside_range: Prop<bool>,
+    /// Choose the interpolation type with which new keys will be added; default "BEZIER": BEZIER | LIN | CONST [ANIMATABLE]
+    pub interpolation_type: Prop<channels_bake::InterpolationType>,
+    /// Bake Modifiers into keyframes and delete them after; default true [ANIMATABLE]
+    pub bake_modifiers: Prop<bool>,
+}
+impl OpProps for ChannelsBake {
+    const IDNAME: &'static str = "anim.channels_bake";
+    const BL_IDNAME: &'static str = "ANIM_OT_channels_bake";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ANIM_OT_CHANNELS_BAKE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ChannelsBake {
+            use_scene_range: a.prop(0, "use_scene_range"),
+            range: a.prop(1, "range"),
+            step: a.prop(2, "step"),
+            remove_outside_range: a.prop(3, "remove_outside_range"),
+            interpolation_type: a.prop(4, "interpolation_type"),
+            bake_modifiers: a.prop(5, "bake_modifiers"),
+        }
+    }
 }
 
 // ---------------------------------------------------------------- anim.keyframe_clear_v3d
@@ -76,7 +181,7 @@ impl OpProps for KeyframeClearV3d {
 // ---------------------------------------------------------------- anim.keyframe_delete
 /// Props of `anim.keyframe_delete`, RNA order.
 pub static KEYFRAME_DELETE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("DEFAULT"), dynamic: Some("ANIM_OT_keyframe_delete.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("DEFAULT"), dynamic: Some("ANIM_OT_keyframe_delete.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `ANIM_OT_keyframe_delete`
 pub static OPSPEC_ANIM_OT_KEYFRAME_DELETE: OperatorSpec = OperatorSpec {
@@ -181,7 +286,7 @@ impl OpProps for KeyframeDeleteV3d {
 // ---------------------------------------------------------------- anim.keyframe_insert
 /// Props of `anim.keyframe_insert`, RNA order.
 pub static KEYFRAME_INSERT_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("DEFAULT"), dynamic: Some("ANIM_OT_keyframe_insert.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("DEFAULT"), dynamic: Some("ANIM_OT_keyframe_insert.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `ANIM_OT_keyframe_insert`
 pub static OPSPEC_ANIM_OT_KEYFRAME_INSERT: OperatorSpec = OperatorSpec {

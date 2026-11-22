@@ -978,6 +978,7 @@ dependencies = [
  "approx",
  "automod",
  "bitflags",
+ "faer",
  "frap-geom",
  "frap-math",
  "frap-mesh",
@@ -1202,6 +1203,15 @@ dependencies = [
  "insta",
  "proptest",
  "smol_str",
+]
+
+[[package]]
+name = "frap-lua"
+version = "0.1.0"
+dependencies = [
+ "frap-ops-all",
+ "frap-session",
+ "mlua",
 ]
 
 [[package]]
@@ -1555,9 +1565,11 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "faer",
  "frap-anim",
  "frap-bmesh",
  "frap-eval",
+ "frap-geom",
  "frap-math",
  "frap-mesh",
  "frap-modifiers",
@@ -1668,6 +1680,22 @@ dependencies = [
  "serde_json",
  "smallvec",
  "smol_str",
+]
+
+[[package]]
+name = "frap-perf-tests"
+version = "0.1.0"
+dependencies = [
+ "assert_cmd",
+ "frap-bmesh",
+ "frap-gltf",
+ "frap-io-gltf",
+ "frap-mesh",
+ "frap-ops-all",
+ "frap-rna",
+ "frap-scene",
+ "frap-session",
+ "serde_json",
 ]
 
 [[package]]
@@ -2562,6 +2590,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "lua-src"
+version = "551.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d400ffef0e3d4d29287092bdc5a276d0bf468b2c69709d5bab0d469312d9f947"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "luajit-src"
+version = "210.7.5+63c8f1a"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a98fb6f037124098f4c2283286a0431a4bb0b1d243b90ca1a4d34dd268ea5b96"
+dependencies = [
+ "cc",
+ "which",
+]
+
+[[package]]
 name = "manifold-rust"
 version = "0.19.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2625,6 +2672,35 @@ checksum = "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
 dependencies = [
  "adler2",
  "simd-adler32",
+]
+
+[[package]]
+name = "mlua"
+version = "0.12.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a7ae6b65bf54b7fdd4cf5b6f44f60862350ebf3fe3779b3a9cc005e7fa14f81"
+dependencies = [
+ "bstr",
+ "either",
+ "libc",
+ "mlua-sys",
+ "num-traits",
+ "parking_lot",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
+name = "mlua-sys"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1631cda17bd6486410ab751d91f5fd4484f441589278cdad879eb3afc721a285"
+dependencies = [
+ "cc",
+ "cfg-if",
+ "libc",
+ "lua-src",
+ "luajit-src",
+ "pkg-config",
 ]
 
 [[package]]
@@ -3090,6 +3166,12 @@ name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+
+[[package]]
+name = "pkg-config"
+version = "0.3.34"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 
 [[package]]
 name = "png"
@@ -4458,6 +4540,15 @@ dependencies = [
  "raw-window-handle",
  "static_assertions",
  "web-sys",
+]
+
+[[package]]
+name = "which"
+version = "8.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bae2f2b2b816647a1cab1acc91f5bd20812d53cb344382635ec2181940c8034f"
+dependencies = [
+ "libc",
 ]
 
 [[package]]

@@ -134,27 +134,7 @@ impl IdPropOp {
 
 // ------------------------------------------------------------------ names
 
-// Ported from io_scene_gltf2 5.2.41 `blender/com/gltf2_blender_utils.py` (`find_unused_name`),
-// Apache-2.0, The glTF-Blender-IO authors.
-/// A name not in `haystack`, at most 63 UTF-8 bytes: `desired`, then `desired.001`, … (the
-/// stem shortened by whole characters while the result is too long).
-pub(crate) fn find_unused_name(haystack: &[SmolStr], desired: &str) -> SmolStr {
-    let mut stem: Vec<char> = desired.chars().take(63).collect();
-    let mut suffix = String::new();
-    let mut cntr = 1u64;
-    loop {
-        let name: String = stem.iter().collect::<String>() + &suffix;
-        if name.len() > 63 {
-            stem.pop();
-            continue;
-        }
-        if !haystack.iter().any(|h| h == name.as_str()) {
-            return SmolStr::new(name);
-        }
-        suffix = format!(".{cntr:03}");
-        cntr += 1;
-    }
-}
+pub(crate) use crate::gltf_variants::find_unused_name;
 
 /// `bpy.data.scenes[0]`'s variants.
 fn first_scene_variants(main: &Main) -> &[GltfVariant] {

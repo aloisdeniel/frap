@@ -7,6 +7,11 @@
 //! here; behaviour tests go to `frap-golden` cases (`tests/golden/cases/uv/**`).
 #![deny(unsafe_code)]
 
+/// UV selection state shared by the UV operators (M8 W0 stub; WP 8.3.8 owns
+/// `select.rs` and `select/**`, WP 8.3.9's editing operators read it).
+#[allow(dead_code)]
+mod select;
+
 #[allow(non_snake_case)]
 mod ops {
     automod::dir!("src/ops");

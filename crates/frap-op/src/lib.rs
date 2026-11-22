@@ -14,6 +14,7 @@ pub mod describe;
 pub mod errors;
 pub mod helpers;
 mod modes;
+pub mod planned;
 pub mod poll;
 mod registry;
 mod services;
@@ -24,8 +25,10 @@ pub use describe::{DESCRIBE_PROVIDERS, DescribeProvider, describe_provider};
 pub use modes::{
     MODE_HANDLERS, ModeHandler, TRANSFORM_MODE_HANDLERS, TransformModeHandler, TransformOp,
 };
-pub use registry::{Lookup, Registry, check_poll, convert_args, lookup, suggest};
-pub use services::{ImageCache, PathResolver, Services};
+pub use registry::{
+    Lookup, OP_GATES, OpGate, Registry, check_poll, convert_args, gate, lookup, lookup_in, suggest,
+};
+pub use services::{ImageCache, PathResolver, Services, UndoRequest};
 
 /// Operator-tier proc-macro (WP 1.12).
 pub use frap_macros::operator;

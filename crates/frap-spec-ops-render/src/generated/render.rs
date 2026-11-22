@@ -13,6 +13,57 @@ pub mod enums {
     use frap_rna::EnumItem;
 }
 
+// ---------------------------------------------------------------- render.opengl
+/// Props of `render.opengl`, RNA order.
+pub static OPENGL_PROPS: [PropDef; 5] = [
+    PropDef { identifier: "animation", name: "Animation", description: "Render files from the animation range of this scene", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "render_keyed_only", name: "Render Keyframes Only", description: "Render only those frames where selected objects have a key in their animation data. Only used when rendering animation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "sequencer", name: "Sequencer", description: "Render using the sequencer's OpenGL display", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "write_still", name: "Write Image", description: "Save the rendered image to the output path (used only when animation is disabled)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "view_context", name: "View Context", description: "Use the current 3D view for rendering, else use scene settings", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `RENDER_OT_opengl`
+pub static OPSPEC_RENDER_OT_OPENGL: OperatorSpec = OperatorSpec {
+    idname: "render.opengl",
+    bl_idname: "RENDER_OT_opengl",
+    label: "Viewport Render",
+    description: "Take a snapshot of the active viewport",
+    options: OpOptions::empty(),
+    props: &OPENGL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `render.opengl` (Viewport Render).
+#[derive(Debug, Clone)]
+pub struct Opengl {
+    /// Render files from the animation range of this scene; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub animation: Prop<bool>,
+    /// Render only those frames where selected objects have a key in their animation data. Only used when rendering animation; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub render_keyed_only: Prop<bool>,
+    /// Render using the sequencer's OpenGL display; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub sequencer: Prop<bool>,
+    /// Save the rendered image to the output path (used only when animation is disabled); default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub write_still: Prop<bool>,
+    /// Use the current 3D view for rendering, else use scene settings; default true [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub view_context: Prop<bool>,
+}
+impl OpProps for Opengl {
+    const IDNAME: &'static str = "render.opengl";
+    const BL_IDNAME: &'static str = "RENDER_OT_opengl";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_RENDER_OT_OPENGL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Opengl {
+            animation: a.prop(0, "animation"),
+            render_keyed_only: a.prop(1, "render_keyed_only"),
+            sequencer: a.prop(2, "sequencer"),
+            write_still: a.prop(3, "write_still"),
+            view_context: a.prop(4, "view_context"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- render.render
 /// Props of `render.render`, RNA order.
 pub static RENDER_PROPS: [PropDef; 8] = [

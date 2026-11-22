@@ -1145,11 +1145,23 @@ fn gather_new_texture(
             frap_gltf::ext::khr_texture_basisu::KhrTextureBasisu::NAME,
             source.is_none(),
         );
+        if source.is_none() {
+            // M8 W0 (decision log M8W0-7): a required KHR_texture_basisu shuts out every
+            // reader without KTX2 support, Blender 5.2 included (D-133), so say so.
+            g.warn(KTX2_REQUIRED_WARNING);
+        }
     }
     texture.source = source.map(|s| push_image(g, s));
     g.doc.textures.push(texture);
     Ok(Some((g.doc.textures.len() - 1) as Index))
 }
+
+/// The WARNING of an export that makes `KHR_texture_basisu` required (M8 W0, decision log
+/// M8W0-7): once per export.
+pub const KTX2_REQUIRED_WARNING: &str = "frap: KHR_texture_basisu is required in this file (a \
+     texture has no PNG, JPEG or WebP image to fall back on, e.g. export_image_format='WEBP' \
+     without export_image_webp_fallback): Blender 5.2 and other readers without KTX2 support \
+     cannot load it (deviation D-133)";
 
 /// An image gathered from encoded `bytes`: `GLTF_SEPARATE` takes its file name now
 /// (`set_real_uri`: every gathered image takes a name, written or not).

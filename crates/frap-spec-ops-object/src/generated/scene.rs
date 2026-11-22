@@ -50,6 +50,285 @@ impl OpProps for SceneDelete {
     }
 }
 
+// ---------------------------------------------------------------- scene.gltf2_assign_as_original
+/// Props of `scene.gltf2_assign_as_original`, RNA order.
+pub static GLTF2_ASSIGN_AS_ORIGINAL_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_assign_as_original`
+pub static OPSPEC_SCENE_OT_GLTF2_ASSIGN_AS_ORIGINAL: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_assign_as_original",
+    bl_idname: "SCENE_OT_gltf2_assign_as_original",
+    label: "Assign as Original",
+    description: "(undocumented operator)",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_ASSIGN_AS_ORIGINAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_assign_as_original` (Assign as Original).
+#[derive(Debug, Clone)]
+pub struct Gltf2AssignAsOriginal {
+}
+impl OpProps for Gltf2AssignAsOriginal {
+    const IDNAME: &'static str = "scene.gltf2_assign_as_original";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_assign_as_original";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_ASSIGN_AS_ORIGINAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2AssignAsOriginal {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_assign_to_variant
+/// Props of `scene.gltf2_assign_to_variant`, RNA order.
+pub static GLTF2_ASSIGN_TO_VARIANT_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_assign_to_variant`
+pub static OPSPEC_SCENE_OT_GLTF2_ASSIGN_TO_VARIANT: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_assign_to_variant",
+    bl_idname: "SCENE_OT_gltf2_assign_to_variant",
+    label: "Assign To Variant",
+    description: "(undocumented operator)",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_ASSIGN_TO_VARIANT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_assign_to_variant` (Assign To Variant).
+#[derive(Debug, Clone)]
+pub struct Gltf2AssignToVariant {
+}
+impl OpProps for Gltf2AssignToVariant {
+    const IDNAME: &'static str = "scene.gltf2_assign_to_variant";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_assign_to_variant";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_ASSIGN_TO_VARIANT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2AssignToVariant {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_display_variant
+/// Props of `scene.gltf2_display_variant`, RNA order.
+pub static GLTF2_DISPLAY_VARIANT_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_display_variant`
+pub static OPSPEC_SCENE_OT_GLTF2_DISPLAY_VARIANT: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_display_variant",
+    bl_idname: "SCENE_OT_gltf2_display_variant",
+    label: "Display Variant",
+    description: "(undocumented operator)",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_DISPLAY_VARIANT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_display_variant` (Display Variant).
+#[derive(Debug, Clone)]
+pub struct Gltf2DisplayVariant {
+}
+impl OpProps for Gltf2DisplayVariant {
+    const IDNAME: &'static str = "scene.gltf2_display_variant";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_display_variant";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_DISPLAY_VARIANT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2DisplayVariant {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_material_to_variant
+/// Props of `scene.gltf2_material_to_variant`, RNA order.
+pub static GLTF2_MATERIAL_TO_VARIANT_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_material_to_variant`
+pub static OPSPEC_SCENE_OT_GLTF2_MATERIAL_TO_VARIANT: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_material_to_variant",
+    bl_idname: "SCENE_OT_gltf2_material_to_variant",
+    label: "Assign Material To Variant",
+    description: "Assign Variant to Slot",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_MATERIAL_TO_VARIANT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_material_to_variant` (Assign Material To Variant).
+#[derive(Debug, Clone)]
+pub struct Gltf2MaterialToVariant {
+}
+impl OpProps for Gltf2MaterialToVariant {
+    const IDNAME: &'static str = "scene.gltf2_material_to_variant";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_material_to_variant";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_MATERIAL_TO_VARIANT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2MaterialToVariant {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_remove_material_variant
+/// Props of `scene.gltf2_remove_material_variant`, RNA order.
+pub static GLTF2_REMOVE_MATERIAL_VARIANT_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_remove_material_variant`
+pub static OPSPEC_SCENE_OT_GLTF2_REMOVE_MATERIAL_VARIANT: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_remove_material_variant",
+    bl_idname: "SCENE_OT_gltf2_remove_material_variant",
+    label: "Remove a variant Slot",
+    description: "Remove a variant Slot",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_REMOVE_MATERIAL_VARIANT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_remove_material_variant` (Remove a variant Slot).
+#[derive(Debug, Clone)]
+pub struct Gltf2RemoveMaterialVariant {
+}
+impl OpProps for Gltf2RemoveMaterialVariant {
+    const IDNAME: &'static str = "scene.gltf2_remove_material_variant";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_remove_material_variant";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_REMOVE_MATERIAL_VARIANT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2RemoveMaterialVariant {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_reset_to_original
+/// Props of `scene.gltf2_reset_to_original`, RNA order.
+pub static GLTF2_RESET_TO_ORIGINAL_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_reset_to_original`
+pub static OPSPEC_SCENE_OT_GLTF2_RESET_TO_ORIGINAL: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_reset_to_original",
+    bl_idname: "SCENE_OT_gltf2_reset_to_original",
+    label: "Reset to Original",
+    description: "(undocumented operator)",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_RESET_TO_ORIGINAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_reset_to_original` (Reset to Original).
+#[derive(Debug, Clone)]
+pub struct Gltf2ResetToOriginal {
+}
+impl OpProps for Gltf2ResetToOriginal {
+    const IDNAME: &'static str = "scene.gltf2_reset_to_original";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_reset_to_original";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_RESET_TO_ORIGINAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2ResetToOriginal {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_variant_add
+/// Props of `scene.gltf2_variant_add`, RNA order.
+pub static GLTF2_VARIANT_ADD_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_variant_add`
+pub static OPSPEC_SCENE_OT_GLTF2_VARIANT_ADD: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_variant_add",
+    bl_idname: "SCENE_OT_gltf2_variant_add",
+    label: "Add Material Variant",
+    description: "Add a new Material Variant",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_VARIANT_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `scene.gltf2_variant_add` (Add Material Variant).
+#[derive(Debug, Clone)]
+pub struct Gltf2VariantAdd {
+}
+impl OpProps for Gltf2VariantAdd {
+    const IDNAME: &'static str = "scene.gltf2_variant_add";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_variant_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_VARIANT_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2VariantAdd {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_variant_remove
+/// Props of `scene.gltf2_variant_remove`, RNA order.
+pub static GLTF2_VARIANT_REMOVE_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_variant_remove`
+pub static OPSPEC_SCENE_OT_GLTF2_VARIANT_REMOVE: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_variant_remove",
+    bl_idname: "SCENE_OT_gltf2_variant_remove",
+    label: "Remove Variant",
+    description: "Add a new Material Variant",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_VARIANT_REMOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_variant_remove` (Remove Variant).
+#[derive(Debug, Clone)]
+pub struct Gltf2VariantRemove {
+}
+impl OpProps for Gltf2VariantRemove {
+    const IDNAME: &'static str = "scene.gltf2_variant_remove";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_variant_remove";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_VARIANT_REMOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2VariantRemove {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- scene.gltf2_variants_slot_add
+/// Props of `scene.gltf2_variants_slot_add`, RNA order.
+pub static GLTF2_VARIANTS_SLOT_ADD_PROPS: [PropDef; 0] = [
+];
+/// `SCENE_OT_gltf2_variants_slot_add`
+pub static OPSPEC_SCENE_OT_GLTF2_VARIANTS_SLOT_ADD: OperatorSpec = OperatorSpec {
+    idname: "scene.gltf2_variants_slot_add",
+    bl_idname: "SCENE_OT_gltf2_variants_slot_add",
+    label: "Add new Slot",
+    description: "Add a new Slot",
+    options: OpOptions::REGISTER,
+    props: &GLTF2_VARIANTS_SLOT_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `scene.gltf2_variants_slot_add` (Add new Slot).
+#[derive(Debug, Clone)]
+pub struct Gltf2VariantsSlotAdd {
+}
+impl OpProps for Gltf2VariantsSlotAdd {
+    const IDNAME: &'static str = "scene.gltf2_variants_slot_add";
+    const BL_IDNAME: &'static str = "SCENE_OT_gltf2_variants_slot_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_SCENE_OT_GLTF2_VARIANTS_SLOT_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Gltf2VariantsSlotAdd {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- scene.new
 /// Props of `scene.new`, RNA order.
 pub static NEW_PROPS: [PropDef; 1] = [

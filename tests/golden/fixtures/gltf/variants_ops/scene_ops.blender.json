@@ -1,0 +1,327 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "Calling operator \"bpy.ops.scene.gltf2_variant_add\" error, could not be found"
+    },
+    {
+      "line": 13,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "Polling operator \"bpy.ops.scene.gltf2_display_variant\" error, could not be found"
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.scene.gltf2_display_variant.poll() failed, context is incorrect"
+    },
+    {
+      "line": 16,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.scene.gltf2_variant_remove.poll() failed, context is incorrect"
+    },
+    {
+      "line": 17,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.scene.gltf2_reset_to_original.poll() failed, context is incorrect"
+    },
+    {
+      "line": 18,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.scene.gltf2_material_to_variant.poll() failed, context is incorrect"
+    },
+    {
+      "line": 19,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.scene.gltf2_remove_material_variant.poll() failed, context is incorrect"
+    },
+    {
+      "line": 20,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "Converting py args to operator properties:: keyword \"foo\" unrecognized"
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 2 out of range, size 2"
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": false
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 2 out of range, size 2"
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.scene.gltf2_variant_remove.poll() failed, context is incorrect"
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 1 out of range, size 1"
+    },
+    {
+      "line": 61,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 0 out of range, size 0"
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "Calling operator \"bpy.ops.scene.gltf2_variant_remove\" error, could not be found"
+    },
+    {
+      "line": 66,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "Polling operator \"bpy.ops.scene.gltf2_variant_remove\" error, could not be found"
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.0, -0.84147096, 0.4546487, 0.0],
+        [0.0, 0.5403023, 0.70807344, 0.0],
+        [0.0, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Material|VariantName|VariantName.001|Red|Red": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 1.0],
+        [0.95517117, -0.19988336, 0.2183912, 0.0],
+        [-0.05518906, 0.60452473, 0.79467225, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "VariantName": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Red"],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "VariantName",
+    "selected": ["VariantName"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

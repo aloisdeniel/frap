@@ -1080,7 +1080,7 @@ impl Session {
         };
         // §10.2 step 1: lookup. `bpy.ops`' `__call__` updates the view layer before `_op_call`
         // raises for an unknown operator, so pending animation is applied then too (WP 6.4).
-        let def = match frap_op::lookup(idname) {
+        let def = match frap_op::lookup_in(idname, &self.host.state.ctx()) {
             Ok(def) => def,
             Err(e) => {
                 frap_scene::Host::apply_pending_animation(&mut self.host)
@@ -1221,7 +1221,7 @@ impl Session {
             OpMetaKind::Idname => r.value = Some(J::from(bl_idname())),
             OpMetaKind::IdnamePy => r.value = Some(J::from(idname.as_str())),
             OpMetaKind::Poll => {
-                let def = frap_op::lookup(idname).map_err(|mut e| {
+                let def = frap_op::lookup_in(idname, &self.host.state.ctx()).map_err(|mut e| {
                     if e.code == frap_op::errors::OP_UNKNOWN {
                         e.message = format!(
                             "Polling operator \"bpy.ops.{idname}\" error, could not be found"
@@ -1246,7 +1246,7 @@ impl Session {
                 }
             }
             OpMetaKind::GetRnaType => {
-                let def = frap_op::lookup(idname).map_err(fail)?;
+                let def = frap_op::lookup_in(idname, &self.host.state.ctx()).map_err(fail)?;
                 let spec = def.spec;
                 let props: Vec<J> = spec
                     .props

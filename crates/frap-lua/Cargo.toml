@@ -1,0 +1,31 @@
+[package]
+name = "frap-lua"
+description = "frap L12: Lua front-end spike over the Session API (ARCHITECTURE §11.6; M8 WP 8.10)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# M8 W0 (decision log M8W0-9). Owned whole by WP 8.10, this manifest included (like
+# frap-draco-sys for WP 7.2): the spike may add what it needs. Nothing depends on it; frap-cli
+# does not link it (the spike's RFC decides whether a `--lua` front-end ships).
+#
+# Native code: `mlua` with `lua54` + `vendored` builds the Lua 5.4 C sources with `cc`, so it
+# sits behind the `lua` feature, off by default (rule 2.2.9: the default-features clean
+# container build stays C-free for this crate). `luau` (sandboxing) is the alternative the
+# spike evaluates.
+[dependencies]
+frap-session.workspace = true
+mlua = { workspace = true, optional = true }
+
+[dev-dependencies]
+frap-ops-all.workspace = true
+
+[features]
+default = []
+lua = ["dep:mlua"]
+
+[lints]
+workspace = true

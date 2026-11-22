@@ -8,7 +8,10 @@ use frap_rna::OperatorSpec;
 pub mod transform;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 14] = [
+pub static ALL_OPS: [&OperatorSpec; 20] = [
+    &transform::OPSPEC_TRANSFORM_OT_BEND,
+    &transform::OPSPEC_TRANSFORM_OT_CREATE_ORIENTATION,
+    &transform::OPSPEC_TRANSFORM_OT_DELETE_ORIENTATION,
     &transform::OPSPEC_TRANSFORM_OT_EDGE_BEVELWEIGHT,
     &transform::OPSPEC_TRANSFORM_OT_EDGE_CREASE,
     &transform::OPSPEC_TRANSFORM_OT_EDGE_SLIDE,
@@ -16,6 +19,9 @@ pub static ALL_OPS: [&OperatorSpec; 14] = [
     &transform::OPSPEC_TRANSFORM_OT_PUSH_PULL,
     &transform::OPSPEC_TRANSFORM_OT_RESIZE,
     &transform::OPSPEC_TRANSFORM_OT_ROTATE,
+    &transform::OPSPEC_TRANSFORM_OT_ROTATE_NORMAL,
+    &transform::OPSPEC_TRANSFORM_OT_SELECT_ORIENTATION,
+    &transform::OPSPEC_TRANSFORM_OT_SHEAR,
     &transform::OPSPEC_TRANSFORM_OT_SHRINK_FATTEN,
     &transform::OPSPEC_TRANSFORM_OT_TOSPHERE,
     &transform::OPSPEC_TRANSFORM_OT_TRANSFORM,

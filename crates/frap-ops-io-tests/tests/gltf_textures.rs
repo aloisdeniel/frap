@@ -327,6 +327,17 @@ fn ktx2_export_structure() {
         j["result"]["extensions_used"],
         serde_json::json!(["KHR_texture_basisu"])
     );
+    // The PNG stays the texture's source: KHR_texture_basisu is not required, no WARNING (M8
+    // W0, decision log M8W0-7).
+    let ktx2_required = |j: &serde_json::Value| {
+        j["reports"].as_array().is_some_and(|rs| {
+            rs.iter().any(|r| {
+                r["type"] == "WARNING"
+                    && r["message"] == frap_io_gltf::export::images::KTX2_REQUIRED_WARNING
+            })
+        })
+    };
+    assert!(!ktx2_required(&j), "{j}");
     let bytes = std::fs::read(work.path().join("k.glb")).unwrap();
     let json = glb_json(&bytes);
     assert!(json.get("extensionsRequired").is_none(), "{json}");
@@ -441,6 +452,7 @@ fn ktx2_export_structure() {
         "{kw}"
     );
     assert!(kw["textures"][0].get("source").is_none());
+    assert!(ktx2_required(&j), "{j}");
     // Imported back, the PNG fallbacks are used, as Blender's add-on does.
     for line in [
         "bpy.ops.wm.read_homefile(use_empty=True)",

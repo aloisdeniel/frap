@@ -9,6 +9,8 @@
 
 pub mod blender;
 pub mod case;
+/// The differential fuzzer (ARCHITECTURE §20.1; M8 W0 stub, WP 8.7).
+pub mod fuzz;
 pub mod runner;
 mod state;
 

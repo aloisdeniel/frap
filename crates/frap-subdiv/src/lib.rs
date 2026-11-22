@@ -22,6 +22,9 @@
 #![deny(unsafe_code)]
 
 pub mod catmull_clark;
+/// OpenSubdiv's `Far` layer for bit-exact face-varying evaluation (M8 W0 stub; WP 8.11).
+#[allow(dead_code)]
+mod far;
 mod fvar;
 pub mod layout;
 #[cfg(feature = "osd")]

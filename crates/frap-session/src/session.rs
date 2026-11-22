@@ -6,6 +6,8 @@
 mod eval;
 mod exec;
 mod funcs;
+/// `ed.undo` / `ed.redo` (M8 W0 stub; WP 8.4 owns `session/undo.rs` and `session/undo/**`).
+mod undo;
 
 use std::collections::BTreeMap;
 use std::panic::{AssertUnwindSafe, catch_unwind};
@@ -207,6 +209,9 @@ struct SessionServices {
     gpu: GpuOptions,
     images: ImageCacheImpl,
     paths: PathResolver,
+    /// The undo request of the running statement (`ed.*`, applied by [`undo`] after the
+    /// statement commits; M8 W0 contract, WP 8.4).
+    undo_request: Option<frap_op::UndoRequest>,
 }
 
 impl Services for SessionServices {
@@ -225,6 +230,9 @@ impl Services for SessionServices {
     }
     fn paths(&self) -> &PathResolver {
         &self.paths
+    }
+    fn undo(&mut self, req: frap_op::UndoRequest) -> Result<(), OpError> {
+        undo::request(&mut self.undo_request, req)
     }
 }
 
@@ -432,6 +440,8 @@ pub struct Session {
     /// Nesting depth of [`Session::transact`] (an operator called with nested calls in its
     /// arguments runs its own transaction inside the statement's).
     txn_depth: u32,
+    /// The undo ring of committed states (`ed.undo`/`ed.redo`, §12; M8 W0 stub, WP 8.4).
+    undo: undo::UndoRing,
 }
 
 /// A statement failure before it becomes a response: kind, operator, error, reports.
@@ -504,10 +514,12 @@ impl Session {
                     cwd: opts.cwd.clone(),
                     blend_dir: None,
                 },
+                undo_request: None,
             },
             opts,
             seq: 0,
             txn_depth: 0,
+            undo: undo::UndoRing::default(),
         };
         if let Startup::File(path) = &session.opts.startup {
             // §13.1/§14: `--file scene.frap` opens the file exactly as
@@ -967,6 +979,11 @@ impl Session {
                 (Err(e), false)
             }
         };
+        if self.txn_depth == 0 {
+            // The statement is over: the undo ring records a committed step or applies the
+            // statement's `ed.*` request (M8 W0 hook; WP 8.4 owns `session/undo.rs`).
+            undo::after_statement(self, result.is_ok() && !cancelled, &log);
+        }
         Txn {
             result,
             cancelled,

@@ -562,7 +562,7 @@ pub fn prepare(
     kwargs: Vec<(String, Input)>,
 ) -> Result<Prepared, FrapError> {
     check_duplicate_keywords(&kwargs)?;
-    let def = crate::registry::lookup(idname)?;
+    let def = crate::registry::lookup_in(idname, ctx)?;
     let mut reports = check_positional(def.spec, &positional)?;
     check_poll(def, ctx)?;
     let c = convert(def, ctx, kwargs)?;
@@ -799,6 +799,13 @@ fn poll_column(ctx: &Context) -> (usize, &'static str) {
 /// the closest context A–E. Unknown → `AttributeError: Polling operator "bpy.ops.x.y" error,
 /// could not be found` (verified).
 pub fn poll(idname: &str, ctx: &Context) -> Result<PollAnswer, FrapError> {
+    if let Some(g) = crate::registry::gate(idname)
+        && !(g.registered)(ctx)
+    {
+        let mut e = unknown_error("Polling", idname, &[]);
+        e.hint = Some(g.when.to_owned());
+        return Err(e);
+    }
     match Registry::global().lookup(idname) {
         Lookup::Implemented(def) => Ok(match (def.poll.check)(ctx) {
             Ok(()) => PollAnswer {

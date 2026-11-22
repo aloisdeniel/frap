@@ -1887,3 +1887,76 @@ fn m7_contract_delta_cheap_parts_run() {
     assert!(!d.encoding.without_buffer_views && d.encoding.extensions.is_empty());
     let _ = (m7_codecs as fn(), m7_gltf as fn());
 }
+
+// ------------------------------------------------------------------------- M8 W0 (decision log
+// M8W0-4..9): the undo request, the operator gates, the planned rows, the BVH and the frap_scene
+// variant operators.
+
+/// `frap_geom::bvh` (WP 8.5; never called: the bodies are `todo!()` until then).
+fn m8_bvh() {
+    let mut t = frap_geom::bvh::BvhTree::new(4, 0.0, 2, 6);
+    t.insert(0, &[[0.0; 3], [1.0; 3]]);
+    t.balance();
+    let _: Vec<(usize, usize)> = t.overlap(&t, &mut |_, _| true);
+    let _: Option<frap_geom::bvh::Nearest> = t.find_nearest([0.0; 3], f32::MAX, &mut |_, _, _| {});
+    let _: Option<frap_geom::bvh::RayHit> = t.ray_cast(
+        [0.0; 3],
+        [0.0, 0.0, 1.0],
+        0.0,
+        f32::MAX,
+        &mut |_, _, _, _| {},
+    );
+    let _: usize = t.range_query([0.0; 3], 1.0, &mut |_, _, _| {});
+}
+
+/// The `frap_scene::gltf_variants` operator bodies (M8 W0, implemented).
+fn m8_variants(main: &mut Main, log: &mut ChangeLog, ob: IdRef<ObjectId>) {
+    use frap_scene::gltf_variants as v;
+    v::variant_add(main, log);
+    v::variant_remove(main, log);
+    let _: Result<(), v::VariantOpError> = v::display_variant(main, log);
+    let _: Result<(), v::VariantOpError> = v::assign_to_variant(main, ob, log);
+    let _: Result<(), v::VariantOpError> = v::reset_to_original(main, ob, log);
+    let _: Result<(), v::VariantOpError> = v::assign_as_original(main, ob, log);
+    let _: Result<(), v::VariantOpError> = v::variants_slot_add(main, ob, log);
+    let _: Result<bool, v::VariantOpError> = v::material_to_variant(main, ob, log);
+    let _: Result<bool, v::VariantOpError> = v::remove_material_variant(main, ob, log);
+}
+
+#[test]
+fn m8_contract_delta_cheap_parts_run() {
+    frap_ops_all::link();
+    // OPERATORS.md: M9 is the post-M8 backlog; the hint names the row (M8W0-3, M8W0-4).
+    assert_eq!(frap_op::planned::operator_milestone("ed.undo"), "M8");
+    assert_eq!(
+        frap_op::planned::operator_milestone("object.voxel_remesh"),
+        frap_op::planned::POST_M8
+    );
+    for (idname, planned, says) in [
+        ("object.track_set", "M9", "after M8"),
+        ("ed.undo", "M8", "plans it for M8"),
+        ("anim.change_frame", "OUT", "does not list it"),
+        ("mesh.knife_project", "OUT", "marks it OUT"),
+        ("object.constraint_add", "OUT", "marks it OUT"),
+    ] {
+        let e = frap_op::lookup(idname).unwrap_err();
+        assert_eq!(e.code, frap_op::errors::OP_NOT_IMPLEMENTED, "{idname}");
+        assert_eq!(e.detail["planned"], planned, "{idname}");
+        assert!(e.hint.as_deref().unwrap().contains(says), "{idname}: {e:?}");
+    }
+    // The glTF variant operators register a gate each (M8W0-6).
+    let gated: BTreeSet<&str> = frap_op::OP_GATES.iter().map(|g| g.idname).collect();
+    assert_eq!(gated.len(), 9);
+    assert!(gated.iter().all(|i| i.starts_with("scene.gltf2_")));
+    assert!(frap_op::gate("scene.gltf2_variant_add").is_some());
+    assert!(frap_op::gate("scene.new").is_none());
+    // The undo request (M8W0-5).
+    let r = frap_op::UndoRequest::Push {
+        message: "step".into(),
+    };
+    assert_ne!(r, frap_op::UndoRequest::Undo);
+    let _ = (
+        m8_bvh as fn(),
+        m8_variants as fn(&mut Main, &mut ChangeLog, IdRef<ObjectId>),
+    );
+}

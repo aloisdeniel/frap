@@ -2,7 +2,7 @@
 
 Companion to `docs/ARCHITECTURE.md`. Every operator, RNA struct, function, modifier type and shader node in scope, with the milestone it lands in. Operator names were checked against the operator list of Blender 5.2.4 (`-b --factory-startup`) when this file was generated.
 
-**Legend.** `M1`…`M8`: milestone (ARCHITECTURE §22). `OUT`: not planned; Blender has it, frap answers `NotImplementedError` (`OP_NOT_IMPLEMENTED`) and `--describe` lists it as `not_implemented`. Priority `P0` MVP, `P1` needed for the fixed scope, `P2` parity/nice to have (from the research catalogues). *macro*: takes nested `<SUB>_OT_<op>={...}` props. *headless-extended*: frap does more than `blender -b` (documented in `docs/deviations.md`; goldens use `#@blender` emulations). Every implemented operator must also reach fidelity tier T0; target tiers above T0 are noted where decided. *prereq*: part of a milestone's golden prerequisite set (ARCHITECTURE §22.1), owned by a WP one wave earlier than the goldens that use it.
+**Legend.** `M1`…`M8`: milestone (ARCHITECTURE §22). `M9`: post-M8 backlog (no milestone plan yet, decision log M8W0-3): `--describe` lists it as planned `M9` and `OP_NOT_IMPLEMENTED` says "planned after M8". `OUT`: not planned; Blender has it, frap answers `NotImplementedError` (`OP_NOT_IMPLEMENTED`) and `--describe` lists it as `not_implemented`. Priority `P0` MVP, `P1` needed for the fixed scope, `P2` parity/nice to have (from the research catalogues). *macro*: takes nested `<SUB>_OT_<op>={...}` props. *headless-extended*: frap does more than `blender -b` (documented in `docs/deviations.md`; goldens use `#@blender` emulations). Every implemented operator must also reach fidelity tier T0; target tiers above T0 are noted where decided. *prereq*: part of a milestone's golden prerequisite set (ARCHITECTURE §22.1), owned by a WP one wave earlier than the goldens that use it.
 
 The `M` column is machine-read: `cargo xtask codegen` generates typed props structs (`frap-spec-ops-<group>`) for every operator with `M` ≤ `spec/current_milestone`; all others are served from `frap-spec-catalog` (ARCHITECTURE §4.2). Keep the column format (`M<n>` or `OUT`) exact.
 
@@ -45,19 +45,19 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.loop_to_region` | M2 | P2 |  |
 | [x] | `mesh.region_to_loop` | M2 | P2 |  |
 | [x] | `mesh.shortest_path_select` | M2 | P2 |  |
-| [ ] | `mesh.select_nth` | M8 | P2 | undefined without active element |
-| [ ] | `mesh.select_boundary_loop_multi` | M8 | P2 |  |
-| [ ] | `mesh.select_similar` | M8 | P2 |  |
-| [ ] | `mesh.select_similar_region` | M8 | P2 |  |
-| [ ] | `mesh.select_interior_faces` | M8 | P2 |  |
-| [ ] | `mesh.select_mirror` | M8 | P2 |  |
-| [ ] | `mesh.select_axis` | M8 | P2 |  |
-| [ ] | `mesh.select_ungrouped` | M8 | P2 | needs vertex groups (M6) |
-| [ ] | `mesh.select_by_pole_count` | M8 | P2 |  |
-| [ ] | `mesh.select_next_item` | M8 | P2 |  |
-| [ ] | `mesh.select_prev_item` | M8 | P2 |  |
-| [ ] | `mesh.select_linked_pick` | M8 | P2 | headless-extended: index |
-| [ ] | `mesh.shortest_path_pick` | M8 | P2 | headless-extended: index |
+| [ ] | `mesh.select_nth` | M8 | P2 | undefined without active element; WP 8.3.1 |
+| [ ] | `mesh.select_boundary_loop_multi` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_similar` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_similar_region` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_interior_faces` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_mirror` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_axis` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_ungrouped` | M8 | P2 | needs vertex groups (M6); WP 8.3.1 |
+| [ ] | `mesh.select_by_pole_count` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_next_item` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_prev_item` | M8 | P2 | WP 8.3.1 |
+| [ ] | `mesh.select_linked_pick` | M8 | P2 | headless-extended: index; WP 8.3.1 |
+| [ ] | `mesh.shortest_path_pick` | M8 | P2 | headless-extended: index; WP 8.3.1 |
 | [x] | `mesh.extrude_region` | M2 | P0 | T1 |
 | [x] | `mesh.extrude_region_move` | M2 | P0 | macro; T1 |
 | [x] | `mesh.extrude_region_shrink_fatten` | M2 | P0 | macro |
@@ -139,29 +139,29 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST) |
 | [x] | `mesh.blend_from_shape` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
 | [x] | `mesh.shape_propagate_to_all` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
-| [ ] | `mesh.normals_tools` | M8 | P2 |  |
-| [ ] | `mesh.smooth_normals` | M8 | P2 |  |
-| [ ] | `mesh.average_normals` | M8 | P2 |  |
-| [ ] | `mesh.point_normals` | M8 | P2 |  |
-| [ ] | `mesh.merge_normals` | M8 | P2 |  |
-| [ ] | `mesh.split_normals` | M8 | P2 |  |
-| [ ] | `mesh.mod_weighted_strength` | M8 | P2 |  |
-| [ ] | `mesh.colors_rotate` | M8 | P2 |  |
-| [ ] | `mesh.colors_reverse` | M8 | P2 |  |
-| [ ] | `mesh.uvs_rotate` | M8 | P2 |  |
-| [ ] | `mesh.uvs_reverse` | M8 | P2 |  |
-| [ ] | `mesh.sort_elements` | M8 | P2 |  |
-| [ ] | `mesh.reorder_vertices_spatial` | M8 | P2 |  |
-| [ ] | `mesh.rip` | M8 | P2 | headless-extended: explicit direction |
-| [ ] | `mesh.rip_move` | M8 | P2 | macro |
-| [ ] | `mesh.rip_edge` | M8 | P2 |  |
-| [ ] | `mesh.rip_edge_move` | M8 | P2 | macro |
-| [ ] | `mesh.vertices_smooth_laplacian` | M8 | P2 |  |
-| [ ] | `mesh.symmetry_snap` | M8 | P2 |  |
-| [ ] | `mesh.face_make_planar` | M8 | P2 |  |
-| [ ] | `mesh.circularize` | M8 | P2 | new in 5.x |
-| [ ] | `mesh.flatten` | M8 | P2 | new in 5.x |
-| [ ] | `mesh.space_edge_loops_evenly` | M8 | P2 | new in 5.x |
+| [ ] | `mesh.normals_tools` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.smooth_normals` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.average_normals` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.point_normals` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.merge_normals` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.split_normals` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.mod_weighted_strength` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.colors_rotate` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.colors_reverse` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.uvs_rotate` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.uvs_reverse` | M8 | P2 | WP 8.3.2 |
+| [ ] | `mesh.sort_elements` | M8 | P2 | WP 8.3.3 |
+| [ ] | `mesh.reorder_vertices_spatial` | M8 | P2 | WP 8.3.3 |
+| [ ] | `mesh.rip` | M8 | P2 | headless-extended: explicit direction; WP 8.3.3 |
+| [ ] | `mesh.rip_move` | M8 | P2 | macro; WP 8.3.3 |
+| [ ] | `mesh.rip_edge` | M8 | P2 | WP 8.3.3 |
+| [ ] | `mesh.rip_edge_move` | M8 | P2 | macro; WP 8.3.3 |
+| [ ] | `mesh.vertices_smooth_laplacian` | M8 | P2 | WP 8.3.3 |
+| [ ] | `mesh.symmetry_snap` | M8 | P2 | WP 8.3.3 |
+| [ ] | `mesh.face_make_planar` | M8 | P2 | WP 8.3.3 |
+| [ ] | `mesh.circularize` | M8 | P2 | new in 5.x; WP 8.3.3 |
+| [ ] | `mesh.flatten` | M8 | P2 | new in 5.x; WP 8.3.3 |
+| [ ] | `mesh.space_edge_loops_evenly` | M8 | P2 | new in 5.x; WP 8.3.3 |
 | — | `mesh.knife_project` | OUT | — | view-dependent |
 | — | `mesh.knife_tool` | OUT | — | interactive |
 | — | `mesh.dupli_extrude_cursor` | OUT | — | interactive |
@@ -195,26 +195,26 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.mode_set` | M1 | P0 | prereq (WP 1.19); dispatcher + `modes/object.rs` M1; `modes/edit_mesh.rs` M2 (WP 2.2); `modes/{edit_armature,pose}.rs` M6 (WP 6.2) |
 | [x] | `object.editmode_toggle` | M2 | P1 |  |
 | [x] | `object.posemode_toggle` | M6 | P1 | WP 6.2 (M5+M6 W0) |
-| [ ] | `object.mode_set_with_submode` | M8 | P2 |  |
+| [ ] | `object.mode_set_with_submode` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
 | [x] | `object.select_by_type` | M1 | P1 |  |
 | [x] | `object.select_pattern` | M1 | P1 |  |
-| [ ] | `object.select_grouped` | M8 | P2 |  |
-| [ ] | `object.select_hierarchy` | M8 | P2 |  |
-| [ ] | `object.select_linked` | M8 | P2 |  |
-| [ ] | `object.select_random` | M8 | P2 |  |
-| [ ] | `object.select_camera` | M8 | P2 |  |
-| [ ] | `object.select_mirror` | M8 | P2 |  |
-| [ ] | `object.select_more` | M8 | P2 |  |
-| [ ] | `object.select_less` | M8 | P2 |  |
-| [ ] | `object.select_same_collection` | M8 | P2 |  |
+| [ ] | `object.select_grouped` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_hierarchy` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_linked` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_random` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_camera` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_mirror` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_more` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_less` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.select_same_collection` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.camera_add` | M1 | P0 | sets scene.camera when None (virtual 3D View); object and data uniquified independently |
 | [x] | `object.light_add` | M1 | P0 | 10 W (factory Light is 1000 W) |
 | [x] | `object.empty_add` | M1 | P0 |  |
 | [x] | `object.armature_add` | M6 | P0 | WP 6.2 (M5+M6 W0) |
-| [ ] | `object.add` | M8 | P2 |  |
-| [ ] | `object.add_named` | M8 | P2 |  |
-| [ ] | `object.collection_instance_add` | M8 | P2 |  |
+| [ ] | `object.add` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.add_named` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.collection_instance_add` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.delete` | M1 | P0 | prereq (WP 1.19); leaves orphan data; re-adding then names data `.001` (T0) |
 | [x] | `object.duplicate` | M1 | P0 | materials shared (factory prefs) |
 | [x] | `object.duplicate_move` | M1 | P0 | macro |
@@ -222,21 +222,21 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
 | [x] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [x] | `object.join_shapes` | M6 | P2 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.duplicates_make_real` | M8 | P2 |  |
+| [ ] | `object.duplicates_make_real` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE, ARMATURE_NAME, ARMATURE_ENVELOPE, BONE, BONE_RELATIVE M6 (WP 6.5); ARMATURE_AUTO M8 |
 | [x] | `object.parent_clear` | M1 | P0 |  |
 | [x] | `object.parent_no_inverse_set` | M1 | P1 |  |
-| [ ] | `object.parent_inverse_apply` | M8 | P2 |  |
+| [ ] | `object.parent_inverse_apply` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.origin_set` | M1 | P0 | all types |
 | [x] | `object.transform_apply` | M1 | P0 | multi-user error as Blender |
 | [x] | `object.location_clear` | M1 | P0 |  |
 | [x] | `object.rotation_clear` | M1 | P0 |  |
 | [x] | `object.scale_clear` | M1 | P0 |  |
-| [ ] | `object.origin_clear` | M8 | P2 |  |
-| [ ] | `object.visual_transform_apply` | M8 | P2 |  |
-| [ ] | `object.transforms_to_deltas` | M8 | P2 |  |
-| [ ] | `object.randomize_transform` | M8 | P2 | BliRng |
-| [ ] | `object.align` | M8 | P2 |  |
+| [ ] | `object.origin_clear` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.visual_transform_apply` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.transforms_to_deltas` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.randomize_transform` | M8 | P2 | BliRng; WP 8.3.5 |
+| [ ] | `object.align` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.shade_smooth` | M1 | P0 | removes sharp_face |
 | [x] | `object.shade_flat` | M1 | P0 |  |
 | [x] | `object.shade_smooth_by_angle` | M1 | P0 | destructive, writes sharp_edge |
@@ -252,8 +252,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.modifiers_clear` | M4 | P1 |  |
 | [x] | `object.subdivision_set` | M4 | P1 |  |
 | [x] | `object.modifier_apply_as_shapekey` | M6 | P2 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.modifier_copy_to_selected` | M8 | P2 |  |
-| [ ] | `object.modifiers_copy_to_selected` | M8 | P2 |  |
+| [ ] | `object.modifier_copy_to_selected` | M8 | P2 | WP 8.3.6 |
+| [ ] | `object.modifiers_copy_to_selected` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.material_slot_add` | M1 | P0 |  |
 | [x] | `object.material_slot_remove` | M1 | P0 |  |
 | [x] | `object.material_slot_remove_unused` | M1 | P1 |  |
@@ -262,7 +262,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_move` | M3 | P2 | WP 3.1 (M3+M4 W0 assignment) |
-| [ ] | `object.material_slot_copy` | M8 | P2 |  |
+| [ ] | `object.material_slot_copy` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.vertex_group_add` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_remove` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_assign` | M6 | P0 | edit mode; WP 6.3 (M5+M6 W0) |
@@ -275,31 +275,31 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.vertex_group_set_active` | M6 | P1 | dynamic enum; WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_normalize` | M6 | P1 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_clean` | M6 | P1 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.vertex_group_copy` | M8 | P2 |  |
-| [ ] | `object.vertex_group_copy_to_selected` | M8 | P2 |  |
-| [ ] | `object.vertex_group_invert` | M8 | P2 |  |
-| [ ] | `object.vertex_group_quantize` | M8 | P2 |  |
-| [ ] | `object.vertex_group_levels` | M8 | P2 |  |
-| [ ] | `object.vertex_group_lock` | M8 | P2 |  |
-| [ ] | `object.vertex_group_mirror` | M8 | P2 |  |
-| [ ] | `object.vertex_group_move` | M8 | P2 |  |
-| [ ] | `object.vertex_group_smooth` | M8 | P2 |  |
-| [ ] | `object.vertex_group_sort` | M8 | P2 |  |
-| [ ] | `object.vertex_weight_copy` | M8 | P2 |  |
-| [ ] | `object.vertex_weight_delete` | M8 | P2 |  |
-| [ ] | `object.vertex_weight_normalize_active_vertex` | M8 | P2 |  |
-| [ ] | `object.vertex_weight_paste` | M8 | P2 |  |
-| [ ] | `object.vertex_weight_set_active` | M8 | P2 |  |
+| [ ] | `object.vertex_group_copy` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_copy_to_selected` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_invert` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_quantize` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_levels` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_lock` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_mirror` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_move` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_smooth` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_group_sort` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_weight_copy` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_weight_delete` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_weight_normalize_active_vertex` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_weight_paste` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.vertex_weight_set_active` | M8 | P2 | WP 8.3.7 |
 | [x] | `object.shape_key_add` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.shape_key_remove` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.shape_key_clear` | M6 | P1 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.shape_key_move` | M6 | P1 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.shape_key_mirror` | M8 | P2 |  |
-| [ ] | `object.shape_key_copy` | M8 | P2 |  |
-| [ ] | `object.shape_key_lock` | M8 | P2 |  |
-| [ ] | `object.shape_key_make_basis` | M8 | P2 |  |
-| [ ] | `object.shape_key_apply_to_basis` | M8 | P2 |  |
-| [ ] | `object.shape_key_transfer` | M8 | P2 |  |
+| [ ] | `object.shape_key_mirror` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.shape_key_copy` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.shape_key_lock` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.shape_key_make_basis` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.shape_key_apply_to_basis` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.shape_key_transfer` | M8 | P2 | WP 8.3.7 |
 | [x] | `object.move_to_collection` | M1 | P1 |  |
 | [x] | `object.link_to_collection` | M1 | P2 |  |
 | [x] | `object.collection_add` | M1 | P2 |  |
@@ -310,26 +310,26 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.hide_view_clear` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
 | [x] | `object.make_single_user` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
 | [x] | `object.make_links_data` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
-| [ ] | `object.hide_render_clear_all` | M8 | P2 |  |
-| [ ] | `object.track_set` | M8 | P2 |  |
-| [ ] | `object.track_clear` | M8 | P2 |  |
-| [ ] | `object.hide_collection` | M8 | P2 |  |
-| [ ] | `object.collection_objects_select` | M8 | P2 |  |
-| [ ] | `object.data_transfer` | M8 | P2 |  |
-| [ ] | `object.datalayout_transfer` | M8 | P2 |  |
-| [ ] | `object.join_uvs` | M8 | P2 |  |
-| [ ] | `object.make_links_scene` | M8 | P2 |  |
-| [ ] | `object.instance_offset_from_cursor` | M8 | P2 |  |
-| [ ] | `object.instance_offset_from_object` | M8 | P2 |  |
-| [ ] | `object.instance_offset_to_cursor` | M8 | P2 |  |
-| [ ] | `object.copy_global_transform` | M8 | P2 |  |
-| [ ] | `object.copy_relative_transform` | M8 | P2 |  |
-| [ ] | `object.paste_transform` | M8 | P2 |  |
-| [ ] | `object.unlink_data` | M8 | P2 |  |
-| [ ] | `object.update_shapes` | M8 | P2 |  |
-| [ ] | `object.visual_geometry_to_objects` | M8 | P2 |  |
-| [ ] | `object.voxel_remesh` | M8 | P2 |  |
-| [ ] | `object.modifier_convert` | M8 | P2 |  |
+| [ ] | `object.hide_render_clear_all` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.track_set` | M9 | P2 | post-M8 (M8 W0, M8W0-3): adds a Track To / Damped Track / Locked Track constraint, and constraints are OUT (rule 3) |
+| [ ] | `object.track_clear` | M9 | P2 | post-M8 (M8 W0, M8W0-3): removes tracking constraints (constraints OUT) |
+| [ ] | `object.hide_collection` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.collection_objects_select` | M8 | P2 | WP 8.3.4 |
+| [ ] | `object.data_transfer` | M8 | P2 | WP 8.3.13 |
+| [ ] | `object.datalayout_transfer` | M8 | P2 | WP 8.3.13 |
+| [ ] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |
+| [ ] | `object.make_links_scene` | M8 | P2 | WP 8.3.6 |
+| [ ] | `object.instance_offset_from_cursor` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.instance_offset_from_object` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.instance_offset_to_cursor` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.copy_global_transform` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.copy_relative_transform` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.paste_transform` | M8 | P2 | WP 8.3.5 |
+| [ ] | `object.unlink_data` | M8 | P2 | WP 8.3.6 |
+| [ ] | `object.update_shapes` | M8 | P2 | WP 8.3.7 |
+| [ ] | `object.visual_geometry_to_objects` | M8 | P2 | WP 8.3.6 |
+| [ ] | `object.voxel_remesh` | M9 | P2 | post-M8 (M8 W0, M8W0-3): OpenVDB level-set remesher (`BKE_mesh_remesh_voxel`), no pure-Rust port planned in M8 |
+| [ ] | `object.modifier_convert` | M8 | P2 | WP 8.3.6 |
 | — | `object.constraint_add` | OUT | — | constraints out of scope |
 | — | `object.constraint_add_with_targets` | OUT | — |  |
 | — | `object.constraints_clear` | OUT | — |  |
@@ -360,12 +360,12 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `transform.vert_crease` | M2 | P2 |  |
 | [x] | `transform.push_pull` | M2 | P2 | Edit Mode (meshes) only |
 | [x] | `transform.vertex_random` | M2 | P2 | BliRng |
-| [ ] | `transform.shear` | M8 | P2 |  |
-| [ ] | `transform.bend` | M8 | P2 |  |
-| [ ] | `transform.rotate_normal` | M8 | P2 |  |
-| [ ] | `transform.create_orientation` | M8 | P2 |  |
-| [ ] | `transform.select_orientation` | M8 | P2 |  |
-| [ ] | `transform.delete_orientation` | M8 | P2 |  |
+| [ ] | `transform.shear` | M8 | P2 | WP 8.3.5 |
+| [ ] | `transform.bend` | M8 | P2 | WP 8.3.5 |
+| [ ] | `transform.rotate_normal` | M8 | P2 | WP 8.3.5 |
+| [ ] | `transform.create_orientation` | M8 | P2 | WP 8.3.5 |
+| [ ] | `transform.select_orientation` | M8 | P2 | WP 8.3.5 |
+| [ ] | `transform.delete_orientation` | M8 | P2 | WP 8.3.5 |
 | — | `transform.trackball` | OUT | — |  |
 | — | `transform.vertex_warp` | OUT | — |  |
 | — | `transform.skin_resize` | OUT | — |  |
@@ -406,34 +406,34 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `uv.lightmap_pack` | M3 | P2 | upper-case prop names are real |
 | [x] | `uv.pin` | M3 | P2 |  |
 | [x] | `uv.project_from_view` | M3 | P2 | frap-extended: projects from scene.camera |
-| [ ] | `uv.minimize_stretch` | M8 | P2 | iterations > 0 headless |
-| [ ] | `uv.select_all` | M8 | P2 | meaningful with sync select off |
-| [ ] | `uv.select_mode` | M8 | P2 |  |
-| [ ] | `uv.select_linked` | M8 | P2 |  |
-| [ ] | `uv.select_more` | M8 | P2 |  |
-| [ ] | `uv.select_less` | M8 | P2 |  |
-| [ ] | `uv.select_split` | M8 | P2 |  |
-| [ ] | `uv.select_overlap` | M8 | P2 |  |
-| [ ] | `uv.select_similar` | M8 | P2 |  |
-| [ ] | `uv.select_pinned` | M8 | P2 |  |
-| [ ] | `uv.select_by_winding` | M8 | P2 |  |
-| [ ] | `uv.shortest_path_select` | M8 | P2 |  |
-| [ ] | `uv.hide` | M8 | P2 |  |
-| [ ] | `uv.reveal` | M8 | P2 |  |
-| [ ] | `uv.weld` | M8 | P2 |  |
-| [ ] | `uv.remove_doubles` | M8 | P2 |  |
-| [ ] | `uv.stitch` | M8 | P2 |  |
-| [ ] | `uv.align` | M8 | P2 |  |
-| [ ] | `uv.align_rotation` | M8 | P2 |  |
-| [ ] | `uv.arrange_islands` | M8 | P2 |  |
-| [ ] | `uv.randomize_uv_transform` | M8 | P2 |  |
-| [ ] | `uv.copy_mirrored_faces` | M8 | P2 |  |
-| [ ] | `uv.snap_selected` | M8 | P2 |  |
-| [ ] | `uv.snap_cursor` | M8 | P2 |  |
-| [ ] | `uv.move_on_axis` | M8 | P2 |  |
-| [ ] | `uv.rip` | M8 | P2 |  |
-| [ ] | `uv.rip_move` | M8 | P2 |  |
-| [ ] | `uv.export_layout` | M8 | P2 |  |
+| [ ] | `uv.minimize_stretch` | M8 | P2 | iterations > 0 headless; WP 8.1 |
+| [ ] | `uv.select_all` | M8 | P2 | meaningful with sync select off; WP 8.3.8 |
+| [ ] | `uv.select_mode` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_linked` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_more` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_less` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_split` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_overlap` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_similar` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_pinned` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.select_by_winding` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.shortest_path_select` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.hide` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.reveal` | M8 | P2 | WP 8.3.8 |
+| [ ] | `uv.weld` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.remove_doubles` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.stitch` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.align` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.align_rotation` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.arrange_islands` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.randomize_uv_transform` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.copy_mirrored_faces` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.snap_selected` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.snap_cursor` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.move_on_axis` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.rip` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.rip_move` | M8 | P2 | WP 8.3.9 |
+| [ ] | `uv.export_layout` | M8 | P2 | WP 8.3.9 |
 | — | `uv.select` | OUT | — | mouse pick |
 | — | `uv.select_box` | OUT | — |  |
 | — | `uv.select_circle` | OUT | — |  |
@@ -458,8 +458,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `anim.keyframe_delete_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
 | [x] | `anim.keyframe_clear_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
 | [x] | `anim.keyframe_delete_by_name` | M6 | P2 | WP 6.4 (M5+M6 W0) |
-| [ ] | `anim.keying_set_active_set` | M8 | P2 |  |
-| [ ] | `anim.channels_bake` | M8 | P2 |  |
+| [ ] | `anim.keying_set_active_set` | M9 | P2 | post-M8 (M8 W0, M8W0-3): keying sets are not bound (`Scene.keying_sets`, `keying_sets.new()` raise `RNA_NOT_IMPLEMENTED`) |
+| [ ] | `anim.channels_bake` | M8 | P2 | WP 8.3.11 |
 
 ### `screen.* (frames)`
 
@@ -487,29 +487,29 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `armature.roll_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [x] | `armature.switch_direction` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [x] | `armature.symmetrize` | M6 | P1 | WP 6.2 (M5+M6 W0) |
-| [ ] | `armature.extrude_forked` | M8 | P2 |  |
-| [ ] | `armature.dissolve` | M8 | P2 |  |
-| [ ] | `armature.split` | M8 | P2 |  |
-| [ ] | `armature.separate` | M8 | P2 |  |
-| [ ] | `armature.fill` | M8 | P2 |  |
-| [ ] | `armature.align` | M8 | P2 |  |
-| [ ] | `armature.select_more` | M8 | P2 |  |
-| [ ] | `armature.select_less` | M8 | P2 |  |
-| [ ] | `armature.select_hierarchy` | M8 | P2 |  |
-| [ ] | `armature.select_linked` | M8 | P2 |  |
-| [ ] | `armature.select_mirror` | M8 | P2 |  |
-| [ ] | `armature.select_similar` | M8 | P2 |  |
-| [ ] | `armature.hide` | M8 | P2 |  |
-| [ ] | `armature.reveal` | M8 | P2 |  |
-| [ ] | `armature.flip_names` | M8 | P2 |  |
-| [ ] | `armature.autoside_names` | M8 | P2 |  |
-| [ ] | `armature.duplicate_rename` | M8 | P2 |  |
-| [ ] | `armature.collection_add` | M8 | P2 | bone collections |
-| [ ] | `armature.collection_remove` | M8 | P2 |  |
-| [ ] | `armature.collection_assign` | M8 | P2 |  |
-| [ ] | `armature.collection_unassign` | M8 | P2 |  |
-| [ ] | `armature.assign_to_collection` | M8 | P2 |  |
-| [ ] | `armature.move_to_collection` | M8 | P2 |  |
+| [ ] | `armature.extrude_forked` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.dissolve` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.split` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.separate` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.fill` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.align` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.select_more` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.select_less` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.select_hierarchy` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.select_linked` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.select_mirror` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.select_similar` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.hide` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.reveal` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.flip_names` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.autoside_names` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.duplicate_rename` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.collection_add` | M8 | P2 | bone collections; WP 8.3.10 |
+| [ ] | `armature.collection_remove` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.collection_assign` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.collection_unassign` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.assign_to_collection` | M8 | P2 | WP 8.3.10 |
+| [ ] | `armature.move_to_collection` | M8 | P2 | WP 8.3.10 |
 | — | `armature.click_extrude` | OUT | — | interactive |
 | — | `armature.select_linked_pick` | OUT | — |  |
 | — | `armature.shortest_path_pick` | OUT | — |  |
@@ -525,20 +525,20 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `pose.scale_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [x] | `pose.armature_apply` | M6 | P1 | apply pose as rest pose; WP 6.2 (M5+M6 W0) |
 | [x] | `pose.rotation_mode_set` | M6 | P1 | WP 6.2 (M5+M6 W0) |
-| [ ] | `pose.user_transforms_clear` | M8 | P2 |  |
-| [ ] | `pose.visual_transform_apply` | M8 | P2 |  |
-| [ ] | `pose.copy` | M8 | P2 |  |
-| [ ] | `pose.paste` | M8 | P2 |  |
-| [ ] | `pose.select_hierarchy` | M8 | P2 |  |
-| [ ] | `pose.select_parent` | M8 | P2 |  |
-| [ ] | `pose.select_linked` | M8 | P2 |  |
-| [ ] | `pose.select_mirror` | M8 | P2 |  |
-| [ ] | `pose.select_grouped` | M8 | P2 |  |
-| [ ] | `pose.hide` | M8 | P2 |  |
-| [ ] | `pose.reveal` | M8 | P2 |  |
-| [ ] | `pose.flip_names` | M8 | P2 |  |
-| [ ] | `pose.autoside_names` | M8 | P2 |  |
-| [ ] | `pose.quaternions_flip` | M8 | P2 |  |
+| [ ] | `pose.user_transforms_clear` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.visual_transform_apply` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.copy` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.paste` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.select_hierarchy` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.select_parent` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.select_linked` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.select_mirror` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.select_grouped` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.hide` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.reveal` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.flip_names` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.autoside_names` | M8 | P2 | WP 8.3.11 |
+| [ ] | `pose.quaternions_flip` | M8 | P2 | WP 8.3.11 |
 | — | `pose.constraint_add` | OUT | — | constraints out of scope |
 | — | `pose.ik_add` | OUT | — |  |
 | — | `pose.breakdown` | OUT | — | interactive pose tools |
@@ -551,15 +551,15 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 |---|---|---|---|---|
 | [x] | `nla.action_pushdown` | M6 | P1 | headless-extended: active object's AnimData; feeds NLA_TRACKS export; WP 6.4 (M5+M6 W0) |
 | [x] | `nla.tracks_add` | M6 | P2 | headless-extended; WP 6.4 (M5+M6 W0) |
-| [ ] | `nla.tracks_delete` | M8 | P2 |  |
-| [ ] | `nla.actionclip_add` | M8 | P2 |  |
+| [ ] | `nla.tracks_delete` | M8 | P2 | WP 8.3.11 |
+| [ ] | `nla.actionclip_add` | M8 | P2 | WP 8.3.11 |
 
 ### `render.*`
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
 | [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6; output formats: every image format but JPEG2000 and AVIF, multilayer OpenEXR; video (FFMPEG) M8 (decision log M56S-2); `scene=` / `layer=` other than the context ones and `use_sequencer_scene=True`: `OP_NOT_IMPLEMENTED` until M8 (deviations §2) |
-| [ ] | `render.opengl` | M8 | P2 | maps to Workbench from scene camera |
+| [ ] | `render.opengl` | M8 | P2 | maps to Workbench from scene camera; WP 8.3.6 |
 
 ### `wm.* (files)`
 
@@ -584,6 +584,16 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 |---|---|---|---|---|
 | [x] | `scene.new` | M3 | P1 | WP 3.10; multi-scene glTF |
 | [x] | `scene.delete` | M3 | P2 | WP 3.10 |
+| [x] | `scene.gltf2_variant_add` | M8 | P2 | glTF add-on (`KHR_materials_variants_ui` on, else unknown as in Blender); `VariantName` made unique like the add-on's name update; M8 W0 (golden `gltf/variants_ops/scene_ops`) |
+| [x] | `scene.gltf2_variant_remove` | M8 | P2 | glTF add-on; removes the active variant of `bpy.data.scenes[0]` and the mesh mappings that use it, with the add-on's in-place index removal; M8 W0 |
+| [x] | `scene.gltf2_display_variant` | M8 | P2 | glTF add-on; every mesh object's slots take the materials mapped to `bpy.data.scenes[0].gltf2_active_variant`; M8 W0 |
+| [x] | `scene.gltf2_reset_to_original` | M8 | P2 | glTF add-on; the active object's slots take `gltf2_variant_default_materials`; M8 W0 |
+| [x] | `scene.gltf2_assign_to_variant` | M8 | P2 | glTF add-on; records the active object's slot materials for the active variant; M8 W0 |
+| [x] | `scene.gltf2_assign_as_original` | M8 | P2 | glTF add-on; records the active object's slot materials as defaults; M8 W0 |
+| [x] | `scene.gltf2_variants_slot_add` | M8 | P2 | glTF add-on; adds the active variant to the active slot's mapping; M8 W0 |
+| [x] | `scene.gltf2_material_to_variant` | M8 | P2 | glTF add-on; re-points the active mapping entry to `Mesh.gltf2_variant_pointer`'s variant (CANCELLED without a match, as the add-on); M8 W0 |
+| [x] | `scene.gltf2_remove_material_variant` | M8 | P2 | glTF add-on; removes the active mapping entry (CANCELLED without a mapping for the active slot); M8 W0 |
+| [ ] | `scene.gltf2_action_filter_refresh` | M9 | P2 | glTF add-on, post-M8 with `export_action_filter` (deviations §2, M8W0-3) |
 | — | `scene.view_layer_add` | OUT | — |  |
 | — | `scene.view_layer_remove` | OUT | — |  |
 
@@ -592,8 +602,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
 | [x] | `material.new` | M1 | P0 | does not assign to a slot from scripts (as Blender) |
-| [ ] | `material.copy` | M8 | P2 |  |
-| [ ] | `material.paste` | M8 | P2 |  |
+| [ ] | `material.copy` | M8 | P2 | WP 8.3.6 |
+| [ ] | `material.paste` | M8 | P2 | WP 8.3.6 |
 
 ### `image.*`
 
@@ -617,11 +627,11 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `collection.create` | M8 | P2 |  |
-| [ ] | `collection.objects_add_active` | M8 | P2 |  |
-| [ ] | `collection.objects_remove` | M8 | P2 |  |
-| [ ] | `collection.objects_remove_all` | M8 | P2 |  |
-| [ ] | `collection.objects_remove_active` | M8 | P2 |  |
+| [ ] | `collection.create` | M8 | P2 | WP 8.3.6 |
+| [ ] | `collection.objects_add_active` | M8 | P2 | WP 8.3.6 |
+| [ ] | `collection.objects_remove` | M8 | P2 | WP 8.3.6 |
+| [ ] | `collection.objects_remove_all` | M8 | P2 | WP 8.3.6 |
+| [ ] | `collection.objects_remove_active` | M8 | P2 | WP 8.3.6 |
 
 ### `import_scene.*`
 
@@ -701,17 +711,17 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 | [x] | `NORMAL_EDIT` | `NormalEditModifier` | M4 | P2 |  |
 | [x] | `LAPLACIANSMOOTH` | `LaplacianSmoothModifier` | M4 | P2 |  |
 | [x] | `ARMATURE` | `ArmatureModifier` | M6 | P0 | LBS, envelopes, mask group, preserve volume (dual quaternions), multi modifier; armature-parent virtual modifier (WP 6.5); B-Bone segments M8 |
-| [ ] | `REMESH` | `RemeshModifier` | M8 | P2 |  |
-| [ ] | `SHRINKWRAP` | `ShrinkwrapModifier` | M8 | P2 |  |
-| [ ] | `UV_PROJECT` | `UVProjectModifier` | M8 | P2 |  |
-| [ ] | `UV_WARP` | `UVWarpModifier` | M8 | P2 |  |
-| [ ] | `CORRECTIVE_SMOOTH` | `CorrectiveSmoothModifier` | M8 | P2 |  |
-| [ ] | `WAVE` | `WaveModifier` | M8 | P2 |  |
-| [ ] | `WARP` | `WarpModifier` | M8 | P2 |  |
-| [ ] | `DATA_TRANSFER` | `DataTransferModifier` | M8 | P2 |  |
-| [ ] | `VERTEX_WEIGHT_EDIT` | `VertexWeightEditModifier` | M8 | P2 |  |
-| [ ] | `VERTEX_WEIGHT_MIX` | `VertexWeightMixModifier` | M8 | P2 |  |
-| [ ] | `VERTEX_WEIGHT_PROXIMITY` | `VertexWeightProximityModifier` | M8 | P2 |  |
+| [ ] | `REMESH` | `RemeshModifier` | M9 | P2 | post-M8 (M8 W0, M8W0-3): VOXEL needs OpenVDB, BLOCKS/SMOOTH/SHARP the dualcon octree contourer (`intern/dualcon`); passes through with the WARNING |
+| [ ] | `SHRINKWRAP` | `ShrinkwrapModifier` | M8 | P2 | WP 8.3.12 |
+| [ ] | `UV_PROJECT` | `UVProjectModifier` | M8 | P2 | WP 8.3.12 |
+| [ ] | `UV_WARP` | `UVWarpModifier` | M8 | P2 | WP 8.3.12 |
+| [ ] | `CORRECTIVE_SMOOTH` | `CorrectiveSmoothModifier` | M8 | P2 | WP 8.3.12 |
+| [ ] | `WAVE` | `WaveModifier` | M8 | P2 | WP 8.3.12 |
+| [ ] | `WARP` | `WarpModifier` | M8 | P2 | WP 8.3.12 |
+| [ ] | `DATA_TRANSFER` | `DataTransferModifier` | M8 | P2 | WP 8.3.13 |
+| [ ] | `VERTEX_WEIGHT_EDIT` | `VertexWeightEditModifier` | M8 | P2 | WP 8.3.13 |
+| [ ] | `VERTEX_WEIGHT_MIX` | `VertexWeightMixModifier` | M8 | P2 | WP 8.3.13 |
+| [ ] | `VERTEX_WEIGHT_PROXIMITY` | `VertexWeightProximityModifier` | M8 | P2 | WP 8.3.13 |
 | — | `SKIN` | `SkinModifier` | OUT | — | data only |
 | — | `CURVE` | `CurveModifier` | OUT | — | no curve objects |
 | — | `LATTICE` | `LatticeModifier` | OUT | — | no lattice objects |
@@ -868,14 +878,17 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 
 ## G. Totals
 
+Recounted at M8 W0 with the codegen parser (`xtask/src/codegen/model.rs::parse_operators_md`: section A rows whose `M` cell is `M<n>` or `OUT`).
+
 | Milestone | Operators |
 |---|---|
-| M1 | 64 |
-| M2 | 124 |
-| M3 | 31 |
+| M1 | 56 |
+| M2 | 125 |
+| M3 | 29 |
 | M4 | 15 |
 | M6 | 54 |
 | M7 | 11 |
-| M8 | 187 |
-| OUT | 61 |
+| M8 | 192 (183 for the M8 WPs, 9 glTF variant operators done in M8 W0) |
+| M9 (post-M8) | 5 |
+| OUT | 60 |
 | total listed | 547 |

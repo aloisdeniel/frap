@@ -209,8 +209,8 @@ source: crates/frap-schema/tests/snapshots.rs
   "object.subdivision_set | planned M4 | poll YYYYY/YYYYY | level,relative,ensure_modifier",
   "object.surfacedeform_bind | planned OUT | poll YNYYY/YNYYY | modifier",
   "object.text_add | planned OUT | poll YYNNN/YYNNN | radius,enter_editmode,align,location,rotation,scale",
-  "object.track_clear | planned M8 | poll YYNNN/YYNNN | type",
-  "object.track_set | planned M8 | poll YYNNN/YYNNN | type",
+  "object.track_clear | planned M9 | poll YYNNN/YYNNN | type",
+  "object.track_set | planned M9 | poll YYNNN/YYNNN | type",
   "object.transfer_mode | planned OUT | poll NNNNN/NNYYY | use_flash_on_transfer",
   "object.transform_apply | planned M1 | poll YYNNN/YYNNN | location,rotation,scale,properties,corrective_flip_normals,isolate_users",
   "object.transform_axis_target | planned OUT | poll NNNNN/YYYYY | ",
@@ -250,6 +250,6 @@ source: crates/frap-schema/tests/snapshots.rs
   "object.visual_transform_apply | planned M8 | poll YYYYY/YYYYY | ",
   "object.volume_add | planned OUT | poll YYNNN/YYNNN | align,location,rotation,scale",
   "object.volume_import | planned OUT | poll YYYYY/YYYYY | filepath,directory,files,hide_props_region,check_existing,filter_blender,filter_backup,filter_image,filter_movie,filter_python,filter_font,filter_sound,filter_text,filter_archive,filter_btx,filter_alembic,filter_usd,filter_obj,filter_volume,filter_folder,filter_blenlib,filemode,relative_path,display_type,sort_method,use_sequence_detection,align,location,rotation,scale",
-  "object.voxel_remesh | planned M8 | poll YNNNN/YNNNN | ",
+  "object.voxel_remesh | planned M9 | poll YNNNN/YNNNN | ",
   "object.voxel_size_edit | planned OUT | poll NNNNN/YNNNN | "
 ]

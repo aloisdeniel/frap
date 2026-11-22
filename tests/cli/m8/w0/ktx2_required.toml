@@ -1,0 +1,10 @@
+# M8 W0 (decision log M8W0-7, deviation D-133): an export that makes KHR_texture_basisu required
+# says so with one WARNING. `ktx2_only.gltf` (copied from tests/cli/m7/textures/ktx2.in/) has
+# two textures whose only image is a KTX2 file; `frap_texture_format='KTX2'` copies them as
+# they are (no encoder needed). With the default `export_image_format` every texture keeps a
+# PNG source, so the extension is optional and nothing is reported; with 'WEBP' and no WebP
+# fallback no core source is left: the file requires KHR_texture_basisu (and EXT_texture_webp),
+# which Blender 5.2 cannot load. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--empty", "--verbosity", "minimal"]
+fs.sandbox = true

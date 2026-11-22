@@ -9,7 +9,13 @@ pub mod center;
 pub mod clear;
 pub mod cursor;
 pub mod deform;
+/// The glTF add-on's variant operators (M8 W0).
+pub mod gltf_variants;
+/// Bone heat weighting (M8 W0 stub, WP 8.5).
+pub mod heat;
 pub mod mesh;
 pub mod shade;
 pub mod snap;
+/// Vertex-group locks, mirror maps and weight copying (M8 W0 stub, WP 8.3.7).
+pub mod weights;
 pub mod xform;

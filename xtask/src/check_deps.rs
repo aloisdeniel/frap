@@ -75,6 +75,10 @@ pub const LAYERS: &[(&str, u8)] = &[
     // Test-only crates (§3.1, rule 2.2.11): they depend on frap-session; nothing depends on them.
     ("frap-ops-io-tests", 12),
     ("frap-ops-render-tests", 12),
+    // M8 W0: the §21.7 budgets (test-only, WP 8.8) and the Lua front-end spike over the
+    // Session API (WP 8.10), beside frap-cli.
+    ("frap-perf-tests", 12),
+    ("frap-lua", 12),
 ];
 
 /// Same-layer edges that §3.2 itself draws: `frap-lang` "depends only on frap-rna" (both L1),

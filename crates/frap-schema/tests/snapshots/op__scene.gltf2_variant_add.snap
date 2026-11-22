@@ -1,0 +1,35 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "scene.gltf2_variant_add",
+  "bl_idname": "SCENE_OT_gltf2_variant_add",
+  "label": "Add Material Variant",
+  "description": "Add a new Material Variant",
+  "bl_options": [
+    "REGISTER"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "glTF add-on operator, registered while KHR_materials_variants_ui is on; appends a variant to bpy.data.scenes[0] (named VariantName, made unique) and makes it active"
+    ]
+  }
+}

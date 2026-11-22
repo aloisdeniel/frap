@@ -13,6 +13,37 @@ pub mod enums {
     use frap_rna::EnumItem;
 }
 
+// ---------------------------------------------------------------- material.copy
+/// Props of `material.copy`, RNA order.
+pub static COPY_PROPS: [PropDef; 0] = [
+];
+/// `MATERIAL_OT_copy`
+pub static OPSPEC_MATERIAL_OT_COPY: OperatorSpec = OperatorSpec {
+    idname: "material.copy",
+    bl_idname: "MATERIAL_OT_copy",
+    label: "Copy Material",
+    description: "Copy the material settings and nodes",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER),
+    props: &COPY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `material.copy` (Copy Material).
+#[derive(Debug, Clone)]
+pub struct Copy {
+}
+impl OpProps for Copy {
+    const IDNAME: &'static str = "material.copy";
+    const BL_IDNAME: &'static str = "MATERIAL_OT_copy";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MATERIAL_OT_COPY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Copy {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- material.new
 /// Props of `material.new`, RNA order.
 pub static NEW_PROPS: [PropDef; 0] = [
@@ -40,6 +71,37 @@ impl OpProps for MaterialNew {
     }
     fn from_args(a: &OpArgs) -> Self {
         MaterialNew {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- material.paste
+/// Props of `material.paste`, RNA order.
+pub static PASTE_PROPS: [PropDef; 0] = [
+];
+/// `MATERIAL_OT_paste`
+pub static OPSPEC_MATERIAL_OT_PASTE: OperatorSpec = OperatorSpec {
+    idname: "material.paste",
+    bl_idname: "MATERIAL_OT_paste",
+    label: "Paste Material",
+    description: "Paste the material settings and nodes",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &PASTE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `material.paste` (Paste Material).
+#[derive(Debug, Clone)]
+pub struct Paste {
+}
+impl OpProps for Paste {
+    const IDNAME: &'static str = "material.paste";
+    const BL_IDNAME: &'static str = "MATERIAL_OT_paste";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MATERIAL_OT_PASTE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Paste {
         }
     }
 }

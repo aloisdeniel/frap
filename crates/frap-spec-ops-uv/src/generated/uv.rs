@@ -11,67 +11,688 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 3] = [
+pub static E0: [EnumItem; 6] = [
+    EnumItem { identifier: "ALIGN_S", name: "Straighten", description: "Align UV vertices along the line defined by the endpoints", value: 0 },
+    EnumItem { identifier: "ALIGN_T", name: "Straighten X", description: "Align UV vertices, moving them horizontally to the line defined by the endpoints", value: 1 },
+    EnumItem { identifier: "ALIGN_U", name: "Straighten Y", description: "Align UV vertices, moving them vertically to the line defined by the endpoints", value: 2 },
+    EnumItem { identifier: "ALIGN_AUTO", name: "Align Auto", description: "Automatically choose the direction on which there is most alignment already", value: 3 },
+    EnumItem { identifier: "ALIGN_X", name: "Align Vertically", description: "Align UV vertices on a vertical line", value: 4 },
+    EnumItem { identifier: "ALIGN_Y", name: "Align Horizontally", description: "Align UV vertices on a horizontal line", value: 5 },
+];
+pub static E1: [EnumItem; 3] = [
+    EnumItem { identifier: "MEAN", name: "Mean", description: "Align UVs along the mean position", value: 0 },
+    EnumItem { identifier: "MIN", name: "Minimum", description: "Align UVs along the minimum position", value: 1 },
+    EnumItem { identifier: "MAX", name: "Maximum", description: "Align UVs along the maximum position", value: 2 },
+];
+pub static E2: [EnumItem; 3] = [
+    EnumItem { identifier: "AUTO", name: "Auto", description: "Align from all edges", value: 0 },
+    EnumItem { identifier: "EDGE", name: "Edge", description: "Only selected edges", value: 1 },
+    EnumItem { identifier: "GEOMETRY", name: "Geometry", description: "Align to Geometry axis", value: 2 },
+];
+pub static E3: [EnumItem; 3] = [
+    EnumItem { identifier: "X", name: "X", description: "X axis", value: 0 },
+    EnumItem { identifier: "Y", name: "Y", description: "Y axis", value: 1 },
+    EnumItem { identifier: "Z", name: "Z", description: "Z axis", value: 2 },
+];
+pub static E4: [EnumItem; 4] = [
+    EnumItem { identifier: "BOUNDING_BOX", name: "Bounding Box", description: "Initial alignment based on the islands bounding box", value: 0 },
+    EnumItem { identifier: "UV_GRID", name: "UV Grid", description: "Initial alignment based on UV Tile Grid", value: 1 },
+    EnumItem { identifier: "ACTIVE_UDIM", name: "Active UDIM", description: "Initial alignment based on Active UDIM", value: 2 },
+    EnumItem { identifier: "CURSOR", name: "2D Cursor", description: "Initial alignment based on 2D cursor", value: 3 },
+];
+pub static E5: [EnumItem; 2] = [
+    EnumItem { identifier: "X", name: "X", description: "Align UV islands along the X axis", value: 0 },
+    EnumItem { identifier: "Y", name: "Y", description: "Align UV islands along the Y axis", value: 1 },
+];
+pub static E6: [EnumItem; 4] = [
+    EnumItem { identifier: "MIN", name: "Min", description: "Align the islands to the min of the island", value: 1 },
+    EnumItem { identifier: "MAX", name: "Max", description: "Align the islands to the max side of the island", value: 0 },
+    EnumItem { identifier: "CENTER", name: "Center", description: "Align the islands to the center of the largest island", value: 2 },
+    EnumItem { identifier: "NONE", name: "None", description: "Preserve island alignment", value: 3 },
+];
+pub static E7: [EnumItem; 3] = [
+    EnumItem { identifier: "LARGE_TO_SMALL", name: "Largest to Smallest", description: "Sort islands from largest to smallest", value: 0 },
+    EnumItem { identifier: "SMALL_TO_LARGE", name: "Smallest to Largest", description: "Sort islands from smallest to largest", value: 1 },
+    EnumItem { identifier: "Fixed", name: "Fixed", description: "Preserve island order", value: 2 },
+];
+pub static E8: [EnumItem; 6] = [
+    EnumItem { identifier: "POS_X", name: "-X to +X", description: "", value: 0 },
+    EnumItem { identifier: "POS_Y", name: "-Y to +Y", description: "", value: 1 },
+    EnumItem { identifier: "POS_Z", name: "-Z to +Z", description: "", value: 2 },
+    EnumItem { identifier: "NEG_X", name: "+X to -X", description: "", value: 3 },
+    EnumItem { identifier: "NEG_Y", name: "+Y to -Y", description: "", value: 4 },
+    EnumItem { identifier: "NEG_Z", name: "+Z to -Z", description: "", value: 5 },
+];
+pub static E9: [EnumItem; 2] = [
+    EnumItem { identifier: "X", name: "X", description: "", value: 0 },
+    EnumItem { identifier: "Y", name: "Y", description: "", value: 1 },
+];
+pub static E10: [EnumItem; 3] = [
     EnumItem { identifier: "VIEW_ON_EQUATOR", name: "View on Equator", description: "3D view is on the equator", value: 0 },
     EnumItem { identifier: "VIEW_ON_POLES", name: "View on Poles", description: "3D view is on the poles", value: 1 },
     EnumItem { identifier: "ALIGN_TO_OBJECT", name: "Align to Object", description: "Align according to object transform", value: 2 },
 ];
-pub static E1: [EnumItem; 2] = [
+pub static E11: [EnumItem; 2] = [
     EnumItem { identifier: "POLAR_ZX", name: "Polar ZX", description: "Polar 0 is X", value: 0 },
     EnumItem { identifier: "POLAR_ZY", name: "Polar ZY", description: "Polar 0 is Y", value: 1 },
 ];
-pub static E2: [EnumItem; 2] = [
+pub static E12: [EnumItem; 2] = [
     EnumItem { identifier: "PINCH", name: "Pinch", description: "UVs are pinched at the poles", value: 0 },
     EnumItem { identifier: "FAN", name: "Fan", description: "UVs are fanned at the poles", value: 1 },
 ];
-pub static E3: [EnumItem; 3] = [
+pub static E13: [EnumItem; 3] = [
+    EnumItem { identifier: "NONE", name: "None", description: "Export only UVs in the [0, 1] range", value: 0 },
+    EnumItem { identifier: "UDIM", name: "UDIM", description: "Export tiles in the UDIM numbering scheme: 1001 + u_tile + 10*v_tile", value: 1 },
+    EnumItem { identifier: "UV", name: "UVTILE", description: "Export tiles in the UVTILE numbering scheme: u(u_tile + 1)_v(v_tile + 1)", value: 2 },
+];
+pub static E14: [EnumItem; 3] = [
+    EnumItem { identifier: "SVG", name: "Scalable Vector Graphic (.svg)", description: "Export the UV layout to a vector SVG file", value: 0 },
+    EnumItem { identifier: "EPS", name: "Encapsulated PostScript (.eps)", description: "Export the UV layout to a vector EPS file", value: 1 },
+    EnumItem { identifier: "PNG", name: "PNG Image (.png)", description: "Export the UV layout to a bitmap image", value: 2 },
+];
+pub static E15: [EnumItem; 3] = [
     EnumItem { identifier: "EVEN", name: "Even", description: "Space all UVs evenly", value: 0 },
     EnumItem { identifier: "LENGTH", name: "Length", description: "Average space UVs edge length of each loop", value: 1 },
     EnumItem { identifier: "LENGTH_AVERAGE", name: "Length Average", description: "Average space UVs edge length of each loop", value: 2 },
 ];
-pub static E4: [EnumItem; 2] = [
+pub static E16: [EnumItem; 2] = [
     EnumItem { identifier: "SEL_FACES", name: "Selected Faces", description: "Pack only selected faces", value: 0 },
     EnumItem { identifier: "ALL_FACES", name: "All Faces", description: "Pack all faces in the mesh", value: 1 },
 ];
-pub static E5: [EnumItem; 4] = [
+pub static E17: [EnumItem; 3] = [
+    EnumItem { identifier: "DYNAMIC", name: "Dynamic", description: "Move by dynamic grid", value: 0 },
+    EnumItem { identifier: "PIXEL", name: "Pixel", description: "Move by pixel", value: 1 },
+    EnumItem { identifier: "UDIM", name: "UDIM", description: "Move by UDIM", value: 2 },
+];
+pub static E18: [EnumItem; 2] = [
+    EnumItem { identifier: "X", name: "X axis", description: "Move vertices on the X axis", value: 0 },
+    EnumItem { identifier: "Y", name: "Y axis", description: "Move vertices on the Y axis", value: 1 },
+];
+pub static E19: [EnumItem; 4] = [
     EnumItem { identifier: "CLOSEST_UDIM", name: "Closest UDIM", description: "Pack islands to closest UDIM", value: 0 },
     EnumItem { identifier: "ACTIVE_UDIM", name: "Active UDIM", description: "Pack islands to active UDIM image tile or UDIM grid tile where 2D cursor is located", value: 1 },
     EnumItem { identifier: "ORIGINAL_AABB", name: "Original bounding box", description: "Pack to starting bounding box of islands", value: 2 },
     EnumItem { identifier: "CUSTOM_REGION", name: "Custom Region", description: "Pack islands to custom region", value: 3 },
 ];
-pub static E6: [EnumItem; 5] = [
+pub static E20: [EnumItem; 5] = [
     EnumItem { identifier: "ANY", name: "Any", description: "Any angle is allowed for rotation", value: 5 },
     EnumItem { identifier: "CARDINAL", name: "Cardinal", description: "Only 90 degree rotations are allowed", value: 4 },
     EnumItem { identifier: "AXIS_ALIGNED", name: "Axis-aligned", description: "Rotated to a minimal rectangle, either vertical or horizontal", value: 1 },
     EnumItem { identifier: "AXIS_ALIGNED_X", name: "Axis-aligned (Horizontal)", description: "Rotate islands to be aligned horizontally", value: 2 },
     EnumItem { identifier: "AXIS_ALIGNED_Y", name: "Axis-aligned (Vertical)", description: "Rotate islands to be aligned vertically", value: 3 },
 ];
-pub static E7: [EnumItem; 3] = [
+pub static E21: [EnumItem; 3] = [
     EnumItem { identifier: "SCALED", name: "Scaled", description: "Use scale of existing UVs to multiply margin", value: 0 },
     EnumItem { identifier: "ADD", name: "Add", description: "Just add the margin, ignoring any UV scale", value: 1 },
     EnumItem { identifier: "FRACTION", name: "Fraction", description: "Specify a precise fraction of final UV output", value: 2 },
 ];
-pub static E8: [EnumItem; 4] = [
+pub static E22: [EnumItem; 4] = [
     EnumItem { identifier: "SCALE", name: "Scale", description: "Pinned islands won't rescale", value: 4 },
     EnumItem { identifier: "ROTATION", name: "Rotation", description: "Pinned islands won't rotate", value: 2 },
     EnumItem { identifier: "ROTATION_SCALE", name: "Rotation and Scale", description: "Pinned islands will translate only", value: 3 },
     EnumItem { identifier: "LOCKED", name: "All", description: "Pinned islands are locked in place", value: 5 },
 ];
-pub static E9: [EnumItem; 3] = [
+pub static E23: [EnumItem; 3] = [
     EnumItem { identifier: "CONCAVE", name: "Exact Shape (Concave)", description: "Uses exact geometry", value: 2 },
     EnumItem { identifier: "CONVEX", name: "Boundary Shape (Convex)", description: "Uses convex hull", value: 1 },
     EnumItem { identifier: "AABB", name: "Bounding Box", description: "Uses bounding boxes", value: 0 },
 ];
-pub static E10: [EnumItem; 3] = [
+pub static E24: [EnumItem; 4] = [
+    EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle selection for all elements", value: 0 },
+    EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
+    EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
+    EnumItem { identifier: "INVERT", name: "Invert", description: "Invert selection of all elements", value: 3 },
+];
+pub static E25: [EnumItem; 2] = [
+    EnumItem { identifier: "POSITIVE", name: "Positive", description: "", value: 0 },
+    EnumItem { identifier: "NEGATIVE", name: "Negative", description: "", value: 1 },
+];
+pub static E26: [EnumItem; 3] = [
+    EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit by edge seams", value: 1 },
+    EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit by sharp edges", value: 2 },
+    EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit by face material", value: 4 },
+];
+pub static E27: [EnumItem; 3] = [
+    EnumItem { identifier: "VERTEX", name: "Vertex", description: "Vertex selection mode", value: 1 },
+    EnumItem { identifier: "EDGE", name: "Edge", description: "Edge selection mode", value: 2 },
+    EnumItem { identifier: "FACE", name: "Face", description: "Face selection mode", value: 4 },
+];
+pub static E28: [EnumItem; 10] = [
+    EnumItem { identifier: "PIN", name: "Pinned", description: "", value: 1007 },
+    EnumItem { identifier: "LENGTH", name: "Length", description: "Edge length in UV space", value: 1003 },
+    EnumItem { identifier: "LENGTH_3D", name: "Length 3D", description: "Length of edge in 3D space", value: 1004 },
+    EnumItem { identifier: "AREA", name: "Area", description: "Face area in UV space", value: 1000 },
+    EnumItem { identifier: "AREA_3D", name: "Area 3D", description: "Area of face in 3D space", value: 1001 },
+    EnumItem { identifier: "MATERIAL", name: "Material", description: "", value: 1005 },
+    EnumItem { identifier: "OBJECT", name: "Object", description: "", value: 1006 },
+    EnumItem { identifier: "SIDES", name: "Polygon Sides", description: "", value: 1008 },
+    EnumItem { identifier: "WINDING", name: "Winding", description: "Face direction defined by clockwise or anti-clockwise winding (facing up or facing down)", value: 1009 },
+    EnumItem { identifier: "FACE", name: "Amount of Faces in Island", description: "", value: 1002 },
+];
+pub static E29: [EnumItem; 3] = [
+    EnumItem { identifier: "EQUAL", name: "Equal", description: "", value: 0 },
+    EnumItem { identifier: "GREATER", name: "Greater", description: "", value: 1 },
+    EnumItem { identifier: "LESS", name: "Less", description: "", value: 2 },
+];
+pub static E30: [EnumItem; 3] = [
     EnumItem { identifier: "AXIS_ALIGNED", name: "Axis-aligned", description: "Rotated to a minimal rectangle, either vertical or horizontal", value: 1 },
     EnumItem { identifier: "AXIS_ALIGNED_X", name: "Axis-aligned (Horizontal)", description: "Rotate islands to be aligned horizontally", value: 2 },
     EnumItem { identifier: "AXIS_ALIGNED_Y", name: "Axis-aligned (Vertical)", description: "Rotate islands to be aligned vertically", value: 3 },
 ];
-pub static E11: [EnumItem; 3] = [
+pub static E31: [EnumItem; 3] = [
+    EnumItem { identifier: "PIXELS", name: "Pixels", description: "", value: 0 },
+    EnumItem { identifier: "SELECTED", name: "Selected", description: "", value: 1 },
+    EnumItem { identifier: "ORIGIN", name: "Origin", description: "", value: 2 },
+];
+pub static E32: [EnumItem; 4] = [
+    EnumItem { identifier: "PIXELS", name: "Pixels", description: "", value: 0 },
+    EnumItem { identifier: "CURSOR", name: "Cursor", description: "", value: 1 },
+    EnumItem { identifier: "CURSOR_OFFSET", name: "Cursor (Offset)", description: "", value: 2 },
+    EnumItem { identifier: "ADJACENT_UNSELECTED", name: "Adjacent Unselected", description: "", value: 3 },
+];
+pub static E33: [EnumItem; 2] = [
+    EnumItem { identifier: "VERTEX", name: "Vertex", description: "", value: 0 },
+    EnumItem { identifier: "EDGE", name: "Edge", description: "", value: 1 },
+];
+pub static E34: [EnumItem; 3] = [
     EnumItem { identifier: "ANGLE_BASED", name: "Angle Based", description: "", value: 0 },
     EnumItem { identifier: "CONFORMAL", name: "Conformal", description: "", value: 1 },
     EnumItem { identifier: "MINIMUM_STRETCH", name: "Minimum Stretch", description: "", value: 2 },
 ];
+}
+
+// ---------------------------------------------------------------- uv.align
+/// Props of `uv.align`, RNA order.
+pub static ALIGN_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "axis", name: "Axis", description: "Axis to align UV locations on", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("ALIGN_AUTO"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "position_mode", name: "Position Mode", description: "Method of calculating the alignment position", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("MEAN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_align`
+pub static OPSPEC_UV_OT_ALIGN: OperatorSpec = OperatorSpec {
+    idname: "uv.align",
+    bl_idname: "UV_OT_align",
+    label: "Align",
+    description: "Aligns selected UV vertices on a line",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &ALIGN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.align`.
+pub mod align {
+    /// `Axis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Axis {
+        /// "ALIGN_S"
+        AlignS,
+        /// "ALIGN_T"
+        AlignT,
+        /// "ALIGN_U"
+        AlignU,
+        /// "ALIGN_AUTO"
+        AlignAuto,
+        /// "ALIGN_X"
+        AlignX,
+        /// "ALIGN_Y"
+        AlignY,
+    }
+    impl Axis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Axis; 6] = [Axis::AlignS, Axis::AlignT, Axis::AlignU, Axis::AlignAuto, Axis::AlignX, Axis::AlignY];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Axis::AlignS => "ALIGN_S",
+                Axis::AlignT => "ALIGN_T",
+                Axis::AlignU => "ALIGN_U",
+                Axis::AlignAuto => "ALIGN_AUTO",
+                Axis::AlignX => "ALIGN_X",
+                Axis::AlignY => "ALIGN_Y",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "ALIGN_S" => Some(Axis::AlignS),
+                "ALIGN_T" => Some(Axis::AlignT),
+                "ALIGN_U" => Some(Axis::AlignU),
+                "ALIGN_AUTO" => Some(Axis::AlignAuto),
+                "ALIGN_X" => Some(Axis::AlignX),
+                "ALIGN_Y" => Some(Axis::AlignY),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Axis {
+        fn default() -> Self {
+            Axis::AlignAuto
+        }
+    }
+    impl frap_rna::FromValue for Axis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `PositionMode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum PositionMode {
+        /// "MEAN"
+        Mean,
+        /// "MIN"
+        Min,
+        /// "MAX"
+        Max,
+    }
+    impl PositionMode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [PositionMode; 3] = [PositionMode::Mean, PositionMode::Min, PositionMode::Max];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                PositionMode::Mean => "MEAN",
+                PositionMode::Min => "MIN",
+                PositionMode::Max => "MAX",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "MEAN" => Some(PositionMode::Mean),
+                "MIN" => Some(PositionMode::Min),
+                "MAX" => Some(PositionMode::Max),
+                _ => None,
+            }
+        }
+    }
+    impl Default for PositionMode {
+        fn default() -> Self {
+            PositionMode::Mean
+        }
+    }
+    impl frap_rna::FromValue for PositionMode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.align` (Align).
+#[derive(Debug, Clone)]
+pub struct Align {
+    /// Axis to align UV locations on; default "ALIGN_AUTO": ALIGN_S | ALIGN_T | ALIGN_U | ALIGN_AUTO | ALIGN_X | ALIGN_Y [ANIMATABLE]
+    pub axis: Prop<align::Axis>,
+    /// Method of calculating the alignment position; default "MEAN": MEAN | MIN | MAX [ANIMATABLE]
+    pub position_mode: Prop<align::PositionMode>,
+}
+impl OpProps for Align {
+    const IDNAME: &'static str = "uv.align";
+    const BL_IDNAME: &'static str = "UV_OT_align";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_ALIGN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Align {
+            axis: a.prop(0, "axis"),
+            position_mode: a.prop(1, "position_mode"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.align_rotation
+/// Props of `uv.align_rotation`, RNA order.
+pub static ALIGN_ROTATION_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "method", name: "Method", description: "Method to calculate rotation angle", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("AUTO"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "axis", name: "Axis", description: "Axis to align to", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "correct_aspect", name: "Correct Aspect", description: "Take image aspect ratio into account", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_align_rotation`
+pub static OPSPEC_UV_OT_ALIGN_ROTATION: OperatorSpec = OperatorSpec {
+    idname: "uv.align_rotation",
+    bl_idname: "UV_OT_align_rotation",
+    label: "Align Rotation",
+    description: "Align the UV island's rotation",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &ALIGN_ROTATION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.align_rotation`.
+pub mod align_rotation {
+    /// `Method`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Method {
+        /// "AUTO"
+        Auto,
+        /// "EDGE"
+        Edge,
+        /// "GEOMETRY"
+        Geometry,
+    }
+    impl Method {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Method; 3] = [Method::Auto, Method::Edge, Method::Geometry];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Method::Auto => "AUTO",
+                Method::Edge => "EDGE",
+                Method::Geometry => "GEOMETRY",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "AUTO" => Some(Method::Auto),
+                "EDGE" => Some(Method::Edge),
+                "GEOMETRY" => Some(Method::Geometry),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Method {
+        fn default() -> Self {
+            Method::Auto
+        }
+    }
+    impl frap_rna::FromValue for Method {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Axis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Axis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+        /// "Z"
+        Z,
+    }
+    impl Axis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Axis; 3] = [Axis::X, Axis::Y, Axis::Z];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Axis::X => "X",
+                Axis::Y => "Y",
+                Axis::Z => "Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(Axis::X),
+                "Y" => Some(Axis::Y),
+                "Z" => Some(Axis::Z),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Axis {
+        fn default() -> Self {
+            Axis::X
+        }
+    }
+    impl frap_rna::FromValue for Axis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.align_rotation` (Align Rotation).
+#[derive(Debug, Clone)]
+pub struct AlignRotation {
+    /// Method to calculate rotation angle; default "AUTO": AUTO | EDGE | GEOMETRY [ANIMATABLE]
+    pub method: Prop<align_rotation::Method>,
+    /// Axis to align to; default "X": X | Y | Z [ANIMATABLE]
+    pub axis: Prop<align_rotation::Axis>,
+    /// Take image aspect ratio into account; default false [ANIMATABLE]
+    pub correct_aspect: Prop<bool>,
+}
+impl OpProps for AlignRotation {
+    const IDNAME: &'static str = "uv.align_rotation";
+    const BL_IDNAME: &'static str = "UV_OT_align_rotation";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_ALIGN_ROTATION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        AlignRotation {
+            method: a.prop(0, "method"),
+            axis: a.prop(1, "axis"),
+            correct_aspect: a.prop(2, "correct_aspect"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.arrange_islands
+/// Props of `uv.arrange_islands`, RNA order.
+pub static ARRANGE_ISLANDS_PROPS: [PropDef; 5] = [
+    PropDef { identifier: "initial_position", name: "Initial Position", description: "Initial position to arrange islands from", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("BOUNDING_BOX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "axis", name: "Axis", description: "Axis to arrange UV islands on", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("Y"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "Location to align islands on", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("MIN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "order", name: "Order", description: "Order of islands", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("LARGE_TO_SMALL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "margin", name: "Margin", description: "Space between islands", kind: PropKind::Float { default: Defaults::Scalar(0.05000000074505806), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_arrange_islands`
+pub static OPSPEC_UV_OT_ARRANGE_ISLANDS: OperatorSpec = OperatorSpec {
+    idname: "uv.arrange_islands",
+    bl_idname: "UV_OT_arrange_islands",
+    label: "Arrange/Align Islands",
+    description: "Arrange selected UV islands on a line",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &ARRANGE_ISLANDS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.arrange_islands`.
+pub mod arrange_islands {
+    /// `InitialPosition`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum InitialPosition {
+        /// "BOUNDING_BOX"
+        BoundingBox,
+        /// "UV_GRID"
+        UvGrid,
+        /// "ACTIVE_UDIM"
+        ActiveUdim,
+        /// "CURSOR"
+        Cursor,
+    }
+    impl InitialPosition {
+        /// Every variant, in RNA item order.
+        pub const ALL: [InitialPosition; 4] = [InitialPosition::BoundingBox, InitialPosition::UvGrid, InitialPosition::ActiveUdim, InitialPosition::Cursor];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                InitialPosition::BoundingBox => "BOUNDING_BOX",
+                InitialPosition::UvGrid => "UV_GRID",
+                InitialPosition::ActiveUdim => "ACTIVE_UDIM",
+                InitialPosition::Cursor => "CURSOR",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "BOUNDING_BOX" => Some(InitialPosition::BoundingBox),
+                "UV_GRID" => Some(InitialPosition::UvGrid),
+                "ACTIVE_UDIM" => Some(InitialPosition::ActiveUdim),
+                "CURSOR" => Some(InitialPosition::Cursor),
+                _ => None,
+            }
+        }
+    }
+    impl Default for InitialPosition {
+        fn default() -> Self {
+            InitialPosition::BoundingBox
+        }
+    }
+    impl frap_rna::FromValue for InitialPosition {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Axis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Axis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+    }
+    impl Axis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Axis; 2] = [Axis::X, Axis::Y];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Axis::X => "X",
+                Axis::Y => "Y",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(Axis::X),
+                "Y" => Some(Axis::Y),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Axis {
+        fn default() -> Self {
+            Axis::Y
+        }
+    }
+    impl frap_rna::FromValue for Axis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Align`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Align {
+        /// "MIN"
+        Min,
+        /// "MAX"
+        Max,
+        /// "CENTER"
+        Center,
+        /// "NONE"
+        None,
+    }
+    impl Align {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Align; 4] = [Align::Min, Align::Max, Align::Center, Align::None];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Align::Min => "MIN",
+                Align::Max => "MAX",
+                Align::Center => "CENTER",
+                Align::None => "NONE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "MIN" => Some(Align::Min),
+                "MAX" => Some(Align::Max),
+                "CENTER" => Some(Align::Center),
+                "NONE" => Some(Align::None),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Align {
+        fn default() -> Self {
+            Align::Min
+        }
+    }
+    impl frap_rna::FromValue for Align {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Order`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Order {
+        /// "LARGE_TO_SMALL"
+        LargeToSmall,
+        /// "SMALL_TO_LARGE"
+        SmallToLarge,
+        /// "Fixed"
+        Fixed,
+    }
+    impl Order {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Order; 3] = [Order::LargeToSmall, Order::SmallToLarge, Order::Fixed];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Order::LargeToSmall => "LARGE_TO_SMALL",
+                Order::SmallToLarge => "SMALL_TO_LARGE",
+                Order::Fixed => "Fixed",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "LARGE_TO_SMALL" => Some(Order::LargeToSmall),
+                "SMALL_TO_LARGE" => Some(Order::SmallToLarge),
+                "Fixed" => Some(Order::Fixed),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Order {
+        fn default() -> Self {
+            Order::LargeToSmall
+        }
+    }
+    impl frap_rna::FromValue for Order {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.arrange_islands` (Arrange/Align Islands).
+#[derive(Debug, Clone)]
+pub struct ArrangeIslands {
+    /// Initial position to arrange islands from; default "BOUNDING_BOX": BOUNDING_BOX | UV_GRID | ACTIVE_UDIM | CURSOR [ANIMATABLE]
+    pub initial_position: Prop<arrange_islands::InitialPosition>,
+    /// Axis to arrange UV islands on; default "Y": X | Y [ANIMATABLE]
+    pub axis: Prop<arrange_islands::Axis>,
+    /// Location to align islands on; default "MIN": MIN | MAX | CENTER | NONE [ANIMATABLE]
+    pub align: Prop<arrange_islands::Align>,
+    /// Order of islands; default "LARGE_TO_SMALL": LARGE_TO_SMALL | SMALL_TO_LARGE | Fixed [ANIMATABLE]
+    pub order: Prop<arrange_islands::Order>,
+    /// Space between islands; default 0.05000000074505806 [ANIMATABLE]
+    pub margin: Prop<f32>,
+}
+impl OpProps for ArrangeIslands {
+    const IDNAME: &'static str = "uv.arrange_islands";
+    const BL_IDNAME: &'static str = "UV_OT_arrange_islands";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_ARRANGE_ISLANDS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArrangeIslands {
+            initial_position: a.prop(0, "initial_position"),
+            axis: a.prop(1, "axis"),
+            align: a.prop(2, "align"),
+            order: a.prop(3, "order"),
+            margin: a.prop(4, "margin"),
+        }
+    }
 }
 
 // ---------------------------------------------------------------- uv.average_islands_scale
@@ -109,6 +730,144 @@ impl OpProps for AverageIslandsScale {
         AverageIslandsScale {
             scale_uv: a.prop(0, "scale_uv"),
             shear: a.prop(1, "shear"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.copy_mirrored_faces
+/// Props of `uv.copy_mirrored_faces`, RNA order.
+pub static COPY_MIRRORED_FACES_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "mesh_axis", name: "Mesh Axis", description: "Mirror vertices based on mesh axis", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("POS_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "uv_axis", name: "UV Axis", description: "Axis to mirror UV coordinates", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "precision", name: "Precision", description: "Tolerance for finding vertex duplicates", kind: PropKind::Int { default: Defaults::Scalar(3), hard: (1, 16), soft: (1, 16) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_copy_mirrored_faces`
+pub static OPSPEC_UV_OT_COPY_MIRRORED_FACES: OperatorSpec = OperatorSpec {
+    idname: "uv.copy_mirrored_faces",
+    bl_idname: "UV_OT_copy_mirrored_faces",
+    label: "Copy Mirrored UV Coords",
+    description: "Copy mirror UV coordinates based on a mirrored mesh",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &COPY_MIRRORED_FACES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.copy_mirrored_faces`.
+pub mod copy_mirrored_faces {
+    /// `MeshAxis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum MeshAxis {
+        /// "POS_X"
+        PosX,
+        /// "POS_Y"
+        PosY,
+        /// "POS_Z"
+        PosZ,
+        /// "NEG_X"
+        NegX,
+        /// "NEG_Y"
+        NegY,
+        /// "NEG_Z"
+        NegZ,
+    }
+    impl MeshAxis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [MeshAxis; 6] = [MeshAxis::PosX, MeshAxis::PosY, MeshAxis::PosZ, MeshAxis::NegX, MeshAxis::NegY, MeshAxis::NegZ];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                MeshAxis::PosX => "POS_X",
+                MeshAxis::PosY => "POS_Y",
+                MeshAxis::PosZ => "POS_Z",
+                MeshAxis::NegX => "NEG_X",
+                MeshAxis::NegY => "NEG_Y",
+                MeshAxis::NegZ => "NEG_Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "POS_X" => Some(MeshAxis::PosX),
+                "POS_Y" => Some(MeshAxis::PosY),
+                "POS_Z" => Some(MeshAxis::PosZ),
+                "NEG_X" => Some(MeshAxis::NegX),
+                "NEG_Y" => Some(MeshAxis::NegY),
+                "NEG_Z" => Some(MeshAxis::NegZ),
+                _ => None,
+            }
+        }
+    }
+    impl Default for MeshAxis {
+        fn default() -> Self {
+            MeshAxis::PosX
+        }
+    }
+    impl frap_rna::FromValue for MeshAxis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `UvAxis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum UvAxis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+    }
+    impl UvAxis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [UvAxis; 2] = [UvAxis::X, UvAxis::Y];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                UvAxis::X => "X",
+                UvAxis::Y => "Y",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(UvAxis::X),
+                "Y" => Some(UvAxis::Y),
+                _ => None,
+            }
+        }
+    }
+    impl Default for UvAxis {
+        fn default() -> Self {
+            UvAxis::X
+        }
+    }
+    impl frap_rna::FromValue for UvAxis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.copy_mirrored_faces` (Copy Mirrored UV Coords).
+#[derive(Debug, Clone)]
+pub struct CopyMirroredFaces {
+    /// Mirror vertices based on mesh axis; default "POS_X": POS_X | POS_Y | POS_Z | NEG_X | NEG_Y | NEG_Z [ANIMATABLE]
+    pub mesh_axis: Prop<copy_mirrored_faces::MeshAxis>,
+    /// Axis to mirror UV coordinates; default "X": X | Y [ANIMATABLE]
+    pub uv_axis: Prop<copy_mirrored_faces::UvAxis>,
+    /// Tolerance for finding vertex duplicates; default 3 [ANIMATABLE]
+    pub precision: Prop<i32>,
+}
+impl OpProps for CopyMirroredFaces {
+    const IDNAME: &'static str = "uv.copy_mirrored_faces";
+    const BL_IDNAME: &'static str = "UV_OT_copy_mirrored_faces";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_COPY_MIRRORED_FACES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CopyMirroredFaces {
+            mesh_axis: a.prop(0, "mesh_axis"),
+            uv_axis: a.prop(1, "uv_axis"),
+            precision: a.prop(2, "precision"),
         }
     }
 }
@@ -163,9 +922,9 @@ impl OpProps for CubeProject {
 // ---------------------------------------------------------------- uv.cylinder_project
 /// Props of `uv.cylinder_project`, RNA order.
 pub static CYLINDER_PROJECT_PROPS: [PropDef; 8] = [
-    PropDef { identifier: "direction", name: "Direction", description: "Direction of the sphere or cylinder", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("VIEW_ON_EQUATOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "How to determine rotation around the pole", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("POLAR_ZX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "pole", name: "Pole", description: "How to handle faces at the poles", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("PINCH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "direction", name: "Direction", description: "Direction of the sphere or cylinder", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("VIEW_ON_EQUATOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "How to determine rotation around the pole", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("POLAR_ZX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "pole", name: "Pole", description: "How to handle faces at the poles", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("PINCH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "seam", name: "Preserve Seams", description: "Separate projections by islands isolated by seams", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "Radius of the sphere or cylinder", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 3.4028234663852886e38), soft: (9.999999747378752e-5, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "correct_aspect", name: "Correct Aspect", description: "Map UVs taking aspect ratio of the image associated with the material into account", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -344,10 +1103,160 @@ impl OpProps for CylinderProject {
     }
 }
 
+// ---------------------------------------------------------------- uv.export_layout
+/// Props of `uv.export_layout`, RNA order.
+pub static EXPORT_LAYOUT_PROPS: [PropDef; 8] = [
+    PropDef { identifier: "filepath", name: "filepath", description: "", kind: PropKind::String { default: "", max_bytes: 0 }, subtype: Subtype::FilePath, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
+    PropDef { identifier: "export_all", name: "All UVs", description: "Export all UVs in this mesh (not just visible ones)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "export_tiles", name: "Export Tiles", description: "Choose whether to export only the [0, 1] range, or all UV tiles", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Item("NONE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "modified", name: "Modified", description: "Exports UVs from the modified mesh", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mode", name: "Format", description: "File format to export the UV layout to", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Item("PNG"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "size", name: "Size", description: "Dimensions of the exported file", kind: PropKind::Int { default: Defaults::Array(&[1024, 1024]), hard: (8, 32768), soft: (8, 32768) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(2), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "opacity", name: "Fill Opacity", description: "Set amount of opacity for exported UV layout", kind: PropKind::Float { default: Defaults::Scalar(0.25), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "check_existing", name: "check_existing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `UV_OT_export_layout`
+pub static OPSPEC_UV_OT_EXPORT_LAYOUT: OperatorSpec = OperatorSpec {
+    idname: "uv.export_layout",
+    bl_idname: "UV_OT_export_layout",
+    label: "Export UV Layout",
+    description: "Export UV layout to file",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &EXPORT_LAYOUT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.export_layout`.
+pub mod export_layout {
+    /// `ExportTiles`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum ExportTiles {
+        /// "NONE"
+        None,
+        /// "UDIM"
+        Udim,
+        /// "UV"
+        Uv,
+    }
+    impl ExportTiles {
+        /// Every variant, in RNA item order.
+        pub const ALL: [ExportTiles; 3] = [ExportTiles::None, ExportTiles::Udim, ExportTiles::Uv];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                ExportTiles::None => "NONE",
+                ExportTiles::Udim => "UDIM",
+                ExportTiles::Uv => "UV",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "NONE" => Some(ExportTiles::None),
+                "UDIM" => Some(ExportTiles::Udim),
+                "UV" => Some(ExportTiles::Uv),
+                _ => None,
+            }
+        }
+    }
+    impl Default for ExportTiles {
+        fn default() -> Self {
+            ExportTiles::None
+        }
+    }
+    impl frap_rna::FromValue for ExportTiles {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Mode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Mode {
+        /// "SVG"
+        Svg,
+        /// "EPS"
+        Eps,
+        /// "PNG"
+        Png,
+    }
+    impl Mode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Mode; 3] = [Mode::Svg, Mode::Eps, Mode::Png];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Mode::Svg => "SVG",
+                Mode::Eps => "EPS",
+                Mode::Png => "PNG",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SVG" => Some(Mode::Svg),
+                "EPS" => Some(Mode::Eps),
+                "PNG" => Some(Mode::Png),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Mode {
+        fn default() -> Self {
+            Mode::Png
+        }
+    }
+    impl frap_rna::FromValue for Mode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.export_layout` (Export UV Layout).
+#[derive(Debug, Clone)]
+pub struct ExportLayout {
+    /// default "" [NEVER_NULL]
+    pub filepath: Prop<SmolStr>,
+    /// Export all UVs in this mesh (not just visible ones); default false [ANIMATABLE]
+    pub export_all: Prop<bool>,
+    /// Choose whether to export only the [0, 1] range, or all UV tiles; default "NONE": NONE | UDIM | UV [ANIMATABLE]
+    pub export_tiles: Prop<export_layout::ExportTiles>,
+    /// Exports UVs from the modified mesh; default false [ANIMATABLE]
+    pub modified: Prop<bool>,
+    /// File format to export the UV layout to; default "PNG": SVG | EPS | PNG [ANIMATABLE]
+    pub mode: Prop<export_layout::Mode>,
+    /// Dimensions of the exported file; INT [ANIMATABLE]
+    pub size: Prop<[i32; 2]>,
+    /// Set amount of opacity for exported UV layout; default 0.25 [ANIMATABLE]
+    pub opacity: Prop<f32>,
+    /// default true [HIDDEN, SKIP_PRESET]
+    pub check_existing: Prop<bool>,
+}
+impl OpProps for ExportLayout {
+    const IDNAME: &'static str = "uv.export_layout";
+    const BL_IDNAME: &'static str = "UV_OT_export_layout";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_EXPORT_LAYOUT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ExportLayout {
+            filepath: a.prop(0, "filepath"),
+            export_all: a.prop(1, "export_all"),
+            export_tiles: a.prop(2, "export_tiles"),
+            modified: a.prop(3, "modified"),
+            mode: a.prop(4, "mode"),
+            size: a.prop(5, "size"),
+            opacity: a.prop(6, "opacity"),
+            check_existing: a.prop(7, "check_existing"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.follow_active_quads
 /// Props of `uv.follow_active_quads`, RNA order.
 pub static FOLLOW_ACTIVE_QUADS_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "mode", name: "Edge Length Mode", description: "Method to space UV edge loops", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("LENGTH_AVERAGE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mode", name: "Edge Length Mode", description: "Method to space UV edge loops", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Item("LENGTH_AVERAGE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `UV_OT_follow_active_quads`
 pub static OPSPEC_UV_OT_FOLLOW_ACTIVE_QUADS: OperatorSpec = OperatorSpec {
@@ -424,10 +1333,45 @@ impl OpProps for FollowActiveQuads {
     }
 }
 
+// ---------------------------------------------------------------- uv.hide
+/// Props of `uv.hide`, RNA order.
+pub static HIDE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "unselected", name: "Unselected", description: "Hide unselected rather than selected", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_hide`
+pub static OPSPEC_UV_OT_HIDE: OperatorSpec = OperatorSpec {
+    idname: "uv.hide",
+    bl_idname: "UV_OT_hide",
+    label: "Hide Selected",
+    description: "Hide (un)selected UV vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &HIDE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.hide` (Hide Selected).
+#[derive(Debug, Clone)]
+pub struct Hide {
+    /// Hide unselected rather than selected; default false [ANIMATABLE]
+    pub unselected: Prop<bool>,
+}
+impl OpProps for Hide {
+    const IDNAME: &'static str = "uv.hide";
+    const BL_IDNAME: &'static str = "UV_OT_hide";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_HIDE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Hide {
+            unselected: a.prop(0, "unselected"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.lightmap_pack
 /// Props of `uv.lightmap_pack`, RNA order.
 pub static LIGHTMAP_PACK_PROPS: [PropDef; 5] = [
-    PropDef { identifier: "PREF_CONTEXT", name: "Selection", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("SEL_FACES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "PREF_CONTEXT", name: "Selection", description: "", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Item("SEL_FACES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "PREF_PACK_IN_ONE", name: "Share Texture Space", description: "Objects share texture space, map all objects into a single UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "PREF_NEW_UVLAYER", name: "New UV Map", description: "Create a new UV map for every mesh packed", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "PREF_BOX_DIV", name: "Pack Quality", description: "Quality of the packing. Higher values will be slower but waste less space", kind: PropKind::Int { default: Defaults::Scalar(12), hard: (1, 48), soft: (1, 48) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -551,19 +1495,188 @@ impl OpProps for MarkSeam {
     }
 }
 
+// ---------------------------------------------------------------- uv.minimize_stretch
+/// Props of `uv.minimize_stretch`, RNA order.
+pub static MINIMIZE_STRETCH_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "fill_holes", name: "Fill Holes", description: "Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "blend", name: "Blend", description: "Blend factor between stretch minimized and original", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "iterations", name: "Iterations", description: "Number of iterations to run, 0 is unlimited when run interactively", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_minimize_stretch`
+pub static OPSPEC_UV_OT_MINIMIZE_STRETCH: OperatorSpec = OperatorSpec {
+    idname: "uv.minimize_stretch",
+    bl_idname: "UV_OT_minimize_stretch",
+    label: "Minimize Stretch",
+    description: "Reduce UV stretching by relaxing angles",
+    options: OpOptions::BLOCKING.union(OpOptions::GRAB_CURSOR).union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MINIMIZE_STRETCH_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.minimize_stretch` (Minimize Stretch).
+#[derive(Debug, Clone)]
+pub struct MinimizeStretch {
+    /// Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry; default true [ANIMATABLE]
+    pub fill_holes: Prop<bool>,
+    /// Blend factor between stretch minimized and original; default 0 [ANIMATABLE]
+    pub blend: Prop<f32>,
+    /// Number of iterations to run, 0 is unlimited when run interactively; default 0 [ANIMATABLE]
+    pub iterations: Prop<i32>,
+}
+impl OpProps for MinimizeStretch {
+    const IDNAME: &'static str = "uv.minimize_stretch";
+    const BL_IDNAME: &'static str = "UV_OT_minimize_stretch";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_MINIMIZE_STRETCH
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MinimizeStretch {
+            fill_holes: a.prop(0, "fill_holes"),
+            blend: a.prop(1, "blend"),
+            iterations: a.prop(2, "iterations"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.move_on_axis
+/// Props of `uv.move_on_axis`, RNA order.
+pub static MOVE_ON_AXIS_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "type", name: "Type", description: "Move Type", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item("UDIM"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "axis", name: "Axis", description: "Axis to move UVs on", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "distance", name: "Distance", description: "Distance to move UVs", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_move_on_axis`
+pub static OPSPEC_UV_OT_MOVE_ON_AXIS: OperatorSpec = OperatorSpec {
+    idname: "uv.move_on_axis",
+    bl_idname: "UV_OT_move_on_axis",
+    label: "Move on Axis",
+    description: "Move UVs on an axis",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MOVE_ON_AXIS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.move_on_axis`.
+pub mod move_on_axis {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "DYNAMIC"
+        Dynamic,
+        /// "PIXEL"
+        Pixel,
+        /// "UDIM"
+        Udim,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 3] = [Type::Dynamic, Type::Pixel, Type::Udim];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Dynamic => "DYNAMIC",
+                Type::Pixel => "PIXEL",
+                Type::Udim => "UDIM",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "DYNAMIC" => Some(Type::Dynamic),
+                "PIXEL" => Some(Type::Pixel),
+                "UDIM" => Some(Type::Udim),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Udim
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Axis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Axis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+    }
+    impl Axis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Axis; 2] = [Axis::X, Axis::Y];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Axis::X => "X",
+                Axis::Y => "Y",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(Axis::X),
+                "Y" => Some(Axis::Y),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Axis {
+        fn default() -> Self {
+            Axis::X
+        }
+    }
+    impl frap_rna::FromValue for Axis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.move_on_axis` (Move on Axis).
+#[derive(Debug, Clone)]
+pub struct MoveOnAxis {
+    /// Move Type; default "UDIM": DYNAMIC | PIXEL | UDIM [ANIMATABLE]
+    pub r#type: Prop<move_on_axis::Type>,
+    /// Axis to move UVs on; default "X": X | Y [ANIMATABLE]
+    pub axis: Prop<move_on_axis::Axis>,
+    /// Distance to move UVs; default 1 [ANIMATABLE]
+    pub distance: Prop<i32>,
+}
+impl OpProps for MoveOnAxis {
+    const IDNAME: &'static str = "uv.move_on_axis";
+    const BL_IDNAME: &'static str = "UV_OT_move_on_axis";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_MOVE_ON_AXIS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MoveOnAxis {
+            r#type: a.prop(0, "type"),
+            axis: a.prop(1, "axis"),
+            distance: a.prop(2, "distance"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.pack_islands
 /// Props of `uv.pack_islands`, RNA order.
 pub static PACK_ISLANDS_PROPS: [PropDef; 10] = [
-    PropDef { identifier: "udim_source", name: "Pack to", description: "", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("CLOSEST_UDIM"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "udim_source", name: "Pack to", description: "", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("CLOSEST_UDIM"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "rotate", name: "Rotate", description: "Rotate islands to improve layout", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "rotate_method", name: "Rotation Method", description: "", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("ANY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "rotate_method", name: "Rotation Method", description: "", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Item("ANY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale islands to fill unit square", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "merge_overlap", name: "Merge Overlapping", description: "Overlapping islands stick together", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "margin_method", name: "Margin Method", description: "", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("SCALED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "margin_method", name: "Margin Method", description: "", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Item("SCALED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "margin", name: "Margin", description: "Space between islands", kind: PropKind::Float { default: Defaults::Scalar(0.0010000000474974513), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "pin", name: "Lock Pinned Islands", description: "Constrain islands containing any pinned UV's", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "pin_method", name: "Pin Method", description: "", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("LOCKED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "shape_method", name: "Shape Method", description: "", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("CONCAVE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "pin_method", name: "Pin Method", description: "", kind: PropKind::Enum { items: &enums::E22, default: EnumDefault::Item("LOCKED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "shape_method", name: "Shape Method", description: "", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Item("CONCAVE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `UV_OT_pack_islands`
 pub static OPSPEC_UV_OT_PACK_ISLANDS: OperatorSpec = OperatorSpec {
@@ -941,6 +2054,112 @@ impl OpProps for ProjectFromView {
     }
 }
 
+// ---------------------------------------------------------------- uv.randomize_uv_transform
+/// Props of `uv.randomize_uv_transform`, RNA order.
+pub static RANDOMIZE_UV_TRANSFORM_PROPS: [PropDef; 8] = [
+    PropDef { identifier: "random_seed", name: "Random Seed", description: "Seed value for the random generator", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 10000), soft: (0, 10000) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_loc", name: "Randomize Location", description: "Randomize the location values", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "loc", name: "Location", description: "Maximum distance the objects can spread over each axis", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0]), hard: (-100.0, 100.0), soft: (-100.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(2), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_rot", name: "Randomize Rotation", description: "Randomize the rotation value", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "rot", name: "Rotation", description: "Maximum rotation", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-6.2831854820251465, 6.2831854820251465), soft: (-6.2831854820251465, 6.2831854820251465), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_scale", name: "Randomize Scale", description: "Randomize the scale values", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "scale_even", name: "Scale Even", description: "Use the same scale value for both axes", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "scale", name: "Scale", description: "Maximum scale randomization over each axis", kind: PropKind::Float { default: Defaults::Array(&[1.0, 1.0]), hard: (-100.0, 100.0), soft: (-100.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(2), flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_randomize_uv_transform`
+pub static OPSPEC_UV_OT_RANDOMIZE_UV_TRANSFORM: OperatorSpec = OperatorSpec {
+    idname: "uv.randomize_uv_transform",
+    bl_idname: "UV_OT_randomize_uv_transform",
+    label: "Randomize",
+    description: "Randomize the UV island's location, rotation, and scale",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &RANDOMIZE_UV_TRANSFORM_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.randomize_uv_transform` (Randomize).
+#[derive(Debug, Clone)]
+pub struct RandomizeUvTransform {
+    /// Seed value for the random generator; default 0 [ANIMATABLE]
+    pub random_seed: Prop<i32>,
+    /// Randomize the location values; default true [ANIMATABLE]
+    pub use_loc: Prop<bool>,
+    /// Maximum distance the objects can spread over each axis; default [0.0, 0.0] [ANIMATABLE]
+    pub loc: Prop<[f32; 2]>,
+    /// Randomize the rotation value; default true [ANIMATABLE]
+    pub use_rot: Prop<bool>,
+    /// Maximum rotation; default 0 [ANIMATABLE]
+    pub rot: Prop<f32>,
+    /// Randomize the scale values; default true [ANIMATABLE]
+    pub use_scale: Prop<bool>,
+    /// Use the same scale value for both axes; default false [ANIMATABLE]
+    pub scale_even: Prop<bool>,
+    /// Maximum scale randomization over each axis; default [1.0, 1.0] [ANIMATABLE]
+    pub scale: Prop<[f32; 2]>,
+}
+impl OpProps for RandomizeUvTransform {
+    const IDNAME: &'static str = "uv.randomize_uv_transform";
+    const BL_IDNAME: &'static str = "UV_OT_randomize_uv_transform";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_RANDOMIZE_UV_TRANSFORM
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RandomizeUvTransform {
+            random_seed: a.prop(0, "random_seed"),
+            use_loc: a.prop(1, "use_loc"),
+            loc: a.prop(2, "loc"),
+            use_rot: a.prop(3, "use_rot"),
+            rot: a.prop(4, "rot"),
+            use_scale: a.prop(5, "use_scale"),
+            scale_even: a.prop(6, "scale_even"),
+            scale: a.prop(7, "scale"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.remove_doubles
+/// Props of `uv.remove_doubles`, RNA order.
+pub static REMOVE_DOUBLES_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "threshold", name: "Merge Distance", description: "Maximum distance between welded vertices", kind: PropKind::Float { default: Defaults::Scalar(0.019999999552965164), hard: (0.0, 10.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_unselected", name: "Unselected", description: "Merge selected to other unselected vertices", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_shared_vertex", name: "Shared Vertex", description: "Weld UVs based on shared vertices", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_remove_doubles`
+pub static OPSPEC_UV_OT_REMOVE_DOUBLES: OperatorSpec = OperatorSpec {
+    idname: "uv.remove_doubles",
+    bl_idname: "UV_OT_remove_doubles",
+    label: "Merge UVs by Distance",
+    description: "Selected UV vertices that are within a radius of each other are welded together",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &REMOVE_DOUBLES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.remove_doubles` (Merge UVs by Distance).
+#[derive(Debug, Clone)]
+pub struct RemoveDoubles {
+    /// Maximum distance between welded vertices; default 0.019999999552965164 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+    /// Merge selected to other unselected vertices; default false [ANIMATABLE]
+    pub use_unselected: Prop<bool>,
+    /// Weld UVs based on shared vertices; default false [ANIMATABLE]
+    pub use_shared_vertex: Prop<bool>,
+}
+impl OpProps for RemoveDoubles {
+    const IDNAME: &'static str = "uv.remove_doubles";
+    const BL_IDNAME: &'static str = "UV_OT_remove_doubles";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_REMOVE_DOUBLES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RemoveDoubles {
+            threshold: a.prop(0, "threshold"),
+            use_unselected: a.prop(1, "use_unselected"),
+            use_shared_vertex: a.prop(2, "use_shared_vertex"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.reset
 /// Props of `uv.reset`, RNA order.
 pub static RESET_PROPS: [PropDef; 0] = [
@@ -968,6 +2187,127 @@ impl OpProps for Reset {
     }
     fn from_args(a: &OpArgs) -> Self {
         Reset {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.reveal
+/// Props of `uv.reveal`, RNA order.
+pub static REVEAL_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "select", name: "Select", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_reveal`
+pub static OPSPEC_UV_OT_REVEAL: OperatorSpec = OperatorSpec {
+    idname: "uv.reveal",
+    bl_idname: "UV_OT_reveal",
+    label: "Reveal Hidden",
+    description: "Reveal all hidden UV vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &REVEAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.reveal` (Reveal Hidden).
+#[derive(Debug, Clone)]
+pub struct Reveal {
+    /// default true [ANIMATABLE]
+    pub select: Prop<bool>,
+}
+impl OpProps for Reveal {
+    const IDNAME: &'static str = "uv.reveal";
+    const BL_IDNAME: &'static str = "UV_OT_reveal";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_REVEAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Reveal {
+            select: a.prop(0, "select"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.rip
+/// Props of `uv.rip`, RNA order.
+pub static RIP_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "Always confirm operation when releasing button", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_accurate", name: "Accurate", description: "Use accurate transformation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "location", name: "Location", description: "Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-100.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(2), flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_rip`
+pub static OPSPEC_UV_OT_RIP: OperatorSpec = OperatorSpec {
+    idname: "uv.rip",
+    bl_idname: "UV_OT_rip",
+    label: "Rip UVs",
+    description: "Rip selected vertices or a selected region",
+    options: OpOptions::DEPENDS_ON_CURSOR.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &RIP_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.rip` (Rip UVs).
+#[derive(Debug, Clone)]
+pub struct Rip {
+    /// default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub mirror: Prop<bool>,
+    /// Always confirm operation when releasing button; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub release_confirm: Prop<bool>,
+    /// Use accurate transformation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub use_accurate: Prop<bool>,
+    /// Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds; default [0.0, 0.0] [ANIMATABLE]
+    pub location: Prop<[f32; 2]>,
+}
+impl OpProps for Rip {
+    const IDNAME: &'static str = "uv.rip";
+    const BL_IDNAME: &'static str = "UV_OT_rip";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_RIP
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Rip {
+            mirror: a.prop(0, "mirror"),
+            release_confirm: a.prop(1, "release_confirm"),
+            use_accurate: a.prop(2, "use_accurate"),
+            location: a.prop(3, "location"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.rip_move
+/// Props of `uv.rip_move`, RNA order.
+pub static RIP_MOVE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "UV_OT_rip", name: "Rip UVs", description: "Rip selected vertices or a selected region", kind: PropKind::Pointer { fixed_type: "UV_OT_rip", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+    PropDef { identifier: "TRANSFORM_OT_translate", name: "Move", description: "Move selected items", kind: PropKind::Pointer { fixed_type: "TRANSFORM_OT_translate", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+];
+/// `UV_OT_rip_move`
+pub static OPSPEC_UV_OT_RIP_MOVE: OperatorSpec = OperatorSpec {
+    idname: "uv.rip_move",
+    bl_idname: "UV_OT_rip_move",
+    label: "Rip Move UVs",
+    description: "Unstitch UVs and move the result",
+    options: OpOptions::MACRO.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &RIP_MOVE_PROPS,
+    macro_steps: &["UV_OT_rip", "TRANSFORM_OT_translate"],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.rip_move` (Rip Move UVs).
+#[derive(Debug, Clone)]
+pub struct RipMove {
+    /// Macro step `UV_OT_rip`: its arguments.
+    pub UV_OT_rip: OpArgs,
+    /// Macro step `TRANSFORM_OT_translate`: its arguments.
+    pub TRANSFORM_OT_translate: OpArgs,
+}
+impl OpProps for RipMove {
+    const IDNAME: &'static str = "uv.rip_move";
+    const BL_IDNAME: &'static str = "UV_OT_rip_move";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_RIP_MOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RipMove {
+            UV_OT_rip: a.nested.get("UV_OT_rip").cloned().unwrap_or_default(),
+            TRANSFORM_OT_translate: a.nested.get("TRANSFORM_OT_translate").cloned().unwrap_or_default(),
         }
     }
 }
@@ -1011,12 +2351,663 @@ impl OpProps for SeamsFromIslands {
     }
 }
 
+// ---------------------------------------------------------------- uv.select_all
+/// Props of `uv.select_all`, RNA order.
+pub static SELECT_ALL_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `UV_OT_select_all`
+pub static OPSPEC_UV_OT_SELECT_ALL: OperatorSpec = OperatorSpec {
+    idname: "uv.select_all",
+    bl_idname: "UV_OT_select_all",
+    label: "(De)select All",
+    description: "Change selection of all UV vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_ALL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.select_all`.
+pub mod select_all {
+    /// `Action`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Action {
+        /// "TOGGLE"
+        Toggle,
+        /// "SELECT"
+        Select,
+        /// "DESELECT"
+        Deselect,
+        /// "INVERT"
+        Invert,
+    }
+    impl Action {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Action; 4] = [Action::Toggle, Action::Select, Action::Deselect, Action::Invert];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Action::Toggle => "TOGGLE",
+                Action::Select => "SELECT",
+                Action::Deselect => "DESELECT",
+                Action::Invert => "INVERT",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "TOGGLE" => Some(Action::Toggle),
+                "SELECT" => Some(Action::Select),
+                "DESELECT" => Some(Action::Deselect),
+                "INVERT" => Some(Action::Invert),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Action {
+        fn default() -> Self {
+            Action::Toggle
+        }
+    }
+    impl frap_rna::FromValue for Action {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.select_all` ((De)select All).
+#[derive(Debug, Clone)]
+pub struct SelectAll {
+    /// Selection action to execute; default "TOGGLE": TOGGLE | SELECT | DESELECT | INVERT [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub action: Prop<select_all::Action>,
+}
+impl OpProps for SelectAll {
+    const IDNAME: &'static str = "uv.select_all";
+    const BL_IDNAME: &'static str = "UV_OT_select_all";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_ALL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectAll {
+            action: a.prop(0, "action"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_by_winding
+/// Props of `uv.select_by_winding`, RNA order.
+pub static SELECT_BY_WINDING_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "winding", name: "Winding", description: "Select faces with positive or negative winding", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("NEGATIVE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend selection rather than clearing the existing selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_select_by_winding`
+pub static OPSPEC_UV_OT_SELECT_BY_WINDING: OperatorSpec = OperatorSpec {
+    idname: "uv.select_by_winding",
+    bl_idname: "UV_OT_select_by_winding",
+    label: "Select by Winding",
+    description: "Select UV faces by their winding",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_BY_WINDING_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.select_by_winding`.
+pub mod select_by_winding {
+    /// `Winding`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Winding {
+        /// "POSITIVE"
+        Positive,
+        /// "NEGATIVE"
+        Negative,
+    }
+    impl Winding {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Winding; 2] = [Winding::Positive, Winding::Negative];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Winding::Positive => "POSITIVE",
+                Winding::Negative => "NEGATIVE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "POSITIVE" => Some(Winding::Positive),
+                "NEGATIVE" => Some(Winding::Negative),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Winding {
+        fn default() -> Self {
+            Winding::Negative
+        }
+    }
+    impl frap_rna::FromValue for Winding {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.select_by_winding` (Select by Winding).
+#[derive(Debug, Clone)]
+pub struct SelectByWinding {
+    /// Select faces with positive or negative winding; default "NEGATIVE": POSITIVE | NEGATIVE [ANIMATABLE]
+    pub winding: Prop<select_by_winding::Winding>,
+    /// Extend selection rather than clearing the existing selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for SelectByWinding {
+    const IDNAME: &'static str = "uv.select_by_winding";
+    const BL_IDNAME: &'static str = "UV_OT_select_by_winding";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_BY_WINDING
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectByWinding {
+            winding: a.prop(0, "winding"),
+            extend: a.prop(1, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_less
+/// Props of `uv.select_less`, RNA order.
+pub static SELECT_LESS_PROPS: [PropDef; 0] = [
+];
+/// `UV_OT_select_less`
+pub static OPSPEC_UV_OT_SELECT_LESS: OperatorSpec = OperatorSpec {
+    idname: "uv.select_less",
+    bl_idname: "UV_OT_select_less",
+    label: "Select Less",
+    description: "Deselect UV vertices at the boundary of each selection region",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_LESS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.select_less` (Select Less).
+#[derive(Debug, Clone)]
+pub struct SelectLess {
+}
+impl OpProps for SelectLess {
+    const IDNAME: &'static str = "uv.select_less";
+    const BL_IDNAME: &'static str = "UV_OT_select_less";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_LESS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectLess {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_linked
+/// Props of `uv.select_linked`, RNA order.
+pub static SELECT_LINKED_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit selection when selecting linked UVs", kind: PropKind::Enum { items: &enums::E26, default: EnumDefault::Flags(&[]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+];
+/// `UV_OT_select_linked`
+pub static OPSPEC_UV_OT_SELECT_LINKED: OperatorSpec = OperatorSpec {
+    idname: "uv.select_linked",
+    bl_idname: "UV_OT_select_linked",
+    label: "Select Linked",
+    description: "Select all UV vertices linked to the active UV map",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_LINKED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.select_linked` (Select Linked).
+#[derive(Debug, Clone)]
+pub struct SelectLinked {
+    /// Delimit selection when selecting linked UVs; default [] [ENUM_FLAG, ANIMATABLE]
+    pub delimit: Prop<BTreeSet<SmolStr>>,
+}
+impl OpProps for SelectLinked {
+    const IDNAME: &'static str = "uv.select_linked";
+    const BL_IDNAME: &'static str = "UV_OT_select_linked";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_LINKED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectLinked {
+            delimit: a.prop(0, "delimit"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_mode
+/// Props of `uv.select_mode`, RNA order.
+pub static SELECT_MODE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E27, default: EnumDefault::Item("VERTEX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `UV_OT_select_mode`
+pub static OPSPEC_UV_OT_SELECT_MODE: OperatorSpec = OperatorSpec {
+    idname: "uv.select_mode",
+    bl_idname: "UV_OT_select_mode",
+    label: "UV Select Mode",
+    description: "Change UV selection mode",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_MODE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.select_mode`.
+pub mod select_mode {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "VERTEX"
+        Vertex,
+        /// "EDGE"
+        Edge,
+        /// "FACE"
+        Face,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 3] = [Type::Vertex, Type::Edge, Type::Face];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Vertex => "VERTEX",
+                Type::Edge => "EDGE",
+                Type::Face => "FACE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "VERTEX" => Some(Type::Vertex),
+                "EDGE" => Some(Type::Edge),
+                "FACE" => Some(Type::Face),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Vertex
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.select_mode` (UV Select Mode).
+#[derive(Debug, Clone)]
+pub struct SelectMode {
+    /// default "VERTEX": VERTEX | EDGE | FACE [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub r#type: Prop<select_mode::Type>,
+}
+impl OpProps for SelectMode {
+    const IDNAME: &'static str = "uv.select_mode";
+    const BL_IDNAME: &'static str = "UV_OT_select_mode";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_MODE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectMode {
+            r#type: a.prop(0, "type"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_more
+/// Props of `uv.select_more`, RNA order.
+pub static SELECT_MORE_PROPS: [PropDef; 0] = [
+];
+/// `UV_OT_select_more`
+pub static OPSPEC_UV_OT_SELECT_MORE: OperatorSpec = OperatorSpec {
+    idname: "uv.select_more",
+    bl_idname: "UV_OT_select_more",
+    label: "Select More",
+    description: "Select more UV vertices connected to initial selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_MORE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.select_more` (Select More).
+#[derive(Debug, Clone)]
+pub struct SelectMore {
+}
+impl OpProps for SelectMore {
+    const IDNAME: &'static str = "uv.select_more";
+    const BL_IDNAME: &'static str = "UV_OT_select_more";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_MORE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectMore {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_overlap
+/// Props of `uv.select_overlap`, RNA order.
+pub static SELECT_OVERLAP_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "extend", name: "Extend", description: "Extend selection rather than clearing the existing selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_select_overlap`
+pub static OPSPEC_UV_OT_SELECT_OVERLAP: OperatorSpec = OperatorSpec {
+    idname: "uv.select_overlap",
+    bl_idname: "UV_OT_select_overlap",
+    label: "Select Overlap",
+    description: "Select all UV faces which overlap each other",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_OVERLAP_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.select_overlap` (Select Overlap).
+#[derive(Debug, Clone)]
+pub struct SelectOverlap {
+    /// Extend selection rather than clearing the existing selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for SelectOverlap {
+    const IDNAME: &'static str = "uv.select_overlap";
+    const BL_IDNAME: &'static str = "UV_OT_select_overlap";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_OVERLAP
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectOverlap {
+            extend: a.prop(0, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_pinned
+/// Props of `uv.select_pinned`, RNA order.
+pub static SELECT_PINNED_PROPS: [PropDef; 0] = [
+];
+/// `UV_OT_select_pinned`
+pub static OPSPEC_UV_OT_SELECT_PINNED: OperatorSpec = OperatorSpec {
+    idname: "uv.select_pinned",
+    bl_idname: "UV_OT_select_pinned",
+    label: "Selected Pinned",
+    description: "Select all pinned UV vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_PINNED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.select_pinned` (Selected Pinned).
+#[derive(Debug, Clone)]
+pub struct SelectPinned {
+}
+impl OpProps for SelectPinned {
+    const IDNAME: &'static str = "uv.select_pinned";
+    const BL_IDNAME: &'static str = "UV_OT_select_pinned";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_PINNED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectPinned {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_similar
+/// Props of `uv.select_similar`, RNA order.
+pub static SELECT_SIMILAR_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E28, default: EnumDefault::Item("PIN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "compare", name: "Compare", description: "", kind: PropKind::Enum { items: &enums::E29, default: EnumDefault::Item("EQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_select_similar`
+pub static OPSPEC_UV_OT_SELECT_SIMILAR: OperatorSpec = OperatorSpec {
+    idname: "uv.select_similar",
+    bl_idname: "UV_OT_select_similar",
+    label: "Select Similar",
+    description: "Select similar UVs by property types",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_SIMILAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.select_similar`.
+pub mod select_similar {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "PIN"
+        Pin,
+        /// "LENGTH"
+        Length,
+        /// "LENGTH_3D"
+        Length3d,
+        /// "AREA"
+        Area,
+        /// "AREA_3D"
+        Area3d,
+        /// "MATERIAL"
+        Material,
+        /// "OBJECT"
+        Object,
+        /// "SIDES"
+        Sides,
+        /// "WINDING"
+        Winding,
+        /// "FACE"
+        Face,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 10] = [Type::Pin, Type::Length, Type::Length3d, Type::Area, Type::Area3d, Type::Material, Type::Object, Type::Sides, Type::Winding, Type::Face];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Pin => "PIN",
+                Type::Length => "LENGTH",
+                Type::Length3d => "LENGTH_3D",
+                Type::Area => "AREA",
+                Type::Area3d => "AREA_3D",
+                Type::Material => "MATERIAL",
+                Type::Object => "OBJECT",
+                Type::Sides => "SIDES",
+                Type::Winding => "WINDING",
+                Type::Face => "FACE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "PIN" => Some(Type::Pin),
+                "LENGTH" => Some(Type::Length),
+                "LENGTH_3D" => Some(Type::Length3d),
+                "AREA" => Some(Type::Area),
+                "AREA_3D" => Some(Type::Area3d),
+                "MATERIAL" => Some(Type::Material),
+                "OBJECT" => Some(Type::Object),
+                "SIDES" => Some(Type::Sides),
+                "WINDING" => Some(Type::Winding),
+                "FACE" => Some(Type::Face),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Pin
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Compare`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Compare {
+        /// "EQUAL"
+        Equal,
+        /// "GREATER"
+        Greater,
+        /// "LESS"
+        Less,
+    }
+    impl Compare {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Compare; 3] = [Compare::Equal, Compare::Greater, Compare::Less];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Compare::Equal => "EQUAL",
+                Compare::Greater => "GREATER",
+                Compare::Less => "LESS",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "EQUAL" => Some(Compare::Equal),
+                "GREATER" => Some(Compare::Greater),
+                "LESS" => Some(Compare::Less),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Compare {
+        fn default() -> Self {
+            Compare::Equal
+        }
+    }
+    impl frap_rna::FromValue for Compare {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.select_similar` (Select Similar).
+#[derive(Debug, Clone)]
+pub struct SelectSimilar {
+    /// default "PIN": PIN | LENGTH | LENGTH_3D | AREA | AREA_3D | MATERIAL | OBJECT | SIDES | … [ANIMATABLE]
+    pub r#type: Prop<select_similar::Type>,
+    /// default "EQUAL": EQUAL | GREATER | LESS [ANIMATABLE]
+    pub compare: Prop<select_similar::Compare>,
+    /// default 0 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+}
+impl OpProps for SelectSimilar {
+    const IDNAME: &'static str = "uv.select_similar";
+    const BL_IDNAME: &'static str = "UV_OT_select_similar";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_SIMILAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectSimilar {
+            r#type: a.prop(0, "type"),
+            compare: a.prop(1, "compare"),
+            threshold: a.prop(2, "threshold"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.select_split
+/// Props of `uv.select_split`, RNA order.
+pub static SELECT_SPLIT_PROPS: [PropDef; 0] = [
+];
+/// `UV_OT_select_split`
+pub static OPSPEC_UV_OT_SELECT_SPLIT: OperatorSpec = OperatorSpec {
+    idname: "uv.select_split",
+    bl_idname: "UV_OT_select_split",
+    label: "Select Split",
+    description: "Select only entirely selected faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_SPLIT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.select_split` (Select Split).
+#[derive(Debug, Clone)]
+pub struct SelectSplit {
+}
+impl OpProps for SelectSplit {
+    const IDNAME: &'static str = "uv.select_split";
+    const BL_IDNAME: &'static str = "UV_OT_select_split";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SELECT_SPLIT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectSplit {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.shortest_path_select
+/// Props of `uv.shortest_path_select`, RNA order.
+pub static SHORTEST_PATH_SELECT_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "use_face_step", name: "Face Stepping", description: "Traverse connected faces (includes diagonals and edge-rings)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_topology_distance", name: "Topology Distance", description: "Find the minimum number of steps, ignoring spatial distance", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_fill", name: "Fill Region", description: "Select all paths between the source/destination elements", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "skip", name: "Deselected", description: "Number of deselected elements in the repetitive sequence", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "nth", name: "Selected", description: "Number of selected elements in the repetitive sequence", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 2147483647), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "offset", name: "Offset", description: "Offset from the starting point", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-100, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_shortest_path_select`
+pub static OPSPEC_UV_OT_SHORTEST_PATH_SELECT: OperatorSpec = OperatorSpec {
+    idname: "uv.shortest_path_select",
+    bl_idname: "UV_OT_shortest_path_select",
+    label: "Select Shortest Path",
+    description: "Select shortest path between two vertices/edges/faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHORTEST_PATH_SELECT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.shortest_path_select` (Select Shortest Path).
+#[derive(Debug, Clone)]
+pub struct ShortestPathSelect {
+    /// Traverse connected faces (includes diagonals and edge-rings); default false [ANIMATABLE]
+    pub use_face_step: Prop<bool>,
+    /// Find the minimum number of steps, ignoring spatial distance; default false [ANIMATABLE]
+    pub use_topology_distance: Prop<bool>,
+    /// Select all paths between the source/destination elements; default false [ANIMATABLE]
+    pub use_fill: Prop<bool>,
+    /// Number of deselected elements in the repetitive sequence; default 0 [ANIMATABLE]
+    pub skip: Prop<i32>,
+    /// Number of selected elements in the repetitive sequence; default 1 [ANIMATABLE]
+    pub nth: Prop<i32>,
+    /// Offset from the starting point; default 0 [ANIMATABLE]
+    pub offset: Prop<i32>,
+}
+impl OpProps for ShortestPathSelect {
+    const IDNAME: &'static str = "uv.shortest_path_select";
+    const BL_IDNAME: &'static str = "UV_OT_shortest_path_select";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SHORTEST_PATH_SELECT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShortestPathSelect {
+            use_face_step: a.prop(0, "use_face_step"),
+            use_topology_distance: a.prop(1, "use_topology_distance"),
+            use_fill: a.prop(2, "use_fill"),
+            skip: a.prop(3, "skip"),
+            nth: a.prop(4, "nth"),
+            offset: a.prop(5, "offset"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.smart_project
 /// Props of `uv.smart_project`, RNA order.
 pub static SMART_PROJECT_PROPS: [PropDef; 7] = [
     PropDef { identifier: "angle_limit", name: "Angle Limit", description: "Lower for more projection groups, higher for less distortion", kind: PropKind::Float { default: Defaults::Scalar(1.1519173383712769), hard: (0.0, 1.5707963705062866), soft: (0.0, 1.5533430576324463), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "margin_method", name: "Margin Method", description: "", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("SCALED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "rotate_method", name: "Rotation Method", description: "", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("AXIS_ALIGNED_Y"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "margin_method", name: "Margin Method", description: "", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Item("SCALED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "rotate_method", name: "Rotation Method", description: "", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("AXIS_ALIGNED_Y"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "island_margin", name: "Island Margin", description: "Margin to reduce bleed from adjacent islands", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "area_weight", name: "Area Weight", description: "Weight projection's vector by faces with larger areas", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "correct_aspect", name: "Correct Aspect", description: "Map UVs taking aspect ratio of the image associated with the material into account", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -1157,12 +3148,176 @@ impl OpProps for SmartProject {
     }
 }
 
+// ---------------------------------------------------------------- uv.snap_cursor
+/// Props of `uv.snap_cursor`, RNA order.
+pub static SNAP_CURSOR_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "target", name: "Target", description: "Target to snap the selected UVs to", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("PIXELS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_snap_cursor`
+pub static OPSPEC_UV_OT_SNAP_CURSOR: OperatorSpec = OperatorSpec {
+    idname: "uv.snap_cursor",
+    bl_idname: "UV_OT_snap_cursor",
+    label: "Snap Cursor",
+    description: "Snap cursor to target type",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SNAP_CURSOR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.snap_cursor`.
+pub mod snap_cursor {
+    /// `Target`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Target {
+        /// "PIXELS"
+        Pixels,
+        /// "SELECTED"
+        Selected,
+        /// "ORIGIN"
+        Origin,
+    }
+    impl Target {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Target; 3] = [Target::Pixels, Target::Selected, Target::Origin];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Target::Pixels => "PIXELS",
+                Target::Selected => "SELECTED",
+                Target::Origin => "ORIGIN",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "PIXELS" => Some(Target::Pixels),
+                "SELECTED" => Some(Target::Selected),
+                "ORIGIN" => Some(Target::Origin),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Target {
+        fn default() -> Self {
+            Target::Pixels
+        }
+    }
+    impl frap_rna::FromValue for Target {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.snap_cursor` (Snap Cursor).
+#[derive(Debug, Clone)]
+pub struct SnapCursor {
+    /// Target to snap the selected UVs to; default "PIXELS": PIXELS | SELECTED | ORIGIN [ANIMATABLE]
+    pub target: Prop<snap_cursor::Target>,
+}
+impl OpProps for SnapCursor {
+    const IDNAME: &'static str = "uv.snap_cursor";
+    const BL_IDNAME: &'static str = "UV_OT_snap_cursor";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SNAP_CURSOR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SnapCursor {
+            target: a.prop(0, "target"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.snap_selected
+/// Props of `uv.snap_selected`, RNA order.
+pub static SNAP_SELECTED_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "target", name: "Target", description: "Target to snap the selected UVs to", kind: PropKind::Enum { items: &enums::E32, default: EnumDefault::Item("PIXELS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `UV_OT_snap_selected`
+pub static OPSPEC_UV_OT_SNAP_SELECTED: OperatorSpec = OperatorSpec {
+    idname: "uv.snap_selected",
+    bl_idname: "UV_OT_snap_selected",
+    label: "Snap Selection",
+    description: "Snap selected UV vertices to target type",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SNAP_SELECTED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.snap_selected`.
+pub mod snap_selected {
+    /// `Target`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Target {
+        /// "PIXELS"
+        Pixels,
+        /// "CURSOR"
+        Cursor,
+        /// "CURSOR_OFFSET"
+        CursorOffset,
+        /// "ADJACENT_UNSELECTED"
+        AdjacentUnselected,
+    }
+    impl Target {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Target; 4] = [Target::Pixels, Target::Cursor, Target::CursorOffset, Target::AdjacentUnselected];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Target::Pixels => "PIXELS",
+                Target::Cursor => "CURSOR",
+                Target::CursorOffset => "CURSOR_OFFSET",
+                Target::AdjacentUnselected => "ADJACENT_UNSELECTED",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "PIXELS" => Some(Target::Pixels),
+                "CURSOR" => Some(Target::Cursor),
+                "CURSOR_OFFSET" => Some(Target::CursorOffset),
+                "ADJACENT_UNSELECTED" => Some(Target::AdjacentUnselected),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Target {
+        fn default() -> Self {
+            Target::Pixels
+        }
+    }
+    impl frap_rna::FromValue for Target {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.snap_selected` (Snap Selection).
+#[derive(Debug, Clone)]
+pub struct SnapSelected {
+    /// Target to snap the selected UVs to; default "PIXELS": PIXELS | CURSOR | CURSOR_OFFSET | ADJACENT_UNSELECTED [ANIMATABLE]
+    pub target: Prop<snap_selected::Target>,
+}
+impl OpProps for SnapSelected {
+    const IDNAME: &'static str = "uv.snap_selected";
+    const BL_IDNAME: &'static str = "UV_OT_snap_selected";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_SNAP_SELECTED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SnapSelected {
+            target: a.prop(0, "target"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.sphere_project
 /// Props of `uv.sphere_project`, RNA order.
 pub static SPHERE_PROJECT_PROPS: [PropDef; 7] = [
-    PropDef { identifier: "direction", name: "Direction", description: "Direction of the sphere or cylinder", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("VIEW_ON_EQUATOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "How to determine rotation around the pole", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("POLAR_ZX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "pole", name: "Pole", description: "How to handle faces at the poles", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("PINCH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "direction", name: "Direction", description: "Direction of the sphere or cylinder", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("VIEW_ON_EQUATOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "How to determine rotation around the pole", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("POLAR_ZX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "pole", name: "Pole", description: "How to handle faces at the poles", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("PINCH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "seam", name: "Preserve Seams", description: "Separate projections by islands isolated by seams", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "correct_aspect", name: "Correct Aspect", description: "Map UVs taking aspect ratio of the image associated with the material into account", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "clip_to_bounds", name: "Clip to Bounds", description: "Clip UV coordinates to bounds after unwrapping", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -1337,15 +3492,169 @@ impl OpProps for SphereProject {
     }
 }
 
+// ---------------------------------------------------------------- uv.stitch
+/// Props of `uv.stitch`, RNA order.
+pub static STITCH_PROPS: [PropDef; 11] = [
+    PropDef { identifier: "use_limit", name: "Use Limit", description: "Stitch UVs within a specified limit distance", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "snap_islands", name: "Snap Islands", description: "Snap islands together (on edge stitch mode, rotates the islands too)", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "limit", name: "Limit", description: "Limit distance in normalized coordinates", kind: PropKind::Float { default: Defaults::Scalar(0.009999999776482582), hard: (0.0, 3.4028234663852886e38), soft: (0.0, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "static_island", name: "Static Island", description: "Island that stays in place when stitching islands", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "active_object_index", name: "Active Object", description: "Index of the active object", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "midpoint_snap", name: "Snap at Midpoint", description: "UVs are stitched at midpoint instead of at static island", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "clear_seams", name: "Clear Seams", description: "Clear seams of stitched edges", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mode", name: "Operation Mode", description: "Use vertex or edge stitching", kind: PropKind::Enum { items: &enums::E33, default: EnumDefault::Item("VERTEX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "stored_mode", name: "Stored Operation Mode", description: "Use vertex or edge stitching", kind: PropKind::Enum { items: &enums::E33, default: EnumDefault::Item("VERTEX"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "selection", name: "Selection", description: "", kind: PropKind::Collection { item_type: "SelectedUvElement", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::HIDDEN).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "objects_selection_count", name: "Objects Selection Count", description: "", kind: PropKind::Int { default: Defaults::Array(&[0, 0, 0, 0, 0, 0]), hard: (0, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(6), flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `UV_OT_stitch`
+pub static OPSPEC_UV_OT_STITCH: OperatorSpec = OperatorSpec {
+    idname: "uv.stitch",
+    bl_idname: "UV_OT_stitch",
+    label: "Stitch",
+    description: "Stitch selected UV vertices by proximity",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &STITCH_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `uv.stitch`.
+pub mod stitch {
+    /// `Mode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Mode {
+        /// "VERTEX"
+        Vertex,
+        /// "EDGE"
+        Edge,
+    }
+    impl Mode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Mode; 2] = [Mode::Vertex, Mode::Edge];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Mode::Vertex => "VERTEX",
+                Mode::Edge => "EDGE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "VERTEX" => Some(Mode::Vertex),
+                "EDGE" => Some(Mode::Edge),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Mode {
+        fn default() -> Self {
+            Mode::Vertex
+        }
+    }
+    impl frap_rna::FromValue for Mode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `StoredMode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum StoredMode {
+        /// "VERTEX"
+        Vertex,
+        /// "EDGE"
+        Edge,
+    }
+    impl StoredMode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [StoredMode; 2] = [StoredMode::Vertex, StoredMode::Edge];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                StoredMode::Vertex => "VERTEX",
+                StoredMode::Edge => "EDGE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "VERTEX" => Some(StoredMode::Vertex),
+                "EDGE" => Some(StoredMode::Edge),
+                _ => None,
+            }
+        }
+    }
+    impl Default for StoredMode {
+        fn default() -> Self {
+            StoredMode::Vertex
+        }
+    }
+    impl frap_rna::FromValue for StoredMode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `uv.stitch` (Stitch).
+#[derive(Debug, Clone)]
+pub struct Stitch {
+    /// Stitch UVs within a specified limit distance; default false [ANIMATABLE]
+    pub use_limit: Prop<bool>,
+    /// Snap islands together (on edge stitch mode, rotates the islands too); default true [ANIMATABLE]
+    pub snap_islands: Prop<bool>,
+    /// Limit distance in normalized coordinates; default 0.009999999776482582 [ANIMATABLE]
+    pub limit: Prop<f32>,
+    /// Island that stays in place when stitching islands; default 0 [ANIMATABLE]
+    pub static_island: Prop<i32>,
+    /// Index of the active object; default 0 [ANIMATABLE]
+    pub active_object_index: Prop<i32>,
+    /// UVs are stitched at midpoint instead of at static island; default false [ANIMATABLE]
+    pub midpoint_snap: Prop<bool>,
+    /// Clear seams of stitched edges; default true [ANIMATABLE]
+    pub clear_seams: Prop<bool>,
+    /// Use vertex or edge stitching; default "VERTEX": VERTEX | EDGE [ANIMATABLE]
+    pub mode: Prop<stitch::Mode>,
+    /// Use vertex or edge stitching; default "VERTEX": VERTEX | EDGE [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub stored_mode: Prop<stitch::StoredMode>,
+    /// COLLECTION [READONLY, HIDDEN, SKIP_PRESET]
+    pub selection: Prop<Value>,
+    /// INT [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub objects_selection_count: Prop<[i32; 6]>,
+}
+impl OpProps for Stitch {
+    const IDNAME: &'static str = "uv.stitch";
+    const BL_IDNAME: &'static str = "UV_OT_stitch";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_STITCH
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Stitch {
+            use_limit: a.prop(0, "use_limit"),
+            snap_islands: a.prop(1, "snap_islands"),
+            limit: a.prop(2, "limit"),
+            static_island: a.prop(3, "static_island"),
+            active_object_index: a.prop(4, "active_object_index"),
+            midpoint_snap: a.prop(5, "midpoint_snap"),
+            clear_seams: a.prop(6, "clear_seams"),
+            mode: a.prop(7, "mode"),
+            stored_mode: a.prop(8, "stored_mode"),
+            selection: a.prop(9, "selection"),
+            objects_selection_count: a.prop(10, "objects_selection_count"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- uv.unwrap
 /// Props of `uv.unwrap`, RNA order.
 pub static UNWRAP_PROPS: [PropDef; 12] = [
-    PropDef { identifier: "method", name: "Method", description: "Unwrapping method (Angle Based usually gives better results than Conformal, while being somewhat slower)", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("CONFORMAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "method", name: "Method", description: "Unwrapping method (Angle Based usually gives better results than Conformal, while being somewhat slower)", kind: PropKind::Enum { items: &enums::E34, default: EnumDefault::Item("CONFORMAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "fill_holes", name: "Fill Holes", description: "Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "correct_aspect", name: "Correct Aspect", description: "Map UVs taking aspect ratio of the image associated with the material into account", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_subsurf_data", name: "Use Subdivision Surface", description: "Map UVs taking vertex position after Subdivision Surface modifier has been applied", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_original_bounds", name: "Original Bounds", description: "Unwrap islands into their original bounds, instead of re-packing", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "margin_method", name: "Margin Method", description: "", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("SCALED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "margin_method", name: "Margin Method", description: "", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Item("SCALED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "margin", name: "Margin", description: "Space between islands", kind: PropKind::Float { default: Defaults::Scalar(0.0010000000474974513), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "no_flip", name: "No Flip", description: "Prevent flipping UV's, flipping may lower distortion depending on the position of pins", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "iterations", name: "Iterations", description: "Number of iterations when \"Minimum Stretch\" method is used", kind: PropKind::Int { default: Defaults::Scalar(10), hard: (0, 10000), soft: (1, 30) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -1499,6 +3808,37 @@ impl OpProps for Unwrap {
             use_weights: a.prop(9, "use_weights"),
             weight_group: a.prop(10, "weight_group"),
             weight_factor: a.prop(11, "weight_factor"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- uv.weld
+/// Props of `uv.weld`, RNA order.
+pub static WELD_PROPS: [PropDef; 0] = [
+];
+/// `UV_OT_weld`
+pub static OPSPEC_UV_OT_WELD: OperatorSpec = OperatorSpec {
+    idname: "uv.weld",
+    bl_idname: "UV_OT_weld",
+    label: "Weld",
+    description: "Weld selected UV vertices together",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &WELD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `uv.weld` (Weld).
+#[derive(Debug, Clone)]
+pub struct Weld {
+}
+impl OpProps for Weld {
+    const IDNAME: &'static str = "uv.weld";
+    const BL_IDNAME: &'static str = "UV_OT_weld";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_UV_OT_WELD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Weld {
         }
     }
 }

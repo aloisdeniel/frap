@@ -7,6 +7,8 @@
 //! declares it as a submodule of one of these files.
 #![deny(unsafe_code)]
 
+/// k-DOP BVH (`BLI_kdopbvh`; M8 W0 contract, WP 8.5).
+pub mod bvh;
 pub mod kdtree;
 /// MikkTSpace tangents (M3, WP 3.7; stub created by M3 W0).
 pub mod mikktspace;

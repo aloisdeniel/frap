@@ -42,7 +42,7 @@ source: crates/frap-schema/tests/snapshots.rs
   "anim.keyframe_insert_button | planned OUT | poll NNNNN/YYYYY | all",
   "anim.keyframe_insert_by_name | planned M6 | poll NNNNN/YYYYY | type",
   "anim.keyframe_insert_menu | planned OUT | poll NNNNN/YYYYY | type,always_prompt",
-  "anim.keying_set_active_set | planned M8 | poll NNNNN/YYYYY | type",
+  "anim.keying_set_active_set | planned M9 | poll NNNNN/YYYYY | type",
   "anim.keying_set_add | planned OUT | poll YYYYY/YYYYY | ",
   "anim.keying_set_export | planned OUT | poll YYYYY/YYYYY | filepath,filter_folder,filter_text,filter_python",
   "anim.keying_set_path_add | planned OUT | poll NNNNN/NNNNN | ",

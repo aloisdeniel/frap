@@ -15,6 +15,8 @@ mod context;
 mod data;
 pub mod edit_armature;
 mod eval;
+/// The glTF add-on's `KHR_materials_variants` operators on `bpy.data` (M8 W0).
+pub mod gltf_variants;
 mod host;
 pub mod id;
 /// `ImageFormatSettings`: the format setters' side effects and per-format items (M5+M6

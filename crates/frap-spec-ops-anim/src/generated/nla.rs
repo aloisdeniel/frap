@@ -48,6 +48,41 @@ impl OpProps for ActionPushdown {
     }
 }
 
+// ---------------------------------------------------------------- nla.actionclip_add
+/// Props of `nla.actionclip_add`, RNA order.
+pub static ACTIONCLIP_ADD_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "action", name: "Action", description: "", kind: PropKind::Enum { items: &[], default: EnumDefault::Item(""), dynamic: Some("NLA_OT_actionclip_add.action") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+];
+/// `NLA_OT_actionclip_add`
+pub static OPSPEC_NLA_OT_ACTIONCLIP_ADD: OperatorSpec = OperatorSpec {
+    idname: "nla.actionclip_add",
+    bl_idname: "NLA_OT_actionclip_add",
+    label: "Add Action Strip",
+    description: "Add an Action-Clip strip (i.e. an NLA Strip referencing an Action) to the active track",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &ACTIONCLIP_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `nla.actionclip_add` (Add Action Strip).
+#[derive(Debug, Clone)]
+pub struct ActionclipAdd {
+    /// default "", dynamic:  [ANIMATABLE, DYNAMIC_ENUM]
+    pub action: Prop<SmolStr>,
+}
+impl OpProps for ActionclipAdd {
+    const IDNAME: &'static str = "nla.actionclip_add";
+    const BL_IDNAME: &'static str = "NLA_OT_actionclip_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_NLA_OT_ACTIONCLIP_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ActionclipAdd {
+            action: a.prop(0, "action"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- nla.tracks_add
 /// Props of `nla.tracks_add`, RNA order.
 pub static TRACKS_ADD_PROPS: [PropDef; 1] = [
@@ -79,6 +114,37 @@ impl OpProps for TracksAdd {
     fn from_args(a: &OpArgs) -> Self {
         TracksAdd {
             above_selected: a.prop(0, "above_selected"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- nla.tracks_delete
+/// Props of `nla.tracks_delete`, RNA order.
+pub static TRACKS_DELETE_PROPS: [PropDef; 0] = [
+];
+/// `NLA_OT_tracks_delete`
+pub static OPSPEC_NLA_OT_TRACKS_DELETE: OperatorSpec = OperatorSpec {
+    idname: "nla.tracks_delete",
+    bl_idname: "NLA_OT_tracks_delete",
+    label: "Delete Tracks",
+    description: "Delete selected NLA-Tracks and the strips they contain",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &TRACKS_DELETE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `nla.tracks_delete` (Delete Tracks).
+#[derive(Debug, Clone)]
+pub struct TracksDelete {
+}
+impl OpProps for TracksDelete {
+    const IDNAME: &'static str = "nla.tracks_delete";
+    const BL_IDNAME: &'static str = "NLA_OT_tracks_delete";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_NLA_OT_TRACKS_DELETE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        TracksDelete {
         }
     }
 }

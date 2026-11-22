@@ -11,51 +11,56 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 5] = [
+pub static E0: [EnumItem; 3] = [
+    EnumItem { identifier: "CUSTOM_NORMAL", name: "Custom Normal", description: "Take average of vertex normals", value: 1 },
+    EnumItem { identifier: "FACE_AREA", name: "Face Area", description: "Set all vertex normals by face area", value: 2 },
+    EnumItem { identifier: "CORNER_ANGLE", name: "Corner Angle", description: "Set all vertex normals by corner angle", value: 3 },
+];
+pub static E1: [EnumItem; 5] = [
     EnumItem { identifier: "OFFSET", name: "Offset", description: "Amount is offset of new edges from original", value: 0 },
     EnumItem { identifier: "WIDTH", name: "Width", description: "Amount is width of new face", value: 1 },
     EnumItem { identifier: "DEPTH", name: "Depth", description: "Amount is perpendicular distance from original edge to bevel face", value: 2 },
     EnumItem { identifier: "PERCENT", name: "Percent", description: "Amount is percent of adjacent edge length", value: 3 },
     EnumItem { identifier: "ABSOLUTE", name: "Absolute", description: "Amount is absolute distance along adjacent edge", value: 4 },
 ];
-pub static E1: [EnumItem; 2] = [
+pub static E2: [EnumItem; 2] = [
     EnumItem { identifier: "SUPERELLIPSE", name: "Superellipse", description: "The profile can be a concave or convex curve", value: 0 },
     EnumItem { identifier: "CUSTOM", name: "Custom", description: "The profile can be any arbitrary path between its endpoints", value: 1 },
 ];
-pub static E2: [EnumItem; 2] = [
+pub static E3: [EnumItem; 2] = [
     EnumItem { identifier: "VERTICES", name: "Vertices", description: "Affect only vertices", value: 0 },
     EnumItem { identifier: "EDGES", name: "Edges", description: "Affect only edges", value: 1 },
 ];
-pub static E3: [EnumItem; 4] = [
+pub static E4: [EnumItem; 4] = [
     EnumItem { identifier: "NONE", name: "None", description: "Do not set face strength", value: 0 },
     EnumItem { identifier: "NEW", name: "New", description: "Set face strength on new faces only", value: 1 },
     EnumItem { identifier: "AFFECTED", name: "Affected", description: "Set face strength on new and modified faces only", value: 2 },
     EnumItem { identifier: "ALL", name: "All", description: "Set face strength on all faces", value: 3 },
 ];
-pub static E4: [EnumItem; 3] = [
+pub static E5: [EnumItem; 3] = [
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Outside of miter is sharp", value: 0 },
     EnumItem { identifier: "PATCH", name: "Patch", description: "Outside of miter is squared-off patch", value: 1 },
     EnumItem { identifier: "ARC", name: "Arc", description: "Outside of miter is arc", value: 2 },
 ];
-pub static E5: [EnumItem; 2] = [
+pub static E6: [EnumItem; 2] = [
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Inside of miter is sharp", value: 0 },
     EnumItem { identifier: "ARC", name: "Arc", description: "Inside of miter is arc", value: 2 },
 ];
-pub static E6: [EnumItem; 2] = [
+pub static E7: [EnumItem; 2] = [
     EnumItem { identifier: "ADJ", name: "Grid Fill", description: "Default patterned fill", value: 0 },
     EnumItem { identifier: "CUTOFF", name: "Cutoff", description: "A cutoff at each profile's end before the intersection", value: 1 },
 ];
-pub static E7: [EnumItem; 3] = [
+pub static E8: [EnumItem; 3] = [
     EnumItem { identifier: "SINGLE", name: "Open Loop", description: "", value: 0 },
     EnumItem { identifier: "CLOSED", name: "Closed Loop", description: "", value: 1 },
     EnumItem { identifier: "PAIRS", name: "Loop Pairs", description: "", value: 2 },
 ];
-pub static E8: [EnumItem; 3] = [
+pub static E9: [EnumItem; 3] = [
     EnumItem { identifier: "LINEAR", name: "Linear", description: "", value: 0 },
     EnumItem { identifier: "PATH", name: "Blend Path", description: "", value: 1 },
     EnumItem { identifier: "SURFACE", name: "Blend Surface", description: "", value: 2 },
 ];
-pub static E9: [EnumItem; 6] = [
+pub static E10: [EnumItem; 6] = [
     EnumItem { identifier: "SMOOTH", name: "Smooth", description: "Smooth falloff", value: 0 },
     EnumItem { identifier: "SPHERE", name: "Sphere", description: "Spherical falloff", value: 1 },
     EnumItem { identifier: "ROOT", name: "Root", description: "Root falloff", value: 2 },
@@ -63,138 +68,221 @@ pub static E9: [EnumItem; 6] = [
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Sharp falloff", value: 3 },
     EnumItem { identifier: "LINEAR", name: "Linear", description: "Linear falloff", value: 4 },
 ];
-pub static E10: [EnumItem; 3] = [
+pub static E11: [EnumItem; 2] = [
+    EnumItem { identifier: "LEAST_SQUARE", name: "Best Fit", description: "Calculate a best-fit circle using non-linear least squares", value: 0 },
+    EnumItem { identifier: "CONTRACT", name: "Interior Fit", description: "Only move vertices towards the center", value: 1 },
+];
+pub static E12: [EnumItem; 3] = [
     EnumItem { identifier: "X", name: "X", description: "", value: 0 },
     EnumItem { identifier: "Y", name: "Y", description: "", value: 1 },
     EnumItem { identifier: "Z", name: "Z", description: "", value: 2 },
 ];
-pub static E11: [EnumItem; 5] = [
+pub static E13: [EnumItem; 5] = [
     EnumItem { identifier: "VERT", name: "Vertices", description: "", value: 0 },
     EnumItem { identifier: "EDGE", name: "Edges", description: "", value: 1 },
     EnumItem { identifier: "FACE", name: "Faces", description: "", value: 2 },
     EnumItem { identifier: "EDGE_FACE", name: "Only Edges & Faces", description: "", value: 3 },
     EnumItem { identifier: "ONLY_FACE", name: "Only Faces", description: "", value: 4 },
 ];
-pub static E12: [EnumItem; 5] = [
+pub static E14: [EnumItem; 5] = [
     EnumItem { identifier: "NORMAL", name: "Normal", description: "Delimit by face directions", value: 1 },
     EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit by face material", value: 2 },
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit by edge seams", value: 4 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit by sharp edges", value: 8 },
     EnumItem { identifier: "UV", name: "UVs", description: "Delimit by UV coordinates", value: 16 },
 ];
-pub static E13: [EnumItem; 2] = [
+pub static E15: [EnumItem; 2] = [
     EnumItem { identifier: "EDGE", name: "Faces by Edges", description: "Split faces along selected edges", value: 2 },
     EnumItem { identifier: "VERT", name: "Faces & Edges by Vertices", description: "Split faces and edges connected to selected vertices", value: 1 },
 ];
-pub static E14: [EnumItem; 4] = [
+pub static E16: [EnumItem; 4] = [
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit edge ring selection at seams", value: 16 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit edge ring selection at sharp edges", value: 32 },
     EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit edge ring selection at material boundaries", value: 64 },
     EnumItem { identifier: "NGONS", name: "N-gons", description: "Allow edge ring selection to step over n-gons with an even number of sides", value: 8 },
 ];
-pub static E15: [EnumItem; 2] = [
+pub static E17: [EnumItem; 3] = [
+    EnumItem { identifier: "BEST_FIT", name: "Best Fit", description: "Calculate a best fitting plane", value: 0 },
+    EnumItem { identifier: "NORMAL", name: "Normal", description: "Derive plane by averaging face normals", value: 1 },
+    EnumItem { identifier: "VIEW", name: "View", description: "Flatten on a plane perpendicular to the viewing angle", value: 2 },
+];
+pub static E18: [EnumItem; 2] = [
     EnumItem { identifier: "SELECT", name: "Self Intersect", description: "Self intersect selected faces", value: 0 },
     EnumItem { identifier: "SELECT_UNSELECT", name: "Selected/Unselected", description: "Intersect selected with unselected faces", value: 1 },
 ];
-pub static E16: [EnumItem; 3] = [
+pub static E19: [EnumItem; 3] = [
     EnumItem { identifier: "ALL", name: "All", description: "Separate all geometry from intersections", value: 0 },
     EnumItem { identifier: "CUT", name: "Cut", description: "Cut into geometry keeping each side separate (Selected/Unselected only)", value: 1 },
     EnumItem { identifier: "NONE", name: "Merge", description: "Merge all geometry from the intersection", value: 2 },
 ];
-pub static E17: [EnumItem; 2] = [
+pub static E20: [EnumItem; 2] = [
     EnumItem { identifier: "FLOAT", name: "Float", description: "Simple solver with good performance, without support for overlapping geometry", value: 0 },
     EnumItem { identifier: "EXACT", name: "Exact", description: "Slower solver with the best results for coplanar faces", value: 1 },
 ];
-pub static E18: [EnumItem; 3] = [
+pub static E21: [EnumItem; 3] = [
     EnumItem { identifier: "INTERSECT", name: "Intersect", description: "", value: 0 },
     EnumItem { identifier: "UNION", name: "Union", description: "", value: 1 },
     EnumItem { identifier: "DIFFERENCE", name: "Difference", description: "", value: 2 },
 ];
-pub static E19: [EnumItem; 2] = [
+pub static E22: [EnumItem; 2] = [
     EnumItem { identifier: "FLOAT", name: "Float", description: "Faster solver, some limitations", value: 0 },
     EnumItem { identifier: "EXACT", name: "Exact", description: "Exact solver, slower, handles more cases", value: 1 },
 ];
-pub static E20: [EnumItem; 5] = [
+pub static E23: [EnumItem; 5] = [
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit edge loop selection at seams", value: 16 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit edge loop selection at sharp edges", value: 32 },
     EnumItem { identifier: "NGONS", name: "N-gons", description: "Stop boundary selection at n-gons", value: 4 },
     EnumItem { identifier: "INNER_CORNERS", name: "Inner Corners", description: "Stop boundary selection at vertices with more than three edges", value: 1 },
     EnumItem { identifier: "OUTER_CORNERS", name: "Outer Corners", description: "Stop boundary selection at vertices with two edges when they share a face that is not an n-gon", value: 2 },
 ];
-pub static E21: [EnumItem; 3] = [
+pub static E24: [EnumItem; 3] = [
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit face loop selection at seams", value: 16 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit face loop selection at sharp edges", value: 32 },
     EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit face loop selection at material boundaries", value: 64 },
 ];
-pub static E22: [EnumItem; 5] = [
+pub static E25: [EnumItem; 5] = [
     EnumItem { identifier: "CENTER", name: "At Center", description: "", value: 3 },
     EnumItem { identifier: "CURSOR", name: "At Cursor", description: "", value: 4 },
     EnumItem { identifier: "COLLAPSE", name: "Collapse", description: "", value: 5 },
     EnumItem { identifier: "FIRST", name: "At First", description: "", value: 6 },
     EnumItem { identifier: "LAST", name: "At Last", description: "", value: 1 },
 ];
-pub static E23: [EnumItem; 3] = [
+pub static E26: [EnumItem; 3] = [
+    EnumItem { identifier: "WEAK", name: "Weak", description: "", value: -16384 },
+    EnumItem { identifier: "MEDIUM", name: "Medium", description: "", value: 0 },
+    EnumItem { identifier: "STRONG", name: "Strong", description: "", value: 16384 },
+];
+pub static E27: [EnumItem; 5] = [
+    EnumItem { identifier: "COPY", name: "Copy Normal", description: "Copy normal to the internal clipboard", value: 1 },
+    EnumItem { identifier: "PASTE", name: "Paste Normal", description: "Paste normal from the internal clipboard", value: 2 },
+    EnumItem { identifier: "ADD", name: "Add Normal", description: "Add normal vector with selection", value: 4 },
+    EnumItem { identifier: "MULTIPLY", name: "Multiply Normal", description: "Multiply normal vector with selection", value: 3 },
+    EnumItem { identifier: "RESET", name: "Reset Normal", description: "Reset the internal clipboard and/or normal of selected element", value: 5 },
+];
+pub static E28: [EnumItem; 2] = [
+    EnumItem { identifier: "COORDINATES", name: "Coordinates", description: "Use static coordinates (defined by various means)", value: 1 },
+    EnumItem { identifier: "MOUSE", name: "Mouse", description: "Follow mouse cursor", value: 2 },
+];
+pub static E29: [EnumItem; 3] = [
     EnumItem { identifier: "MEDIAN_WEIGHTED", name: "Weighted Median", description: "Weighted median face center", value: 0 },
     EnumItem { identifier: "MEDIAN", name: "Median", description: "Median face center", value: 1 },
     EnumItem { identifier: "BOUNDS", name: "Bounds", description: "Face bounds center", value: 2 },
 ];
-pub static E24: [EnumItem; 3] = [
+pub static E30: [EnumItem; 3] = [
     EnumItem { identifier: "NOTHING", name: "Nothing", description: "Don't fill at all", value: 0 },
     EnumItem { identifier: "NGON", name: "N-Gon", description: "Use n-gons", value: 1 },
     EnumItem { identifier: "TRIFAN", name: "Triangle Fan", description: "Use triangle fans", value: 2 },
 ];
-pub static E25: [EnumItem; 3] = [
+pub static E31: [EnumItem; 3] = [
     EnumItem { identifier: "WORLD", name: "World", description: "Align the new object to the world", value: 0 },
     EnumItem { identifier: "VIEW", name: "View", description: "Align the new object to the view", value: 1 },
     EnumItem { identifier: "CURSOR", name: "3D Cursor", description: "Use the 3D cursor orientation for the new object", value: 2 },
 ];
-pub static E26: [EnumItem; 2] = [
+pub static E32: [EnumItem; 2] = [
     EnumItem { identifier: "MAJOR_MINOR", name: "Major/Minor", description: "Use the major/minor radii for torus dimensions", value: 0 },
     EnumItem { identifier: "EXT_INT", name: "Exterior/Interior", description: "Use the exterior/interior radii for torus dimensions", value: 1 },
 ];
-pub static E27: [EnumItem; 5] = [
+pub static E33: [EnumItem; 5] = [
     EnumItem { identifier: "BEAUTY", name: "Beauty", description: "Split the quads in nice triangles, slower method", value: 0 },
     EnumItem { identifier: "FIXED", name: "Fixed", description: "Split the quads on the first and third vertices", value: 1 },
     EnumItem { identifier: "FIXED_ALTERNATE", name: "Fixed Alternate", description: "Split the quads on the 2nd and 4th vertices", value: 2 },
     EnumItem { identifier: "SHORTEST_DIAGONAL", name: "Shortest Diagonal", description: "Split the quads along their shortest diagonal", value: 3 },
     EnumItem { identifier: "LONGEST_DIAGONAL", name: "Longest Diagonal", description: "Split the quads along their longest diagonal", value: 4 },
 ];
-pub static E28: [EnumItem; 2] = [
+pub static E34: [EnumItem; 2] = [
     EnumItem { identifier: "BEAUTY", name: "Beauty", description: "Arrange the new triangles evenly (slow)", value: 0 },
     EnumItem { identifier: "CLIP", name: "Clip", description: "Split the polygons with an ear clipping algorithm", value: 1 },
 ];
-pub static E29: [EnumItem; 4] = [
+pub static E35: [EnumItem; 8] = [
+    EnumItem { identifier: "SMOOTH", name: "Smooth", description: "Smooth falloff", value: 0 },
+    EnumItem { identifier: "SPHERE", name: "Sphere", description: "Spherical falloff", value: 1 },
+    EnumItem { identifier: "ROOT", name: "Root", description: "Root falloff", value: 2 },
+    EnumItem { identifier: "INVERSE_SQUARE", name: "Inverse Square", description: "Inverse Square falloff", value: 7 },
+    EnumItem { identifier: "SHARP", name: "Sharp", description: "Sharp falloff", value: 3 },
+    EnumItem { identifier: "LINEAR", name: "Linear", description: "Linear falloff", value: 4 },
+    EnumItem { identifier: "CONSTANT", name: "Constant", description: "Constant falloff", value: 5 },
+    EnumItem { identifier: "RANDOM", name: "Random", description: "Random falloff", value: 6 },
+];
+pub static E36: [EnumItem; 4] = [
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle selection for all elements", value: 0 },
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
     EnumItem { identifier: "INVERT", name: "Invert", description: "Invert selection of all elements", value: 3 },
 ];
-pub static E30: [EnumItem; 4] = [
+pub static E37: [EnumItem; 7] = [
+    EnumItem { identifier: "GLOBAL", name: "Global", description: "Align the transformation axes to world space", value: 0 },
+    EnumItem { identifier: "LOCAL", name: "Local", description: "Align the transformation axes to the selected objects' local space", value: 1 },
+    EnumItem { identifier: "NORMAL", name: "Normal", description: "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)", value: 2 },
+    EnumItem { identifier: "GIMBAL", name: "Gimbal", description: "Align each axis to the Euler rotation axis as used for input", value: 4 },
+    EnumItem { identifier: "VIEW", name: "View", description: "Align the transformation axes to the window", value: 3 },
+    EnumItem { identifier: "CURSOR", name: "Cursor", description: "Align the transformation axes to the 3D cursor", value: 5 },
+    EnumItem { identifier: "PARENT", name: "Parent", description: "Align the transformation axes to the object's parent space", value: 6 },
+];
+pub static E38: [EnumItem; 3] = [
+    EnumItem { identifier: "POS", name: "Positive Axis", description: "", value: 0 },
+    EnumItem { identifier: "NEG", name: "Negative Axis", description: "", value: 1 },
+    EnumItem { identifier: "ALIGN", name: "Aligned Axis", description: "", value: 2 },
+];
+pub static E39: [EnumItem; 4] = [
     EnumItem { identifier: "LESS", name: "Less Than", description: "", value: 0 },
     EnumItem { identifier: "EQUAL", name: "Equal To", description: "", value: 1 },
     EnumItem { identifier: "GREATER", name: "Greater Than", description: "", value: 2 },
     EnumItem { identifier: "NOTEQUAL", name: "Not Equal To", description: "", value: 3 },
 ];
-pub static E31: [EnumItem; 3] = [
+pub static E40: [EnumItem; 3] = [
+    EnumItem { identifier: "X", name: "X", description: "", value: 1 },
+    EnumItem { identifier: "Y", name: "Y", description: "", value: 2 },
+    EnumItem { identifier: "Z", name: "Z", description: "", value: 4 },
+];
+pub static E41: [EnumItem; 3] = [
     EnumItem { identifier: "VERT", name: "Vertex", description: "Vertex selection mode", value: 1 },
     EnumItem { identifier: "EDGE", name: "Edge", description: "Edge selection mode", value: 2 },
     EnumItem { identifier: "FACE", name: "Face", description: "Face selection mode", value: 4 },
 ];
-pub static E32: [EnumItem; 3] = [
+pub static E42: [EnumItem; 3] = [
     EnumItem { identifier: "DISABLE", name: "Disable", description: "Disable the selection mode", value: 0 },
     EnumItem { identifier: "ENABLE", name: "Enable", description: "Enable the selection mode", value: 1 },
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle the selection mode", value: 2 },
 ];
-pub static E33: [EnumItem; 2] = [
+pub static E43: [EnumItem; 2] = [
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
 ];
-pub static E34: [EnumItem; 3] = [
+pub static E44: [EnumItem; 22] = [
+    EnumItem { identifier: "VERT_NORMAL", name: "Normal", description: "", value: 0 },
+    EnumItem { identifier: "VERT_FACES", name: "Amount of Adjacent Faces", description: "", value: 1 },
+    EnumItem { identifier: "VERT_GROUPS", name: "Vertex Groups", description: "", value: 2 },
+    EnumItem { identifier: "VERT_EDGES", name: "Amount of Connecting Edges", description: "", value: 3 },
+    EnumItem { identifier: "VERT_CREASE", name: "Vertex Crease", description: "", value: 4 },
+    EnumItem { identifier: "EDGE_LENGTH", name: "Length", description: "", value: 101 },
+    EnumItem { identifier: "EDGE_DIR", name: "Direction", description: "", value: 102 },
+    EnumItem { identifier: "EDGE_FACES", name: "Amount of Faces Around an Edge", description: "", value: 103 },
+    EnumItem { identifier: "EDGE_FACE_ANGLE", name: "Face Angles", description: "", value: 104 },
+    EnumItem { identifier: "EDGE_CREASE", name: "Crease", description: "", value: 105 },
+    EnumItem { identifier: "EDGE_BEVEL", name: "Bevel", description: "", value: 106 },
+    EnumItem { identifier: "EDGE_SEAM", name: "Seam", description: "", value: 107 },
+    EnumItem { identifier: "EDGE_SHARP", name: "Sharpness", description: "", value: 108 },
+    EnumItem { identifier: "EDGE_FREESTYLE", name: "Freestyle Edge Marks", description: "", value: 109 },
+    EnumItem { identifier: "FACE_MATERIAL", name: "Material", description: "", value: 201 },
+    EnumItem { identifier: "FACE_AREA", name: "Area", description: "", value: 202 },
+    EnumItem { identifier: "FACE_SIDES", name: "Polygon Sides", description: "", value: 203 },
+    EnumItem { identifier: "FACE_PERIMETER", name: "Perimeter", description: "", value: 204 },
+    EnumItem { identifier: "FACE_NORMAL", name: "Normal", description: "", value: 205 },
+    EnumItem { identifier: "FACE_COPLANAR", name: "Coplanar", description: "", value: 206 },
+    EnumItem { identifier: "FACE_SMOOTH", name: "Flat/Smooth", description: "", value: 207 },
+    EnumItem { identifier: "FACE_FREESTYLE", name: "Freestyle Face Marks", description: "", value: 208 },
+];
+pub static E45: [EnumItem; 3] = [
+    EnumItem { identifier: "EQUAL", name: "Equal", description: "", value: 0 },
+    EnumItem { identifier: "GREATER", name: "Greater", description: "", value: 1 },
+    EnumItem { identifier: "LESS", name: "Less", description: "", value: 2 },
+];
+pub static E46: [EnumItem; 3] = [
     EnumItem { identifier: "SELECTED", name: "Selection", description: "", value: 0 },
     EnumItem { identifier: "MATERIAL", name: "By Material", description: "", value: 1 },
     EnumItem { identifier: "LOOSE", name: "By Loose Parts", description: "", value: 2 },
 ];
-pub static E35: [EnumItem; 6] = [
+pub static E47: [EnumItem; 6] = [
     EnumItem { identifier: "SELECT", name: "Select", description: "", value: 0 },
     EnumItem { identifier: "SEAM", name: "Tag Seam", description: "", value: 1 },
     EnumItem { identifier: "SHARP", name: "Tag Sharp", description: "", value: 2 },
@@ -202,13 +290,31 @@ pub static E35: [EnumItem; 6] = [
     EnumItem { identifier: "BEVEL", name: "Tag Bevel", description: "", value: 4 },
     EnumItem { identifier: "FREESTYLE", name: "Tag Freestyle Edge Mark", description: "", value: 5 },
 ];
-pub static E36: [EnumItem; 4] = [
+pub static E48: [EnumItem; 7] = [
+    EnumItem { identifier: "VIEW_ZAXIS", name: "View Z Axis", description: "Sort selected elements from farthest to nearest one in current view", value: 1 },
+    EnumItem { identifier: "VIEW_XAXIS", name: "View X Axis", description: "Sort selected elements from left to right one in current view", value: 2 },
+    EnumItem { identifier: "CURSOR_DISTANCE", name: "Cursor Distance", description: "Sort selected elements from nearest to farthest from 3D cursor", value: 3 },
+    EnumItem { identifier: "MATERIAL", name: "Material", description: "Sort selected faces from smallest to greatest material index", value: 4 },
+    EnumItem { identifier: "SELECTED", name: "Selected", description: "Move all selected elements in first places, preserving their relative order.\nWarning: This will affect unselected elements' indices as well", value: 5 },
+    EnumItem { identifier: "RANDOMIZE", name: "Randomize", description: "Randomize order of selected elements", value: 6 },
+    EnumItem { identifier: "REVERSE", name: "Reverse", description: "Reverse current order of selected elements", value: 7 },
+];
+pub static E49: [EnumItem; 3] = [
+    EnumItem { identifier: "VERT", name: "Vertices", description: "", value: 1 },
+    EnumItem { identifier: "EDGE", name: "Edges", description: "", value: 2 },
+    EnumItem { identifier: "FACE", name: "Faces", description: "", value: 8 },
+];
+pub static E50: [EnumItem; 2] = [
+    EnumItem { identifier: "CUBIC", name: "Cubic", description: "Natural cubic spline, smooth results", value: 0 },
+    EnumItem { identifier: "LINEAR", name: "Linear", description: "Vertices are projected on existing edges", value: 1 },
+];
+pub static E51: [EnumItem; 4] = [
     EnumItem { identifier: "INNERVERT", name: "Inner Vert", description: "", value: 0 },
     EnumItem { identifier: "PATH", name: "Path", description: "", value: 1 },
     EnumItem { identifier: "STRAIGHT_CUT", name: "Straight Cut", description: "", value: 3 },
     EnumItem { identifier: "FAN", name: "Fan", description: "", value: 2 },
 ];
-pub static E37: [EnumItem; 6] = [
+pub static E52: [EnumItem; 6] = [
     EnumItem { identifier: "NEGATIVE_X", name: "-X to +X", description: "", value: 0 },
     EnumItem { identifier: "POSITIVE_X", name: "+X to -X", description: "", value: 3 },
     EnumItem { identifier: "NEGATIVE_Y", name: "-Y to +Y", description: "", value: 1 },
@@ -281,6 +387,94 @@ impl OpProps for AttributeSet {
     }
 }
 
+// ---------------------------------------------------------------- mesh.average_normals
+/// Props of `mesh.average_normals`, RNA order.
+pub static AVERAGE_NORMALS_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "average_type", name: "Type", description: "Averaging method", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("CUSTOM_NORMAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "weight", name: "Weight", description: "Weight applied per face", kind: PropKind::Int { default: Defaults::Scalar(50), hard: (1, 100), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Threshold", description: "Threshold value for different weights to be considered equal", kind: PropKind::Float { default: Defaults::Scalar(0.009999999776482582), hard: (0.0, 10.0), soft: (0.0, 5.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_average_normals`
+pub static OPSPEC_MESH_OT_AVERAGE_NORMALS: OperatorSpec = OperatorSpec {
+    idname: "mesh.average_normals",
+    bl_idname: "MESH_OT_average_normals",
+    label: "Average Normals",
+    description: "Average custom normals of selected vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &AVERAGE_NORMALS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.average_normals`.
+pub mod average_normals {
+    /// `AverageType`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum AverageType {
+        /// "CUSTOM_NORMAL"
+        CustomNormal,
+        /// "FACE_AREA"
+        FaceArea,
+        /// "CORNER_ANGLE"
+        CornerAngle,
+    }
+    impl AverageType {
+        /// Every variant, in RNA item order.
+        pub const ALL: [AverageType; 3] = [AverageType::CustomNormal, AverageType::FaceArea, AverageType::CornerAngle];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                AverageType::CustomNormal => "CUSTOM_NORMAL",
+                AverageType::FaceArea => "FACE_AREA",
+                AverageType::CornerAngle => "CORNER_ANGLE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "CUSTOM_NORMAL" => Some(AverageType::CustomNormal),
+                "FACE_AREA" => Some(AverageType::FaceArea),
+                "CORNER_ANGLE" => Some(AverageType::CornerAngle),
+                _ => None,
+            }
+        }
+    }
+    impl Default for AverageType {
+        fn default() -> Self {
+            AverageType::CustomNormal
+        }
+    }
+    impl frap_rna::FromValue for AverageType {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.average_normals` (Average Normals).
+#[derive(Debug, Clone)]
+pub struct AverageNormals {
+    /// Averaging method; default "CUSTOM_NORMAL": CUSTOM_NORMAL | FACE_AREA | CORNER_ANGLE [ANIMATABLE]
+    pub average_type: Prop<average_normals::AverageType>,
+    /// Weight applied per face; default 50 [ANIMATABLE]
+    pub weight: Prop<i32>,
+    /// Threshold value for different weights to be considered equal; default 0.009999999776482582 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+}
+impl OpProps for AverageNormals {
+    const IDNAME: &'static str = "mesh.average_normals";
+    const BL_IDNAME: &'static str = "MESH_OT_average_normals";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_AVERAGE_NORMALS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        AverageNormals {
+            average_type: a.prop(0, "average_type"),
+            weight: a.prop(1, "weight"),
+            threshold: a.prop(2, "threshold"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.beautify_fill
 /// Props of `mesh.beautify_fill`, RNA order.
 pub static BEAUTIFY_FILL_PROPS: [PropDef; 1] = [
@@ -319,24 +513,24 @@ impl OpProps for BeautifyFill {
 // ---------------------------------------------------------------- mesh.bevel
 /// Props of `mesh.bevel`, RNA order.
 pub static BEVEL_PROPS: [PropDef; 19] = [
-    PropDef { identifier: "offset_type", name: "Width Type", description: "The method for determining the size of the bevel", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("OFFSET"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "offset_type", name: "Width Type", description: "The method for determining the size of the bevel", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("OFFSET"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "offset", name: "Width", description: "Bevel amount", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1000000.0), soft: (0.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "profile_type", name: "Profile Type", description: "The type of shape used to rebuild a beveled section", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("SUPERELLIPSE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "profile_type", name: "Profile Type", description: "The type of shape used to rebuild a beveled section", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("SUPERELLIPSE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "offset_pct", name: "Width Percent", description: "Bevel amount for percentage method", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 100.0), soft: (0.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Percentage, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "segments", name: "Segments", description: "Segments for curved edge", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 1000), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "profile", name: "Profile", description: "Controls profile shape (0.5 = round)", kind: PropKind::Float { default: Defaults::Scalar(0.5), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "affect", name: "Affect", description: "Affect edges or vertices", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("EDGES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "affect", name: "Affect", description: "Affect edges or vertices", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("EDGES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "clamp_overlap", name: "Clamp Overlap", description: "Do not allow beveled edges/vertices to overlap each other", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "loop_slide", name: "Loop Slide", description: "Prefer sliding along edges to even widths", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mark_seam", name: "Mark Seams", description: "Preserve seams along beveled edges", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mark_sharp", name: "Mark Sharp", description: "Preserve sharp edges along beveled edges", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "material", name: "Material Index", description: "Material for bevel faces (-1 means use adjacent faces)", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (-1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "harden_normals", name: "Harden Normals", description: "Match normals of new faces to adjacent faces", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "face_strength_mode", name: "Face Strength Mode", description: "Whether to set face strength, and which faces to set face strength on", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("NONE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "miter_outer", name: "Outer Miter", description: "Pattern to use for outside of miters", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("SHARP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "miter_inner", name: "Inner Miter", description: "Pattern to use for inside of miters", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("SHARP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "face_strength_mode", name: "Face Strength Mode", description: "Whether to set face strength, and which faces to set face strength on", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("NONE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "miter_outer", name: "Outer Miter", description: "Pattern to use for outside of miters", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("SHARP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "miter_inner", name: "Inner Miter", description: "Pattern to use for inside of miters", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("SHARP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "spread", name: "Spread", description: "Amount to spread arcs for arc inner miters", kind: PropKind::Float { default: Defaults::Scalar(0.10000000149011612), hard: (0.0, 1000000.0), soft: (0.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "vmesh_method", name: "Vertex Mesh Method", description: "The method to use to create meshes at intersections", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("ADJ"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "vmesh_method", name: "Vertex Mesh Method", description: "The method to use to create meshes at intersections", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("ADJ"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_bevel`
@@ -841,15 +1035,15 @@ impl OpProps for BlendFromShape {
 // ---------------------------------------------------------------- mesh.bridge_edge_loops
 /// Props of `mesh.bridge_edge_loops`, RNA order.
 pub static BRIDGE_EDGE_LOOPS_PROPS: [PropDef; 9] = [
-    PropDef { identifier: "type", name: "Connect Loops", description: "Method of bridging multiple loops", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("SINGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Connect Loops", description: "Method of bridging multiple loops", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("SINGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_merge", name: "Merge", description: "Merge rather than creating faces", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "merge_factor", name: "Merge Factor", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.5), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "twist_offset", name: "Twist", description: "Twist offset for closed loops", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-1000, 1000), soft: (-1000, 1000) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "number_cuts", name: "Number of Cuts", description: "", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 1000), soft: (0, 64) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "interpolation", name: "Interpolation", description: "Interpolation method", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("PATH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "interpolation", name: "Interpolation", description: "Interpolation method", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("PATH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "smoothness", name: "Smoothness", description: "Smoothness factor", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1000.0), soft: (0.0, 2.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "profile_shape_factor", name: "Profile Factor", description: "How much intermediary new edges are shrunk/expanded", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-1000.0, 1000.0), soft: (-2.0, 2.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "profile_shape", name: "Profile Shape", description: "Shape of the profile", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "profile_shape", name: "Profile Shape", description: "Shape of the profile", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_bridge_edge_loops`
 pub static OPSPEC_MESH_OT_BRIDGE_EDGE_LOOPS: OperatorSpec = OperatorSpec {
@@ -1046,6 +1240,176 @@ impl OpProps for BridgeEdgeLoops {
     }
 }
 
+// ---------------------------------------------------------------- mesh.circularize
+/// Props of `mesh.circularize`, RNA order.
+pub static CIRCULARIZE_PROPS: [PropDef; 8] = [
+    PropDef { identifier: "factor", name: "Factor", description: "Circularization factor", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "fit_method", name: "Method", description: "Method used for fitting a circle to the vertices", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("LEAST_SQUARE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "angle", name: "Rotation", description: "Rotate the circle", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-6.2831854820251465, 6.2831854820251465), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_custom_radius", name: "Use Custom Radius", description: "Enable custom radius", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "custom_radius", name: "Radius", description: "Radius of the circle", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 3.4028234663852886e38), soft: (0.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "regular", name: "Space Evenly", description: "Distribute vertices at constant distances along the circle, otherwise preserves original spacing", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "flatten", name: "Flatten", description: "Flatten the circle, instead of projecting it on the mesh", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "lock", name: "Lock", description: "Lock editing of the axis", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_circularize`
+pub static OPSPEC_MESH_OT_CIRCULARIZE: OperatorSpec = OperatorSpec {
+    idname: "mesh.circularize",
+    bl_idname: "MESH_OT_circularize",
+    label: "To Circle",
+    description: "Shape selected geometry into a circle",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &CIRCULARIZE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.circularize`.
+pub mod circularize {
+    /// `FitMethod`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum FitMethod {
+        /// "LEAST_SQUARE"
+        LeastSquare,
+        /// "CONTRACT"
+        Contract,
+    }
+    impl FitMethod {
+        /// Every variant, in RNA item order.
+        pub const ALL: [FitMethod; 2] = [FitMethod::LeastSquare, FitMethod::Contract];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                FitMethod::LeastSquare => "LEAST_SQUARE",
+                FitMethod::Contract => "CONTRACT",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "LEAST_SQUARE" => Some(FitMethod::LeastSquare),
+                "CONTRACT" => Some(FitMethod::Contract),
+                _ => None,
+            }
+        }
+    }
+    impl Default for FitMethod {
+        fn default() -> Self {
+            FitMethod::LeastSquare
+        }
+    }
+    impl frap_rna::FromValue for FitMethod {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.circularize` (To Circle).
+#[derive(Debug, Clone)]
+pub struct Circularize {
+    /// Circularization factor; default 1 [ANIMATABLE]
+    pub factor: Prop<f32>,
+    /// Method used for fitting a circle to the vertices; default "LEAST_SQUARE": LEAST_SQUARE | CONTRACT [ANIMATABLE]
+    pub fit_method: Prop<circularize::FitMethod>,
+    /// Rotate the circle; default 0 [ANIMATABLE]
+    pub angle: Prop<f32>,
+    /// Enable custom radius; default false [ANIMATABLE]
+    pub use_custom_radius: Prop<bool>,
+    /// Radius of the circle; default 1 [ANIMATABLE]
+    pub custom_radius: Prop<f32>,
+    /// Distribute vertices at constant distances along the circle, otherwise preserves original spacing; default true [ANIMATABLE]
+    pub regular: Prop<bool>,
+    /// Flatten the circle, instead of projecting it on the mesh; default 1 [ANIMATABLE]
+    pub flatten: Prop<f32>,
+    /// Lock editing of the axis; BOOLEAN [ANIMATABLE]
+    pub lock: Prop<[bool; 3]>,
+}
+impl OpProps for Circularize {
+    const IDNAME: &'static str = "mesh.circularize";
+    const BL_IDNAME: &'static str = "MESH_OT_circularize";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_CIRCULARIZE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Circularize {
+            factor: a.prop(0, "factor"),
+            fit_method: a.prop(1, "fit_method"),
+            angle: a.prop(2, "angle"),
+            use_custom_radius: a.prop(3, "use_custom_radius"),
+            custom_radius: a.prop(4, "custom_radius"),
+            regular: a.prop(5, "regular"),
+            flatten: a.prop(6, "flatten"),
+            lock: a.prop(7, "lock"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.colors_reverse
+/// Props of `mesh.colors_reverse`, RNA order.
+pub static COLORS_REVERSE_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_colors_reverse`
+pub static OPSPEC_MESH_OT_COLORS_REVERSE: OperatorSpec = OperatorSpec {
+    idname: "mesh.colors_reverse",
+    bl_idname: "MESH_OT_colors_reverse",
+    label: "Reverse Colors",
+    description: "Flip direction of face corner color attribute inside faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &COLORS_REVERSE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.colors_reverse` (Reverse Colors).
+#[derive(Debug, Clone)]
+pub struct ColorsReverse {
+}
+impl OpProps for ColorsReverse {
+    const IDNAME: &'static str = "mesh.colors_reverse";
+    const BL_IDNAME: &'static str = "MESH_OT_colors_reverse";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_COLORS_REVERSE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ColorsReverse {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.colors_rotate
+/// Props of `mesh.colors_rotate`, RNA order.
+pub static COLORS_ROTATE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "use_ccw", name: "Counter Clockwise", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_colors_rotate`
+pub static OPSPEC_MESH_OT_COLORS_ROTATE: OperatorSpec = OperatorSpec {
+    idname: "mesh.colors_rotate",
+    bl_idname: "MESH_OT_colors_rotate",
+    label: "Rotate Colors",
+    description: "Rotate face corner color attribute inside faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &COLORS_ROTATE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.colors_rotate` (Rotate Colors).
+#[derive(Debug, Clone)]
+pub struct ColorsRotate {
+    /// default false [ANIMATABLE]
+    pub use_ccw: Prop<bool>,
+}
+impl OpProps for ColorsRotate {
+    const IDNAME: &'static str = "mesh.colors_rotate";
+    const BL_IDNAME: &'static str = "MESH_OT_colors_rotate";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_COLORS_ROTATE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ColorsRotate {
+            use_ccw: a.prop(0, "use_ccw"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.convex_hull
 /// Props of `mesh.convex_hull`, RNA order.
 pub static CONVEX_HULL_PROPS: [PropDef; 13] = [
@@ -1199,7 +1563,7 @@ pub static DECIMATE_PROPS: [PropDef; 6] = [
     PropDef { identifier: "vertex_group_factor", name: "Weight", description: "Vertex group strength", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1000.0), soft: (0.0, 10.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "invert_vertex_group", name: "Invert", description: "Invert vertex group influence", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_symmetry", name: "Symmetry", description: "Maintain symmetry on an axis", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "symmetry_axis", name: "Axis", description: "Axis of symmetry", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("Y"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "symmetry_axis", name: "Axis", description: "Axis of symmetry", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("Y"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_decimate`
 pub static OPSPEC_MESH_OT_DECIMATE: OperatorSpec = OperatorSpec {
@@ -1294,7 +1658,7 @@ impl OpProps for Decimate {
 // ---------------------------------------------------------------- mesh.delete
 /// Props of `mesh.delete`, RNA order.
 pub static DELETE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "Method used for deleting mesh data", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Method used for deleting mesh data", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_delete`
 pub static OPSPEC_MESH_OT_DELETE: OperatorSpec = OperatorSpec {
@@ -1579,7 +1943,7 @@ impl OpProps for DissolveFaces {
 pub static DISSOLVE_LIMITED_PROPS: [PropDef; 3] = [
     PropDef { identifier: "angle_limit", name: "Max Angle", description: "Angle limit", kind: PropKind::Float { default: Defaults::Scalar(0.0872664600610733), hard: (0.0, 3.1415927410125732), soft: (0.0, 3.1415927410125732), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_dissolve_boundaries", name: "All Boundaries", description: "Dissolve all vertices in between face boundaries", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit dissolve operation", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Flags(&["NORMAL"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit dissolve operation", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NORMAL"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
 ];
 /// `MESH_OT_dissolve_limited`
 pub static OPSPEC_MESH_OT_DISSOLVE_LIMITED: OperatorSpec = OperatorSpec {
@@ -1881,7 +2245,7 @@ impl OpProps for EdgeRotate {
 // ---------------------------------------------------------------- mesh.edge_split
 /// Props of `mesh.edge_split`, RNA order.
 pub static EDGE_SPLIT_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "Method to use for splitting", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Item("EDGE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Method to use for splitting", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Item("EDGE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_edge_split`
 pub static OPSPEC_MESH_OT_EDGE_SPLIT: OperatorSpec = OperatorSpec {
@@ -1957,7 +2321,7 @@ impl OpProps for EdgeSplit {
 // ---------------------------------------------------------------- mesh.edgering_select
 /// Props of `mesh.edgering_select`, RNA order.
 pub static EDGERING_SELECT_PROPS: [PropDef; 8] = [
-    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
     PropDef { identifier: "extend", name: "Extend Select", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "deselect", name: "Deselect", description: "Remove from the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "toggle", name: "Toggle Select", description: "Toggle the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -2563,6 +2927,45 @@ impl OpProps for ExtrudeVertsIndiv {
     }
 }
 
+// ---------------------------------------------------------------- mesh.face_make_planar
+/// Props of `mesh.face_make_planar`, RNA order.
+pub static FACE_MAKE_PLANAR_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "factor", name: "Factor", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (-10.0, 10.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "repeat", name: "Iterations", description: "", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 10000), soft: (1, 200) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_face_make_planar`
+pub static OPSPEC_MESH_OT_FACE_MAKE_PLANAR: OperatorSpec = OperatorSpec {
+    idname: "mesh.face_make_planar",
+    bl_idname: "MESH_OT_face_make_planar",
+    label: "Make Planar Faces",
+    description: "Flatten selected faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &FACE_MAKE_PLANAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.face_make_planar` (Make Planar Faces).
+#[derive(Debug, Clone)]
+pub struct FaceMakePlanar {
+    /// default 1 [ANIMATABLE]
+    pub factor: Prop<f32>,
+    /// default 1 [ANIMATABLE]
+    pub repeat: Prop<i32>,
+}
+impl OpProps for FaceMakePlanar {
+    const IDNAME: &'static str = "mesh.face_make_planar";
+    const BL_IDNAME: &'static str = "MESH_OT_face_make_planar";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_FACE_MAKE_PLANAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        FaceMakePlanar {
+            factor: a.prop(0, "factor"),
+            repeat: a.prop(1, "repeat"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.face_split_by_edges
 /// Props of `mesh.face_split_by_edges`, RNA order.
 pub static FACE_SPLIT_BY_EDGES_PROPS: [PropDef; 0] = [
@@ -2804,6 +3207,94 @@ impl OpProps for FillHoles {
     }
 }
 
+// ---------------------------------------------------------------- mesh.flatten
+/// Props of `mesh.flatten`, RNA order.
+pub static FLATTEN_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "factor", name: "Factor", description: "Flattening factor", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "method", name: "Method", description: "Plane on which vertices are flattened", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item("BEST_FIT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "lock", name: "Lock", description: "Lock editing of the axis", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_flatten`
+pub static OPSPEC_MESH_OT_FLATTEN: OperatorSpec = OperatorSpec {
+    idname: "mesh.flatten",
+    bl_idname: "MESH_OT_flatten",
+    label: "Flatten",
+    description: "Flatten vertices on a best-fitting plane",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &FLATTEN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.flatten`.
+pub mod flatten {
+    /// `Method`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Method {
+        /// "BEST_FIT"
+        BestFit,
+        /// "NORMAL"
+        Normal,
+        /// "VIEW"
+        View,
+    }
+    impl Method {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Method; 3] = [Method::BestFit, Method::Normal, Method::View];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Method::BestFit => "BEST_FIT",
+                Method::Normal => "NORMAL",
+                Method::View => "VIEW",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "BEST_FIT" => Some(Method::BestFit),
+                "NORMAL" => Some(Method::Normal),
+                "VIEW" => Some(Method::View),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Method {
+        fn default() -> Self {
+            Method::BestFit
+        }
+    }
+    impl frap_rna::FromValue for Method {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.flatten` (Flatten).
+#[derive(Debug, Clone)]
+pub struct Flatten {
+    /// Flattening factor; default 1 [ANIMATABLE]
+    pub factor: Prop<f32>,
+    /// Plane on which vertices are flattened; default "BEST_FIT": BEST_FIT | NORMAL | VIEW [ANIMATABLE]
+    pub method: Prop<flatten::Method>,
+    /// Lock editing of the axis; BOOLEAN [ANIMATABLE]
+    pub lock: Prop<[bool; 3]>,
+}
+impl OpProps for Flatten {
+    const IDNAME: &'static str = "mesh.flatten";
+    const BL_IDNAME: &'static str = "MESH_OT_flatten";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_FLATTEN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Flatten {
+            factor: a.prop(0, "factor"),
+            method: a.prop(1, "method"),
+            lock: a.prop(2, "lock"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.flip_normals
 /// Props of `mesh.flip_normals`, RNA order.
 pub static FLIP_NORMALS_PROPS: [PropDef; 1] = [
@@ -2983,10 +3474,10 @@ impl OpProps for Inset {
 // ---------------------------------------------------------------- mesh.intersect
 /// Props of `mesh.intersect`, RNA order.
 pub static INTERSECT_PROPS: [PropDef; 4] = [
-    PropDef { identifier: "mode", name: "Source", description: "", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Item("SELECT_UNSELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "separate_mode", name: "Separate Mode", description: "", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Item("CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mode", name: "Source", description: "", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("SELECT_UNSELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "separate_mode", name: "Separate Mode", description: "", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "threshold", name: "Merge Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(9.999999974752427e-7), hard: (0.0, 0.009999999776482582), soft: (0.0, 0.0010000000474974513), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "solver", name: "Solver", description: "Which Intersect solver to use", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item("EXACT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "solver", name: "Solver", description: "Which Intersect solver to use", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Item("EXACT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_intersect`
 pub static OPSPEC_MESH_OT_INTERSECT: OperatorSpec = OperatorSpec {
@@ -3151,11 +3642,11 @@ impl OpProps for Intersect {
 // ---------------------------------------------------------------- mesh.intersect_boolean
 /// Props of `mesh.intersect_boolean`, RNA order.
 pub static INTERSECT_BOOLEAN_PROPS: [PropDef; 5] = [
-    PropDef { identifier: "operation", name: "Boolean Operation", description: "Which boolean operation to apply", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("DIFFERENCE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "operation", name: "Boolean Operation", description: "Which boolean operation to apply", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Item("DIFFERENCE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_swap", name: "Swap", description: "Use with difference intersection to swap which side is kept", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_self", name: "Self Intersection", description: "Do self-union or self-intersection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "threshold", name: "Merge Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(9.999999974752427e-7), hard: (0.0, 0.009999999776482582), soft: (0.0, 0.0010000000474974513), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "solver", name: "Solver", description: "Which Boolean solver to use", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("EXACT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "solver", name: "Solver", description: "Which Boolean solver to use", kind: PropKind::Enum { items: &enums::E22, default: EnumDefault::Item("EXACT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_intersect_boolean`
 pub static OPSPEC_MESH_OT_INTERSECT_BOOLEAN: OperatorSpec = OperatorSpec {
@@ -3285,8 +3776,8 @@ impl OpProps for IntersectBoolean {
 // ---------------------------------------------------------------- mesh.loop_select
 /// Props of `mesh.loop_select`, RNA order.
 pub static LOOP_SELECT_PROPS: [PropDef; 9] = [
-    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
-    PropDef { identifier: "delimit_face_loop", name: "Face Loop Delimit", description: "Delimit face loop selection", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Flags(&[]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_face_loop", name: "Face Loop Delimit", description: "Delimit face loop selection", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Flags(&[]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
     PropDef { identifier: "extend", name: "Extend Select", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "deselect", name: "Deselect", description: "Remove from the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "toggle", name: "Toggle Select", description: "Toggle the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -3389,7 +3880,7 @@ impl OpProps for LoopToRegion {
 pub static LOOPCUT_PROPS: [PropDef; 6] = [
     PropDef { identifier: "number_cuts", name: "Number of Cuts", description: "", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 1000000), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "smoothness", name: "Smoothness", description: "Smoothness factor", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-1000.0, 1000.0), soft: (-4.0, 4.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "falloff", name: "Falloff", description: "Falloff type of the feather", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("INVERSE_SQUARE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "falloff", name: "Falloff", description: "Falloff type of the feather", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("INVERSE_SQUARE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "object_index", name: "Object Index", description: "", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "edge_index", name: "Edge Index", description: "", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "mesh_select_mode_init", name: "", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -3612,7 +4103,7 @@ impl OpProps for MarkSharp {
 // ---------------------------------------------------------------- mesh.merge
 /// Props of `mesh.merge`, RNA order.
 pub static MERGE_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "type", name: "Type", description: "Merge method to use", kind: PropKind::Enum { items: &enums::E22, default: EnumDefault::Item("CENTER"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Merge method to use", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("CENTER"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "uvs", name: "UVs", description: "Move UVs according to merge", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_merge`
@@ -3701,6 +4192,121 @@ impl OpProps for Merge {
     }
 }
 
+// ---------------------------------------------------------------- mesh.merge_normals
+/// Props of `mesh.merge_normals`, RNA order.
+pub static MERGE_NORMALS_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_merge_normals`
+pub static OPSPEC_MESH_OT_MERGE_NORMALS: OperatorSpec = OperatorSpec {
+    idname: "mesh.merge_normals",
+    bl_idname: "MESH_OT_merge_normals",
+    label: "Merge Normals",
+    description: "Merge custom normals of selected vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MERGE_NORMALS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.merge_normals` (Merge Normals).
+#[derive(Debug, Clone)]
+pub struct MergeNormals {
+}
+impl OpProps for MergeNormals {
+    const IDNAME: &'static str = "mesh.merge_normals";
+    const BL_IDNAME: &'static str = "MESH_OT_merge_normals";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_MERGE_NORMALS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MergeNormals {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.mod_weighted_strength
+/// Props of `mesh.mod_weighted_strength`, RNA order.
+pub static MOD_WEIGHTED_STRENGTH_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "set", name: "Set Value", description: "Set value of faces", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "face_strength", name: "Face Strength", description: "Strength to use for assigning or selecting face influence for weighted normal modifier", kind: PropKind::Enum { items: &enums::E26, default: EnumDefault::Item("MEDIUM"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_mod_weighted_strength`
+pub static OPSPEC_MESH_OT_MOD_WEIGHTED_STRENGTH: OperatorSpec = OperatorSpec {
+    idname: "mesh.mod_weighted_strength",
+    bl_idname: "MESH_OT_mod_weighted_strength",
+    label: "Face Normals Strength",
+    description: "Set/Get strength of face (used in Weighted Normal modifier)",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MOD_WEIGHTED_STRENGTH_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.mod_weighted_strength`.
+pub mod mod_weighted_strength {
+    /// `FaceStrength`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum FaceStrength {
+        /// "WEAK"
+        Weak,
+        /// "MEDIUM"
+        Medium,
+        /// "STRONG"
+        Strong,
+    }
+    impl FaceStrength {
+        /// Every variant, in RNA item order.
+        pub const ALL: [FaceStrength; 3] = [FaceStrength::Weak, FaceStrength::Medium, FaceStrength::Strong];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                FaceStrength::Weak => "WEAK",
+                FaceStrength::Medium => "MEDIUM",
+                FaceStrength::Strong => "STRONG",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "WEAK" => Some(FaceStrength::Weak),
+                "MEDIUM" => Some(FaceStrength::Medium),
+                "STRONG" => Some(FaceStrength::Strong),
+                _ => None,
+            }
+        }
+    }
+    impl Default for FaceStrength {
+        fn default() -> Self {
+            FaceStrength::Medium
+        }
+    }
+    impl frap_rna::FromValue for FaceStrength {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.mod_weighted_strength` (Face Normals Strength).
+#[derive(Debug, Clone)]
+pub struct ModWeightedStrength {
+    /// Set value of faces; default false [ANIMATABLE]
+    pub set: Prop<bool>,
+    /// Strength to use for assigning or selecting face influence for weighted normal modifier; default "MEDIUM": WEAK | MEDIUM | STRONG [ANIMATABLE]
+    pub face_strength: Prop<mod_weighted_strength::FaceStrength>,
+}
+impl OpProps for ModWeightedStrength {
+    const IDNAME: &'static str = "mesh.mod_weighted_strength";
+    const BL_IDNAME: &'static str = "MESH_OT_mod_weighted_strength";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_MOD_WEIGHTED_STRENGTH
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModWeightedStrength {
+            set: a.prop(0, "set"),
+            face_strength: a.prop(1, "face_strength"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.normals_make_consistent
 /// Props of `mesh.normals_make_consistent`, RNA order.
 pub static NORMALS_MAKE_CONSISTENT_PROPS: [PropDef; 1] = [
@@ -3732,6 +4338,98 @@ impl OpProps for NormalsMakeConsistent {
     fn from_args(a: &OpArgs) -> Self {
         NormalsMakeConsistent {
             inside: a.prop(0, "inside"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.normals_tools
+/// Props of `mesh.normals_tools`, RNA order.
+pub static NORMALS_TOOLS_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "mode", name: "Mode", description: "Mode of tools taking input from interface", kind: PropKind::Enum { items: &enums::E27, default: EnumDefault::Item("COPY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "absolute", name: "Absolute Coordinates", description: "Copy Absolute coordinates of Normal vector", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_normals_tools`
+pub static OPSPEC_MESH_OT_NORMALS_TOOLS: OperatorSpec = OperatorSpec {
+    idname: "mesh.normals_tools",
+    bl_idname: "MESH_OT_normals_tools",
+    label: "Normals Vector Tools",
+    description: "Custom normals tools using Normal Vector of UI",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &NORMALS_TOOLS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.normals_tools`.
+pub mod normals_tools {
+    /// `Mode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Mode {
+        /// "COPY"
+        Copy,
+        /// "PASTE"
+        Paste,
+        /// "ADD"
+        Add,
+        /// "MULTIPLY"
+        Multiply,
+        /// "RESET"
+        Reset,
+    }
+    impl Mode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Mode; 5] = [Mode::Copy, Mode::Paste, Mode::Add, Mode::Multiply, Mode::Reset];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Mode::Copy => "COPY",
+                Mode::Paste => "PASTE",
+                Mode::Add => "ADD",
+                Mode::Multiply => "MULTIPLY",
+                Mode::Reset => "RESET",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "COPY" => Some(Mode::Copy),
+                "PASTE" => Some(Mode::Paste),
+                "ADD" => Some(Mode::Add),
+                "MULTIPLY" => Some(Mode::Multiply),
+                "RESET" => Some(Mode::Reset),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Mode {
+        fn default() -> Self {
+            Mode::Copy
+        }
+    }
+    impl frap_rna::FromValue for Mode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.normals_tools` (Normals Vector Tools).
+#[derive(Debug, Clone)]
+pub struct NormalsTools {
+    /// Mode of tools taking input from interface; default "COPY": COPY | PASTE | ADD | MULTIPLY | RESET [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub mode: Prop<normals_tools::Mode>,
+    /// Copy Absolute coordinates of Normal vector; default false [ANIMATABLE]
+    pub absolute: Prop<bool>,
+}
+impl OpProps for NormalsTools {
+    const IDNAME: &'static str = "mesh.normals_tools";
+    const BL_IDNAME: &'static str = "MESH_OT_normals_tools";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_NORMALS_TOOLS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        NormalsTools {
+            mode: a.prop(0, "mode"),
+            absolute: a.prop(1, "absolute"),
         }
     }
 }
@@ -3810,12 +4508,108 @@ impl OpProps for OffsetEdgeLoopsSlide {
     }
 }
 
+// ---------------------------------------------------------------- mesh.point_normals
+/// Props of `mesh.point_normals`, RNA order.
+pub static POINT_NORMALS_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "mode", name: "Mode", description: "How to define coordinates to point custom normals to", kind: PropKind::Enum { items: &enums::E28, default: EnumDefault::Item("COORDINATES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "invert", name: "Invert", description: "Invert affected normals", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "Make all affected normals parallel", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "target_location", name: "Target", description: "Target location to which normals will point", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "spherize", name: "Spherize", description: "Interpolate between original and new normals", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "spherize_strength", name: "Spherize Strength", description: "Ratio of spherized normal to original normal", kind: PropKind::Float { default: Defaults::Scalar(0.10000000149011612), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_point_normals`
+pub static OPSPEC_MESH_OT_POINT_NORMALS: OperatorSpec = OperatorSpec {
+    idname: "mesh.point_normals",
+    bl_idname: "MESH_OT_point_normals",
+    label: "Point Normals to Target",
+    description: "Point selected custom normals to specified Target",
+    options: OpOptions::BLOCKING.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &POINT_NORMALS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.point_normals`.
+pub mod point_normals {
+    /// `Mode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Mode {
+        /// "COORDINATES"
+        Coordinates,
+        /// "MOUSE"
+        Mouse,
+    }
+    impl Mode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Mode; 2] = [Mode::Coordinates, Mode::Mouse];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Mode::Coordinates => "COORDINATES",
+                Mode::Mouse => "MOUSE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "COORDINATES" => Some(Mode::Coordinates),
+                "MOUSE" => Some(Mode::Mouse),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Mode {
+        fn default() -> Self {
+            Mode::Coordinates
+        }
+    }
+    impl frap_rna::FromValue for Mode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.point_normals` (Point Normals to Target).
+#[derive(Debug, Clone)]
+pub struct PointNormals {
+    /// How to define coordinates to point custom normals to; default "COORDINATES": COORDINATES | MOUSE [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub mode: Prop<point_normals::Mode>,
+    /// Invert affected normals; default false [ANIMATABLE]
+    pub invert: Prop<bool>,
+    /// Make all affected normals parallel; default false [ANIMATABLE]
+    pub align: Prop<bool>,
+    /// Target location to which normals will point; default [0.0, 0.0, 0.0] [ANIMATABLE]
+    pub target_location: Prop<[f32; 3]>,
+    /// Interpolate between original and new normals; default false [ANIMATABLE]
+    pub spherize: Prop<bool>,
+    /// Ratio of spherized normal to original normal; default 0.10000000149011612 [ANIMATABLE]
+    pub spherize_strength: Prop<f32>,
+}
+impl OpProps for PointNormals {
+    const IDNAME: &'static str = "mesh.point_normals";
+    const BL_IDNAME: &'static str = "MESH_OT_point_normals";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_POINT_NORMALS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PointNormals {
+            mode: a.prop(0, "mode"),
+            invert: a.prop(1, "invert"),
+            align: a.prop(2, "align"),
+            target_location: a.prop(3, "target_location"),
+            spherize: a.prop(4, "spherize"),
+            spherize_strength: a.prop(5, "spherize_strength"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.poke
 /// Props of `mesh.poke`, RNA order.
 pub static POKE_PROPS: [PropDef; 3] = [
     PropDef { identifier: "offset", name: "Poke Offset", description: "Poke Offset", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-1000.0, 1000.0), soft: (-10.0, 10.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_relative_offset", name: "Offset Relative", description: "Scale the offset by surrounding geometry", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "center_mode", name: "Poke Center", description: "Poke face center calculation", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Item("MEDIAN_WEIGHTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "center_mode", name: "Poke Center", description: "Poke face center calculation", kind: PropKind::Enum { items: &enums::E29, default: EnumDefault::Item("MEDIAN_WEIGHTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_poke`
 pub static OPSPEC_MESH_OT_POKE: OperatorSpec = OperatorSpec {
@@ -3903,10 +4697,10 @@ impl OpProps for Poke {
 pub static PRIMITIVE_CIRCLE_ADD_PROPS: [PropDef; 9] = [
     PropDef { identifier: "vertices", name: "Vertices", description: "", kind: PropKind::Int { default: Defaults::Scalar(32), hard: (3, 10000000), soft: (3, 500) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "fill_type", name: "Fill Type", description: "", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("NOTHING"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "fill_type", name: "Fill Type", description: "", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("NOTHING"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4059,10 +4853,10 @@ pub static PRIMITIVE_CONE_ADD_PROPS: [PropDef; 11] = [
     PropDef { identifier: "radius1", name: "Radius 1", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius2", name: "Radius 2", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 999999995904.0), soft: (0.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "depth", name: "Depth", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "end_fill_type", name: "Base Fill Type", description: "", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "end_fill_type", name: "Base Fill Type", description: "", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4220,7 +5014,7 @@ pub static PRIMITIVE_CUBE_ADD_PROPS: [PropDef; 7] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4324,10 +5118,10 @@ pub static PRIMITIVE_CYLINDER_ADD_PROPS: [PropDef; 10] = [
     PropDef { identifier: "vertices", name: "Vertices", description: "", kind: PropKind::Int { default: Defaults::Scalar(32), hard: (3, 10000000), soft: (3, 500) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "depth", name: "Depth", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "end_fill_type", name: "Cap Fill Type", description: "", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "end_fill_type", name: "Cap Fill Type", description: "", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4484,7 +5278,7 @@ pub static PRIMITIVE_GRID_ADD_PROPS: [PropDef; 9] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4595,7 +5389,7 @@ pub static PRIMITIVE_ICO_SPHERE_ADD_PROPS: [PropDef; 8] = [
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4702,7 +5496,7 @@ pub static PRIMITIVE_MONKEY_ADD_PROPS: [PropDef; 7] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4806,7 +5600,7 @@ pub static PRIMITIVE_PLANE_ADD_PROPS: [PropDef; 7] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4907,12 +5701,12 @@ impl OpProps for PrimitivePlaneAdd {
 // ---------------------------------------------------------------- mesh.primitive_torus_add
 /// Props of `mesh.primitive_torus_add`, RNA order.
 pub static PRIMITIVE_TORUS_ADD_PROPS: [PropDef; 11] = [
-    PropDef { identifier: "align", name: "Align", description: "", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "major_segments", name: "Major Segments", description: "Number of segments for the main ring of the torus", kind: PropKind::Int { default: Defaults::Scalar(48), hard: (3, 256), soft: (3, 256) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "minor_segments", name: "Minor Segments", description: "Number of segments for the minor ring of the torus", kind: PropKind::Int { default: Defaults::Scalar(12), hard: (3, 256), soft: (3, 256) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "mode", name: "Dimensions Mode", description: "", kind: PropKind::Enum { items: &enums::E26, default: EnumDefault::Item("MAJOR_MINOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mode", name: "Dimensions Mode", description: "", kind: PropKind::Enum { items: &enums::E32, default: EnumDefault::Item("MAJOR_MINOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "major_radius", name: "Major Radius", description: "Radius from the origin to the center of the cross sections", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 10000.0), soft: (0.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "minor_radius", name: "Minor Radius", description: "Radius of the torus's cross section", kind: PropKind::Float { default: Defaults::Scalar(0.25), hard: (0.0, 10000.0), soft: (0.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "abso_major_rad", name: "Exterior Radius", description: "Total Exterior Radius of the torus", kind: PropKind::Float { default: Defaults::Scalar(1.25), hard: (0.0, 10000.0), soft: (0.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -5070,7 +5864,7 @@ pub static PRIMITIVE_UV_SPHERE_ADD_PROPS: [PropDef; 9] = [
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -5177,8 +5971,8 @@ impl OpProps for PrimitiveUvSphereAdd {
 // ---------------------------------------------------------------- mesh.quads_convert_to_tris
 /// Props of `mesh.quads_convert_to_tris`, RNA order.
 pub static QUADS_CONVERT_TO_TRIS_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "quad_method", name: "Quad Method", description: "Method for splitting the quads into triangles", kind: PropKind::Enum { items: &enums::E27, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "ngon_method", name: "N-gon Method", description: "Method for splitting the n-gons into triangles", kind: PropKind::Enum { items: &enums::E28, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "quad_method", name: "Quad Method", description: "Method for splitting the quads into triangles", kind: PropKind::Enum { items: &enums::E33, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "ngon_method", name: "N-gon Method", description: "Method for splitting the n-gons into triangles", kind: PropKind::Enum { items: &enums::E34, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_quads_convert_to_tris`
 pub static OPSPEC_MESH_OT_QUADS_CONVERT_TO_TRIS: OperatorSpec = OperatorSpec {
@@ -5382,6 +6176,37 @@ impl OpProps for RemoveDoubles {
     }
 }
 
+// ---------------------------------------------------------------- mesh.reorder_vertices_spatial
+/// Props of `mesh.reorder_vertices_spatial`, RNA order.
+pub static REORDER_VERTICES_SPATIAL_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_reorder_vertices_spatial`
+pub static OPSPEC_MESH_OT_REORDER_VERTICES_SPATIAL: OperatorSpec = OperatorSpec {
+    idname: "mesh.reorder_vertices_spatial",
+    bl_idname: "MESH_OT_reorder_vertices_spatial",
+    label: "Reorder Mesh Spatially",
+    description: "Reorder mesh faces and vertices based on their spatial position for better BVH building and sculpting performance.",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &REORDER_VERTICES_SPATIAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.reorder_vertices_spatial` (Reorder Mesh Spatially).
+#[derive(Debug, Clone)]
+pub struct ReorderVerticesSpatial {
+}
+impl OpProps for ReorderVerticesSpatial {
+    const IDNAME: &'static str = "mesh.reorder_vertices_spatial";
+    const BL_IDNAME: &'static str = "MESH_OT_reorder_vertices_spatial";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_REORDER_VERTICES_SPATIAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ReorderVerticesSpatial {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.reveal
 /// Props of `mesh.reveal`, RNA order.
 pub static REVEAL_PROPS: [PropDef; 1] = [
@@ -5413,6 +6238,255 @@ impl OpProps for Reveal {
     fn from_args(a: &OpArgs) -> Self {
         Reveal {
             select: a.prop(0, "select"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.rip
+/// Props of `mesh.rip`, RNA order.
+pub static RIP_PROPS: [PropDef; 9] = [
+    PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E35, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "Always confirm operation when releasing button", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_accurate", name: "Accurate", description: "Use accurate transformation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_fill", name: "Fill", description: "Fill the ripped region", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_rip`
+pub static OPSPEC_MESH_OT_RIP: OperatorSpec = OperatorSpec {
+    idname: "mesh.rip",
+    bl_idname: "MESH_OT_rip",
+    label: "Rip",
+    description: "Disconnect vertices or edges from connected geometry",
+    options: OpOptions::DEPENDS_ON_CURSOR.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &RIP_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.rip`.
+pub mod rip {
+    /// `ProportionalEditFalloff`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum ProportionalEditFalloff {
+        /// "SMOOTH"
+        Smooth,
+        /// "SPHERE"
+        Sphere,
+        /// "ROOT"
+        Root,
+        /// "INVERSE_SQUARE"
+        InverseSquare,
+        /// "SHARP"
+        Sharp,
+        /// "LINEAR"
+        Linear,
+        /// "CONSTANT"
+        Constant,
+        /// "RANDOM"
+        Random,
+    }
+    impl ProportionalEditFalloff {
+        /// Every variant, in RNA item order.
+        pub const ALL: [ProportionalEditFalloff; 8] = [ProportionalEditFalloff::Smooth, ProportionalEditFalloff::Sphere, ProportionalEditFalloff::Root, ProportionalEditFalloff::InverseSquare, ProportionalEditFalloff::Sharp, ProportionalEditFalloff::Linear, ProportionalEditFalloff::Constant, ProportionalEditFalloff::Random];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                ProportionalEditFalloff::Smooth => "SMOOTH",
+                ProportionalEditFalloff::Sphere => "SPHERE",
+                ProportionalEditFalloff::Root => "ROOT",
+                ProportionalEditFalloff::InverseSquare => "INVERSE_SQUARE",
+                ProportionalEditFalloff::Sharp => "SHARP",
+                ProportionalEditFalloff::Linear => "LINEAR",
+                ProportionalEditFalloff::Constant => "CONSTANT",
+                ProportionalEditFalloff::Random => "RANDOM",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SMOOTH" => Some(ProportionalEditFalloff::Smooth),
+                "SPHERE" => Some(ProportionalEditFalloff::Sphere),
+                "ROOT" => Some(ProportionalEditFalloff::Root),
+                "INVERSE_SQUARE" => Some(ProportionalEditFalloff::InverseSquare),
+                "SHARP" => Some(ProportionalEditFalloff::Sharp),
+                "LINEAR" => Some(ProportionalEditFalloff::Linear),
+                "CONSTANT" => Some(ProportionalEditFalloff::Constant),
+                "RANDOM" => Some(ProportionalEditFalloff::Random),
+                _ => None,
+            }
+        }
+    }
+    impl Default for ProportionalEditFalloff {
+        fn default() -> Self {
+            ProportionalEditFalloff::Smooth
+        }
+    }
+    impl frap_rna::FromValue for ProportionalEditFalloff {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.rip` (Rip).
+#[derive(Debug, Clone)]
+pub struct Rip {
+    /// default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub mirror: Prop<bool>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_edit: Prop<bool>,
+    /// Falloff type for proportional editing mode; default "SMOOTH": SMOOTH | SPHERE | ROOT | INVERSE_SQUARE | SHARP | LINEAR | CONSTANT | RANDOM [ANIMATABLE]
+    pub proportional_edit_falloff: Prop<rip::ProportionalEditFalloff>,
+    /// default 1 [ANIMATABLE]
+    pub proportional_size: Prop<f32>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_connected: Prop<bool>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_projected: Prop<bool>,
+    /// Always confirm operation when releasing button; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub release_confirm: Prop<bool>,
+    /// Use accurate transformation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub use_accurate: Prop<bool>,
+    /// Fill the ripped region; default false [ANIMATABLE]
+    pub use_fill: Prop<bool>,
+}
+impl OpProps for Rip {
+    const IDNAME: &'static str = "mesh.rip";
+    const BL_IDNAME: &'static str = "MESH_OT_rip";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_RIP
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Rip {
+            mirror: a.prop(0, "mirror"),
+            use_proportional_edit: a.prop(1, "use_proportional_edit"),
+            proportional_edit_falloff: a.prop(2, "proportional_edit_falloff"),
+            proportional_size: a.prop(3, "proportional_size"),
+            use_proportional_connected: a.prop(4, "use_proportional_connected"),
+            use_proportional_projected: a.prop(5, "use_proportional_projected"),
+            release_confirm: a.prop(6, "release_confirm"),
+            use_accurate: a.prop(7, "use_accurate"),
+            use_fill: a.prop(8, "use_fill"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.rip_edge
+/// Props of `mesh.rip_edge`, RNA order.
+pub static RIP_EDGE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "location", name: "Location", description: "World-space ray origin for extending vertices", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-1.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "direction", name: "Direction", description: "World-space direction vector for extending vertices", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-1.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `MESH_OT_rip_edge`
+pub static OPSPEC_MESH_OT_RIP_EDGE: OperatorSpec = OperatorSpec {
+    idname: "mesh.rip_edge",
+    bl_idname: "MESH_OT_rip_edge",
+    label: "Extend Vertices",
+    description: "Extend vertices along the edge closest to the cursor",
+    options: OpOptions::DEPENDS_ON_CURSOR.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &RIP_EDGE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.rip_edge` (Extend Vertices).
+#[derive(Debug, Clone)]
+pub struct RipEdge {
+    /// World-space ray origin for extending vertices; default [0.0, 0.0, 0.0] [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub location: Prop<[f32; 3]>,
+    /// World-space direction vector for extending vertices; default [0.0, 0.0, 0.0] [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub direction: Prop<[f32; 3]>,
+}
+impl OpProps for RipEdge {
+    const IDNAME: &'static str = "mesh.rip_edge";
+    const BL_IDNAME: &'static str = "MESH_OT_rip_edge";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_RIP_EDGE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RipEdge {
+            location: a.prop(0, "location"),
+            direction: a.prop(1, "direction"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.rip_edge_move
+/// Props of `mesh.rip_edge_move`, RNA order.
+pub static RIP_EDGE_MOVE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "MESH_OT_rip_edge", name: "Extend Vertices", description: "Extend vertices along the edge closest to the cursor", kind: PropKind::Pointer { fixed_type: "MESH_OT_rip_edge", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+    PropDef { identifier: "TRANSFORM_OT_translate", name: "Move", description: "Move selected items", kind: PropKind::Pointer { fixed_type: "TRANSFORM_OT_translate", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+];
+/// `MESH_OT_rip_edge_move`
+pub static OPSPEC_MESH_OT_RIP_EDGE_MOVE: OperatorSpec = OperatorSpec {
+    idname: "mesh.rip_edge_move",
+    bl_idname: "MESH_OT_rip_edge_move",
+    label: "Extend Vertices",
+    description: "Extend vertices and move the result",
+    options: OpOptions::MACRO.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &RIP_EDGE_MOVE_PROPS,
+    macro_steps: &["MESH_OT_rip_edge", "TRANSFORM_OT_translate"],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.rip_edge_move` (Extend Vertices).
+#[derive(Debug, Clone)]
+pub struct RipEdgeMove {
+    /// Macro step `MESH_OT_rip_edge`: its arguments.
+    pub MESH_OT_rip_edge: OpArgs,
+    /// Macro step `TRANSFORM_OT_translate`: its arguments.
+    pub TRANSFORM_OT_translate: OpArgs,
+}
+impl OpProps for RipEdgeMove {
+    const IDNAME: &'static str = "mesh.rip_edge_move";
+    const BL_IDNAME: &'static str = "MESH_OT_rip_edge_move";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_RIP_EDGE_MOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RipEdgeMove {
+            MESH_OT_rip_edge: a.nested.get("MESH_OT_rip_edge").cloned().unwrap_or_default(),
+            TRANSFORM_OT_translate: a.nested.get("TRANSFORM_OT_translate").cloned().unwrap_or_default(),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.rip_move
+/// Props of `mesh.rip_move`, RNA order.
+pub static RIP_MOVE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "MESH_OT_rip", name: "Rip", description: "Disconnect vertices or edges from connected geometry", kind: PropKind::Pointer { fixed_type: "MESH_OT_rip", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+    PropDef { identifier: "TRANSFORM_OT_translate", name: "Move", description: "Move selected items", kind: PropKind::Pointer { fixed_type: "TRANSFORM_OT_translate", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+];
+/// `MESH_OT_rip_move`
+pub static OPSPEC_MESH_OT_RIP_MOVE: OperatorSpec = OperatorSpec {
+    idname: "mesh.rip_move",
+    bl_idname: "MESH_OT_rip_move",
+    label: "Rip",
+    description: "Rip polygons and move the result",
+    options: OpOptions::MACRO.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &RIP_MOVE_PROPS,
+    macro_steps: &["MESH_OT_rip", "TRANSFORM_OT_translate"],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.rip_move` (Rip).
+#[derive(Debug, Clone)]
+pub struct RipMove {
+    /// Macro step `MESH_OT_rip`: its arguments.
+    pub MESH_OT_rip: OpArgs,
+    /// Macro step `TRANSFORM_OT_translate`: its arguments.
+    pub TRANSFORM_OT_translate: OpArgs,
+}
+impl OpProps for RipMove {
+    const IDNAME: &'static str = "mesh.rip_move";
+    const BL_IDNAME: &'static str = "MESH_OT_rip_move";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_RIP_MOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RipMove {
+            MESH_OT_rip: a.nested.get("MESH_OT_rip").cloned().unwrap_or_default(),
+            TRANSFORM_OT_translate: a.nested.get("TRANSFORM_OT_translate").cloned().unwrap_or_default(),
         }
     }
 }
@@ -5467,7 +6541,7 @@ impl OpProps for Screw {
 // ---------------------------------------------------------------- mesh.select_all
 /// Props of `mesh.select_all`, RNA order.
 pub static SELECT_ALL_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E29, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E36, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_select_all`
 pub static OPSPEC_MESH_OT_SELECT_ALL: OperatorSpec = OperatorSpec {
@@ -5548,6 +6622,237 @@ impl OpProps for SelectAll {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_axis
+/// Props of `mesh.select_axis`, RNA order.
+pub static SELECT_AXIS_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "orientation", name: "Axis Mode", description: "Axis orientation", kind: PropKind::Enum { items: &enums::E37, default: EnumDefault::Item("LOCAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "sign", name: "Axis Sign", description: "Side to select", kind: PropKind::Enum { items: &enums::E38, default: EnumDefault::Item("POS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "axis", name: "Axis", description: "Select the axis to compare each vertex on", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(9.999999747378752e-5), hard: (9.999999974752427e-7, 50.0), soft: (9.999999747378752e-6, 10.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_select_axis`
+pub static OPSPEC_MESH_OT_SELECT_AXIS: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_axis",
+    bl_idname: "MESH_OT_select_axis",
+    label: "Select Axis",
+    description: "Select all data in the mesh on a single axis",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_AXIS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.select_axis`.
+pub mod select_axis {
+    /// `Orientation`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Orientation {
+        /// "GLOBAL"
+        Global,
+        /// "LOCAL"
+        Local,
+        /// "NORMAL"
+        Normal,
+        /// "GIMBAL"
+        Gimbal,
+        /// "VIEW"
+        View,
+        /// "CURSOR"
+        Cursor,
+        /// "PARENT"
+        Parent,
+    }
+    impl Orientation {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Orientation; 7] = [Orientation::Global, Orientation::Local, Orientation::Normal, Orientation::Gimbal, Orientation::View, Orientation::Cursor, Orientation::Parent];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Orientation::Global => "GLOBAL",
+                Orientation::Local => "LOCAL",
+                Orientation::Normal => "NORMAL",
+                Orientation::Gimbal => "GIMBAL",
+                Orientation::View => "VIEW",
+                Orientation::Cursor => "CURSOR",
+                Orientation::Parent => "PARENT",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "GLOBAL" => Some(Orientation::Global),
+                "LOCAL" => Some(Orientation::Local),
+                "NORMAL" => Some(Orientation::Normal),
+                "GIMBAL" => Some(Orientation::Gimbal),
+                "VIEW" => Some(Orientation::View),
+                "CURSOR" => Some(Orientation::Cursor),
+                "PARENT" => Some(Orientation::Parent),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Orientation {
+        fn default() -> Self {
+            Orientation::Local
+        }
+    }
+    impl frap_rna::FromValue for Orientation {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Sign`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Sign {
+        /// "POS"
+        Pos,
+        /// "NEG"
+        Neg,
+        /// "ALIGN"
+        Align,
+    }
+    impl Sign {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Sign; 3] = [Sign::Pos, Sign::Neg, Sign::Align];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Sign::Pos => "POS",
+                Sign::Neg => "NEG",
+                Sign::Align => "ALIGN",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "POS" => Some(Sign::Pos),
+                "NEG" => Some(Sign::Neg),
+                "ALIGN" => Some(Sign::Align),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Sign {
+        fn default() -> Self {
+            Sign::Pos
+        }
+    }
+    impl frap_rna::FromValue for Sign {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Axis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Axis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+        /// "Z"
+        Z,
+    }
+    impl Axis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Axis; 3] = [Axis::X, Axis::Y, Axis::Z];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Axis::X => "X",
+                Axis::Y => "Y",
+                Axis::Z => "Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(Axis::X),
+                "Y" => Some(Axis::Y),
+                "Z" => Some(Axis::Z),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Axis {
+        fn default() -> Self {
+            Axis::X
+        }
+    }
+    impl frap_rna::FromValue for Axis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.select_axis` (Select Axis).
+#[derive(Debug, Clone)]
+pub struct SelectAxis {
+    /// Axis orientation; default "LOCAL": GLOBAL | LOCAL | NORMAL | GIMBAL | VIEW | CURSOR | PARENT [ANIMATABLE]
+    pub orientation: Prop<select_axis::Orientation>,
+    /// Side to select; default "POS": POS | NEG | ALIGN [ANIMATABLE]
+    pub sign: Prop<select_axis::Sign>,
+    /// Select the axis to compare each vertex on; default "X": X | Y | Z [ANIMATABLE]
+    pub axis: Prop<select_axis::Axis>,
+    /// default 0.00009999999747378752 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+}
+impl OpProps for SelectAxis {
+    const IDNAME: &'static str = "mesh.select_axis";
+    const BL_IDNAME: &'static str = "MESH_OT_select_axis";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_AXIS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectAxis {
+            orientation: a.prop(0, "orientation"),
+            sign: a.prop(1, "sign"),
+            axis: a.prop(2, "axis"),
+            threshold: a.prop(3, "threshold"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.select_boundary_loop_multi
+/// Props of `mesh.select_boundary_loop_multi`, RNA order.
+pub static SELECT_BOUNDARY_LOOP_MULTI_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Flags(&[]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+];
+/// `MESH_OT_select_boundary_loop_multi`
+pub static OPSPEC_MESH_OT_SELECT_BOUNDARY_LOOP_MULTI: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_boundary_loop_multi",
+    bl_idname: "MESH_OT_select_boundary_loop_multi",
+    label: "Multi Select Boundary Loops",
+    description: "Select entire boundary loop of each selected boundary edge",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_BOUNDARY_LOOP_MULTI_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_boundary_loop_multi` (Multi Select Boundary Loops).
+#[derive(Debug, Clone)]
+pub struct SelectBoundaryLoopMulti {
+    /// Extend the selection; default true [ANIMATABLE]
+    pub extend: Prop<bool>,
+    /// Delimit edge loop selection; default [] [ENUM_FLAG, ANIMATABLE]
+    pub delimit_edge_loop: Prop<BTreeSet<SmolStr>>,
+}
+impl OpProps for SelectBoundaryLoopMulti {
+    const IDNAME: &'static str = "mesh.select_boundary_loop_multi";
+    const BL_IDNAME: &'static str = "MESH_OT_select_boundary_loop_multi";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_BOUNDARY_LOOP_MULTI
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectBoundaryLoopMulti {
+            extend: a.prop(0, "extend"),
+            delimit_edge_loop: a.prop(1, "delimit_edge_loop"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.select_by_attribute
 /// Props of `mesh.select_by_attribute`, RNA order.
 pub static SELECT_BY_ATTRIBUTE_PROPS: [PropDef; 0] = [
@@ -5579,10 +6884,106 @@ impl OpProps for SelectByAttribute {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_by_pole_count
+/// Props of `mesh.select_by_pole_count`, RNA order.
+pub static SELECT_BY_POLE_COUNT_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "pole_count", name: "Pole Count", description: "", kind: PropKind::Int { default: Defaults::Scalar(4), hard: (0, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Type of comparison to make", kind: PropKind::Enum { items: &enums::E39, default: EnumDefault::Item("NOTEQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "exclude_nonmanifold", name: "Exclude Non Manifold", description: "Exclude non-manifold poles", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_select_by_pole_count`
+pub static OPSPEC_MESH_OT_SELECT_BY_POLE_COUNT: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_by_pole_count",
+    bl_idname: "MESH_OT_select_by_pole_count",
+    label: "Select By Pole Count",
+    description: "Select vertices at poles by the number of connected edges. In edge and face mode the geometry connected to the vertices is selected",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_BY_POLE_COUNT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.select_by_pole_count`.
+pub mod select_by_pole_count {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "LESS"
+        Less,
+        /// "EQUAL"
+        Equal,
+        /// "GREATER"
+        Greater,
+        /// "NOTEQUAL"
+        Notequal,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 4] = [Type::Less, Type::Equal, Type::Greater, Type::Notequal];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Less => "LESS",
+                Type::Equal => "EQUAL",
+                Type::Greater => "GREATER",
+                Type::Notequal => "NOTEQUAL",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "LESS" => Some(Type::Less),
+                "EQUAL" => Some(Type::Equal),
+                "GREATER" => Some(Type::Greater),
+                "NOTEQUAL" => Some(Type::Notequal),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Notequal
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.select_by_pole_count` (Select By Pole Count).
+#[derive(Debug, Clone)]
+pub struct SelectByPoleCount {
+    /// default 4 [ANIMATABLE]
+    pub pole_count: Prop<i32>,
+    /// Type of comparison to make; default "NOTEQUAL": LESS | EQUAL | GREATER | NOTEQUAL [ANIMATABLE]
+    pub r#type: Prop<select_by_pole_count::Type>,
+    /// Extend the selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+    /// Exclude non-manifold poles; default true [ANIMATABLE]
+    pub exclude_nonmanifold: Prop<bool>,
+}
+impl OpProps for SelectByPoleCount {
+    const IDNAME: &'static str = "mesh.select_by_pole_count";
+    const BL_IDNAME: &'static str = "MESH_OT_select_by_pole_count";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_BY_POLE_COUNT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectByPoleCount {
+            pole_count: a.prop(0, "pole_count"),
+            r#type: a.prop(1, "type"),
+            extend: a.prop(2, "extend"),
+            exclude_nonmanifold: a.prop(3, "exclude_nonmanifold"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.select_edge_loop_multi
 /// Props of `mesh.select_edge_loop_multi`, RNA order.
 pub static SELECT_EDGE_LOOP_MULTI_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
 ];
 /// `MESH_OT_select_edge_loop_multi`
 pub static OPSPEC_MESH_OT_SELECT_EDGE_LOOP_MULTI: OperatorSpec = OperatorSpec {
@@ -5617,7 +7018,7 @@ impl OpProps for SelectEdgeLoopMulti {
 // ---------------------------------------------------------------- mesh.select_edge_ring_multi
 /// Props of `mesh.select_edge_ring_multi`, RNA order.
 pub static SELECT_EDGE_RING_MULTI_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
 ];
 /// `MESH_OT_select_edge_ring_multi`
 pub static OPSPEC_MESH_OT_SELECT_EDGE_RING_MULTI: OperatorSpec = OperatorSpec {
@@ -5653,7 +7054,7 @@ impl OpProps for SelectEdgeRingMulti {
 /// Props of `mesh.select_face_by_sides`, RNA order.
 pub static SELECT_FACE_BY_SIDES_PROPS: [PropDef; 3] = [
     PropDef { identifier: "number", name: "Number of Vertices", description: "", kind: PropKind::Int { default: Defaults::Scalar(4), hard: (3, 2147483647), soft: (3, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "type", name: "Type", description: "Type of comparison to make", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("EQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Type of comparison to make", kind: PropKind::Enum { items: &enums::E39, default: EnumDefault::Item("EQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_select_face_by_sides`
@@ -5741,6 +7142,37 @@ impl OpProps for SelectFaceBySides {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_interior_faces
+/// Props of `mesh.select_interior_faces`, RNA order.
+pub static SELECT_INTERIOR_FACES_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_select_interior_faces`
+pub static OPSPEC_MESH_OT_SELECT_INTERIOR_FACES: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_interior_faces",
+    bl_idname: "MESH_OT_select_interior_faces",
+    label: "Select Interior Faces",
+    description: "Select faces where all edges have more than 2 face users",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_INTERIOR_FACES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_interior_faces` (Select Interior Faces).
+#[derive(Debug, Clone)]
+pub struct SelectInteriorFaces {
+}
+impl OpProps for SelectInteriorFaces {
+    const IDNAME: &'static str = "mesh.select_interior_faces";
+    const BL_IDNAME: &'static str = "MESH_OT_select_interior_faces";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_INTERIOR_FACES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectInteriorFaces {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.select_less
 /// Props of `mesh.select_less`, RNA order.
 pub static SELECT_LESS_PROPS: [PropDef; 1] = [
@@ -5779,7 +7211,7 @@ impl OpProps for SelectLess {
 // ---------------------------------------------------------------- mesh.select_linked
 /// Props of `mesh.select_linked`, RNA order.
 pub static SELECT_LINKED_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit selected region", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Flags(&["SEAM"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit selected region", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["SEAM"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_select_linked`
 pub static OPSPEC_MESH_OT_SELECT_LINKED: OperatorSpec = OperatorSpec {
@@ -5807,6 +7239,53 @@ impl OpProps for SelectLinked {
     fn from_args(a: &OpArgs) -> Self {
         SelectLinked {
             delimit: a.prop(0, "delimit"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.select_linked_pick
+/// Props of `mesh.select_linked_pick`, RNA order.
+pub static SELECT_LINKED_PICK_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "deselect", name: "Deselect", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit selected region", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["SEAM"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "object_index", name: "", description: "", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "index", name: "", description: "", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `MESH_OT_select_linked_pick`
+pub static OPSPEC_MESH_OT_SELECT_LINKED_PICK: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_linked_pick",
+    bl_idname: "MESH_OT_select_linked_pick",
+    label: "Select Linked",
+    description: "(De)select all vertices linked to the edge under the mouse cursor",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_LINKED_PICK_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_linked_pick` (Select Linked).
+#[derive(Debug, Clone)]
+pub struct SelectLinkedPick {
+    /// default false [ANIMATABLE]
+    pub deselect: Prop<bool>,
+    /// Delimit selected region; default ["SEAM"] [SKIP_SAVE, ENUM_FLAG, ANIMATABLE, SKIP_PRESET]
+    pub delimit: Prop<BTreeSet<SmolStr>>,
+    /// default -1 [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub object_index: Prop<i32>,
+    /// default -1 [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub index: Prop<i32>,
+}
+impl OpProps for SelectLinkedPick {
+    const IDNAME: &'static str = "mesh.select_linked_pick";
+    const BL_IDNAME: &'static str = "MESH_OT_select_linked_pick";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_LINKED_PICK
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectLinkedPick {
+            deselect: a.prop(0, "deselect"),
+            delimit: a.prop(1, "delimit"),
+            object_index: a.prop(2, "object_index"),
+            index: a.prop(3, "index"),
         }
     }
 }
@@ -5846,13 +7325,52 @@ impl OpProps for SelectLoose {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_mirror
+/// Props of `mesh.select_mirror`, RNA order.
+pub static SELECT_MIRROR_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "axis", name: "Axis", description: "", kind: PropKind::Enum { items: &enums::E40, default: EnumDefault::Flags(&["X"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the existing selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_select_mirror`
+pub static OPSPEC_MESH_OT_SELECT_MIRROR: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_mirror",
+    bl_idname: "MESH_OT_select_mirror",
+    label: "Select Mirror",
+    description: "Select mesh items at mirrored locations",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_MIRROR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_mirror` (Select Mirror).
+#[derive(Debug, Clone)]
+pub struct SelectMirror {
+    /// default ["X"] [ENUM_FLAG, ANIMATABLE]
+    pub axis: Prop<BTreeSet<SmolStr>>,
+    /// Extend the existing selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for SelectMirror {
+    const IDNAME: &'static str = "mesh.select_mirror";
+    const BL_IDNAME: &'static str = "MESH_OT_select_mirror";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_MIRROR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectMirror {
+            axis: a.prop(0, "axis"),
+            extend: a.prop(1, "extend"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.select_mode
 /// Props of `mesh.select_mode`, RNA order.
 pub static SELECT_MODE_PROPS: [PropDef; 4] = [
     PropDef { identifier: "use_extend", name: "Extend", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_expand", name: "Expand", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E32, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E41, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E42, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_select_mode`
 pub static OPSPEC_MESH_OT_SELECT_MODE: OperatorSpec = OperatorSpec {
@@ -6015,6 +7533,37 @@ impl OpProps for SelectMore {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_next_item
+/// Props of `mesh.select_next_item`, RNA order.
+pub static SELECT_NEXT_ITEM_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_select_next_item`
+pub static OPSPEC_MESH_OT_SELECT_NEXT_ITEM: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_next_item",
+    bl_idname: "MESH_OT_select_next_item",
+    label: "Select Next Element",
+    description: "Select the next element (using selection order)",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_NEXT_ITEM_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_next_item` (Select Next Element).
+#[derive(Debug, Clone)]
+pub struct SelectNextItem {
+}
+impl OpProps for SelectNextItem {
+    const IDNAME: &'static str = "mesh.select_next_item";
+    const BL_IDNAME: &'static str = "MESH_OT_select_next_item";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_NEXT_ITEM
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectNextItem {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.select_non_manifold
 /// Props of `mesh.select_non_manifold`, RNA order.
 pub static SELECT_NON_MANIFOLD_PROPS: [PropDef; 6] = [
@@ -6070,12 +7619,86 @@ impl OpProps for SelectNonManifold {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_nth
+/// Props of `mesh.select_nth`, RNA order.
+pub static SELECT_NTH_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "skip", name: "Deselected", description: "Number of deselected elements in the repetitive sequence", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 2147483647), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "nth", name: "Selected", description: "Number of selected elements in the repetitive sequence", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 2147483647), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "offset", name: "Offset", description: "Offset from the starting point", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-100, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_select_nth`
+pub static OPSPEC_MESH_OT_SELECT_NTH: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_nth",
+    bl_idname: "MESH_OT_select_nth",
+    label: "Checker Deselect",
+    description: "Deselect every Nth element starting from the active vertex, edge or face",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_NTH_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_nth` (Checker Deselect).
+#[derive(Debug, Clone)]
+pub struct SelectNth {
+    /// Number of deselected elements in the repetitive sequence; default 1 [ANIMATABLE]
+    pub skip: Prop<i32>,
+    /// Number of selected elements in the repetitive sequence; default 1 [ANIMATABLE]
+    pub nth: Prop<i32>,
+    /// Offset from the starting point; default 0 [ANIMATABLE]
+    pub offset: Prop<i32>,
+}
+impl OpProps for SelectNth {
+    const IDNAME: &'static str = "mesh.select_nth";
+    const BL_IDNAME: &'static str = "MESH_OT_select_nth";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_NTH
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectNth {
+            skip: a.prop(0, "skip"),
+            nth: a.prop(1, "nth"),
+            offset: a.prop(2, "offset"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.select_prev_item
+/// Props of `mesh.select_prev_item`, RNA order.
+pub static SELECT_PREV_ITEM_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_select_prev_item`
+pub static OPSPEC_MESH_OT_SELECT_PREV_ITEM: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_prev_item",
+    bl_idname: "MESH_OT_select_prev_item",
+    label: "Select Previous Element",
+    description: "Select the previous element (using selection order)",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_PREV_ITEM_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_prev_item` (Select Previous Element).
+#[derive(Debug, Clone)]
+pub struct SelectPrevItem {
+}
+impl OpProps for SelectPrevItem {
+    const IDNAME: &'static str = "mesh.select_prev_item";
+    const BL_IDNAME: &'static str = "MESH_OT_select_prev_item";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_PREV_ITEM
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectPrevItem {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.select_random
 /// Props of `mesh.select_random`, RNA order.
 pub static SELECT_RANDOM_PROPS: [PropDef; 3] = [
     PropDef { identifier: "ratio", name: "Ratio", description: "Portion of items to select randomly", kind: PropKind::Float { default: Defaults::Scalar(0.5), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "seed", name: "Random Seed", description: "Seed for the random number generator", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 255) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E33, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E43, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_select_random`
 pub static OPSPEC_MESH_OT_SELECT_RANDOM: OperatorSpec = OperatorSpec {
@@ -6154,10 +7777,282 @@ impl OpProps for SelectRandom {
     }
 }
 
+// ---------------------------------------------------------------- mesh.select_similar
+/// Props of `mesh.select_similar`, RNA order.
+pub static SELECT_SIMILAR_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E44, default: EnumDefault::Item("VERT_NORMAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "compare", name: "Compare", description: "", kind: PropKind::Enum { items: &enums::E45, default: EnumDefault::Item("EQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 100000.0), soft: (0.0, 1.0), precision: 5, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_select_similar`
+pub static OPSPEC_MESH_OT_SELECT_SIMILAR: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_similar",
+    bl_idname: "MESH_OT_select_similar",
+    label: "Select Similar",
+    description: "Select similar vertices, edges or faces by property types",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_SIMILAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.select_similar`.
+pub mod select_similar {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "VERT_NORMAL"
+        VertNormal,
+        /// "VERT_FACES"
+        VertFaces,
+        /// "VERT_GROUPS"
+        VertGroups,
+        /// "VERT_EDGES"
+        VertEdges,
+        /// "VERT_CREASE"
+        VertCrease,
+        /// "EDGE_LENGTH"
+        EdgeLength,
+        /// "EDGE_DIR"
+        EdgeDir,
+        /// "EDGE_FACES"
+        EdgeFaces,
+        /// "EDGE_FACE_ANGLE"
+        EdgeFaceAngle,
+        /// "EDGE_CREASE"
+        EdgeCrease,
+        /// "EDGE_BEVEL"
+        EdgeBevel,
+        /// "EDGE_SEAM"
+        EdgeSeam,
+        /// "EDGE_SHARP"
+        EdgeSharp,
+        /// "EDGE_FREESTYLE"
+        EdgeFreestyle,
+        /// "FACE_MATERIAL"
+        FaceMaterial,
+        /// "FACE_AREA"
+        FaceArea,
+        /// "FACE_SIDES"
+        FaceSides,
+        /// "FACE_PERIMETER"
+        FacePerimeter,
+        /// "FACE_NORMAL"
+        FaceNormal,
+        /// "FACE_COPLANAR"
+        FaceCoplanar,
+        /// "FACE_SMOOTH"
+        FaceSmooth,
+        /// "FACE_FREESTYLE"
+        FaceFreestyle,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 22] = [Type::VertNormal, Type::VertFaces, Type::VertGroups, Type::VertEdges, Type::VertCrease, Type::EdgeLength, Type::EdgeDir, Type::EdgeFaces, Type::EdgeFaceAngle, Type::EdgeCrease, Type::EdgeBevel, Type::EdgeSeam, Type::EdgeSharp, Type::EdgeFreestyle, Type::FaceMaterial, Type::FaceArea, Type::FaceSides, Type::FacePerimeter, Type::FaceNormal, Type::FaceCoplanar, Type::FaceSmooth, Type::FaceFreestyle];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::VertNormal => "VERT_NORMAL",
+                Type::VertFaces => "VERT_FACES",
+                Type::VertGroups => "VERT_GROUPS",
+                Type::VertEdges => "VERT_EDGES",
+                Type::VertCrease => "VERT_CREASE",
+                Type::EdgeLength => "EDGE_LENGTH",
+                Type::EdgeDir => "EDGE_DIR",
+                Type::EdgeFaces => "EDGE_FACES",
+                Type::EdgeFaceAngle => "EDGE_FACE_ANGLE",
+                Type::EdgeCrease => "EDGE_CREASE",
+                Type::EdgeBevel => "EDGE_BEVEL",
+                Type::EdgeSeam => "EDGE_SEAM",
+                Type::EdgeSharp => "EDGE_SHARP",
+                Type::EdgeFreestyle => "EDGE_FREESTYLE",
+                Type::FaceMaterial => "FACE_MATERIAL",
+                Type::FaceArea => "FACE_AREA",
+                Type::FaceSides => "FACE_SIDES",
+                Type::FacePerimeter => "FACE_PERIMETER",
+                Type::FaceNormal => "FACE_NORMAL",
+                Type::FaceCoplanar => "FACE_COPLANAR",
+                Type::FaceSmooth => "FACE_SMOOTH",
+                Type::FaceFreestyle => "FACE_FREESTYLE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "VERT_NORMAL" => Some(Type::VertNormal),
+                "VERT_FACES" => Some(Type::VertFaces),
+                "VERT_GROUPS" => Some(Type::VertGroups),
+                "VERT_EDGES" => Some(Type::VertEdges),
+                "VERT_CREASE" => Some(Type::VertCrease),
+                "EDGE_LENGTH" => Some(Type::EdgeLength),
+                "EDGE_DIR" => Some(Type::EdgeDir),
+                "EDGE_FACES" => Some(Type::EdgeFaces),
+                "EDGE_FACE_ANGLE" => Some(Type::EdgeFaceAngle),
+                "EDGE_CREASE" => Some(Type::EdgeCrease),
+                "EDGE_BEVEL" => Some(Type::EdgeBevel),
+                "EDGE_SEAM" => Some(Type::EdgeSeam),
+                "EDGE_SHARP" => Some(Type::EdgeSharp),
+                "EDGE_FREESTYLE" => Some(Type::EdgeFreestyle),
+                "FACE_MATERIAL" => Some(Type::FaceMaterial),
+                "FACE_AREA" => Some(Type::FaceArea),
+                "FACE_SIDES" => Some(Type::FaceSides),
+                "FACE_PERIMETER" => Some(Type::FacePerimeter),
+                "FACE_NORMAL" => Some(Type::FaceNormal),
+                "FACE_COPLANAR" => Some(Type::FaceCoplanar),
+                "FACE_SMOOTH" => Some(Type::FaceSmooth),
+                "FACE_FREESTYLE" => Some(Type::FaceFreestyle),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::VertNormal
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Compare`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Compare {
+        /// "EQUAL"
+        Equal,
+        /// "GREATER"
+        Greater,
+        /// "LESS"
+        Less,
+    }
+    impl Compare {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Compare; 3] = [Compare::Equal, Compare::Greater, Compare::Less];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Compare::Equal => "EQUAL",
+                Compare::Greater => "GREATER",
+                Compare::Less => "LESS",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "EQUAL" => Some(Compare::Equal),
+                "GREATER" => Some(Compare::Greater),
+                "LESS" => Some(Compare::Less),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Compare {
+        fn default() -> Self {
+            Compare::Equal
+        }
+    }
+    impl frap_rna::FromValue for Compare {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.select_similar` (Select Similar).
+#[derive(Debug, Clone)]
+pub struct SelectSimilar {
+    /// default "VERT_NORMAL": VERT_NORMAL | VERT_FACES | VERT_GROUPS | VERT_EDGES | VERT_CREASE | EDGE_LENGTH | EDGE_DIR | EDGE_FACES | … [ANIMATABLE]
+    pub r#type: Prop<select_similar::Type>,
+    /// default "EQUAL": EQUAL | GREATER | LESS [ANIMATABLE]
+    pub compare: Prop<select_similar::Compare>,
+    /// default 0 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+}
+impl OpProps for SelectSimilar {
+    const IDNAME: &'static str = "mesh.select_similar";
+    const BL_IDNAME: &'static str = "MESH_OT_select_similar";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_SIMILAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectSimilar {
+            r#type: a.prop(0, "type"),
+            compare: a.prop(1, "compare"),
+            threshold: a.prop(2, "threshold"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.select_similar_region
+/// Props of `mesh.select_similar_region`, RNA order.
+pub static SELECT_SIMILAR_REGION_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_select_similar_region`
+pub static OPSPEC_MESH_OT_SELECT_SIMILAR_REGION: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_similar_region",
+    bl_idname: "MESH_OT_select_similar_region",
+    label: "Select Similar Regions",
+    description: "Select similar face regions to the current selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_SIMILAR_REGION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_similar_region` (Select Similar Regions).
+#[derive(Debug, Clone)]
+pub struct SelectSimilarRegion {
+}
+impl OpProps for SelectSimilarRegion {
+    const IDNAME: &'static str = "mesh.select_similar_region";
+    const BL_IDNAME: &'static str = "MESH_OT_select_similar_region";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_SIMILAR_REGION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectSimilarRegion {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.select_ungrouped
+/// Props of `mesh.select_ungrouped`, RNA order.
+pub static SELECT_UNGROUPED_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_select_ungrouped`
+pub static OPSPEC_MESH_OT_SELECT_UNGROUPED: OperatorSpec = OperatorSpec {
+    idname: "mesh.select_ungrouped",
+    bl_idname: "MESH_OT_select_ungrouped",
+    label: "Select Ungrouped",
+    description: "Select vertices without a group",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_UNGROUPED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.select_ungrouped` (Select Ungrouped).
+#[derive(Debug, Clone)]
+pub struct SelectUngrouped {
+    /// Extend the selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for SelectUngrouped {
+    const IDNAME: &'static str = "mesh.select_ungrouped";
+    const BL_IDNAME: &'static str = "MESH_OT_select_ungrouped";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SELECT_UNGROUPED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectUngrouped {
+            extend: a.prop(0, "extend"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.separate
 /// Props of `mesh.separate`, RNA order.
 pub static SEPARATE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E34, default: EnumDefault::Item("SELECTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E46, default: EnumDefault::Item("SELECTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_separate`
 pub static OPSPEC_MESH_OT_SEPARATE: OperatorSpec = OperatorSpec {
@@ -6339,10 +8234,130 @@ impl OpProps for ShapePropagateToAll {
     }
 }
 
+// ---------------------------------------------------------------- mesh.shortest_path_pick
+/// Props of `mesh.shortest_path_pick`, RNA order.
+pub static SHORTEST_PATH_PICK_PROPS: [PropDef; 8] = [
+    PropDef { identifier: "edge_mode", name: "Edge Tag", description: "The edge flag to tag when selecting the shortest path", kind: PropKind::Enum { items: &enums::E47, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_face_step", name: "Face Stepping", description: "Traverse connected faces (includes diagonals and edge-rings)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_topology_distance", name: "Topology Distance", description: "Find the minimum number of steps, ignoring spatial distance", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_fill", name: "Fill Region", description: "Select all paths between the source/destination elements", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "skip", name: "Deselected", description: "Number of deselected elements in the repetitive sequence", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "nth", name: "Selected", description: "Number of selected elements in the repetitive sequence", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 2147483647), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "offset", name: "Offset", description: "Offset from the starting point", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-100, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "index", name: "", description: "", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `MESH_OT_shortest_path_pick`
+pub static OPSPEC_MESH_OT_SHORTEST_PATH_PICK: OperatorSpec = OperatorSpec {
+    idname: "mesh.shortest_path_pick",
+    bl_idname: "MESH_OT_shortest_path_pick",
+    label: "Pick Shortest Path",
+    description: "Select shortest path between two selections",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHORTEST_PATH_PICK_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.shortest_path_pick`.
+pub mod shortest_path_pick {
+    /// `EdgeMode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum EdgeMode {
+        /// "SELECT"
+        Select,
+        /// "SEAM"
+        Seam,
+        /// "SHARP"
+        Sharp,
+        /// "CREASE"
+        Crease,
+        /// "BEVEL"
+        Bevel,
+        /// "FREESTYLE"
+        Freestyle,
+    }
+    impl EdgeMode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [EdgeMode; 6] = [EdgeMode::Select, EdgeMode::Seam, EdgeMode::Sharp, EdgeMode::Crease, EdgeMode::Bevel, EdgeMode::Freestyle];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                EdgeMode::Select => "SELECT",
+                EdgeMode::Seam => "SEAM",
+                EdgeMode::Sharp => "SHARP",
+                EdgeMode::Crease => "CREASE",
+                EdgeMode::Bevel => "BEVEL",
+                EdgeMode::Freestyle => "FREESTYLE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SELECT" => Some(EdgeMode::Select),
+                "SEAM" => Some(EdgeMode::Seam),
+                "SHARP" => Some(EdgeMode::Sharp),
+                "CREASE" => Some(EdgeMode::Crease),
+                "BEVEL" => Some(EdgeMode::Bevel),
+                "FREESTYLE" => Some(EdgeMode::Freestyle),
+                _ => None,
+            }
+        }
+    }
+    impl Default for EdgeMode {
+        fn default() -> Self {
+            EdgeMode::Select
+        }
+    }
+    impl frap_rna::FromValue for EdgeMode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.shortest_path_pick` (Pick Shortest Path).
+#[derive(Debug, Clone)]
+pub struct ShortestPathPick {
+    /// The edge flag to tag when selecting the shortest path; default "SELECT": SELECT | SEAM | SHARP | CREASE | BEVEL | FREESTYLE [ANIMATABLE]
+    pub edge_mode: Prop<shortest_path_pick::EdgeMode>,
+    /// Traverse connected faces (includes diagonals and edge-rings); default false [ANIMATABLE]
+    pub use_face_step: Prop<bool>,
+    /// Find the minimum number of steps, ignoring spatial distance; default false [ANIMATABLE]
+    pub use_topology_distance: Prop<bool>,
+    /// Select all paths between the source/destination elements; default false [ANIMATABLE]
+    pub use_fill: Prop<bool>,
+    /// Number of deselected elements in the repetitive sequence; default 0 [ANIMATABLE]
+    pub skip: Prop<i32>,
+    /// Number of selected elements in the repetitive sequence; default 1 [ANIMATABLE]
+    pub nth: Prop<i32>,
+    /// Offset from the starting point; default 0 [ANIMATABLE]
+    pub offset: Prop<i32>,
+    /// default -1 [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub index: Prop<i32>,
+}
+impl OpProps for ShortestPathPick {
+    const IDNAME: &'static str = "mesh.shortest_path_pick";
+    const BL_IDNAME: &'static str = "MESH_OT_shortest_path_pick";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SHORTEST_PATH_PICK
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShortestPathPick {
+            edge_mode: a.prop(0, "edge_mode"),
+            use_face_step: a.prop(1, "use_face_step"),
+            use_topology_distance: a.prop(2, "use_topology_distance"),
+            use_fill: a.prop(3, "use_fill"),
+            skip: a.prop(4, "skip"),
+            nth: a.prop(5, "nth"),
+            offset: a.prop(6, "offset"),
+            index: a.prop(7, "index"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.shortest_path_select
 /// Props of `mesh.shortest_path_select`, RNA order.
 pub static SHORTEST_PATH_SELECT_PROPS: [PropDef; 7] = [
-    PropDef { identifier: "edge_mode", name: "Edge Tag", description: "The edge flag to tag when selecting the shortest path", kind: PropKind::Enum { items: &enums::E35, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "edge_mode", name: "Edge Tag", description: "The edge flag to tag when selecting the shortest path", kind: PropKind::Enum { items: &enums::E47, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_face_step", name: "Face Stepping", description: "Traverse connected faces (includes diagonals and edge-rings)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_topology_distance", name: "Topology Distance", description: "Find the minimum number of steps, ignoring spatial distance", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_fill", name: "Fill Region", description: "Select all paths between the source/destination elements", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -6455,6 +8470,41 @@ impl OpProps for ShortestPathSelect {
     }
 }
 
+// ---------------------------------------------------------------- mesh.smooth_normals
+/// Props of `mesh.smooth_normals`, RNA order.
+pub static SMOOTH_NORMALS_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "factor", name: "Factor", description: "Specifies weight of smooth vs original normal", kind: PropKind::Float { default: Defaults::Scalar(0.5), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_smooth_normals`
+pub static OPSPEC_MESH_OT_SMOOTH_NORMALS: OperatorSpec = OperatorSpec {
+    idname: "mesh.smooth_normals",
+    bl_idname: "MESH_OT_smooth_normals",
+    label: "Smooth Normals Vectors",
+    description: "Smooth custom normals based on adjacent vertex normals",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SMOOTH_NORMALS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.smooth_normals` (Smooth Normals Vectors).
+#[derive(Debug, Clone)]
+pub struct SmoothNormals {
+    /// Specifies weight of smooth vs original normal; default 0.5 [ANIMATABLE]
+    pub factor: Prop<f32>,
+}
+impl OpProps for SmoothNormals {
+    const IDNAME: &'static str = "mesh.smooth_normals";
+    const BL_IDNAME: &'static str = "MESH_OT_smooth_normals";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SMOOTH_NORMALS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SmoothNormals {
+            factor: a.prop(0, "factor"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.solidify
 /// Props of `mesh.solidify`, RNA order.
 pub static SOLIDIFY_PROPS: [PropDef; 1] = [
@@ -6486,6 +8536,198 @@ impl OpProps for Solidify {
     fn from_args(a: &OpArgs) -> Self {
         Solidify {
             thickness: a.prop(0, "thickness"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.sort_elements
+/// Props of `mesh.sort_elements`, RNA order.
+pub static SORT_ELEMENTS_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "type", name: "Type", description: "Type of reordering operation to apply", kind: PropKind::Enum { items: &enums::E48, default: EnumDefault::Item("VIEW_ZAXIS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "elements", name: "Elements", description: "Which elements to affect (vertices, edges and/or faces)", kind: PropKind::Enum { items: &enums::E49, default: EnumDefault::Flags(&["VERT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "reverse", name: "Reverse", description: "Reverse the sorting effect", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "seed", name: "Seed", description: "Seed for random-based operations", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 255) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_sort_elements`
+pub static OPSPEC_MESH_OT_SORT_ELEMENTS: OperatorSpec = OperatorSpec {
+    idname: "mesh.sort_elements",
+    bl_idname: "MESH_OT_sort_elements",
+    label: "Sort Mesh Elements",
+    description: "The order of selected vertices/edges/faces is modified, based on a given method",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SORT_ELEMENTS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.sort_elements`.
+pub mod sort_elements {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "VIEW_ZAXIS"
+        ViewZaxis,
+        /// "VIEW_XAXIS"
+        ViewXaxis,
+        /// "CURSOR_DISTANCE"
+        CursorDistance,
+        /// "MATERIAL"
+        Material,
+        /// "SELECTED"
+        Selected,
+        /// "RANDOMIZE"
+        Randomize,
+        /// "REVERSE"
+        Reverse,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 7] = [Type::ViewZaxis, Type::ViewXaxis, Type::CursorDistance, Type::Material, Type::Selected, Type::Randomize, Type::Reverse];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::ViewZaxis => "VIEW_ZAXIS",
+                Type::ViewXaxis => "VIEW_XAXIS",
+                Type::CursorDistance => "CURSOR_DISTANCE",
+                Type::Material => "MATERIAL",
+                Type::Selected => "SELECTED",
+                Type::Randomize => "RANDOMIZE",
+                Type::Reverse => "REVERSE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "VIEW_ZAXIS" => Some(Type::ViewZaxis),
+                "VIEW_XAXIS" => Some(Type::ViewXaxis),
+                "CURSOR_DISTANCE" => Some(Type::CursorDistance),
+                "MATERIAL" => Some(Type::Material),
+                "SELECTED" => Some(Type::Selected),
+                "RANDOMIZE" => Some(Type::Randomize),
+                "REVERSE" => Some(Type::Reverse),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::ViewZaxis
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.sort_elements` (Sort Mesh Elements).
+#[derive(Debug, Clone)]
+pub struct SortElements {
+    /// Type of reordering operation to apply; default "VIEW_ZAXIS": VIEW_ZAXIS | VIEW_XAXIS | CURSOR_DISTANCE | MATERIAL | SELECTED | RANDOMIZE | REVERSE [ANIMATABLE]
+    pub r#type: Prop<sort_elements::Type>,
+    /// Which elements to affect (vertices, edges and/or faces); default ["VERT"] [ENUM_FLAG, ANIMATABLE]
+    pub elements: Prop<BTreeSet<SmolStr>>,
+    /// Reverse the sorting effect; default false [ANIMATABLE]
+    pub reverse: Prop<bool>,
+    /// Seed for random-based operations; default 0 [ANIMATABLE]
+    pub seed: Prop<i32>,
+}
+impl OpProps for SortElements {
+    const IDNAME: &'static str = "mesh.sort_elements";
+    const BL_IDNAME: &'static str = "MESH_OT_sort_elements";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SORT_ELEMENTS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SortElements {
+            r#type: a.prop(0, "type"),
+            elements: a.prop(1, "elements"),
+            reverse: a.prop(2, "reverse"),
+            seed: a.prop(3, "seed"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.space_edge_loops_evenly
+/// Props of `mesh.space_edge_loops_evenly`, RNA order.
+pub static SPACE_EDGE_LOOPS_EVENLY_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "factor", name: "Factor", description: "Spacing effect factor", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "interpolation", name: "Interpolation", description: "Algorithm used for interpolation", kind: PropKind::Enum { items: &enums::E50, default: EnumDefault::Item("CUBIC"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "lock", name: "Lock", description: "Lock editing of the axis", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_space_edge_loops_evenly`
+pub static OPSPEC_MESH_OT_SPACE_EDGE_LOOPS_EVENLY: OperatorSpec = OperatorSpec {
+    idname: "mesh.space_edge_loops_evenly",
+    bl_idname: "MESH_OT_space_edge_loops_evenly",
+    label: "Space Edge Loops Evenly",
+    description: "Space the vertices in a regular distribution on the loop",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SPACE_EDGE_LOOPS_EVENLY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.space_edge_loops_evenly`.
+pub mod space_edge_loops_evenly {
+    /// `Interpolation`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Interpolation {
+        /// "CUBIC"
+        Cubic,
+        /// "LINEAR"
+        Linear,
+    }
+    impl Interpolation {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Interpolation; 2] = [Interpolation::Cubic, Interpolation::Linear];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Interpolation::Cubic => "CUBIC",
+                Interpolation::Linear => "LINEAR",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "CUBIC" => Some(Interpolation::Cubic),
+                "LINEAR" => Some(Interpolation::Linear),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Interpolation {
+        fn default() -> Self {
+            Interpolation::Cubic
+        }
+    }
+    impl frap_rna::FromValue for Interpolation {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.space_edge_loops_evenly` (Space Edge Loops Evenly).
+#[derive(Debug, Clone)]
+pub struct SpaceEdgeLoopsEvenly {
+    /// Spacing effect factor; default 1 [ANIMATABLE]
+    pub factor: Prop<f32>,
+    /// Algorithm used for interpolation; default "CUBIC": CUBIC | LINEAR [ANIMATABLE]
+    pub interpolation: Prop<space_edge_loops_evenly::Interpolation>,
+    /// Lock editing of the axis; BOOLEAN [ANIMATABLE]
+    pub lock: Prop<[bool; 3]>,
+}
+impl OpProps for SpaceEdgeLoopsEvenly {
+    const IDNAME: &'static str = "mesh.space_edge_loops_evenly";
+    const BL_IDNAME: &'static str = "MESH_OT_space_edge_loops_evenly";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SPACE_EDGE_LOOPS_EVENLY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SpaceEdgeLoopsEvenly {
+            factor: a.prop(0, "factor"),
+            interpolation: a.prop(1, "interpolation"),
+            lock: a.prop(2, "lock"),
         }
     }
 }
@@ -6580,13 +8822,44 @@ impl OpProps for Split {
     }
 }
 
+// ---------------------------------------------------------------- mesh.split_normals
+/// Props of `mesh.split_normals`, RNA order.
+pub static SPLIT_NORMALS_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_split_normals`
+pub static OPSPEC_MESH_OT_SPLIT_NORMALS: OperatorSpec = OperatorSpec {
+    idname: "mesh.split_normals",
+    bl_idname: "MESH_OT_split_normals",
+    label: "Split Normals",
+    description: "Split custom normals of selected vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SPLIT_NORMALS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.split_normals` (Split Normals).
+#[derive(Debug, Clone)]
+pub struct SplitNormals {
+}
+impl OpProps for SplitNormals {
+    const IDNAME: &'static str = "mesh.split_normals";
+    const BL_IDNAME: &'static str = "MESH_OT_split_normals";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SPLIT_NORMALS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SplitNormals {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.subdivide
 /// Props of `mesh.subdivide`, RNA order.
 pub static SUBDIVIDE_PROPS: [PropDef; 7] = [
     PropDef { identifier: "number_cuts", name: "Number of Cuts", description: "", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 100), soft: (1, 10) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "smoothness", name: "Smoothness", description: "Smoothness factor", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1000.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "ngon", name: "Create N-Gons", description: "When disabled, newly created faces are limited to 3 and 4 sided faces", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "quadcorner", name: "Quad Corner Type", description: "How to subdivide quad corners (anything other than Straight Cut will prevent n-gons)", kind: PropKind::Enum { items: &enums::E36, default: EnumDefault::Item("STRAIGHT_CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "quadcorner", name: "Quad Corner Type", description: "How to subdivide quad corners (anything other than Straight Cut will prevent n-gons)", kind: PropKind::Enum { items: &enums::E51, default: EnumDefault::Item("STRAIGHT_CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "fractal", name: "Fractal", description: "Fractal randomness factor", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1000000.0), soft: (0.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "fractal_along_normal", name: "Along Normal", description: "Apply fractal displacement along normal only", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "seed", name: "Random Seed", description: "Seed for the random number generator", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 255) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -6692,10 +8965,10 @@ impl OpProps for Subdivide {
 /// Props of `mesh.subdivide_edgering`, RNA order.
 pub static SUBDIVIDE_EDGERING_PROPS: [PropDef; 5] = [
     PropDef { identifier: "number_cuts", name: "Number of Cuts", description: "", kind: PropKind::Int { default: Defaults::Scalar(10), hard: (0, 1000), soft: (1, 64) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "interpolation", name: "Interpolation", description: "Interpolation method", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("PATH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "interpolation", name: "Interpolation", description: "Interpolation method", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("PATH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "smoothness", name: "Smoothness", description: "Smoothness factor", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1000.0), soft: (0.0, 2.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "profile_shape_factor", name: "Profile Factor", description: "How much intermediary new edges are shrunk/expanded", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-1000.0, 1000.0), soft: (-2.0, 2.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "profile_shape", name: "Profile Shape", description: "Shape of the profile", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "profile_shape", name: "Profile Shape", description: "Shape of the profile", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_subdivide_edgering`
 pub static OPSPEC_MESH_OT_SUBDIVIDE_EDGERING: OperatorSpec = OperatorSpec {
@@ -6841,7 +9114,7 @@ impl OpProps for SubdivideEdgering {
 // ---------------------------------------------------------------- mesh.symmetrize
 /// Props of `mesh.symmetrize`, RNA order.
 pub static SYMMETRIZE_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to", kind: PropKind::Enum { items: &enums::E37, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to", kind: PropKind::Enum { items: &enums::E52, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "threshold", name: "Threshold", description: "Limit for snap middle vertices to the axis center", kind: PropKind::Float { default: Defaults::Scalar(9.999999747378752e-5), hard: (0.0, 10.0), soft: (9.999999747378752e-6, 0.10000000149011612), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_symmetrize`
@@ -6930,6 +9203,114 @@ impl OpProps for Symmetrize {
         Symmetrize {
             direction: a.prop(0, "direction"),
             threshold: a.prop(1, "threshold"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.symmetry_snap
+/// Props of `mesh.symmetry_snap`, RNA order.
+pub static SYMMETRY_SNAP_PROPS: [PropDef; 5] = [
+    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to", kind: PropKind::Enum { items: &enums::E52, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Threshold", description: "Distance within which matching vertices are searched", kind: PropKind::Float { default: Defaults::Scalar(0.05000000074505806), hard: (0.0, 10.0), soft: (9.999999747378752e-5, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "factor", name: "Factor", description: "Mix factor of the locations of the vertices", kind: PropKind::Float { default: Defaults::Scalar(0.5), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_center", name: "Center", description: "Snap middle vertices to the axis center", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_topology", name: "Topology Mirror", description: "Use topology to find mirrored vertices instead of spatial proximity", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_symmetry_snap`
+pub static OPSPEC_MESH_OT_SYMMETRY_SNAP: OperatorSpec = OperatorSpec {
+    idname: "mesh.symmetry_snap",
+    bl_idname: "MESH_OT_symmetry_snap",
+    label: "Snap to Symmetry",
+    description: "Snap vertex pairs to their mirrored locations",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SYMMETRY_SNAP_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.symmetry_snap`.
+pub mod symmetry_snap {
+    /// `Direction`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Direction {
+        /// "NEGATIVE_X"
+        NegativeX,
+        /// "POSITIVE_X"
+        PositiveX,
+        /// "NEGATIVE_Y"
+        NegativeY,
+        /// "POSITIVE_Y"
+        PositiveY,
+        /// "NEGATIVE_Z"
+        NegativeZ,
+        /// "POSITIVE_Z"
+        PositiveZ,
+    }
+    impl Direction {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Direction; 6] = [Direction::NegativeX, Direction::PositiveX, Direction::NegativeY, Direction::PositiveY, Direction::NegativeZ, Direction::PositiveZ];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Direction::NegativeX => "NEGATIVE_X",
+                Direction::PositiveX => "POSITIVE_X",
+                Direction::NegativeY => "NEGATIVE_Y",
+                Direction::PositiveY => "POSITIVE_Y",
+                Direction::NegativeZ => "NEGATIVE_Z",
+                Direction::PositiveZ => "POSITIVE_Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "NEGATIVE_X" => Some(Direction::NegativeX),
+                "POSITIVE_X" => Some(Direction::PositiveX),
+                "NEGATIVE_Y" => Some(Direction::NegativeY),
+                "POSITIVE_Y" => Some(Direction::PositiveY),
+                "NEGATIVE_Z" => Some(Direction::NegativeZ),
+                "POSITIVE_Z" => Some(Direction::PositiveZ),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Direction {
+        fn default() -> Self {
+            Direction::NegativeX
+        }
+    }
+    impl frap_rna::FromValue for Direction {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.symmetry_snap` (Snap to Symmetry).
+#[derive(Debug, Clone)]
+pub struct SymmetrySnap {
+    /// Which sides to copy from and to; default "NEGATIVE_X": NEGATIVE_X | POSITIVE_X | NEGATIVE_Y | POSITIVE_Y | NEGATIVE_Z | POSITIVE_Z [ANIMATABLE]
+    pub direction: Prop<symmetry_snap::Direction>,
+    /// Distance within which matching vertices are searched; default 0.05000000074505806 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+    /// Mix factor of the locations of the vertices; default 0.5 [ANIMATABLE]
+    pub factor: Prop<f32>,
+    /// Snap middle vertices to the axis center; default true [ANIMATABLE]
+    pub use_center: Prop<bool>,
+    /// Use topology to find mirrored vertices instead of spatial proximity; default false [ANIMATABLE]
+    pub use_topology: Prop<bool>,
+}
+impl OpProps for SymmetrySnap {
+    const IDNAME: &'static str = "mesh.symmetry_snap";
+    const BL_IDNAME: &'static str = "MESH_OT_symmetry_snap";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SYMMETRY_SNAP
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SymmetrySnap {
+            direction: a.prop(0, "direction"),
+            threshold: a.prop(1, "threshold"),
+            factor: a.prop(2, "factor"),
+            use_center: a.prop(3, "use_center"),
+            use_topology: a.prop(4, "use_topology"),
         }
     }
 }
@@ -7094,6 +9475,72 @@ impl OpProps for UvTextureRemove {
     }
     fn from_args(a: &OpArgs) -> Self {
         UvTextureRemove {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.uvs_reverse
+/// Props of `mesh.uvs_reverse`, RNA order.
+pub static UVS_REVERSE_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_uvs_reverse`
+pub static OPSPEC_MESH_OT_UVS_REVERSE: OperatorSpec = OperatorSpec {
+    idname: "mesh.uvs_reverse",
+    bl_idname: "MESH_OT_uvs_reverse",
+    label: "Reverse UVs",
+    description: "Flip direction of UV coordinates inside faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &UVS_REVERSE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.uvs_reverse` (Reverse UVs).
+#[derive(Debug, Clone)]
+pub struct UvsReverse {
+}
+impl OpProps for UvsReverse {
+    const IDNAME: &'static str = "mesh.uvs_reverse";
+    const BL_IDNAME: &'static str = "MESH_OT_uvs_reverse";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_UVS_REVERSE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        UvsReverse {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.uvs_rotate
+/// Props of `mesh.uvs_rotate`, RNA order.
+pub static UVS_ROTATE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "use_ccw", name: "Counter Clockwise", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_uvs_rotate`
+pub static OPSPEC_MESH_OT_UVS_ROTATE: OperatorSpec = OperatorSpec {
+    idname: "mesh.uvs_rotate",
+    bl_idname: "MESH_OT_uvs_rotate",
+    label: "Rotate UVs",
+    description: "Rotate UV coordinates inside faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &UVS_ROTATE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.uvs_rotate` (Rotate UVs).
+#[derive(Debug, Clone)]
+pub struct UvsRotate {
+    /// default false [ANIMATABLE]
+    pub use_ccw: Prop<bool>,
+}
+impl OpProps for UvsRotate {
+    const IDNAME: &'static str = "mesh.uvs_rotate";
+    const BL_IDNAME: &'static str = "MESH_OT_uvs_rotate";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_UVS_ROTATE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        UvsRotate {
+            use_ccw: a.prop(0, "use_ccw"),
         }
     }
 }
@@ -7277,6 +9724,65 @@ impl OpProps for VerticesSmooth {
             yaxis: a.prop(3, "yaxis"),
             zaxis: a.prop(4, "zaxis"),
             wait_for_input: a.prop(5, "wait_for_input"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.vertices_smooth_laplacian
+/// Props of `mesh.vertices_smooth_laplacian`, RNA order.
+pub static VERTICES_SMOOTH_LAPLACIAN_PROPS: [PropDef; 7] = [
+    PropDef { identifier: "repeat", name: "Number of iterations to smooth the mesh", description: "", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 1000), soft: (1, 200) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "lambda_factor", name: "Lambda factor", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (1.0000000116860974e-7, 1000.0), soft: (1.0000000116860974e-7, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "lambda_border", name: "Lambda factor in border", description: "", kind: PropKind::Float { default: Defaults::Scalar(4.999999873689376e-5), hard: (1.0000000116860974e-7, 1000.0), soft: (1.0000000116860974e-7, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_x", name: "Smooth X Axis", description: "Smooth object along X axis", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_y", name: "Smooth Y Axis", description: "Smooth object along Y axis", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_z", name: "Smooth Z Axis", description: "Smooth object along Z axis", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "preserve_volume", name: "Preserve Volume", description: "Apply volume preservation after smooth", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_vertices_smooth_laplacian`
+pub static OPSPEC_MESH_OT_VERTICES_SMOOTH_LAPLACIAN: OperatorSpec = OperatorSpec {
+    idname: "mesh.vertices_smooth_laplacian",
+    bl_idname: "MESH_OT_vertices_smooth_laplacian",
+    label: "Laplacian Smooth Vertices",
+    description: "Laplacian smooth of selected vertices",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTICES_SMOOTH_LAPLACIAN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.vertices_smooth_laplacian` (Laplacian Smooth Vertices).
+#[derive(Debug, Clone)]
+pub struct VerticesSmoothLaplacian {
+    /// default 1 [ANIMATABLE]
+    pub repeat: Prop<i32>,
+    /// default 1 [ANIMATABLE]
+    pub lambda_factor: Prop<f32>,
+    /// default 0.00004999999873689376 [ANIMATABLE]
+    pub lambda_border: Prop<f32>,
+    /// Smooth object along X axis; default true [ANIMATABLE]
+    pub use_x: Prop<bool>,
+    /// Smooth object along Y axis; default true [ANIMATABLE]
+    pub use_y: Prop<bool>,
+    /// Smooth object along Z axis; default true [ANIMATABLE]
+    pub use_z: Prop<bool>,
+    /// Apply volume preservation after smooth; default true [ANIMATABLE]
+    pub preserve_volume: Prop<bool>,
+}
+impl OpProps for VerticesSmoothLaplacian {
+    const IDNAME: &'static str = "mesh.vertices_smooth_laplacian";
+    const BL_IDNAME: &'static str = "MESH_OT_vertices_smooth_laplacian";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_VERTICES_SMOOTH_LAPLACIAN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VerticesSmoothLaplacian {
+            repeat: a.prop(0, "repeat"),
+            lambda_factor: a.prop(1, "lambda_factor"),
+            lambda_border: a.prop(2, "lambda_border"),
+            use_x: a.prop(3, "use_x"),
+            use_y: a.prop(4, "use_y"),
+            use_z: a.prop(5, "use_z"),
+            preserve_volume: a.prop(6, "preserve_volume"),
         }
     }
 }

@@ -10,7 +10,12 @@
 //! cargo xtask codegen [--check]       Blender dumps -> generated Rust (WP 1.1)
 //! cargo xtask fmt [--check]           rustfmt on every tracked hand-written .rs (automod modules too)
 //! cargo xtask golden <bless|live|report> [--filter <glob>]   (WP 1.8)
+//! cargo xtask spec-refresh [--check] [--blender <path>]       Blender 5.2.x spec refresh (M8 WP 8.9)
+//! cargo xtask perf [--record]         §21.7 performance budgets vs xtask/perf.toml (M8 WP 8.8)
 //! ```
+//!
+//! M8 W0 (decision log M8W0-9): `spec_refresh.rs` (WP 8.9) and `perf.rs` (WP 8.8) are wired
+//! here as stubs; each WP owns its file (and its directory below it).
 #![deny(unsafe_code)]
 
 use std::path::PathBuf;
@@ -21,6 +26,8 @@ mod check_deps;
 mod codegen;
 mod fmt;
 mod golden;
+mod perf;
+mod spec_refresh;
 
 /// Prints a warning; on GitHub Actions also as a `::warning` annotation, so a check that passes
 /// vacuously (codegen before WP 1.1, budgets without baselines) is visible in the run summary.
@@ -39,7 +46,7 @@ pub fn workspace_root() -> PathBuf {
         .to_path_buf()
 }
 
-const USAGE: &str = "usage: cargo xtask <check-deps | budgets [--record] | codegen [--check] | fmt [--check] | golden <bless|live|report> [--filter <glob>]>";
+const USAGE: &str = "usage: cargo xtask <check-deps | budgets [--record] | codegen [--check] | fmt [--check] | golden <bless|live|report> [--filter <glob>] | spec-refresh [--check] | perf [--record]>";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -53,6 +60,8 @@ fn main() -> ExitCode {
         "codegen" => codegen::run(rest),
         "fmt" => fmt::run(rest),
         "golden" => golden::run(rest),
+        "spec-refresh" => spec_refresh::run(rest),
+        "perf" => perf::run(rest),
         "-h" | "--help" | "help" => {
             println!("{USAGE}");
             Ok(())

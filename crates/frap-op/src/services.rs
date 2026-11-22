@@ -47,6 +47,27 @@ pub trait ImageCache {
     fn evict(&mut self, key: IdKey);
 }
 
+/// What an `ed.*` undo operator asks the session for (M8 W0 contract, decision log M8W0-5;
+/// WP 8.4 implements it). An undo operator changes nothing itself: it records the request
+/// with [`Services::undo`], and the session applies it to its ring of committed states once
+/// the statement has committed (an undo step is never rolled back into, and a failed or
+/// CANCELLED statement is not a step).
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum UndoRequest {
+    /// `ed.undo()`: back to the state before the last undo step.
+    Undo,
+    /// `ed.redo()`: forward again.
+    Redo,
+    /// `ed.undo_redo()`: undo the last step and redo it.
+    UndoRedo,
+    /// `ed.undo_push(message=…)`: a named step at the current state.
+    Push {
+        /// The step's name (`message`).
+        message: String,
+    },
+}
+
 /// Session services reachable from operators.
 pub trait Services {
     /// Lazily created GPU render service; `OpError::Gpu` (`GPU_UNAVAILABLE`) when there is no
@@ -56,4 +77,12 @@ pub trait Services {
     fn images(&mut self) -> &mut dyn ImageCache;
     /// Path resolution (`cwd`, `//` relative to `bpy.data.filepath`).
     fn paths(&self) -> &PathResolver;
+    /// Records an undo request for the session to apply after the statement (M8 W0 contract,
+    /// [`UndoRequest`]). The default answers `NotImplementedError` (a host without an undo
+    /// ring).
+    fn undo(&mut self, req: UndoRequest) -> Result<(), OpError> {
+        Err(OpError::NotImplemented(format!(
+            "frap: this session keeps no undo history ({req:?})"
+        )))
+    }
 }

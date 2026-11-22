@@ -4,7 +4,12 @@
 //! operator, modifier evaluator or shader node is planned (`"M2"`) or that it is out of scope
 //! (`"OUT"`). The same column drives codegen (§4.2), so the two cannot disagree.
 //!
-//! Rule (3) of OPERATORS.md: an operator that is not listed is `OUT`.
+//! Rule (3) of OPERATORS.md: an operator that is not listed is `OUT`. `M9` is the post-M8
+//! backlog ([`POST_M8`]).
+//!
+//! Moved from `frap-schema` (`manifest/planned.rs`) in M8 W0 (decision log M8W0-4) so the
+//! `OP_NOT_IMPLEMENTED` hint of `frap-op`'s registry can name the row; `frap-schema`
+//! re-exports it.
 
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
@@ -14,6 +19,9 @@ const OPERATORS_MD: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../docs/OPERATORS.md"
 ));
+
+/// The `M` cell of a post-M8 row (OPERATORS.md legend, decision log M8W0-3).
+pub const POST_M8: &str = "M9";
 
 /// One table row of OPERATORS.md: the first code-spanned cell (operator idname, modifier type
 /// or node `bl_idname`), the second code-spanned cell (modifier struct, if any) and the `M`
@@ -94,6 +102,8 @@ mod tests {
         assert_eq!(operator_milestone("mesh.primitive_cube_add"), "M1");
         assert_eq!(operator_milestone("mesh.select_all"), "M2");
         assert_eq!(operator_milestone("sculpt.brush_stroke"), "OUT");
+        assert_eq!(operator_milestone("object.track_set"), POST_M8);
+        assert_eq!(operator_milestone("scene.gltf2_variant_add"), "M8");
         let sub = row("SUBSURF").expect("modifier table row");
         assert_eq!(
             (sub.milestone, sub.second, sub.section),

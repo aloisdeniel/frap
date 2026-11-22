@@ -5,12 +5,17 @@
 
 use frap_rna::OperatorSpec;
 
+pub mod ed;
 pub mod export_scene;
 pub mod import_scene;
 pub mod wm;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 8] = [
+pub static ALL_OPS: [&OperatorSpec; 12] = [
+    &ed::OPSPEC_ED_OT_REDO,
+    &ed::OPSPEC_ED_OT_UNDO,
+    &ed::OPSPEC_ED_OT_UNDO_PUSH,
+    &ed::OPSPEC_ED_OT_UNDO_REDO,
     &export_scene::OPSPEC_EXPORT_SCENE_OT_GLTF,
     &import_scene::OPSPEC_IMPORT_SCENE_OT_GLTF,
     &wm::OPSPEC_WM_OT_OPEN_MAINFILE,

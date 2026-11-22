@@ -235,8 +235,21 @@ pub(crate) fn unknown_error(verb: &str, idname: &str, suggestions: &[&str]) -> F
 }
 
 /// The known-but-unimplemented error (`NotImplementedError`, `OP_NOT_IMPLEMENTED`) with the
-/// Blender signature in `detail.signature`.
+/// Blender signature in `detail.signature` and the OPERATORS.md milestone in
+/// `detail.planned` (`"M8"`, `"M9"` = post-M8, `"OUT"`; M8 W0, decision log M8W0-4): the hint
+/// names what the row says, and for an operator without a row it says so (rule 3 makes it
+/// `OUT`) instead of pointing at a row that does not exist.
 pub(crate) fn not_implemented_error(spec: &OperatorSpec) -> FrapError {
+    let row = crate::planned::row(spec.idname).filter(|r| r.section == 'A');
+    let planned = row.map_or("OUT", |r| r.milestone);
+    let status = match row {
+        Some(r) if r.milestone == "OUT" => "OPERATORS.md marks it OUT (not planned)".to_owned(),
+        Some(r) if r.milestone == crate::planned::POST_M8 => {
+            "OPERATORS.md plans it after M8 (M9, the post-M8 backlog)".to_owned()
+        }
+        Some(r) => format!("OPERATORS.md plans it for {}", r.milestone),
+        None => "OPERATORS.md does not list it, so it is OUT (not planned, rule 3)".to_owned(),
+    };
     FrapError::new(
         PyExc::NotImplementedError,
         OP_NOT_IMPLEMENTED,
@@ -247,10 +260,48 @@ pub(crate) fn not_implemented_error(spec: &OperatorSpec) -> FrapError {
     )
     .with_detail("operator", spec.idname)
     .with_detail("signature", crate::def::pipeline::signature(spec))
+    .with_detail("planned", planned)
     .with_hint(format!(
-        "frap --describe op:{} shows its status; OPERATORS.md lists the milestone it lands in",
+        "frap --describe op:{} shows its status; {status}",
         spec.idname
     ))
+}
+
+/// An operator Blender registers only while a condition holds, e.g. the glTF add-on's
+/// variant operators while `KHR_materials_variants_ui` is on (`variant_register`). While
+/// `registered` answers false, calling or polling it is Blender's unknown-operator error
+/// (`Calling operator "bpy.ops.X" error, could not be found`), with `when` as the hint.
+/// Extension point (M8 W0, decision log M8W0-6): the operator's file registers its gate.
+#[derive(Debug)]
+pub struct OpGate {
+    /// `ns.op`
+    pub idname: &'static str,
+    /// Whether the operator is registered in this context.
+    pub registered: fn(&Context) -> bool,
+    /// How to register it (`error.hint` while it is not).
+    pub when: &'static str,
+}
+
+/// Operators registered only under a condition ([`OpGate`]).
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice]
+pub static OP_GATES: [OpGate];
+
+/// The gate of `idname`, if it has one.
+pub fn gate(idname: &str) -> Option<&'static OpGate> {
+    OP_GATES.iter().find(|g| g.idname == idname)
+}
+
+/// [`lookup`] in a context: an operator whose [`OpGate`] is closed is unknown, as in Blender.
+pub fn lookup_in(idname: &str, ctx: &Context) -> Result<&'static OperatorDef, FrapError> {
+    if let Some(g) = gate(idname)
+        && !(g.registered)(ctx)
+    {
+        let mut e = unknown_error("Calling", idname, &[]);
+        e.hint = Some(g.when.to_owned());
+        return Err(e);
+    }
+    lookup(idname)
 }
 
 /// §10.2 step 1: lookup, with Blender's error for unknown operators and `OP_NOT_IMPLEMENTED`

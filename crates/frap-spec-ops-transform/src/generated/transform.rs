@@ -11,7 +11,17 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 11] = [
+pub static E0: [EnumItem; 8] = [
+    EnumItem { identifier: "SMOOTH", name: "Smooth", description: "Smooth falloff", value: 0 },
+    EnumItem { identifier: "SPHERE", name: "Sphere", description: "Spherical falloff", value: 1 },
+    EnumItem { identifier: "ROOT", name: "Root", description: "Root falloff", value: 2 },
+    EnumItem { identifier: "INVERSE_SQUARE", name: "Inverse Square", description: "Inverse Square falloff", value: 7 },
+    EnumItem { identifier: "SHARP", name: "Sharp", description: "Sharp falloff", value: 3 },
+    EnumItem { identifier: "LINEAR", name: "Linear", description: "Linear falloff", value: 4 },
+    EnumItem { identifier: "CONSTANT", name: "Constant", description: "Constant falloff", value: 5 },
+    EnumItem { identifier: "RANDOM", name: "Random", description: "Random falloff", value: 6 },
+];
+pub static E1: [EnumItem; 11] = [
     EnumItem { identifier: "INCREMENT", name: "Increment", description: "Snap to increments", value: 256 },
     EnumItem { identifier: "GRID", name: "Grid", description: "Snap to grid", value: 128 },
     EnumItem { identifier: "VERTEX", name: "Vertex", description: "Snap to vertices", value: 5 },
@@ -24,13 +34,13 @@ pub static E0: [EnumItem; 11] = [
     EnumItem { identifier: "FACE_PROJECT", name: "Face Project", description: "Snap by projecting onto faces", value: 1024 },
     EnumItem { identifier: "FACE_NEAREST", name: "Face Nearest", description: "Snap to nearest point on faces", value: 512 },
 ];
-pub static E1: [EnumItem; 4] = [
+pub static E2: [EnumItem; 4] = [
     EnumItem { identifier: "CLOSEST", name: "Closest", description: "Snap closest point onto target", value: 0 },
     EnumItem { identifier: "CENTER", name: "Center", description: "Snap transformation center onto target", value: 1 },
     EnumItem { identifier: "MEDIAN", name: "Median", description: "Snap median onto target", value: 2 },
     EnumItem { identifier: "ACTIVE", name: "Active", description: "Snap active onto target", value: 3 },
 ];
-pub static E2: [EnumItem; 7] = [
+pub static E3: [EnumItem; 7] = [
     EnumItem { identifier: "GLOBAL", name: "Global", description: "Align the transformation axes to world space", value: 0 },
     EnumItem { identifier: "LOCAL", name: "Local", description: "Align the transformation axes to the selected objects' local space", value: 1 },
     EnumItem { identifier: "NORMAL", name: "Normal", description: "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)", value: 2 },
@@ -38,16 +48,6 @@ pub static E2: [EnumItem; 7] = [
     EnumItem { identifier: "VIEW", name: "View", description: "Align the transformation axes to the window", value: 3 },
     EnumItem { identifier: "CURSOR", name: "Cursor", description: "Align the transformation axes to the 3D cursor", value: 5 },
     EnumItem { identifier: "PARENT", name: "Parent", description: "Align the transformation axes to the object's parent space", value: 6 },
-];
-pub static E3: [EnumItem; 8] = [
-    EnumItem { identifier: "SMOOTH", name: "Smooth", description: "Smooth falloff", value: 0 },
-    EnumItem { identifier: "SPHERE", name: "Sphere", description: "Spherical falloff", value: 1 },
-    EnumItem { identifier: "ROOT", name: "Root", description: "Root falloff", value: 2 },
-    EnumItem { identifier: "INVERSE_SQUARE", name: "Inverse Square", description: "Inverse Square falloff", value: 7 },
-    EnumItem { identifier: "SHARP", name: "Sharp", description: "Sharp falloff", value: 3 },
-    EnumItem { identifier: "LINEAR", name: "Linear", description: "Linear falloff", value: 4 },
-    EnumItem { identifier: "CONSTANT", name: "Constant", description: "Constant falloff", value: 5 },
-    EnumItem { identifier: "RANDOM", name: "Random", description: "Random falloff", value: 6 },
 ];
 pub static E4: [EnumItem; 3] = [
     EnumItem { identifier: "X", name: "X", description: "", value: 0 },
@@ -88,6 +88,228 @@ pub static E5: [EnumItem; 32] = [
     EnumItem { identifier: "SEQSLIDE", name: "Sequence Slide", description: "", value: 32 },
     EnumItem { identifier: "GPENCIL_OPACITY", name: "Grease Pencil Opacity", description: "", value: 35 },
 ];
+}
+
+// ---------------------------------------------------------------- transform.bend
+/// Props of `transform.bend`, RNA order.
+pub static BEND_PROPS: [PropDef; 12] = [
+    PropDef { identifier: "value", name: "Angle", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Fixed(1), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "gpencil_strokes", name: "Edit Grease Pencil", description: "Edit selected Grease Pencil strokes", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "center_override", name: "Center Override", description: "Force using this center value (when set)", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-10000.0, 10000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "Always confirm operation when releasing button", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_accurate", name: "Accurate", description: "Use accurate transformation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `TRANSFORM_OT_bend`
+pub static OPSPEC_TRANSFORM_OT_BEND: OperatorSpec = OperatorSpec {
+    idname: "transform.bend",
+    bl_idname: "TRANSFORM_OT_bend",
+    label: "Bend",
+    description: "Bend selected items between the 3D cursor and the mouse",
+    options: OpOptions::BLOCKING.union(OpOptions::DEPENDS_ON_CURSOR).union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &BEND_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Enums of `transform.bend`.
+pub mod bend {
+    /// `ProportionalEditFalloff`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum ProportionalEditFalloff {
+        /// "SMOOTH"
+        Smooth,
+        /// "SPHERE"
+        Sphere,
+        /// "ROOT"
+        Root,
+        /// "INVERSE_SQUARE"
+        InverseSquare,
+        /// "SHARP"
+        Sharp,
+        /// "LINEAR"
+        Linear,
+        /// "CONSTANT"
+        Constant,
+        /// "RANDOM"
+        Random,
+    }
+    impl ProportionalEditFalloff {
+        /// Every variant, in RNA item order.
+        pub const ALL: [ProportionalEditFalloff; 8] = [ProportionalEditFalloff::Smooth, ProportionalEditFalloff::Sphere, ProportionalEditFalloff::Root, ProportionalEditFalloff::InverseSquare, ProportionalEditFalloff::Sharp, ProportionalEditFalloff::Linear, ProportionalEditFalloff::Constant, ProportionalEditFalloff::Random];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                ProportionalEditFalloff::Smooth => "SMOOTH",
+                ProportionalEditFalloff::Sphere => "SPHERE",
+                ProportionalEditFalloff::Root => "ROOT",
+                ProportionalEditFalloff::InverseSquare => "INVERSE_SQUARE",
+                ProportionalEditFalloff::Sharp => "SHARP",
+                ProportionalEditFalloff::Linear => "LINEAR",
+                ProportionalEditFalloff::Constant => "CONSTANT",
+                ProportionalEditFalloff::Random => "RANDOM",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SMOOTH" => Some(ProportionalEditFalloff::Smooth),
+                "SPHERE" => Some(ProportionalEditFalloff::Sphere),
+                "ROOT" => Some(ProportionalEditFalloff::Root),
+                "INVERSE_SQUARE" => Some(ProportionalEditFalloff::InverseSquare),
+                "SHARP" => Some(ProportionalEditFalloff::Sharp),
+                "LINEAR" => Some(ProportionalEditFalloff::Linear),
+                "CONSTANT" => Some(ProportionalEditFalloff::Constant),
+                "RANDOM" => Some(ProportionalEditFalloff::Random),
+                _ => None,
+            }
+        }
+    }
+    impl Default for ProportionalEditFalloff {
+        fn default() -> Self {
+            ProportionalEditFalloff::Smooth
+        }
+    }
+    impl frap_rna::FromValue for ProportionalEditFalloff {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `transform.bend` (Bend).
+#[derive(Debug, Clone)]
+pub struct Bend {
+    /// default [0.0] [ANIMATABLE]
+    pub value: Prop<[f32; 1]>,
+    /// default false [ANIMATABLE]
+    pub mirror: Prop<bool>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_edit: Prop<bool>,
+    /// Falloff type for proportional editing mode; default "SMOOTH": SMOOTH | SPHERE | ROOT | INVERSE_SQUARE | SHARP | LINEAR | CONSTANT | RANDOM [ANIMATABLE]
+    pub proportional_edit_falloff: Prop<bend::ProportionalEditFalloff>,
+    /// default 1 [ANIMATABLE]
+    pub proportional_size: Prop<f32>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_connected: Prop<bool>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_projected: Prop<bool>,
+    /// default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub snap: Prop<bool>,
+    /// Edit selected Grease Pencil strokes; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub gpencil_strokes: Prop<bool>,
+    /// Force using this center value (when set); default [0.0, 0.0, 0.0] [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub center_override: Prop<[f32; 3]>,
+    /// Always confirm operation when releasing button; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub release_confirm: Prop<bool>,
+    /// Use accurate transformation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub use_accurate: Prop<bool>,
+}
+impl OpProps for Bend {
+    const IDNAME: &'static str = "transform.bend";
+    const BL_IDNAME: &'static str = "TRANSFORM_OT_bend";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_TRANSFORM_OT_BEND
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Bend {
+            value: a.prop(0, "value"),
+            mirror: a.prop(1, "mirror"),
+            use_proportional_edit: a.prop(2, "use_proportional_edit"),
+            proportional_edit_falloff: a.prop(3, "proportional_edit_falloff"),
+            proportional_size: a.prop(4, "proportional_size"),
+            use_proportional_connected: a.prop(5, "use_proportional_connected"),
+            use_proportional_projected: a.prop(6, "use_proportional_projected"),
+            snap: a.prop(7, "snap"),
+            gpencil_strokes: a.prop(8, "gpencil_strokes"),
+            center_override: a.prop(9, "center_override"),
+            release_confirm: a.prop(10, "release_confirm"),
+            use_accurate: a.prop(11, "use_accurate"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- transform.create_orientation
+/// Props of `transform.create_orientation`, RNA order.
+pub static CREATE_ORIENTATION_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "name", name: "Name", description: "Name of the new custom orientation", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
+    PropDef { identifier: "use_view", name: "Use View", description: "Use the current view instead of the active object to create the new orientation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use", name: "Use After Creation", description: "Select orientation after its creation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "overwrite", name: "Overwrite Previous", description: "Overwrite previously created orientation with same name", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `TRANSFORM_OT_create_orientation`
+pub static OPSPEC_TRANSFORM_OT_CREATE_ORIENTATION: OperatorSpec = OperatorSpec {
+    idname: "transform.create_orientation",
+    bl_idname: "TRANSFORM_OT_create_orientation",
+    label: "Create Orientation",
+    description: "Create transformation orientation from selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &CREATE_ORIENTATION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `transform.create_orientation` (Create Orientation).
+#[derive(Debug, Clone)]
+pub struct CreateOrientation {
+    /// Name of the new custom orientation; default "" [NEVER_NULL]
+    pub name: Prop<SmolStr>,
+    /// Use the current view instead of the active object to create the new orientation; default false [ANIMATABLE]
+    pub use_view: Prop<bool>,
+    /// Select orientation after its creation; default false [ANIMATABLE]
+    pub r#use: Prop<bool>,
+    /// Overwrite previously created orientation with same name; default false [ANIMATABLE]
+    pub overwrite: Prop<bool>,
+}
+impl OpProps for CreateOrientation {
+    const IDNAME: &'static str = "transform.create_orientation";
+    const BL_IDNAME: &'static str = "TRANSFORM_OT_create_orientation";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_TRANSFORM_OT_CREATE_ORIENTATION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CreateOrientation {
+            name: a.prop(0, "name"),
+            use_view: a.prop(1, "use_view"),
+            r#use: a.prop(2, "use"),
+            overwrite: a.prop(3, "overwrite"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- transform.delete_orientation
+/// Props of `transform.delete_orientation`, RNA order.
+pub static DELETE_ORIENTATION_PROPS: [PropDef; 0] = [
+];
+/// `TRANSFORM_OT_delete_orientation`
+pub static OPSPEC_TRANSFORM_OT_DELETE_ORIENTATION: OperatorSpec = OperatorSpec {
+    idname: "transform.delete_orientation",
+    bl_idname: "TRANSFORM_OT_delete_orientation",
+    label: "Delete Orientation",
+    description: "Delete transformation orientation",
+    options: OpOptions::UNDO,
+    props: &DELETE_ORIENTATION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `transform.delete_orientation` (Delete Orientation).
+#[derive(Debug, Clone)]
+pub struct DeleteOrientation {
+}
+impl OpProps for DeleteOrientation {
+    const IDNAME: &'static str = "transform.delete_orientation";
+    const BL_IDNAME: &'static str = "TRANSFORM_OT_delete_orientation";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_TRANSFORM_OT_DELETE_ORIENTATION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        DeleteOrientation {
+        }
+    }
 }
 
 // ---------------------------------------------------------------- transform.edge_bevelweight
@@ -194,9 +416,9 @@ pub static EDGE_SLIDE_PROPS: [PropDef; 18] = [
     PropDef { identifier: "use_clamp", name: "Clamp", description: "Clamp within the edge extents", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_project", name: "Project Individual Elements", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_self", name: "Target: Include Active", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_edit", name: "Target: Include Edit", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_nonedit", name: "Target: Include Non-Edited", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -339,9 +561,9 @@ impl OpProps for EdgeSlide {
 // ---------------------------------------------------------------- transform.mirror
 /// Props of `transform.mirror`, RNA order.
 pub static MIRROR_PROPS: [PropDef; 8] = [
-    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_mirror.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_mirror.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
     PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_mirror.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_mirror.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "constraint_axis", name: "Constraint Axis", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "gpencil_strokes", name: "Edit Grease Pencil", description: "Edit selected Grease Pencil strokes", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "center_override", name: "Center Override", description: "Force using this center value (when set)", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-10000.0, 10000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -405,7 +627,7 @@ pub static PUSH_PULL_PROPS: [PropDef; 11] = [
     PropDef { identifier: "value", name: "Distance", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -544,20 +766,20 @@ impl OpProps for PushPull {
 pub static RESIZE_PROPS: [PropDef; 28] = [
     PropDef { identifier: "value", name: "Scale", description: "", kind: PropKind::Float { default: Defaults::Array(&[1.0, 1.0, 1.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mouse_dir_constraint", name: "Mouse Directional Constraint", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_resize.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_resize.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
     PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_resize.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_resize.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "constraint_axis", name: "Constraint Axis", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_project", name: "Project Individual Elements", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_self", name: "Target: Include Active", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_edit", name: "Target: Include Edit", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_nonedit", name: "Target: Include Non-Edited", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -798,20 +1020,20 @@ impl OpProps for Resize {
 pub static ROTATE_PROPS: [PropDef; 25] = [
     PropDef { identifier: "value", name: "Angle", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "orient_axis", name: "Axis", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("Z"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_rotate.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_rotate.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
     PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_rotate.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_rotate.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "constraint_axis", name: "Constraint Axis", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_project", name: "Project Individual Elements", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_self", name: "Target: Include Active", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_edit", name: "Target: Include Edit", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_nonedit", name: "Target: Include Non-Edited", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -1077,6 +1299,397 @@ impl OpProps for Rotate {
     }
 }
 
+// ---------------------------------------------------------------- transform.rotate_normal
+/// Props of `transform.rotate_normal`, RNA order.
+pub static ROTATE_NORMAL_PROPS: [PropDef; 9] = [
+    PropDef { identifier: "value", name: "Angle", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "orient_axis", name: "Axis", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("Z"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_rotate_normal.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_rotate_normal.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "constraint_axis", name: "Constraint Axis", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "Always confirm operation when releasing button", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_accurate", name: "Accurate", description: "Use accurate transformation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `TRANSFORM_OT_rotate_normal`
+pub static OPSPEC_TRANSFORM_OT_ROTATE_NORMAL: OperatorSpec = OperatorSpec {
+    idname: "transform.rotate_normal",
+    bl_idname: "TRANSFORM_OT_rotate_normal",
+    label: "Rotate Normals",
+    description: "Rotate custom normal of selected items",
+    options: OpOptions::BLOCKING.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &ROTATE_NORMAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `transform.rotate_normal`.
+pub mod rotate_normal {
+    /// `OrientAxis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum OrientAxis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+        /// "Z"
+        Z,
+    }
+    impl OrientAxis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [OrientAxis; 3] = [OrientAxis::X, OrientAxis::Y, OrientAxis::Z];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                OrientAxis::X => "X",
+                OrientAxis::Y => "Y",
+                OrientAxis::Z => "Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(OrientAxis::X),
+                "Y" => Some(OrientAxis::Y),
+                "Z" => Some(OrientAxis::Z),
+                _ => None,
+            }
+        }
+    }
+    impl Default for OrientAxis {
+        fn default() -> Self {
+            OrientAxis::Z
+        }
+    }
+    impl frap_rna::FromValue for OrientAxis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `transform.rotate_normal` (Rotate Normals).
+#[derive(Debug, Clone)]
+pub struct RotateNormal {
+    /// default 0 [ANIMATABLE]
+    pub value: Prop<f32>,
+    /// default "Z": X | Y | Z [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub orient_axis: Prop<rotate_normal::OrientAxis>,
+    /// Transformation orientation; default "GLOBAL", dynamic: GLOBAL | LOCAL | NORMAL | GIMBAL | VIEW | CURSOR | PARENT [ANIMATABLE, DYNAMIC_ENUM]
+    pub orient_type: Prop<SmolStr>,
+    /// default [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub orient_matrix: Prop<[[f32; 3]; 3]>,
+    /// default "GLOBAL", dynamic: GLOBAL | LOCAL | NORMAL | GIMBAL | VIEW | CURSOR | PARENT [HIDDEN, ANIMATABLE, DYNAMIC_ENUM, SKIP_PRESET]
+    pub orient_matrix_type: Prop<SmolStr>,
+    /// BOOLEAN [ANIMATABLE]
+    pub constraint_axis: Prop<[bool; 3]>,
+    /// default false [ANIMATABLE]
+    pub mirror: Prop<bool>,
+    /// Always confirm operation when releasing button; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub release_confirm: Prop<bool>,
+    /// Use accurate transformation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub use_accurate: Prop<bool>,
+}
+impl OpProps for RotateNormal {
+    const IDNAME: &'static str = "transform.rotate_normal";
+    const BL_IDNAME: &'static str = "TRANSFORM_OT_rotate_normal";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_TRANSFORM_OT_ROTATE_NORMAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        RotateNormal {
+            value: a.prop(0, "value"),
+            orient_axis: a.prop(1, "orient_axis"),
+            orient_type: a.prop(2, "orient_type"),
+            orient_matrix: a.prop(3, "orient_matrix"),
+            orient_matrix_type: a.prop(4, "orient_matrix_type"),
+            constraint_axis: a.prop(5, "constraint_axis"),
+            mirror: a.prop(6, "mirror"),
+            release_confirm: a.prop(7, "release_confirm"),
+            use_accurate: a.prop(8, "use_accurate"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- transform.select_orientation
+/// Props of `transform.select_orientation`, RNA order.
+pub static SELECT_ORIENTATION_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "orientation", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_select_orientation.orientation") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+];
+/// `TRANSFORM_OT_select_orientation`
+pub static OPSPEC_TRANSFORM_OT_SELECT_ORIENTATION: OperatorSpec = OperatorSpec {
+    idname: "transform.select_orientation",
+    bl_idname: "TRANSFORM_OT_select_orientation",
+    label: "Select Orientation",
+    description: "Select transformation orientation",
+    options: OpOptions::UNDO,
+    props: &SELECT_ORIENTATION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `transform.select_orientation` (Select Orientation).
+#[derive(Debug, Clone)]
+pub struct SelectOrientation {
+    /// Transformation orientation; default "GLOBAL", dynamic: GLOBAL | LOCAL | NORMAL | GIMBAL | VIEW | CURSOR | PARENT [ANIMATABLE, DYNAMIC_ENUM]
+    pub orientation: Prop<SmolStr>,
+}
+impl OpProps for SelectOrientation {
+    const IDNAME: &'static str = "transform.select_orientation";
+    const BL_IDNAME: &'static str = "TRANSFORM_OT_select_orientation";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_TRANSFORM_OT_SELECT_ORIENTATION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectOrientation {
+            orientation: a.prop(0, "orientation"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- transform.shear
+/// Props of `transform.shear`, RNA order.
+pub static SHEAR_PROPS: [PropDef; 16] = [
+    PropDef { identifier: "angle", name: "Angle", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "orient_axis", name: "Axis", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("Z"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_axis_ortho", name: "Axis Ortho", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_shear.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_shear.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "gpencil_strokes", name: "Edit Grease Pencil", description: "Edit selected Grease Pencil strokes", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "Always confirm operation when releasing button", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_accurate", name: "Accurate", description: "Use accurate transformation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `TRANSFORM_OT_shear`
+pub static OPSPEC_TRANSFORM_OT_SHEAR: OperatorSpec = OperatorSpec {
+    idname: "transform.shear",
+    bl_idname: "TRANSFORM_OT_shear",
+    label: "Shear",
+    description: "Shear selected items along the given axis",
+    options: OpOptions::BLOCKING.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &SHEAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Enums of `transform.shear`.
+pub mod shear {
+    /// `OrientAxis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum OrientAxis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+        /// "Z"
+        Z,
+    }
+    impl OrientAxis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [OrientAxis; 3] = [OrientAxis::X, OrientAxis::Y, OrientAxis::Z];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                OrientAxis::X => "X",
+                OrientAxis::Y => "Y",
+                OrientAxis::Z => "Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(OrientAxis::X),
+                "Y" => Some(OrientAxis::Y),
+                "Z" => Some(OrientAxis::Z),
+                _ => None,
+            }
+        }
+    }
+    impl Default for OrientAxis {
+        fn default() -> Self {
+            OrientAxis::Z
+        }
+    }
+    impl frap_rna::FromValue for OrientAxis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `OrientAxisOrtho`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum OrientAxisOrtho {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+        /// "Z"
+        Z,
+    }
+    impl OrientAxisOrtho {
+        /// Every variant, in RNA item order.
+        pub const ALL: [OrientAxisOrtho; 3] = [OrientAxisOrtho::X, OrientAxisOrtho::Y, OrientAxisOrtho::Z];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                OrientAxisOrtho::X => "X",
+                OrientAxisOrtho::Y => "Y",
+                OrientAxisOrtho::Z => "Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(OrientAxisOrtho::X),
+                "Y" => Some(OrientAxisOrtho::Y),
+                "Z" => Some(OrientAxisOrtho::Z),
+                _ => None,
+            }
+        }
+    }
+    impl Default for OrientAxisOrtho {
+        fn default() -> Self {
+            OrientAxisOrtho::X
+        }
+    }
+    impl frap_rna::FromValue for OrientAxisOrtho {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `ProportionalEditFalloff`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum ProportionalEditFalloff {
+        /// "SMOOTH"
+        Smooth,
+        /// "SPHERE"
+        Sphere,
+        /// "ROOT"
+        Root,
+        /// "INVERSE_SQUARE"
+        InverseSquare,
+        /// "SHARP"
+        Sharp,
+        /// "LINEAR"
+        Linear,
+        /// "CONSTANT"
+        Constant,
+        /// "RANDOM"
+        Random,
+    }
+    impl ProportionalEditFalloff {
+        /// Every variant, in RNA item order.
+        pub const ALL: [ProportionalEditFalloff; 8] = [ProportionalEditFalloff::Smooth, ProportionalEditFalloff::Sphere, ProportionalEditFalloff::Root, ProportionalEditFalloff::InverseSquare, ProportionalEditFalloff::Sharp, ProportionalEditFalloff::Linear, ProportionalEditFalloff::Constant, ProportionalEditFalloff::Random];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                ProportionalEditFalloff::Smooth => "SMOOTH",
+                ProportionalEditFalloff::Sphere => "SPHERE",
+                ProportionalEditFalloff::Root => "ROOT",
+                ProportionalEditFalloff::InverseSquare => "INVERSE_SQUARE",
+                ProportionalEditFalloff::Sharp => "SHARP",
+                ProportionalEditFalloff::Linear => "LINEAR",
+                ProportionalEditFalloff::Constant => "CONSTANT",
+                ProportionalEditFalloff::Random => "RANDOM",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SMOOTH" => Some(ProportionalEditFalloff::Smooth),
+                "SPHERE" => Some(ProportionalEditFalloff::Sphere),
+                "ROOT" => Some(ProportionalEditFalloff::Root),
+                "INVERSE_SQUARE" => Some(ProportionalEditFalloff::InverseSquare),
+                "SHARP" => Some(ProportionalEditFalloff::Sharp),
+                "LINEAR" => Some(ProportionalEditFalloff::Linear),
+                "CONSTANT" => Some(ProportionalEditFalloff::Constant),
+                "RANDOM" => Some(ProportionalEditFalloff::Random),
+                _ => None,
+            }
+        }
+    }
+    impl Default for ProportionalEditFalloff {
+        fn default() -> Self {
+            ProportionalEditFalloff::Smooth
+        }
+    }
+    impl frap_rna::FromValue for ProportionalEditFalloff {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `transform.shear` (Shear).
+#[derive(Debug, Clone)]
+pub struct Shear {
+    /// default 0 [ANIMATABLE]
+    pub angle: Prop<f32>,
+    /// default "Z": X | Y | Z [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub orient_axis: Prop<shear::OrientAxis>,
+    /// default "X": X | Y | Z [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub orient_axis_ortho: Prop<shear::OrientAxisOrtho>,
+    /// Transformation orientation; default "GLOBAL", dynamic: GLOBAL | LOCAL | NORMAL | GIMBAL | VIEW | CURSOR | PARENT [ANIMATABLE, DYNAMIC_ENUM]
+    pub orient_type: Prop<SmolStr>,
+    /// default [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub orient_matrix: Prop<[[f32; 3]; 3]>,
+    /// default "GLOBAL", dynamic: GLOBAL | LOCAL | NORMAL | GIMBAL | VIEW | CURSOR | PARENT [HIDDEN, ANIMATABLE, DYNAMIC_ENUM, SKIP_PRESET]
+    pub orient_matrix_type: Prop<SmolStr>,
+    /// default false [ANIMATABLE]
+    pub mirror: Prop<bool>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_edit: Prop<bool>,
+    /// Falloff type for proportional editing mode; default "SMOOTH": SMOOTH | SPHERE | ROOT | INVERSE_SQUARE | SHARP | LINEAR | CONSTANT | RANDOM [ANIMATABLE]
+    pub proportional_edit_falloff: Prop<shear::ProportionalEditFalloff>,
+    /// default 1 [ANIMATABLE]
+    pub proportional_size: Prop<f32>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_connected: Prop<bool>,
+    /// default false [ANIMATABLE]
+    pub use_proportional_projected: Prop<bool>,
+    /// default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub snap: Prop<bool>,
+    /// Edit selected Grease Pencil strokes; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub gpencil_strokes: Prop<bool>,
+    /// Always confirm operation when releasing button; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub release_confirm: Prop<bool>,
+    /// Use accurate transformation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub use_accurate: Prop<bool>,
+}
+impl OpProps for Shear {
+    const IDNAME: &'static str = "transform.shear";
+    const BL_IDNAME: &'static str = "TRANSFORM_OT_shear";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_TRANSFORM_OT_SHEAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Shear {
+            angle: a.prop(0, "angle"),
+            orient_axis: a.prop(1, "orient_axis"),
+            orient_axis_ortho: a.prop(2, "orient_axis_ortho"),
+            orient_type: a.prop(3, "orient_type"),
+            orient_matrix: a.prop(4, "orient_matrix"),
+            orient_matrix_type: a.prop(5, "orient_matrix_type"),
+            mirror: a.prop(6, "mirror"),
+            use_proportional_edit: a.prop(7, "use_proportional_edit"),
+            proportional_edit_falloff: a.prop(8, "proportional_edit_falloff"),
+            proportional_size: a.prop(9, "proportional_size"),
+            use_proportional_connected: a.prop(10, "use_proportional_connected"),
+            use_proportional_projected: a.prop(11, "use_proportional_projected"),
+            snap: a.prop(12, "snap"),
+            gpencil_strokes: a.prop(13, "gpencil_strokes"),
+            release_confirm: a.prop(14, "release_confirm"),
+            use_accurate: a.prop(15, "use_accurate"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- transform.shrink_fatten
 /// Props of `transform.shrink_fatten`, RNA order.
 pub static SHRINK_FATTEN_PROPS: [PropDef; 11] = [
@@ -1084,7 +1697,7 @@ pub static SHRINK_FATTEN_PROPS: [PropDef; 11] = [
     PropDef { identifier: "use_even_offset", name: "Offset Even", description: "Scale the offset to give more even thickness", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -1223,7 +1836,7 @@ pub static TOSPHERE_PROPS: [PropDef; 12] = [
     PropDef { identifier: "value", name: "Factor", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -1367,20 +1980,20 @@ pub static TRANSFORM_PROPS: [PropDef; 32] = [
     PropDef { identifier: "mode", name: "Mode", description: "", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("TRANSLATION"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "value", name: "Values", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(4), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "orient_axis", name: "Axis", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("Z"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_transform.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_transform.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
     PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_transform.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_transform.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "constraint_axis", name: "Constraint Axis", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_project", name: "Project Individual Elements", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_self", name: "Target: Include Active", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_edit", name: "Target: Include Edit", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_nonedit", name: "Target: Include Non-Edited", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -1835,20 +2448,20 @@ impl OpProps for Transform {
 /// Props of `transform.translate`, RNA order.
 pub static TRANSLATE_PROPS: [PropDef; 32] = [
     PropDef { identifier: "value", name: "Move", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 5, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_translate.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "orient_type", name: "Orientation", description: "Transformation orientation", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_translate.orient_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
     PropDef { identifier: "orient_matrix", name: "Matrix", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (0.0, 0.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Matrix, unit: Unit::None, array: ArrayShape::Matrix(3, 3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_translate.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "orient_matrix_type", name: "Matrix Orientation", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("GLOBAL"), dynamic: Some("TRANSFORM_OT_translate.orient_matrix_type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "constraint_axis", name: "Constraint Axis", description: "", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_size", name: "Proportional Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (9.999999974752427e-7, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_connected", name: "Connected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_proportional_projected", name: "Projected (2D)", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_project", name: "Project Individual Elements", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_self", name: "Target: Include Active", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_edit", name: "Target: Include Edit", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_nonedit", name: "Target: Include Non-Edited", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -2158,9 +2771,9 @@ pub static VERT_SLIDE_PROPS: [PropDef; 18] = [
     PropDef { identifier: "direction", name: "Slide Direction", description: "World-space direction", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "snap", name: "Use Snapping Options", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_elements", name: "Snap to Elements", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Flags(&["INCREMENT"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_project", name: "Project Individual Elements", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "snap_target", name: "Snap Base", description: "Point on source that will snap to target", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("CLOSEST"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_self", name: "Target: Include Active", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_edit", name: "Target: Include Edit", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_snap_nonedit", name: "Target: Include Non-Edited", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },

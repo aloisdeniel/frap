@@ -80,6 +80,9 @@ members = [
     # test-only crates (rule 2.2.11: operator behaviour tests that need a Session)
     "crates/frap-ops-io-tests",
     "crates/frap-ops-render-tests",
+    # M8 W0 (decision log M8W0-9): the §21.7 budgets (WP 8.8) and the Lua spike (WP 8.10).
+    "crates/frap-perf-tests",
+    "crates/frap-lua",
     # tooling (cargo xtask ...)
     "xtask",
 ]
@@ -149,6 +152,8 @@ frap-schema = { path = "crates/frap-schema", version = "0.1.0" }
 frap-golden = { path = "crates/frap-golden", version = "0.1.0" }
 frap-ops-io-tests = { path = "crates/frap-ops-io-tests", version = "0.1.0" }
 frap-ops-render-tests = { path = "crates/frap-ops-render-tests", version = "0.1.0" }
+frap-perf-tests = { path = "crates/frap-perf-tests", version = "0.1.0" }
+frap-lua = { path = "crates/frap-lua", version = "0.1.0" }
 
 # ---------------------------------------------------------------- external (§3.5)
 # Exact patch versions are locked in Cargo.lock. Entries for later milestones are declared
@@ -180,6 +185,9 @@ manifold-rust = "=0.19.2"
 opensubdiv-rs = "=0.7.0"
 bevy_mikktspace = "1.0.0"
 spade = "2.15.1"
+# M8 W0 (decision log M8W0-9): the Lua spike (frap-lua feature `lua`, off; WP 8.10). Lua 5.4
+# vendored: built with `cc` only when the feature is on.
+mlua = { version = "0.12.2", default-features = false, features = ["lua54", "vendored"] }
 earcut = "0.4.12"
 faer = { version = "0.24.4", features = ["sparse", "sparse-linalg"] }
 smallvec = { version = "1.16.1", features = ["const_generics", "union", "serde"] }

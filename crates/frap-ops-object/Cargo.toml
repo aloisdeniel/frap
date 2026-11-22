@@ -28,6 +28,10 @@ frap-eval.workspace = true
 frap-anim.workspace = true
 frap-nodes.workspace = true
 smallvec.workspace = true
+# M8 W0 (decision log M8W0-9): the bone-heat sparse solve (WP 8.5, `support/heat.rs`) and the
+# BVH of its visibility rays (`frap_geom::bvh`).
+faer.workspace = true
+frap-geom.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

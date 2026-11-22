@@ -11,17 +11,22 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 2] = [
+pub static E0: [EnumItem; 3] = [
+    EnumItem { identifier: "XAXIS", name: "X-Axis", description: "Left/Right", value: 0 },
+    EnumItem { identifier: "YAXIS", name: "Y-Axis", description: "Front/Back", value: 1 },
+    EnumItem { identifier: "ZAXIS", name: "Z-Axis", description: "Top/Bottom", value: 2 },
+];
+pub static E1: [EnumItem; 2] = [
     EnumItem { identifier: "OBJECT", name: "Object", description: "The newly created bone will use Object Space co-ordinate system", value: 0 },
     EnumItem { identifier: "WORLD", name: "World", description: "The newly created bone will use World Space co-ordinate system", value: 1 },
 ];
-pub static E1: [EnumItem; 4] = [
+pub static E2: [EnumItem; 4] = [
     EnumItem { identifier: "UP", name: "Up", description: "Make the bone visually point upwards so the long axis is aligned with the World/Object positive Z axis (depending on the choice above)", value: 0 },
     EnumItem { identifier: "AXES", name: "Axes", description: "Align the new bone to match the axes of the World/Object (depending on the choice above)", value: 1 },
     EnumItem { identifier: "3D_CURSOR", name: "3D Cursor", description: "Align new bone to match the axes of the 3D cursor", value: 2 },
     EnumItem { identifier: "3D_VIEW", name: "Viewport", description: "Align new bone to match the axes of the 3D viewport", value: 3 },
 ];
-pub static E2: [EnumItem; 13] = [
+pub static E3: [EnumItem; 13] = [
     EnumItem { identifier: "POS_X", name: "Local +X Tangent", description: "", value: 3 },
     EnumItem { identifier: "POS_Z", name: "Local +Z Tangent", description: "", value: 4 },
     EnumItem { identifier: "GLOBAL_POS_X", name: "Global +X Axis", description: "", value: 0 },
@@ -36,32 +41,198 @@ pub static E2: [EnumItem; 13] = [
     EnumItem { identifier: "VIEW", name: "View Axis", description: "", value: 11 },
     EnumItem { identifier: "CURSOR", name: "Cursor", description: "", value: 12 },
 ];
-pub static E3: [EnumItem; 2] = [
+pub static E4: [EnumItem; 2] = [
     EnumItem { identifier: "CLEAR", name: "Clear Parent", description: "", value: 1 },
     EnumItem { identifier: "DISCONNECT", name: "Disconnect Bone", description: "", value: 2 },
 ];
-pub static E4: [EnumItem; 2] = [
+pub static E5: [EnumItem; 2] = [
     EnumItem { identifier: "CONNECTED", name: "Connected", description: "", value: 1 },
     EnumItem { identifier: "OFFSET", name: "Keep Offset", description: "", value: 2 },
 ];
-pub static E5: [EnumItem; 4] = [
+pub static E6: [EnumItem; 4] = [
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle selection for all elements", value: 0 },
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
     EnumItem { identifier: "INVERT", name: "Invert", description: "Invert selection of all elements", value: 3 },
 ];
-pub static E6: [EnumItem; 2] = [
+pub static E7: [EnumItem; 2] = [
+    EnumItem { identifier: "PARENT", name: "Select Parent", description: "", value: 0 },
+    EnumItem { identifier: "CHILD", name: "Select Child", description: "", value: 1 },
+];
+pub static E8: [EnumItem; 10] = [
+    EnumItem { identifier: "CHILDREN", name: "Children", description: "", value: 1 },
+    EnumItem { identifier: "CHILDREN_IMMEDIATE", name: "Immediate Children", description: "", value: 2 },
+    EnumItem { identifier: "SIBLINGS", name: "Siblings", description: "", value: 3 },
+    EnumItem { identifier: "LENGTH", name: "Length", description: "", value: 4 },
+    EnumItem { identifier: "DIRECTION", name: "Direction (Y Axis)", description: "", value: 5 },
+    EnumItem { identifier: "PREFIX", name: "Prefix", description: "", value: 6 },
+    EnumItem { identifier: "SUFFIX", name: "Suffix", description: "", value: 7 },
+    EnumItem { identifier: "BONE_COLLECTION", name: "Bone Collection", description: "", value: 8 },
+    EnumItem { identifier: "COLOR", name: "Color", description: "", value: 9 },
+    EnumItem { identifier: "SHAPE", name: "Shape", description: "", value: 10 },
+];
+pub static E9: [EnumItem; 2] = [
     EnumItem { identifier: "NEGATIVE_X", name: "-X to +X", description: "", value: -1 },
     EnumItem { identifier: "POSITIVE_X", name: "+X to -X", description: "", value: 1 },
 ];
+}
+
+// ---------------------------------------------------------------- armature.align
+/// Props of `armature.align`, RNA order.
+pub static ALIGN_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_align`
+pub static OPSPEC_ARMATURE_OT_ALIGN: OperatorSpec = OperatorSpec {
+    idname: "armature.align",
+    bl_idname: "ARMATURE_OT_align",
+    label: "Align Bones",
+    description: "Align selected bones to the active bone (or to their parent)",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &ALIGN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.align` (Align Bones).
+#[derive(Debug, Clone)]
+pub struct Align {
+}
+impl OpProps for Align {
+    const IDNAME: &'static str = "armature.align";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_align";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_ALIGN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Align {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.assign_to_collection
+/// Props of `armature.assign_to_collection`, RNA order.
+pub static ASSIGN_TO_COLLECTION_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "collection_index", name: "Collection Index", description: "Index of the collection to assign selected bones to. When the operator should create a new bone collection, use new_collection_name to define the collection name, and set this parameter to the parent index of the new bone collection", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (-1, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "new_collection_name", name: "Name", description: "Name of a to-be-added bone collection. Only pass this if you want to create a new bone collection and assign the selected bones to it. To assign to an existing collection, do not include this parameter and use collection_index", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `ARMATURE_OT_assign_to_collection`
+pub static OPSPEC_ARMATURE_OT_ASSIGN_TO_COLLECTION: OperatorSpec = OperatorSpec {
+    idname: "armature.assign_to_collection",
+    bl_idname: "ARMATURE_OT_assign_to_collection",
+    label: "Assign to Collection",
+    description: "Assign all selected bones to a collection, or unassign them, depending on whether the active bone is already assigned or not",
+    options: OpOptions::UNDO,
+    props: &ASSIGN_TO_COLLECTION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `armature.assign_to_collection` (Assign to Collection).
+#[derive(Debug, Clone)]
+pub struct AssignToCollection {
+    /// Index of the collection to assign selected bones to. When the operator should create a new bone collection, use new_collection_name to define the collection name, and set this parameter to the parent index of the new bone collection; default -1 [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub collection_index: Prop<i32>,
+    /// Name of a to-be-added bone collection. Only pass this if you want to create a new bone collection and assign the selected bones to it. To assign to an existing collection, do not include this parameter and use collection_index; default "" [SKIP_SAVE, NEVER_NULL, SKIP_PRESET]
+    pub new_collection_name: Prop<SmolStr>,
+}
+impl OpProps for AssignToCollection {
+    const IDNAME: &'static str = "armature.assign_to_collection";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_assign_to_collection";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_ASSIGN_TO_COLLECTION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        AssignToCollection {
+            collection_index: a.prop(0, "collection_index"),
+            new_collection_name: a.prop(1, "new_collection_name"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.autoside_names
+/// Props of `armature.autoside_names`, RNA order.
+pub static AUTOSIDE_NAMES_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "type", name: "Axis", description: "Axis to tag names with", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("XAXIS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_autoside_names`
+pub static OPSPEC_ARMATURE_OT_AUTOSIDE_NAMES: OperatorSpec = OperatorSpec {
+    idname: "armature.autoside_names",
+    bl_idname: "ARMATURE_OT_autoside_names",
+    label: "Auto-Name by Axis",
+    description: "Automatically renames the selected bones according to which side of the target axis they fall on",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &AUTOSIDE_NAMES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Enums of `armature.autoside_names`.
+pub mod autoside_names {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "XAXIS"
+        Xaxis,
+        /// "YAXIS"
+        Yaxis,
+        /// "ZAXIS"
+        Zaxis,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 3] = [Type::Xaxis, Type::Yaxis, Type::Zaxis];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Xaxis => "XAXIS",
+                Type::Yaxis => "YAXIS",
+                Type::Zaxis => "ZAXIS",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "XAXIS" => Some(Type::Xaxis),
+                "YAXIS" => Some(Type::Yaxis),
+                "ZAXIS" => Some(Type::Zaxis),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Xaxis
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `armature.autoside_names` (Auto-Name by Axis).
+#[derive(Debug, Clone)]
+pub struct ArmatureAutosideNames {
+    /// Axis to tag names with; default "XAXIS": XAXIS | YAXIS | ZAXIS [ANIMATABLE]
+    pub r#type: Prop<autoside_names::Type>,
+}
+impl OpProps for ArmatureAutosideNames {
+    const IDNAME: &'static str = "armature.autoside_names";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_autoside_names";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_AUTOSIDE_NAMES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureAutosideNames {
+            r#type: a.prop(0, "type"),
+        }
+    }
 }
 
 // ---------------------------------------------------------------- armature.bone_primitive_add
 /// Props of `armature.bone_primitive_add`, RNA order.
 pub static BONE_PRIMITIVE_ADD_PROPS: [PropDef; 5] = [
     PropDef { identifier: "name", name: "Name", description: "Name of the newly created bone", kind: PropKind::String { default: "Bone", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
-    PropDef { identifier: "space", name: "Space", description: "Co-ordinate system the new bone will be created in", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("OBJECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "Initial orientation of the new bone", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("UP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "space", name: "Space", description: "Co-ordinate system the new bone will be created in", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("OBJECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "Initial orientation of the new bone", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("UP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "length", name: "Length", description: "Length of the new bone", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0010000000474974513, 3.4028234663852886e38), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_deform", name: "Deform", description: "Enable bone to deform geometry", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
@@ -197,7 +368,7 @@ impl OpProps for BonePrimitiveAdd {
 // ---------------------------------------------------------------- armature.calculate_roll
 /// Props of `armature.calculate_roll`, RNA order.
 pub static CALCULATE_ROLL_PROPS: [PropDef; 3] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("POS_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("POS_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "axis_flip", name: "Flip Axis", description: "Negate the alignment axis", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "axis_only", name: "Shortest Rotation", description: "Ignore the axis direction, use the shortest rotation to align", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
@@ -322,6 +493,138 @@ impl OpProps for CalculateRoll {
     }
 }
 
+// ---------------------------------------------------------------- armature.collection_add
+/// Props of `armature.collection_add`, RNA order.
+pub static COLLECTION_ADD_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_collection_add`
+pub static OPSPEC_ARMATURE_OT_COLLECTION_ADD: OperatorSpec = OperatorSpec {
+    idname: "armature.collection_add",
+    bl_idname: "ARMATURE_OT_collection_add",
+    label: "Add Bone Collection",
+    description: "Add a new bone collection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &COLLECTION_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `armature.collection_add` (Add Bone Collection).
+#[derive(Debug, Clone)]
+pub struct CollectionAdd {
+}
+impl OpProps for CollectionAdd {
+    const IDNAME: &'static str = "armature.collection_add";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_collection_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_COLLECTION_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CollectionAdd {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.collection_assign
+/// Props of `armature.collection_assign`, RNA order.
+pub static COLLECTION_ASSIGN_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "name", name: "Bone Collection", description: "Name of the bone collection to assign this bone to; empty to assign to the active bone collection", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
+];
+/// `ARMATURE_OT_collection_assign`
+pub static OPSPEC_ARMATURE_OT_COLLECTION_ASSIGN: OperatorSpec = OperatorSpec {
+    idname: "armature.collection_assign",
+    bl_idname: "ARMATURE_OT_collection_assign",
+    label: "Add Selected Bones to Collection",
+    description: "Add selected bones to the chosen bone collection",
+    options: OpOptions::UNDO,
+    props: &COLLECTION_ASSIGN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `armature.collection_assign` (Add Selected Bones to Collection).
+#[derive(Debug, Clone)]
+pub struct CollectionAssign {
+    /// Name of the bone collection to assign this bone to; empty to assign to the active bone collection; default "" [NEVER_NULL]
+    pub name: Prop<SmolStr>,
+}
+impl OpProps for CollectionAssign {
+    const IDNAME: &'static str = "armature.collection_assign";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_collection_assign";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_COLLECTION_ASSIGN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CollectionAssign {
+            name: a.prop(0, "name"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.collection_remove
+/// Props of `armature.collection_remove`, RNA order.
+pub static COLLECTION_REMOVE_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_collection_remove`
+pub static OPSPEC_ARMATURE_OT_COLLECTION_REMOVE: OperatorSpec = OperatorSpec {
+    idname: "armature.collection_remove",
+    bl_idname: "ARMATURE_OT_collection_remove",
+    label: "Remove Bone Collection",
+    description: "Remove the active bone collection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &COLLECTION_REMOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `armature.collection_remove` (Remove Bone Collection).
+#[derive(Debug, Clone)]
+pub struct CollectionRemove {
+}
+impl OpProps for CollectionRemove {
+    const IDNAME: &'static str = "armature.collection_remove";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_collection_remove";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_COLLECTION_REMOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CollectionRemove {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.collection_unassign
+/// Props of `armature.collection_unassign`, RNA order.
+pub static COLLECTION_UNASSIGN_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "name", name: "Bone Collection", description: "Name of the bone collection to unassign this bone from; empty to unassign from the active bone collection", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
+];
+/// `ARMATURE_OT_collection_unassign`
+pub static OPSPEC_ARMATURE_OT_COLLECTION_UNASSIGN: OperatorSpec = OperatorSpec {
+    idname: "armature.collection_unassign",
+    bl_idname: "ARMATURE_OT_collection_unassign",
+    label: "Remove Selected from Bone collections",
+    description: "Remove selected bones from the active bone collection",
+    options: OpOptions::UNDO,
+    props: &COLLECTION_UNASSIGN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `armature.collection_unassign` (Remove Selected from Bone collections).
+#[derive(Debug, Clone)]
+pub struct CollectionUnassign {
+    /// Name of the bone collection to unassign this bone from; empty to unassign from the active bone collection; default "" [NEVER_NULL]
+    pub name: Prop<SmolStr>,
+}
+impl OpProps for CollectionUnassign {
+    const IDNAME: &'static str = "armature.collection_unassign";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_collection_unassign";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_COLLECTION_UNASSIGN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CollectionUnassign {
+            name: a.prop(0, "name"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- armature.delete
 /// Props of `armature.delete`, RNA order.
 pub static DELETE_PROPS: [PropDef; 1] = [
@@ -353,6 +656,37 @@ impl OpProps for ArmatureDelete {
     fn from_args(a: &OpArgs) -> Self {
         ArmatureDelete {
             confirm: a.prop(0, "confirm"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.dissolve
+/// Props of `armature.dissolve`, RNA order.
+pub static DISSOLVE_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_dissolve`
+pub static OPSPEC_ARMATURE_OT_DISSOLVE: OperatorSpec = OperatorSpec {
+    idname: "armature.dissolve",
+    bl_idname: "ARMATURE_OT_dissolve",
+    label: "Dissolve Selected Bone(s)",
+    description: "Dissolve selected bones from the armature",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &DISSOLVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.dissolve` (Dissolve Selected Bone(s)).
+#[derive(Debug, Clone)]
+pub struct Dissolve {
+}
+impl OpProps for Dissolve {
+    const IDNAME: &'static str = "armature.dissolve";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_dissolve";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_DISSOLVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Dissolve {
         }
     }
 }
@@ -431,6 +765,49 @@ impl OpProps for ArmatureDuplicateMove {
     }
 }
 
+// ---------------------------------------------------------------- armature.duplicate_rename
+/// Props of `armature.duplicate_rename`, RNA order.
+pub static DUPLICATE_RENAME_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "do_flip_names", name: "Flip Names", description: "Try to flip names of the bones, if possible, instead of adding a number extension", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "search", name: "Search", description: "A part of the current bone name that will be replaced", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
+    PropDef { identifier: "replace", name: "Replace", description: "The substitute to be inserted into the place of the given search term. If left empty the search term will be removed", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
+];
+/// `ARMATURE_OT_duplicate_rename`
+pub static OPSPEC_ARMATURE_OT_DUPLICATE_RENAME: OperatorSpec = OperatorSpec {
+    idname: "armature.duplicate_rename",
+    bl_idname: "ARMATURE_OT_duplicate_rename",
+    label: "Duplicate and Rename",
+    description: "Make copies of the selected bones within the same armature and replace a part of their name",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &DUPLICATE_RENAME_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.duplicate_rename` (Duplicate and Rename).
+#[derive(Debug, Clone)]
+pub struct DuplicateRename {
+    /// Try to flip names of the bones, if possible, instead of adding a number extension; default false [ANIMATABLE]
+    pub do_flip_names: Prop<bool>,
+    /// A part of the current bone name that will be replaced; default "" [NEVER_NULL]
+    pub search: Prop<SmolStr>,
+    /// The substitute to be inserted into the place of the given search term. If left empty the search term will be removed; default "" [NEVER_NULL]
+    pub replace: Prop<SmolStr>,
+}
+impl OpProps for DuplicateRename {
+    const IDNAME: &'static str = "armature.duplicate_rename";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_duplicate_rename";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_DUPLICATE_RENAME
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        DuplicateRename {
+            do_flip_names: a.prop(0, "do_flip_names"),
+            search: a.prop(1, "search"),
+            replace: a.prop(2, "replace"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- armature.extrude
 /// Props of `armature.extrude`, RNA order.
 pub static EXTRUDE_PROPS: [PropDef; 1] = [
@@ -462,6 +839,45 @@ impl OpProps for Extrude {
     fn from_args(a: &OpArgs) -> Self {
         Extrude {
             forked: a.prop(0, "forked"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.extrude_forked
+/// Props of `armature.extrude_forked`, RNA order.
+pub static EXTRUDE_FORKED_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "ARMATURE_OT_extrude", name: "Extrude", description: "Create new bones from the selected joints", kind: PropKind::Pointer { fixed_type: "ARMATURE_OT_extrude", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+    PropDef { identifier: "TRANSFORM_OT_translate", name: "Move", description: "Move selected items", kind: PropKind::Pointer { fixed_type: "TRANSFORM_OT_translate", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
+];
+/// `ARMATURE_OT_extrude_forked`
+pub static OPSPEC_ARMATURE_OT_EXTRUDE_FORKED: OperatorSpec = OperatorSpec {
+    idname: "armature.extrude_forked",
+    bl_idname: "ARMATURE_OT_extrude_forked",
+    label: "Extrude Forked",
+    description: "Create new bones from the selected joints and move them",
+    options: OpOptions::MACRO.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &EXTRUDE_FORKED_PROPS,
+    macro_steps: &["ARMATURE_OT_extrude", "TRANSFORM_OT_translate"],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.extrude_forked` (Extrude Forked).
+#[derive(Debug, Clone)]
+pub struct ExtrudeForked {
+    /// Macro step `ARMATURE_OT_extrude`: its arguments.
+    pub ARMATURE_OT_extrude: OpArgs,
+    /// Macro step `TRANSFORM_OT_translate`: its arguments.
+    pub TRANSFORM_OT_translate: OpArgs,
+}
+impl OpProps for ExtrudeForked {
+    const IDNAME: &'static str = "armature.extrude_forked";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_extrude_forked";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_EXTRUDE_FORKED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ExtrudeForked {
+            ARMATURE_OT_extrude: a.nested.get("ARMATURE_OT_extrude").cloned().unwrap_or_default(),
+            TRANSFORM_OT_translate: a.nested.get("TRANSFORM_OT_translate").cloned().unwrap_or_default(),
         }
     }
 }
@@ -505,10 +921,150 @@ impl OpProps for ExtrudeMove {
     }
 }
 
+// ---------------------------------------------------------------- armature.fill
+/// Props of `armature.fill`, RNA order.
+pub static FILL_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_fill`
+pub static OPSPEC_ARMATURE_OT_FILL: OperatorSpec = OperatorSpec {
+    idname: "armature.fill",
+    bl_idname: "ARMATURE_OT_fill",
+    label: "Fill Between Joints",
+    description: "Add bone between selected joint(s) and/or 3D cursor",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &FILL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.fill` (Fill Between Joints).
+#[derive(Debug, Clone)]
+pub struct Fill {
+}
+impl OpProps for Fill {
+    const IDNAME: &'static str = "armature.fill";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_fill";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_FILL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Fill {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.flip_names
+/// Props of `armature.flip_names`, RNA order.
+pub static FLIP_NAMES_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "do_strip_numbers", name: "Strip Numbers", description: "Try to remove right-most dot-number from flipped names.\nWarning: May result in incoherent naming in some cases", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_flip_names`
+pub static OPSPEC_ARMATURE_OT_FLIP_NAMES: OperatorSpec = OperatorSpec {
+    idname: "armature.flip_names",
+    bl_idname: "ARMATURE_OT_flip_names",
+    label: "Flip Names",
+    description: "Flips (and corrects) the axis suffixes of the names of selected bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &FLIP_NAMES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.flip_names` (Flip Names).
+#[derive(Debug, Clone)]
+pub struct ArmatureFlipNames {
+    /// Try to remove right-most dot-number from flipped names. Warning: May result in incoherent naming in some cases; default false [ANIMATABLE]
+    pub do_strip_numbers: Prop<bool>,
+}
+impl OpProps for ArmatureFlipNames {
+    const IDNAME: &'static str = "armature.flip_names";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_flip_names";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_FLIP_NAMES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureFlipNames {
+            do_strip_numbers: a.prop(0, "do_strip_numbers"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.hide
+/// Props of `armature.hide`, RNA order.
+pub static HIDE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "unselected", name: "Unselected", description: "Hide unselected rather than selected", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_hide`
+pub static OPSPEC_ARMATURE_OT_HIDE: OperatorSpec = OperatorSpec {
+    idname: "armature.hide",
+    bl_idname: "ARMATURE_OT_hide",
+    label: "Hide Selected",
+    description: "Tag selected bones to not be visible in Edit Mode",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &HIDE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.hide` (Hide Selected).
+#[derive(Debug, Clone)]
+pub struct ArmatureHide {
+    /// Hide unselected rather than selected; default false [ANIMATABLE]
+    pub unselected: Prop<bool>,
+}
+impl OpProps for ArmatureHide {
+    const IDNAME: &'static str = "armature.hide";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_hide";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_HIDE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureHide {
+            unselected: a.prop(0, "unselected"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.move_to_collection
+/// Props of `armature.move_to_collection`, RNA order.
+pub static MOVE_TO_COLLECTION_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "collection_index", name: "Collection Index", description: "Index of the collection to move selected bones to. When the operator should create a new bone collection, do not include this parameter and pass new_collection_name", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-1, 2147483647), soft: (-1, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "new_collection_name", name: "Name", description: "Name of a to-be-added bone collection. Only pass this if you want to create a new bone collection and move the selected bones to it. To move to an existing collection, do not include this parameter and use collection_index", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `ARMATURE_OT_move_to_collection`
+pub static OPSPEC_ARMATURE_OT_MOVE_TO_COLLECTION: OperatorSpec = OperatorSpec {
+    idname: "armature.move_to_collection",
+    bl_idname: "ARMATURE_OT_move_to_collection",
+    label: "Move to Collection",
+    description: "Move bones to a collection",
+    options: OpOptions::UNDO,
+    props: &MOVE_TO_COLLECTION_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `armature.move_to_collection` (Move to Collection).
+#[derive(Debug, Clone)]
+pub struct MoveToCollection {
+    /// Index of the collection to move selected bones to. When the operator should create a new bone collection, do not include this parameter and pass new_collection_name; default -1 [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub collection_index: Prop<i32>,
+    /// Name of a to-be-added bone collection. Only pass this if you want to create a new bone collection and move the selected bones to it. To move to an existing collection, do not include this parameter and use collection_index; default "" [SKIP_SAVE, NEVER_NULL, SKIP_PRESET]
+    pub new_collection_name: Prop<SmolStr>,
+}
+impl OpProps for MoveToCollection {
+    const IDNAME: &'static str = "armature.move_to_collection";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_move_to_collection";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_MOVE_TO_COLLECTION
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MoveToCollection {
+            collection_index: a.prop(0, "collection_index"),
+            new_collection_name: a.prop(1, "new_collection_name"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- armature.parent_clear
 /// Props of `armature.parent_clear`, RNA order.
 pub static PARENT_CLEAR_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Clear Type", description: "What way to clear parenting", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("CLEAR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Clear Type", description: "What way to clear parenting", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("CLEAR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `ARMATURE_OT_parent_clear`
 pub static OPSPEC_ARMATURE_OT_PARENT_CLEAR: OperatorSpec = OperatorSpec {
@@ -584,7 +1140,7 @@ impl OpProps for ParentClear {
 // ---------------------------------------------------------------- armature.parent_set
 /// Props of `armature.parent_set`, RNA order.
 pub static PARENT_SET_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Parent Type", description: "Type of parenting", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("CONNECTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Parent Type", description: "Type of parenting", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("CONNECTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `ARMATURE_OT_parent_set`
 pub static OPSPEC_ARMATURE_OT_PARENT_SET: OperatorSpec = OperatorSpec {
@@ -657,6 +1213,41 @@ impl OpProps for ParentSet {
     }
 }
 
+// ---------------------------------------------------------------- armature.reveal
+/// Props of `armature.reveal`, RNA order.
+pub static REVEAL_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "select", name: "Select", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_reveal`
+pub static OPSPEC_ARMATURE_OT_REVEAL: OperatorSpec = OperatorSpec {
+    idname: "armature.reveal",
+    bl_idname: "ARMATURE_OT_reveal",
+    label: "Reveal Hidden",
+    description: "Reveal all bones hidden in Edit Mode",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &REVEAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.reveal` (Reveal Hidden).
+#[derive(Debug, Clone)]
+pub struct ArmatureReveal {
+    /// default true [ANIMATABLE]
+    pub select: Prop<bool>,
+}
+impl OpProps for ArmatureReveal {
+    const IDNAME: &'static str = "armature.reveal";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_reveal";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_REVEAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureReveal {
+            select: a.prop(0, "select"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- armature.roll_clear
 /// Props of `armature.roll_clear`, RNA order.
 pub static ROLL_CLEAR_PROPS: [PropDef; 1] = [
@@ -695,7 +1286,7 @@ impl OpProps for RollClear {
 // ---------------------------------------------------------------- armature.select_all
 /// Props of `armature.select_all`, RNA order.
 pub static SELECT_ALL_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `ARMATURE_OT_select_all`
 pub static OPSPEC_ARMATURE_OT_SELECT_ALL: OperatorSpec = OperatorSpec {
@@ -776,6 +1367,396 @@ impl OpProps for ArmatureSelectAll {
     }
 }
 
+// ---------------------------------------------------------------- armature.select_hierarchy
+/// Props of `armature.select_hierarchy`, RNA order.
+pub static SELECT_HIERARCHY_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "direction", name: "Direction", description: "", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("PARENT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_select_hierarchy`
+pub static OPSPEC_ARMATURE_OT_SELECT_HIERARCHY: OperatorSpec = OperatorSpec {
+    idname: "armature.select_hierarchy",
+    bl_idname: "ARMATURE_OT_select_hierarchy",
+    label: "Select Hierarchy",
+    description: "Select immediate parent/children of selected bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_HIERARCHY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Enums of `armature.select_hierarchy`.
+pub mod select_hierarchy {
+    /// `Direction`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Direction {
+        /// "PARENT"
+        Parent,
+        /// "CHILD"
+        Child,
+    }
+    impl Direction {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Direction; 2] = [Direction::Parent, Direction::Child];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Direction::Parent => "PARENT",
+                Direction::Child => "CHILD",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "PARENT" => Some(Direction::Parent),
+                "CHILD" => Some(Direction::Child),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Direction {
+        fn default() -> Self {
+            Direction::Parent
+        }
+    }
+    impl frap_rna::FromValue for Direction {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `armature.select_hierarchy` (Select Hierarchy).
+#[derive(Debug, Clone)]
+pub struct ArmatureSelectHierarchy {
+    /// default "PARENT": PARENT | CHILD [ANIMATABLE]
+    pub direction: Prop<select_hierarchy::Direction>,
+    /// Extend the selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for ArmatureSelectHierarchy {
+    const IDNAME: &'static str = "armature.select_hierarchy";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_select_hierarchy";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SELECT_HIERARCHY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureSelectHierarchy {
+            direction: a.prop(0, "direction"),
+            extend: a.prop(1, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.select_less
+/// Props of `armature.select_less`, RNA order.
+pub static SELECT_LESS_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_select_less`
+pub static OPSPEC_ARMATURE_OT_SELECT_LESS: OperatorSpec = OperatorSpec {
+    idname: "armature.select_less",
+    bl_idname: "ARMATURE_OT_select_less",
+    label: "Select Less",
+    description: "Deselect those bones at the boundary of each selection region",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_LESS_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.select_less` (Select Less).
+#[derive(Debug, Clone)]
+pub struct SelectLess {
+}
+impl OpProps for SelectLess {
+    const IDNAME: &'static str = "armature.select_less";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_select_less";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SELECT_LESS
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectLess {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.select_linked
+/// Props of `armature.select_linked`, RNA order.
+pub static SELECT_LINKED_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "all_forks", name: "All Forks", description: "Follow forks in the parents chain", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_select_linked`
+pub static OPSPEC_ARMATURE_OT_SELECT_LINKED: OperatorSpec = OperatorSpec {
+    idname: "armature.select_linked",
+    bl_idname: "ARMATURE_OT_select_linked",
+    label: "Select Linked All",
+    description: "Select all bones linked by parent/child connections to the current selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_LINKED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.select_linked` (Select Linked All).
+#[derive(Debug, Clone)]
+pub struct ArmatureSelectLinked {
+    /// Follow forks in the parents chain; default false [ANIMATABLE]
+    pub all_forks: Prop<bool>,
+}
+impl OpProps for ArmatureSelectLinked {
+    const IDNAME: &'static str = "armature.select_linked";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_select_linked";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SELECT_LINKED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureSelectLinked {
+            all_forks: a.prop(0, "all_forks"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.select_mirror
+/// Props of `armature.select_mirror`, RNA order.
+pub static SELECT_MIRROR_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "only_active", name: "Active Only", description: "Only operate on the active bone", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_select_mirror`
+pub static OPSPEC_ARMATURE_OT_SELECT_MIRROR: OperatorSpec = OperatorSpec {
+    idname: "armature.select_mirror",
+    bl_idname: "ARMATURE_OT_select_mirror",
+    label: "Select Mirror",
+    description: "Mirror the bone selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_MIRROR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.select_mirror` (Select Mirror).
+#[derive(Debug, Clone)]
+pub struct ArmatureSelectMirror {
+    /// Only operate on the active bone; default false [ANIMATABLE]
+    pub only_active: Prop<bool>,
+    /// Extend the selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for ArmatureSelectMirror {
+    const IDNAME: &'static str = "armature.select_mirror";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_select_mirror";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SELECT_MIRROR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureSelectMirror {
+            only_active: a.prop(0, "only_active"),
+            extend: a.prop(1, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.select_more
+/// Props of `armature.select_more`, RNA order.
+pub static SELECT_MORE_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_select_more`
+pub static OPSPEC_ARMATURE_OT_SELECT_MORE: OperatorSpec = OperatorSpec {
+    idname: "armature.select_more",
+    bl_idname: "ARMATURE_OT_select_more",
+    label: "Select More",
+    description: "Select those bones connected to the initial selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_MORE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.select_more` (Select More).
+#[derive(Debug, Clone)]
+pub struct SelectMore {
+}
+impl OpProps for SelectMore {
+    const IDNAME: &'static str = "armature.select_more";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_select_more";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SELECT_MORE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectMore {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.select_similar
+/// Props of `armature.select_similar`, RNA order.
+pub static SELECT_SIMILAR_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("LENGTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.10000000149011612), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `ARMATURE_OT_select_similar`
+pub static OPSPEC_ARMATURE_OT_SELECT_SIMILAR: OperatorSpec = OperatorSpec {
+    idname: "armature.select_similar",
+    bl_idname: "ARMATURE_OT_select_similar",
+    label: "Select Similar",
+    description: "Select similar bones by property types",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_SIMILAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Enums of `armature.select_similar`.
+pub mod select_similar {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "CHILDREN"
+        Children,
+        /// "CHILDREN_IMMEDIATE"
+        ChildrenImmediate,
+        /// "SIBLINGS"
+        Siblings,
+        /// "LENGTH"
+        Length,
+        /// "DIRECTION"
+        Direction,
+        /// "PREFIX"
+        Prefix,
+        /// "SUFFIX"
+        Suffix,
+        /// "BONE_COLLECTION"
+        BoneCollection,
+        /// "COLOR"
+        Color,
+        /// "SHAPE"
+        Shape,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 10] = [Type::Children, Type::ChildrenImmediate, Type::Siblings, Type::Length, Type::Direction, Type::Prefix, Type::Suffix, Type::BoneCollection, Type::Color, Type::Shape];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Children => "CHILDREN",
+                Type::ChildrenImmediate => "CHILDREN_IMMEDIATE",
+                Type::Siblings => "SIBLINGS",
+                Type::Length => "LENGTH",
+                Type::Direction => "DIRECTION",
+                Type::Prefix => "PREFIX",
+                Type::Suffix => "SUFFIX",
+                Type::BoneCollection => "BONE_COLLECTION",
+                Type::Color => "COLOR",
+                Type::Shape => "SHAPE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "CHILDREN" => Some(Type::Children),
+                "CHILDREN_IMMEDIATE" => Some(Type::ChildrenImmediate),
+                "SIBLINGS" => Some(Type::Siblings),
+                "LENGTH" => Some(Type::Length),
+                "DIRECTION" => Some(Type::Direction),
+                "PREFIX" => Some(Type::Prefix),
+                "SUFFIX" => Some(Type::Suffix),
+                "BONE_COLLECTION" => Some(Type::BoneCollection),
+                "COLOR" => Some(Type::Color),
+                "SHAPE" => Some(Type::Shape),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Length
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `armature.select_similar` (Select Similar).
+#[derive(Debug, Clone)]
+pub struct SelectSimilar {
+    /// default "LENGTH": CHILDREN | CHILDREN_IMMEDIATE | SIBLINGS | LENGTH | DIRECTION | PREFIX | SUFFIX | BONE_COLLECTION | … [ANIMATABLE]
+    pub r#type: Prop<select_similar::Type>,
+    /// default 0.10000000149011612 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+}
+impl OpProps for SelectSimilar {
+    const IDNAME: &'static str = "armature.select_similar";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_select_similar";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SELECT_SIMILAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectSimilar {
+            r#type: a.prop(0, "type"),
+            threshold: a.prop(1, "threshold"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.separate
+/// Props of `armature.separate`, RNA order.
+pub static SEPARATE_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_separate`
+pub static OPSPEC_ARMATURE_OT_SEPARATE: OperatorSpec = OperatorSpec {
+    idname: "armature.separate",
+    bl_idname: "ARMATURE_OT_separate",
+    label: "Separate Bones",
+    description: "Isolate selected bones into a separate armature",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SEPARATE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.separate` (Separate Bones).
+#[derive(Debug, Clone)]
+pub struct Separate {
+}
+impl OpProps for Separate {
+    const IDNAME: &'static str = "armature.separate";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_separate";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SEPARATE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Separate {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- armature.split
+/// Props of `armature.split`, RNA order.
+pub static SPLIT_PROPS: [PropDef; 0] = [
+];
+/// `ARMATURE_OT_split`
+pub static OPSPEC_ARMATURE_OT_SPLIT: OperatorSpec = OperatorSpec {
+    idname: "armature.split",
+    bl_idname: "ARMATURE_OT_split",
+    label: "Split",
+    description: "Split off selected bones from connected unselected bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SPLIT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::Y] }),
+};
+/// Typed props of `armature.split` (Split).
+#[derive(Debug, Clone)]
+pub struct ArmatureSplit {
+}
+impl OpProps for ArmatureSplit {
+    const IDNAME: &'static str = "armature.split";
+    const BL_IDNAME: &'static str = "ARMATURE_OT_split";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_ARMATURE_OT_SPLIT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureSplit {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- armature.subdivide
 /// Props of `armature.subdivide`, RNA order.
 pub static SUBDIVIDE_PROPS: [PropDef; 1] = [
@@ -845,7 +1826,7 @@ impl OpProps for SwitchDirection {
 // ---------------------------------------------------------------- armature.symmetrize
 /// Props of `armature.symmetrize`, RNA order.
 pub static SYMMETRIZE_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to (when both are selected)", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to (when both are selected)", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "copy_bone_colors", name: "Bone Colors", description: "Copy colors to existing bones", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `ARMATURE_OT_symmetrize`

@@ -8,6 +8,7 @@ use frap_rna::OperatorSpec;
 pub mod render;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 1] = [
+pub static ALL_OPS: [&OperatorSpec; 2] = [
+    &render::OPSPEC_RENDER_OT_OPENGL,
     &render::OPSPEC_RENDER_OT_RENDER,
 ];

@@ -11,7 +11,12 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 8] = [
+pub static E0: [EnumItem; 3] = [
+    EnumItem { identifier: "XAXIS", name: "X-Axis", description: "Left/Right", value: 0 },
+    EnumItem { identifier: "YAXIS", name: "Y-Axis", description: "Front/Back", value: 1 },
+    EnumItem { identifier: "ZAXIS", name: "Z-Axis", description: "Top/Bottom", value: 2 },
+];
+pub static E1: [EnumItem; 8] = [
     EnumItem { identifier: "QUATERNION", name: "Quaternion (WXYZ)", description: "No Gimbal Lock", value: 0 },
     EnumItem { identifier: "XYZ", name: "XYZ Euler", description: "XYZ Rotation Order - prone to Gimbal Lock (default)", value: 1 },
     EnumItem { identifier: "XZY", name: "XZY Euler", description: "XZY Rotation Order - prone to Gimbal Lock", value: 2 },
@@ -21,11 +26,24 @@ pub static E0: [EnumItem; 8] = [
     EnumItem { identifier: "ZYX", name: "ZYX Euler", description: "ZYX Rotation Order - prone to Gimbal Lock", value: 6 },
     EnumItem { identifier: "AXIS_ANGLE", name: "Axis Angle", description: "Axis Angle (W+XYZ), defines a rotation around some axis defined by 3D-Vector", value: -1 },
 ];
-pub static E1: [EnumItem; 4] = [
+pub static E2: [EnumItem; 4] = [
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle selection for all elements", value: 0 },
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
     EnumItem { identifier: "INVERT", name: "Invert", description: "Invert selection of all elements", value: 3 },
+];
+pub static E3: [EnumItem; 7] = [
+    EnumItem { identifier: "COLLECTION", name: "Collection", description: "Same collections as the active bone", value: 0 },
+    EnumItem { identifier: "COLOR", name: "Color", description: "Same color as the active bone", value: 1 },
+    EnumItem { identifier: "KEYINGSET", name: "Keying Set", description: "All bones affected by active Keying Set", value: 2 },
+    EnumItem { identifier: "CHILDREN", name: "Children", description: "Select all children of currently selected bones", value: 3 },
+    EnumItem { identifier: "CHILDREN_IMMEDIATE", name: "Immediate Children", description: "Select direct children of currently selected bones", value: 4 },
+    EnumItem { identifier: "PARENT", name: "Parents", description: "Select the parents of currently selected bones", value: 5 },
+    EnumItem { identifier: "SIBLINGS", name: "Siblings", description: "Select all bones that have the same parent as currently selected bones", value: 6 },
+];
+pub static E4: [EnumItem; 2] = [
+    EnumItem { identifier: "PARENT", name: "Select Parent", description: "", value: 0 },
+    EnumItem { identifier: "CHILD", name: "Select Child", description: "", value: 1 },
 ];
 }
 
@@ -64,6 +82,187 @@ impl OpProps for ArmatureApply {
     }
 }
 
+// ---------------------------------------------------------------- pose.autoside_names
+/// Props of `pose.autoside_names`, RNA order.
+pub static AUTOSIDE_NAMES_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "axis", name: "Axis", description: "Axis to tag names with", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("XAXIS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_autoside_names`
+pub static OPSPEC_POSE_OT_AUTOSIDE_NAMES: OperatorSpec = OperatorSpec {
+    idname: "pose.autoside_names",
+    bl_idname: "POSE_OT_autoside_names",
+    label: "Auto-Name by Axis",
+    description: "Automatically renames the selected bones according to which side of the target axis they fall on",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &AUTOSIDE_NAMES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Enums of `pose.autoside_names`.
+pub mod autoside_names {
+    /// `Axis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Axis {
+        /// "XAXIS"
+        Xaxis,
+        /// "YAXIS"
+        Yaxis,
+        /// "ZAXIS"
+        Zaxis,
+    }
+    impl Axis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Axis; 3] = [Axis::Xaxis, Axis::Yaxis, Axis::Zaxis];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Axis::Xaxis => "XAXIS",
+                Axis::Yaxis => "YAXIS",
+                Axis::Zaxis => "ZAXIS",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "XAXIS" => Some(Axis::Xaxis),
+                "YAXIS" => Some(Axis::Yaxis),
+                "ZAXIS" => Some(Axis::Zaxis),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Axis {
+        fn default() -> Self {
+            Axis::Xaxis
+        }
+    }
+    impl frap_rna::FromValue for Axis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `pose.autoside_names` (Auto-Name by Axis).
+#[derive(Debug, Clone)]
+pub struct PoseAutosideNames {
+    /// Axis to tag names with; default "XAXIS": XAXIS | YAXIS | ZAXIS [ANIMATABLE]
+    pub axis: Prop<autoside_names::Axis>,
+}
+impl OpProps for PoseAutosideNames {
+    const IDNAME: &'static str = "pose.autoside_names";
+    const BL_IDNAME: &'static str = "POSE_OT_autoside_names";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_AUTOSIDE_NAMES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseAutosideNames {
+            axis: a.prop(0, "axis"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.copy
+/// Props of `pose.copy`, RNA order.
+pub static COPY_PROPS: [PropDef; 0] = [
+];
+/// `POSE_OT_copy`
+pub static OPSPEC_POSE_OT_COPY: OperatorSpec = OperatorSpec {
+    idname: "pose.copy",
+    bl_idname: "POSE_OT_copy",
+    label: "Copy Pose",
+    description: "Copy the current pose of the selected bones to the internal clipboard",
+    options: OpOptions::REGISTER,
+    props: &COPY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.copy` (Copy Pose).
+#[derive(Debug, Clone)]
+pub struct Copy {
+}
+impl OpProps for Copy {
+    const IDNAME: &'static str = "pose.copy";
+    const BL_IDNAME: &'static str = "POSE_OT_copy";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_COPY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Copy {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.flip_names
+/// Props of `pose.flip_names`, RNA order.
+pub static FLIP_NAMES_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "do_strip_numbers", name: "Strip Numbers", description: "Try to remove right-most dot-number from flipped names.\nWarning: May result in incoherent naming in some cases", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_flip_names`
+pub static OPSPEC_POSE_OT_FLIP_NAMES: OperatorSpec = OperatorSpec {
+    idname: "pose.flip_names",
+    bl_idname: "POSE_OT_flip_names",
+    label: "Flip Names",
+    description: "Flips (and corrects) the axis suffixes of the names of selected bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &FLIP_NAMES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.flip_names` (Flip Names).
+#[derive(Debug, Clone)]
+pub struct PoseFlipNames {
+    /// Try to remove right-most dot-number from flipped names. Warning: May result in incoherent naming in some cases; default false [ANIMATABLE]
+    pub do_strip_numbers: Prop<bool>,
+}
+impl OpProps for PoseFlipNames {
+    const IDNAME: &'static str = "pose.flip_names";
+    const BL_IDNAME: &'static str = "POSE_OT_flip_names";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_FLIP_NAMES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseFlipNames {
+            do_strip_numbers: a.prop(0, "do_strip_numbers"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.hide
+/// Props of `pose.hide`, RNA order.
+pub static HIDE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "unselected", name: "Unselected", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_hide`
+pub static OPSPEC_POSE_OT_HIDE: OperatorSpec = OperatorSpec {
+    idname: "pose.hide",
+    bl_idname: "POSE_OT_hide",
+    label: "Hide Selected",
+    description: "Tag selected bones to not be visible in Pose Mode",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &HIDE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.hide` (Hide Selected).
+#[derive(Debug, Clone)]
+pub struct PoseHide {
+    /// default false [ANIMATABLE]
+    pub unselected: Prop<bool>,
+}
+impl OpProps for PoseHide {
+    const IDNAME: &'static str = "pose.hide";
+    const BL_IDNAME: &'static str = "POSE_OT_hide";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_HIDE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseHide {
+            unselected: a.prop(0, "unselected"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- pose.loc_clear
 /// Props of `pose.loc_clear`, RNA order.
 pub static LOC_CLEAR_PROPS: [PropDef; 0] = [
@@ -91,6 +290,111 @@ impl OpProps for LocClear {
     }
     fn from_args(a: &OpArgs) -> Self {
         LocClear {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.paste
+/// Props of `pose.paste`, RNA order.
+pub static PASTE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "flipped", name: "Flipped on X-Axis", description: "Paste the stored pose flipped on to current pose", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "selected_mask", name: "On Selected Only", description: "Only paste the stored pose on to selected bones in the current pose", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_paste`
+pub static OPSPEC_POSE_OT_PASTE: OperatorSpec = OperatorSpec {
+    idname: "pose.paste",
+    bl_idname: "POSE_OT_paste",
+    label: "Paste Pose",
+    description: "Paste the stored pose on to the current pose",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &PASTE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.paste` (Paste Pose).
+#[derive(Debug, Clone)]
+pub struct Paste {
+    /// Paste the stored pose flipped on to current pose; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub flipped: Prop<bool>,
+    /// Only paste the stored pose on to selected bones in the current pose; default false [ANIMATABLE]
+    pub selected_mask: Prop<bool>,
+}
+impl OpProps for Paste {
+    const IDNAME: &'static str = "pose.paste";
+    const BL_IDNAME: &'static str = "POSE_OT_paste";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_PASTE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Paste {
+            flipped: a.prop(0, "flipped"),
+            selected_mask: a.prop(1, "selected_mask"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.quaternions_flip
+/// Props of `pose.quaternions_flip`, RNA order.
+pub static QUATERNIONS_FLIP_PROPS: [PropDef; 0] = [
+];
+/// `POSE_OT_quaternions_flip`
+pub static OPSPEC_POSE_OT_QUATERNIONS_FLIP: OperatorSpec = OperatorSpec {
+    idname: "pose.quaternions_flip",
+    bl_idname: "POSE_OT_quaternions_flip",
+    label: "Flip Quaternions",
+    description: "Flip quaternion values to achieve desired rotations, while maintaining the same orientations",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &QUATERNIONS_FLIP_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.quaternions_flip` (Flip Quaternions).
+#[derive(Debug, Clone)]
+pub struct QuaternionsFlip {
+}
+impl OpProps for QuaternionsFlip {
+    const IDNAME: &'static str = "pose.quaternions_flip";
+    const BL_IDNAME: &'static str = "POSE_OT_quaternions_flip";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_QUATERNIONS_FLIP
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        QuaternionsFlip {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.reveal
+/// Props of `pose.reveal`, RNA order.
+pub static REVEAL_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "select", name: "Select", description: "", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_reveal`
+pub static OPSPEC_POSE_OT_REVEAL: OperatorSpec = OperatorSpec {
+    idname: "pose.reveal",
+    bl_idname: "POSE_OT_reveal",
+    label: "Reveal Selected",
+    description: "Reveal all bones hidden in Pose Mode",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &REVEAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.reveal` (Reveal Selected).
+#[derive(Debug, Clone)]
+pub struct PoseReveal {
+    /// default true [ANIMATABLE]
+    pub select: Prop<bool>,
+}
+impl OpProps for PoseReveal {
+    const IDNAME: &'static str = "pose.reveal";
+    const BL_IDNAME: &'static str = "POSE_OT_reveal";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_REVEAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseReveal {
+            select: a.prop(0, "select"),
         }
     }
 }
@@ -129,7 +433,7 @@ impl OpProps for RotClear {
 // ---------------------------------------------------------------- pose.rotation_mode_set
 /// Props of `pose.rotation_mode_set`, RNA order.
 pub static ROTATION_MODE_SET_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Rotation Mode", description: "", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("QUATERNION"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Rotation Mode", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("QUATERNION"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `POSE_OT_rotation_mode_set`
 pub static OPSPEC_POSE_OT_ROTATION_MODE_SET: OperatorSpec = OperatorSpec {
@@ -260,7 +564,7 @@ impl OpProps for ScaleClear {
 // ---------------------------------------------------------------- pose.select_all
 /// Props of `pose.select_all`, RNA order.
 pub static SELECT_ALL_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `POSE_OT_select_all`
 pub static OPSPEC_POSE_OT_SELECT_ALL: OperatorSpec = OperatorSpec {
@@ -341,6 +645,287 @@ impl OpProps for PoseSelectAll {
     }
 }
 
+// ---------------------------------------------------------------- pose.select_grouped
+/// Props of `pose.select_grouped`, RNA order.
+pub static SELECT_GROUPED_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "extend", name: "Extend", description: "Extend selection instead of deselecting everything first", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("COLLECTION"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_select_grouped`
+pub static OPSPEC_POSE_OT_SELECT_GROUPED: OperatorSpec = OperatorSpec {
+    idname: "pose.select_grouped",
+    bl_idname: "POSE_OT_select_grouped",
+    label: "Select Grouped",
+    description: "Select all visible bones grouped by similar properties",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_GROUPED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Enums of `pose.select_grouped`.
+pub mod select_grouped {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "COLLECTION"
+        Collection,
+        /// "COLOR"
+        Color,
+        /// "KEYINGSET"
+        Keyingset,
+        /// "CHILDREN"
+        Children,
+        /// "CHILDREN_IMMEDIATE"
+        ChildrenImmediate,
+        /// "PARENT"
+        Parent,
+        /// "SIBLINGS"
+        Siblings,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 7] = [Type::Collection, Type::Color, Type::Keyingset, Type::Children, Type::ChildrenImmediate, Type::Parent, Type::Siblings];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Collection => "COLLECTION",
+                Type::Color => "COLOR",
+                Type::Keyingset => "KEYINGSET",
+                Type::Children => "CHILDREN",
+                Type::ChildrenImmediate => "CHILDREN_IMMEDIATE",
+                Type::Parent => "PARENT",
+                Type::Siblings => "SIBLINGS",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "COLLECTION" => Some(Type::Collection),
+                "COLOR" => Some(Type::Color),
+                "KEYINGSET" => Some(Type::Keyingset),
+                "CHILDREN" => Some(Type::Children),
+                "CHILDREN_IMMEDIATE" => Some(Type::ChildrenImmediate),
+                "PARENT" => Some(Type::Parent),
+                "SIBLINGS" => Some(Type::Siblings),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Collection
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `pose.select_grouped` (Select Grouped).
+#[derive(Debug, Clone)]
+pub struct SelectGrouped {
+    /// Extend selection instead of deselecting everything first; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+    /// default "COLLECTION": COLLECTION | COLOR | KEYINGSET | CHILDREN | CHILDREN_IMMEDIATE | PARENT | SIBLINGS [ANIMATABLE]
+    pub r#type: Prop<select_grouped::Type>,
+}
+impl OpProps for SelectGrouped {
+    const IDNAME: &'static str = "pose.select_grouped";
+    const BL_IDNAME: &'static str = "POSE_OT_select_grouped";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_SELECT_GROUPED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectGrouped {
+            extend: a.prop(0, "extend"),
+            r#type: a.prop(1, "type"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.select_hierarchy
+/// Props of `pose.select_hierarchy`, RNA order.
+pub static SELECT_HIERARCHY_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "direction", name: "Direction", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("PARENT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_select_hierarchy`
+pub static OPSPEC_POSE_OT_SELECT_HIERARCHY: OperatorSpec = OperatorSpec {
+    idname: "pose.select_hierarchy",
+    bl_idname: "POSE_OT_select_hierarchy",
+    label: "Select Hierarchy",
+    description: "Select immediate parent/children of selected bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_HIERARCHY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Enums of `pose.select_hierarchy`.
+pub mod select_hierarchy {
+    /// `Direction`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Direction {
+        /// "PARENT"
+        Parent,
+        /// "CHILD"
+        Child,
+    }
+    impl Direction {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Direction; 2] = [Direction::Parent, Direction::Child];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Direction::Parent => "PARENT",
+                Direction::Child => "CHILD",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "PARENT" => Some(Direction::Parent),
+                "CHILD" => Some(Direction::Child),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Direction {
+        fn default() -> Self {
+            Direction::Parent
+        }
+    }
+    impl frap_rna::FromValue for Direction {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `pose.select_hierarchy` (Select Hierarchy).
+#[derive(Debug, Clone)]
+pub struct PoseSelectHierarchy {
+    /// default "PARENT": PARENT | CHILD [ANIMATABLE]
+    pub direction: Prop<select_hierarchy::Direction>,
+    /// Extend the selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for PoseSelectHierarchy {
+    const IDNAME: &'static str = "pose.select_hierarchy";
+    const BL_IDNAME: &'static str = "POSE_OT_select_hierarchy";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_SELECT_HIERARCHY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseSelectHierarchy {
+            direction: a.prop(0, "direction"),
+            extend: a.prop(1, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.select_linked
+/// Props of `pose.select_linked`, RNA order.
+pub static SELECT_LINKED_PROPS: [PropDef; 0] = [
+];
+/// `POSE_OT_select_linked`
+pub static OPSPEC_POSE_OT_SELECT_LINKED: OperatorSpec = OperatorSpec {
+    idname: "pose.select_linked",
+    bl_idname: "POSE_OT_select_linked",
+    label: "Select Connected",
+    description: "Select all bones linked by connected parent/child relationships from the current selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_LINKED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.select_linked` (Select Connected).
+#[derive(Debug, Clone)]
+pub struct PoseSelectLinked {
+}
+impl OpProps for PoseSelectLinked {
+    const IDNAME: &'static str = "pose.select_linked";
+    const BL_IDNAME: &'static str = "POSE_OT_select_linked";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_SELECT_LINKED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseSelectLinked {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.select_mirror
+/// Props of `pose.select_mirror`, RNA order.
+pub static SELECT_MIRROR_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "only_active", name: "Active Only", description: "Only operate on the active bone", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_select_mirror`
+pub static OPSPEC_POSE_OT_SELECT_MIRROR: OperatorSpec = OperatorSpec {
+    idname: "pose.select_mirror",
+    bl_idname: "POSE_OT_select_mirror",
+    label: "Select Mirror",
+    description: "Mirror the bone selection",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_MIRROR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.select_mirror` (Select Mirror).
+#[derive(Debug, Clone)]
+pub struct PoseSelectMirror {
+    /// Only operate on the active bone; default false [ANIMATABLE]
+    pub only_active: Prop<bool>,
+    /// Extend the selection; default false [ANIMATABLE]
+    pub extend: Prop<bool>,
+}
+impl OpProps for PoseSelectMirror {
+    const IDNAME: &'static str = "pose.select_mirror";
+    const BL_IDNAME: &'static str = "POSE_OT_select_mirror";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_SELECT_MIRROR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PoseSelectMirror {
+            only_active: a.prop(0, "only_active"),
+            extend: a.prop(1, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.select_parent
+/// Props of `pose.select_parent`, RNA order.
+pub static SELECT_PARENT_PROPS: [PropDef; 0] = [
+];
+/// `POSE_OT_select_parent`
+pub static OPSPEC_POSE_OT_SELECT_PARENT: OperatorSpec = OperatorSpec {
+    idname: "pose.select_parent",
+    bl_idname: "POSE_OT_select_parent",
+    label: "Select Parent Bone",
+    description: "Select bones that are parents of the currently selected bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SELECT_PARENT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.select_parent` (Select Parent Bone).
+#[derive(Debug, Clone)]
+pub struct SelectParent {
+}
+impl OpProps for SelectParent {
+    const IDNAME: &'static str = "pose.select_parent";
+    const BL_IDNAME: &'static str = "POSE_OT_select_parent";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_SELECT_PARENT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SelectParent {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- pose.transforms_clear
 /// Props of `pose.transforms_clear`, RNA order.
 pub static TRANSFORMS_CLEAR_PROPS: [PropDef; 0] = [
@@ -368,6 +953,72 @@ impl OpProps for TransformsClear {
     }
     fn from_args(a: &OpArgs) -> Self {
         TransformsClear {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.user_transforms_clear
+/// Props of `pose.user_transforms_clear`, RNA order.
+pub static USER_TRANSFORMS_CLEAR_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "only_selected", name: "Only Selected", description: "Only visible/selected bones", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `POSE_OT_user_transforms_clear`
+pub static OPSPEC_POSE_OT_USER_TRANSFORMS_CLEAR: OperatorSpec = OperatorSpec {
+    idname: "pose.user_transforms_clear",
+    bl_idname: "POSE_OT_user_transforms_clear",
+    label: "Clear User Transforms",
+    description: "Reset pose bone transforms to keyframed state",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &USER_TRANSFORMS_CLEAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.user_transforms_clear` (Clear User Transforms).
+#[derive(Debug, Clone)]
+pub struct UserTransformsClear {
+    /// Only visible/selected bones; default true [ANIMATABLE]
+    pub only_selected: Prop<bool>,
+}
+impl OpProps for UserTransformsClear {
+    const IDNAME: &'static str = "pose.user_transforms_clear";
+    const BL_IDNAME: &'static str = "POSE_OT_user_transforms_clear";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_USER_TRANSFORMS_CLEAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        UserTransformsClear {
+            only_selected: a.prop(0, "only_selected"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- pose.visual_transform_apply
+/// Props of `pose.visual_transform_apply`, RNA order.
+pub static VISUAL_TRANSFORM_APPLY_PROPS: [PropDef; 0] = [
+];
+/// `POSE_OT_visual_transform_apply`
+pub static OPSPEC_POSE_OT_VISUAL_TRANSFORM_APPLY: OperatorSpec = OperatorSpec {
+    idname: "pose.visual_transform_apply",
+    bl_idname: "POSE_OT_visual_transform_apply",
+    label: "Apply Visual Transform to Pose",
+    description: "Apply final constrained position of pose bones to their transform",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VISUAL_TRANSFORM_APPLY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `pose.visual_transform_apply` (Apply Visual Transform to Pose).
+#[derive(Debug, Clone)]
+pub struct VisualTransformApply {
+}
+impl OpProps for VisualTransformApply {
+    const IDNAME: &'static str = "pose.visual_transform_apply";
+    const BL_IDNAME: &'static str = "POSE_OT_visual_transform_apply";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_POSE_OT_VISUAL_TRANSFORM_APPLY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VisualTransformApply {
         }
     }
 }

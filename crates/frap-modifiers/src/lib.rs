@@ -20,6 +20,9 @@
 //! WPs 4.2–4.6 (and 6.5 in M6) add `src/types/<type>.rs` files (automod, no `mod` edit).
 #![deny(unsafe_code)]
 
+/// The data-transfer core shared by DATA_TRANSFER and `object.data_transfer` (M8 W0 stub;
+/// WP 8.3.13).
+pub mod data_transfer;
 pub mod registry;
 pub mod stack;
 

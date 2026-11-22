@@ -1,0 +1,30 @@
+[package]
+name = "frap-perf-tests"
+description = "frap test-only crate (rule 2.2.11): the performance budgets of ARCHITECTURE §21.7 through a real Session (M8 WP 8.8)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# Test-only (M8 W0, decision log M8W0-9): nothing depends on this crate, so it may depend on
+# frap-session (L11) without a dev-dependency cycle. Owned by WP 8.8 except this manifest; the
+# budgets are measured in release builds (`cargo test -p frap-perf-tests --release`), and a
+# debug run only checks that each measurement runs.
+[dependencies]
+
+[dev-dependencies]
+frap-session.workspace = true
+frap-ops-all = { workspace = true, features = ["meshopt", "draco", "basisu", "webp-lossy"] }
+frap-scene.workspace = true
+frap-mesh.workspace = true
+frap-bmesh.workspace = true
+frap-rna.workspace = true
+frap-io-gltf.workspace = true
+frap-gltf.workspace = true
+serde_json.workspace = true
+assert_cmd.workspace = true
+
+[lints]
+workspace = true

@@ -9,7 +9,8 @@
 #   check : cargo check --manifest-path fuzz/Cargo.toml                      (stable; CI `checks`)
 #
 # One `[[bin]]` per target, no glob: cargo-fuzz lists targets from this file. A new target is a
-# new `[[bin]]` here (integrator, next W0) or a new file under one of the names below.
+# new `[[bin]]` here (integrator, next W0) or a new file under one of the names below. M8: WP 8.7
+# owns `fuzz_targets/{gltf_read,frap_read,imbuf_decode}.rs`.
 
 [package]
 name = "frap-fuzz"
@@ -28,6 +29,10 @@ cargo-fuzz = true
 # External dependency outside the root workspace table (cannot inherit, see root Cargo.toml).
 libfuzzer-sys = "0.4"
 frap-lang = { path = "../crates/frap-lang" }
+# M8 W0 (decision log M8W0-9): the readers WP 8.7 fuzzes.
+frap-gltf = { path = "../crates/frap-gltf" }
+frap-project = { path = "../crates/frap-project" }
+frap-imbuf = { path = "../crates/frap-imbuf", features = ["basisu"] }
 
 # `parse_complete` on arbitrary UTF-8: never panics, every error has a span (WP 1.3).
 [[bin]]
@@ -41,6 +46,29 @@ bench = false
 [[bin]]
 name = "lang_split"
 path = "fuzz_targets/lang_split.rs"
+test = false
+doc = false
+bench = false
+
+# M8 W0 stubs, written by WP 8.7: the GLB / glTF reader, the `.frap` container reader and the
+# image decoders on arbitrary bytes.
+[[bin]]
+name = "gltf_read"
+path = "fuzz_targets/gltf_read.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "frap_read"
+path = "fuzz_targets/frap_read.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "imbuf_decode"
+path = "fuzz_targets/imbuf_decode.rs"
 test = false
 doc = false
 bench = false

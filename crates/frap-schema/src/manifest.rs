@@ -12,7 +12,6 @@
 
 mod curated;
 mod ops;
-mod planned;
 mod props;
 mod target;
 
@@ -24,8 +23,8 @@ pub use curated::{
     DEFAULTS_THAT_SURPRISE, POLL_CONTEXTS, PRIMITIVES_APPLYING_SCALE, PRIMITIVES_IGNORING_SCALE,
     SurpriseDefault, SurpriseKind, unset_semantics,
 };
+pub use frap_op::planned::{PlannedRow, operator_milestone, row as planned_row};
 pub use ops::{OpEntry, all_ops, find_op, glob_match, namespaces};
-pub use planned::{PlannedRow, operator_milestone, row as planned_row};
 pub use props::{
     PropOwner, array_json, default_json, describe_prop, float_json, poll_req_name, poll_req_text,
     ranges, unit_label,
