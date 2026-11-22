@@ -24,7 +24,13 @@ use frap_spec_ops_uv::uv;
 use super::weld::common;
 use crate::select::{UvSel, op};
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+#[operator(
+    poll = poll::EDITMESH,
+    tier = T1,
+    notes = [
+        "correct_aspect reads the image of frap's virtual Image Editor, which shows none (aspect 1); Blender outside an Image Editor raises AttributeError",
+    ]
+)]
 fn exec(cx: &mut OpCtx, p: uv::AlignRotation) -> OpResult {
     let method = p.method.value.identifier();
     let axis = match p.axis.value.identifier() {

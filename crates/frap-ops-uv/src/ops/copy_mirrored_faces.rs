@@ -27,7 +27,13 @@ fn key(p: [f32; 3]) -> [u32; 3] {
     p.map(|c| if c == 0.0 { 0 } else { c.to_bits() })
 }
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+#[operator(
+    poll = poll::EDITMESH,
+    tier = T1,
+    notes = [
+        "face pairs are copied in mesh order (Blender walks a hash map): only a face that is both a source and a destination can differ",
+    ]
+)]
 fn exec(cx: &mut OpCtx, p: uv::CopyMirroredFaces) -> OpResult {
     let precision = p.precision.value;
     let mesh_axis = match p.mesh_axis.value.identifier() {

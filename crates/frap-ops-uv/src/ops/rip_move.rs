@@ -21,7 +21,7 @@ use frap_spec_ops_uv::uv;
 
 use super::rip::rip_multi;
 use super::unwrap::uvedit;
-use super::weld::common::{self, IMAGE_EDITOR_NOTE};
+use super::weld::common;
 use crate::select::{Uv, op};
 
 /// The UV translation of the `TRANSFORM_OT_translate` step: its `value` (`T_INPUT_IS_VALUES_FINAL`:
@@ -44,11 +44,16 @@ fn location(args: &OpArgs) -> Uv {
     }
 }
 
+/// The `--describe` note.
+const RIP_MOVE_NOTE: &str = "headless-extended: runs as in an Image Editor in UV mode without \
+     an image: its TRANSFORM_OT_translate step adds value[0], value[1] to the UVs that stay \
+     selected (frap's transform.translate moves vertices), on the UV selection the rip leaves";
+
 #[operator(
     poll = poll::EDITMESH,
     tier = T1,
     kind = Macro,
-    support = HeadlessExtended(IMAGE_EDITOR_NOTE)
+    support = HeadlessExtended(RIP_MOVE_NOTE)
 )]
 fn exec(cx: &mut OpCtx, p: uv::RipMove) -> OpResult {
     uvedit::check_uvedit(cx)?;

@@ -69,7 +69,13 @@ impl IslandBounds {
     }
 }
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+#[operator(
+    poll = poll::EDITMESH,
+    tier = T1,
+    notes = [
+        "initial_position='CURSOR' starts at the 2D cursor of frap's virtual Image Editor (uv.snap_cursor moves it); Blender without an Image Editor starts at the origin",
+    ]
+)]
 fn exec(cx: &mut OpCtx, p: uv::ArrangeIslands) -> OpResult {
     uvedit::check_uvedit(cx)?;
     let initial_position = p.initial_position.value.identifier();

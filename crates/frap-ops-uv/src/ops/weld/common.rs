@@ -267,12 +267,6 @@ pub(crate) fn dot(a: Uv, b: Uv) -> f32 {
     a[0] * b[0] + a[1] * b[1]
 }
 
-/// `cross_v2v2`.
-#[inline]
-pub(crate) fn cross(a: Uv, b: Uv) -> f32 {
-    a[0] * b[1] - a[1] * b[0]
-}
-
 /// `sub_v2_v2v2`.
 #[inline]
 pub(crate) fn sub(a: Uv, b: Uv) -> Uv {
@@ -336,6 +330,5 @@ mod tests {
         assert_eq!(normalize(&mut z), 0.0);
         assert!((angle([1.0, 0.0], [0.0, 2.0]) - core::f32::consts::FRAC_PI_2).abs() < 1e-6);
         assert!((angle([1.0, 0.0], [-1.0, 0.0]) - core::f32::consts::PI).abs() < 1e-6);
-        assert_eq!(cross([1.0, 0.0], [0.0, 1.0]), 1.0);
     }
 }

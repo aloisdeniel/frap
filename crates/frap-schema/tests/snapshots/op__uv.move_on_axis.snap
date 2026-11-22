@@ -1,0 +1,138 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.move_on_axis",
+  "bl_idname": "UV_OT_move_on_axis",
+  "label": "Move on Axis",
+  "description": "Move UVs on an axis",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "Move Type",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "UDIM",
+      "enum_items": [
+        {
+          "identifier": "DYNAMIC",
+          "name": "Dynamic",
+          "description": "Move by dynamic grid",
+          "value": 0
+        },
+        {
+          "identifier": "PIXEL",
+          "name": "Pixel",
+          "description": "Move by pixel",
+          "value": 1
+        },
+        {
+          "identifier": "UDIM",
+          "name": "UDIM",
+          "description": "Move by UDIM",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "axis",
+      "name": "Axis",
+      "description": "Axis to move UVs on",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "X",
+      "enum_items": [
+        {
+          "identifier": "X",
+          "name": "X axis",
+          "description": "Move vertices on the X axis",
+          "value": 0
+        },
+        {
+          "identifier": "Y",
+          "name": "Y axis",
+          "description": "Move vertices on the Y axis",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "distance",
+      "name": "Distance",
+      "description": "Distance to move UVs",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": "headless-extended: runs as in an Image Editor in UV mode without an image (Blender's poll needs one; blender -b has none): image size 256 x 256, pivot BOUNDING_BOX_CENTER, the 2D cursor kept per scene and moved only by uv.snap_cursor (starts at the origin)",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

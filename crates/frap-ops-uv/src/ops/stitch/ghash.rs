@@ -85,7 +85,8 @@ impl EdgeHash {
     }
 
     /// `BLI_ghash_len`.
-    pub(crate) fn len(&self) -> usize {
+    #[cfg(test)]
+    fn len(&self) -> usize {
         self.entries.len()
     }
 

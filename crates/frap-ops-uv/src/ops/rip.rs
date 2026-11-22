@@ -35,14 +35,13 @@ fn exec(cx: &mut OpCtx, p: uv::Rip) -> OpResult {
     }
 }
 
+/// The ripped meshes and their `uv_select_sync_valid`.
+pub(crate) type Ripped = Vec<(IdRef<MeshId>, bool)>;
+
 /// `uv_rip_exec` over every mesh in Edit Mode with a UV map: the meshes with their
 /// `uv_select_sync_valid` after the rip (for `uv.rip_move`'s translation), `None` when no mesh
 /// changed (`CANCELLED`).
-pub(crate) fn rip_multi(
-    cx: &mut OpCtx,
-    ts: Ts,
-    co: Uv,
-) -> Result<Option<Vec<(IdRef<MeshId>, bool)>>, OpError> {
+pub(crate) fn rip_multi(cx: &mut OpCtx, ts: Ts, co: Uv) -> Result<Option<Ripped>, OpError> {
     if ts.sticky == Sticky::Vert {
         // "Rip" is logically incompatible with sync-select (and with vertex sticky selection).
         return Err(OpError::Runtime(

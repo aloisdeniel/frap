@@ -572,14 +572,14 @@ pub(crate) fn process_data(
                 }
             }
             Mode::Edge => {
-                for i in 0..p.st.uvs.len() {
+                for (i, fp) in final_position.iter().enumerate() {
                     let element = p.st.uvs[i];
                     if p.st.map.storage[element as usize].flag & STITCH_STITCHABLE != 0 {
                         let luv = p.el_uv(element);
                         let ii = p.el_island(element) as usize;
                         let isl = &mut p.islands[ii];
-                        isl.translation[0] += final_position[i].uv[0] - luv[0];
-                        isl.translation[1] += final_position[i].uv[1] - luv[1];
+                        isl.translation[0] += fp.uv[0] - luv[0];
+                        isl.translation[1] += fp.uv[1] - luv[1];
                         isl.median_point[0] += luv[0];
                         isl.median_point[1] += luv[1];
                         isl.num_of_elements += 1;

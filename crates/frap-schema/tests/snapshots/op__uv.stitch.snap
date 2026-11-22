@@ -1,0 +1,314 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.stitch",
+  "bl_idname": "UV_OT_stitch",
+  "label": "Stitch",
+  "description": "Stitch selected UV vertices by proximity",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "use_limit",
+      "name": "Use Limit",
+      "description": "Stitch UVs within a specified limit distance",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_islands",
+      "name": "Snap Islands",
+      "description": "Snap islands together (on edge stitch mode, rotates the islands too)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "limit",
+      "name": "Limit",
+      "description": "Limit distance in normalized coordinates",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.01,
+      "hard_min": 0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "static_island",
+      "name": "Static Island",
+      "description": "Island that stays in place when stitching islands",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "active_object_index",
+      "name": "Active Object",
+      "description": "Index of the active object",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "midpoint_snap",
+      "name": "Snap at Midpoint",
+      "description": "UVs are stitched at midpoint instead of at static island",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "clear_seams",
+      "name": "Clear Seams",
+      "description": "Clear seams of stitched edges",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mode",
+      "name": "Operation Mode",
+      "description": "Use vertex or edge stitching",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VERTEX",
+      "enum_items": [
+        {
+          "identifier": "VERTEX",
+          "name": "Vertex",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "EDGE",
+          "name": "Edge",
+          "description": "",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "stored_mode",
+      "name": "Stored Operation Mode",
+      "description": "Use vertex or edge stitching",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VERTEX",
+      "enum_items": [
+        {
+          "identifier": "VERTEX",
+          "name": "Vertex",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "EDGE",
+          "name": "Edge",
+          "description": "",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "selection",
+      "name": "Selection",
+      "description": "",
+      "type": "COLLECTION",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [],
+      "item_type": "SelectedUvElement",
+      "api": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "READONLY",
+        "HIDDEN",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "objects_selection_count",
+      "name": "Objects Selection Count",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": [
+        6
+      ],
+      "default": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "hard_min": 0,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": "headless-extended: runs as in an Image Editor in UV mode (blender -b crashes running uv.stitch without one: its exec registers a draw callback on the context region); objects_selection_count keeps six entries (Blender redefines it to one per mesh after a finished stitch)",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -45,7 +45,13 @@ use state::{Mode, Ssc, StitchState, UvElementId};
 /// `RNA_MAX_ARRAY_LENGTH`.
 const RNA_MAX_ARRAY_LENGTH: usize = 64;
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+/// The `--describe` note: Blender's exec needs an Image Editor region.
+const STITCH_NOTE: &str = "headless-extended: runs as in an Image Editor in UV mode (blender -b \
+     crashes running uv.stitch without one: its exec registers a draw callback on the context \
+     region); objects_selection_count keeps six entries (Blender redefines it to one per mesh \
+     after a finished stitch)";
+
+#[operator(poll = poll::EDITMESH, tier = T1, support = HeadlessExtended(STITCH_NOTE))]
 fn exec(cx: &mut OpCtx, p: uv::Stitch) -> OpResult {
     uvedit::check_uvedit(cx)?;
     let ts = op::ts(cx);
@@ -145,8 +151,8 @@ fn exec(cx: &mut OpCtx, p: uv::Stitch) -> OpResult {
     run(cx, ts, &mut ssc, &mut states[active], true, false)?;
 
     // `stitch_exec`: `stitch_process_data_all(ssc, scene, final=true)`.
-    for i in 0..states.len() {
-        run(cx, ts, &mut ssc, &mut states[i], i == active, true)?;
+    for (i, entry) in states.iter_mut().enumerate() {
+        run(cx, ts, &mut ssc, entry, i == active, true)?;
     }
     Ok(OpStatus::Finished)
 }
@@ -222,9 +228,7 @@ fn selection_items(v: &Value) -> Result<Vec<UvElementId>, OpError> {
             match (slot, val) {
                 (0, Value::Str(_)) => {}
                 (0, _) => {
-                    return Err(err(format!(
-                        "SelectedUvElement.name expected a string type"
-                    )));
+                    return Err(err("SelectedUvElement.name expected a string type".into()));
                 }
                 (_, Value::Int(i)) => {
                     index[slot - 1] = i32::try_from(*i).unwrap_or(i32::MAX);
