@@ -7,10 +7,12 @@
 //! `meshopt`), filter encoding helpers, and any additive items. The add-on's encoder is
 //! `io/exp/meshopt.py` over Blender's `bf_intern_meshopt_bridge` (meshoptimizer), so a
 //! meshoptimizer backend gives the add-on's bitstreams (Blender 5.2.4 bundles meshoptimizer
-//! 1.1, the `meshopt =0.7.0` crate 1.3: same formats, encoder output may differ by version).
+//! 1.1, the `meshopt =0.7.0` crate 1.3: same formats, encoder output may differ by version;
+//! the one filter whose output differs, `meshopt_encodeFilterExp`, is ported from 1.1, see
+//! [`encode_filter_exp`]).
 //!
-//! WP 7.1 additions (all behind the `meshopt` feature; without it they answer
-//! [`CodecError::Unavailable`]):
+//! WP 7.1 additions (all behind the `meshopt` feature but [`encode_filter_exp`]; without it
+//! they answer [`CodecError::Unavailable`]):
 //! - the attribute filter encoders the add-on calls ([`encode_filter_exp`] with
 //!   [`ExpMode`], [`encode_filter_quat`], [`encode_filter_oct`], [`encode_filter_color`]);
 //! - the mesh optimisers `export_use_gltfpack` maps onto (gltfpack is a meshoptimizer tool):
@@ -213,6 +215,19 @@ fn check_vertex_stride(stride: usize) -> Result<(), String> {
     }
 }
 
+/// The element size a filter of a `stride`-byte view applies to: `stride`, except for the
+/// add-on's `QUATERNION` views of byteStride 16 (`sampled/object/sampler.py`, the object
+/// rotations of `export_force_sampling`), whose quaternions are 8-byte elements packed in the
+/// first `count * 8` bytes: release meshoptimizer's `meshopt_decodeFilterQuat` (Blender's
+/// bridge) ignores the stride and reads them there, and Blender 5.2.4 imports these files.
+pub fn filter_stride(filter: MeshoptFilter, stride: usize) -> usize {
+    if filter == MeshoptFilter::Quaternion && stride == 16 {
+        8
+    } else {
+        stride
+    }
+}
+
 /// Checks that a filter can be applied to elements of `stride` bytes (the spec's rules).
 pub fn check_filter_stride(filter: MeshoptFilter, stride: usize) -> Result<(), String> {
     let ok = match filter {
@@ -231,9 +246,17 @@ pub fn check_filter_stride(filter: MeshoptFilter, stride: usize) -> Result<(), S
     }
 }
 
-/// `meshopt_encodeFilterExp`: `values` holds `count` elements of `stride / 4` floats; returns
-/// `count * stride` bytes (one `(exponent << 24) | mantissa` word per float, `bits` of
-/// mantissa, 1..=24).
+/// `meshopt_encodeFilterExp` of meshoptimizer 1.1, the version Blender 5.2.4 bundles:
+/// `values` holds `count` elements of `stride / 4` floats; returns `count * stride` bytes
+/// (one `(exponent << 24) | mantissa` word per float, `bits` of mantissa, 1..=24). Pure Rust,
+/// always available.
+///
+/// Ported from meshoptimizer v1.1 `src/vertexfilter.cpp` (MIT, Arseny Kapoulkine): 1.3 (the
+/// `meshopt` crate's) changed `optlog2(0)` from 0 to the minimum exponent, so a zero component
+/// no longer raises a shared exponent, and clamps the rounded mantissa; with 1.1 the vector
+/// `(0, 0.0171, 0)` gets the exponent of 0.5 (Blender 5.2.4's bridge, probed through ctypes).
+/// Non-finite values encode as 1.1 does on arm64 and x86-64 SSE (`int(NaN)` is 0 in Rust; an
+/// infinite product saturates).
 pub fn encode_filter_exp(
     values: &[f32],
     count: usize,
@@ -253,22 +276,80 @@ pub fn encode_filter_exp(
             values.len()
         )));
     }
-    if values.iter().any(|v| !v.is_finite()) {
-        return Err(encode_err(
-            "meshopt: the exponential filter needs finite values",
-        ));
+    Ok(encode_filter_exp_v1_1(
+        values,
+        count,
+        stride / 4,
+        bits as i32,
+        mode,
+    ))
+}
+
+/// meshoptimizer 1.1's `optlog2`: `frexp`'s exponent, 0 for 0.
+fn optlog2_v1_1(v: f32) -> i32 {
+    if v == 0.0 {
+        0
+    } else {
+        ((v.to_bits() >> 23) & 0xff) as i32 - 127 + 1
     }
-    backend_or_unavailable(|| {
-        #[cfg(feature = "meshopt")]
-        {
-            backend::encode_filter_exp(values, count, stride, bits, mode)
+}
+
+/// meshoptimizer's `optexp2`: `2^e` as a float built from its exponent bits.
+fn optexp2(e: i32) -> f32 {
+    f32::from_bits(((e + 127) as u32) << 23)
+}
+
+/// The body of meshoptimizer 1.1's `meshopt_encodeFilterExp`.
+fn encode_filter_exp_v1_1(
+    data: &[f32],
+    count: usize,
+    stride_float: usize,
+    bits: i32,
+    mode: ExpMode,
+) -> Vec<u8> {
+    const MIN_EXP: i32 = -100;
+    let mut component_exp = vec![MIN_EXP; stride_float];
+    if mode == ExpMode::SharedComponent {
+        for v in data.chunks_exact(stride_float).take(count) {
+            for (c, &x) in component_exp.iter_mut().zip(v) {
+                *c = (*c).max(optlog2_v1_1(x));
+            }
         }
-        #[cfg(not(feature = "meshopt"))]
-        {
-            let _ = mode;
-            unreachable!()
+    }
+    let mut out = Vec::with_capacity(count * stride_float * 4);
+    for v in data.chunks_exact(stride_float).take(count) {
+        let mut vector_exp = MIN_EXP;
+        match mode {
+            ExpMode::SharedVector => {
+                for &x in v {
+                    vector_exp = vector_exp.max(optlog2_v1_1(x));
+                }
+            }
+            ExpMode::Separate => {
+                for (c, &x) in component_exp.iter_mut().zip(v) {
+                    *c = optlog2_v1_1(x).max(MIN_EXP);
+                }
+            }
+            ExpMode::Clamped => {
+                for (c, &x) in component_exp.iter_mut().zip(v) {
+                    *c = optlog2_v1_1(x).max(0);
+                }
+            }
+            ExpMode::SharedComponent => {}
         }
-    })
+        for (j, &x) in v.iter().enumerate() {
+            let exp = if mode == ExpMode::SharedVector {
+                vector_exp
+            } else {
+                component_exp[j]
+            } - (bits - 1);
+            // `int(v[j] * optexp2(-exp) + (v[j] >= 0 ? 0.5f : -0.5f))`, in f32.
+            let m = (x * optexp2(-exp) + if x >= 0.0 { 0.5 } else { -0.5 }) as i32;
+            let d = ((m as u32) & ((1 << 24) - 1)) | ((exp as u32) << 24);
+            out.extend_from_slice(&d.to_le_bytes());
+        }
+    }
+    out
 }
 
 /// `meshopt_encodeFilterQuat`: `values` holds `count` unit quaternions (x, y, z, w); returns
@@ -560,8 +641,8 @@ mod backend {
     use meshopt::ffi;
 
     use super::{
-        CodecError, ExpMode, MAX_DECODED_BYTES, MeshoptCodec, MeshoptFilter, MeshoptMode,
-        MeshoptVersion, check_filter_stride, check_vertex_stride, encode_err,
+        CodecError, MAX_DECODED_BYTES, MeshoptCodec, MeshoptFilter, MeshoptMode, MeshoptVersion,
+        check_filter_stride, check_vertex_stride, encode_err, filter_stride,
     };
 
     /// meshoptimizer's default encoder level (`meshopt::kEncodeDefaultLevel`), the level of
@@ -695,7 +776,8 @@ mod backend {
             let rc = match mode {
                 MeshoptMode::Attributes => {
                     check_vertex_stride(stride).map_err(decode_err)?;
-                    check_filter_stride(filter, stride).map_err(decode_err)?;
+                    check_filter_stride(filter, filter_stride(filter, stride))
+                        .map_err(decode_err)?;
                     // SAFETY: `out` holds `count * stride` bytes; the stride satisfies the
                     // asserts; the decoder bounds-checks the (untrusted) input.
                     unsafe {
@@ -760,8 +842,12 @@ mod backend {
                 )));
             }
             if count > 0 {
-                // SAFETY: `out` holds `count` elements of `stride` bytes, a stride the filter
-                // accepts (checked above).
+                // A QUATERNION view of byteStride 16 filters its first `count * 8` bytes
+                // (`filter_stride`), as Blender's decoder does.
+                let stride = filter_stride(filter, stride);
+                // SAFETY: `out` holds `count` elements of `stride` bytes (at least: the
+                // quaternions of a 16-byte view fill half of it), a stride the filter accepts
+                // (checked above).
                 unsafe {
                     let p = out.as_mut_ptr().cast();
                     match filter {
@@ -779,37 +865,6 @@ mod backend {
             }
             Ok(out)
         }
-    }
-
-    pub(super) fn encode_filter_exp(
-        values: &[f32],
-        count: usize,
-        stride: usize,
-        bits: u32,
-        mode: ExpMode,
-    ) -> Result<Vec<u8>, CodecError> {
-        let mode = match mode {
-            ExpMode::Separate => ffi::meshopt_EncodeExpMode_meshopt_EncodeExpSeparate,
-            ExpMode::SharedVector => ffi::meshopt_EncodeExpMode_meshopt_EncodeExpSharedVector,
-            ExpMode::SharedComponent => ffi::meshopt_EncodeExpMode_meshopt_EncodeExpSharedComponent,
-            ExpMode::Clamped => ffi::meshopt_EncodeExpMode_meshopt_EncodeExpClamped,
-        };
-        let mut out = vec![0u8; count * stride];
-        if count > 0 {
-            // SAFETY: `out` holds `count * stride` bytes, `values` `count * stride / 4`
-            // floats; stride and bits satisfy the asserts (checked by the caller).
-            unsafe {
-                ffi::meshopt_encodeFilterExp(
-                    out.as_mut_ptr().cast(),
-                    count,
-                    stride,
-                    bits as i32,
-                    values.as_ptr(),
-                    mode,
-                );
-            }
-        }
-        Ok(out)
     }
 
     /// The filters whose input is four floats per element.
@@ -998,6 +1053,37 @@ mod tests {
         assert_eq!(MeshoptVersion::Khr.vertex_version(), 1);
     }
 
+    /// Blender 5.2.4's `bf_intern_meshopt_bridge` (meshoptimizer 1.1) `encodeFilterExp` of
+    /// `[(0, 0, 0), (0, 0.0171467, 0), (0, 0.5, 0)]` (stride 12, 12 bits), probed with ctypes
+    /// inside Blender: modes 0 (separate), 1 (shared vector, the add-on's) and 2.
+    #[test]
+    fn exponential_filter_is_meshoptimizer_1_1s() {
+        let v = [0.0f32, 0.0, 0.0, 0.0, 0.0171467, 0.0, 0.0, 0.5, 0.0];
+        let words = |m| -> Vec<u32> {
+            encode_filter_exp(&v, 3, 12, 12, m)
+                .unwrap()
+                .chunks_exact(4)
+                .map(|c| u32::from_le_bytes([c[0], c[1], c[2], c[3]]))
+                .collect()
+        };
+        let z = 0xf500_0000;
+        assert_eq!(
+            words(ExpMode::Separate),
+            [z, z, z, z, 0xf000_0464, z, z, 0xf500_0400, z]
+        );
+        assert_eq!(
+            words(ExpMode::SharedVector),
+            [z, z, z, z, 0xf500_0023, z, z, 0xf500_0400, z]
+        );
+        assert_eq!(
+            words(ExpMode::SharedComponent),
+            [z, z, z, z, 0xf500_0023, z, z, 0xf500_0400, z]
+        );
+        // NaN encodes as a zero mantissa (no error: Blender exports such meshes).
+        let n = encode_filter_exp(&[f32::NAN, 1.0, 0.0], 1, 12, 12, ExpMode::SharedVector);
+        assert_eq!(n.unwrap().len(), 12);
+    }
+
     #[test]
     fn quantizers_match_meshoptimizer() {
         assert_eq!(quantize_unorm(0.0, 14), 0);
@@ -1017,6 +1103,9 @@ mod tests {
         assert!(check_filter_stride(MeshoptFilter::Exponential, 6).is_err());
         assert!(check_filter_stride(MeshoptFilter::Quaternion, 8).is_ok());
         assert!(check_filter_stride(MeshoptFilter::Quaternion, 16).is_err());
+        assert_eq!(filter_stride(MeshoptFilter::Quaternion, 16), 8);
+        assert_eq!(filter_stride(MeshoptFilter::Quaternion, 8), 8);
+        assert_eq!(filter_stride(MeshoptFilter::Exponential, 16), 16);
         assert!(check_filter_stride(MeshoptFilter::Octahedral, 4).is_ok());
         assert!(check_filter_stride(MeshoptFilter::Color, 12).is_err());
     }
@@ -1033,8 +1122,15 @@ mod tests {
     #[test]
     fn without_the_feature_nothing_is_available() {
         assert!(codec().is_none());
+        // Pure Rust (meshoptimizer 1.1's), available without the backend.
         assert_eq!(
-            encode_filter_exp(&[0.0; 3], 1, 12, 12, ExpMode::SharedVector),
+            encode_filter_exp(&[0.0; 3], 1, 12, 12, ExpMode::SharedVector)
+                .unwrap()
+                .len(),
+            12
+        );
+        assert_eq!(
+            encode_filter_quat(&[0.0, 0.0, 0.0, 1.0], 1, 8),
             Err(unavailable())
         );
         assert!(
@@ -1137,6 +1233,54 @@ mod tests {
                 let m = if k < 3 { 3.5f32 } else { 100.0 };
                 assert!((a - b).abs() <= m / 2048.0, "{a} vs {b}");
             }
+        }
+
+        /// The add-on's sampled object rotations (`sampled/object/sampler.py`): QUATERNION
+        /// with byteStride 16, the filtered quaternions in the first `count * 8` bytes of the
+        /// vertex stream; decoded as Blender's bridge decodes them (release
+        /// `meshopt_decodeFilterQuat` ignores the stride).
+        #[test]
+        fn quaternion_filter_at_byte_stride_16_decodes_the_first_half() {
+            let h = std::f32::consts::FRAC_1_SQRT_2;
+            let q = [0.0f32, 0.0, h, h, 1.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5];
+            let mut filtered = encode_filter_quat(&q, 3, 8).unwrap();
+            let packed = filtered.clone();
+            filtered.resize(3 * 16, 0);
+            let enc = c()
+                .encode_vertex(&filtered, 3, 16, MeshoptVersion::Ext)
+                .unwrap();
+            let dec = c()
+                .decode(
+                    &enc,
+                    3,
+                    16,
+                    MeshoptMode::Attributes,
+                    MeshoptFilter::Quaternion,
+                )
+                .unwrap();
+            assert_eq!(dec.len(), 48);
+            // The same quaternions as a tightly packed (stride 8) view decodes to.
+            let enc8 = c()
+                .encode_vertex(&packed, 3, 8, MeshoptVersion::Ext)
+                .unwrap();
+            let dec8 = c()
+                .decode(
+                    &enc8,
+                    3,
+                    8,
+                    MeshoptMode::Attributes,
+                    MeshoptFilter::Quaternion,
+                )
+                .unwrap();
+            assert_eq!(&dec[..24], &dec8[..]);
+            let back: Vec<f32> = dec[..24]
+                .chunks_exact(2)
+                .map(|c| f32::from(i16::from_le_bytes([c[0], c[1]])) / 32767.0)
+                .collect();
+            for (a, b) in q.iter().zip(&back) {
+                assert!((a - b).abs() < 1e-2, "{q:?} vs {back:?}");
+            }
+            assert!(dec[24..].iter().all(|&b| b == 0));
         }
 
         #[test]
@@ -1243,7 +1387,7 @@ mod tests {
                 c().encode_index(&[0, 1], 2, 2, MeshoptMode::Triangles)
                     .is_err()
             );
-            assert!(encode_filter_exp(&[f32::NAN; 3], 1, 12, 12, ExpMode::Separate).is_err());
+            assert!(encode_filter_exp(&[1.0; 3], 1, 6, 12, ExpMode::Separate).is_err());
         }
 
         #[test]

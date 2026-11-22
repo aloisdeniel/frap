@@ -23,6 +23,9 @@ frap-anim.workspace = true
 # WP 1.8: the frap-side dumper's fallback reads node trees (socket values) natively.
 frap-nodes.workspace = true
 frap-gltf.workspace = true
+# M7 stabilization: `gltf_canonical` decodes EXT/KHR_meshopt_compression views with
+# meshoptimizer's own decoder (the library Blender's bridge wraps), not with frap-gltf.
+frap-codec-mesh = { workspace = true, features = ["meshopt"] }
 frap-imbuf.workspace = true
 serde.workspace = true
 serde_json.workspace = true

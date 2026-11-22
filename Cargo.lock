@@ -1120,6 +1120,7 @@ version = "0.1.0"
 dependencies = [
  "automod",
  "frap-anim",
+ "frap-codec-mesh",
  "frap-geom",
  "frap-gltf",
  "frap-imbuf",

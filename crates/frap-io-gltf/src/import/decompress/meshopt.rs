@@ -12,7 +12,11 @@
 //! `COLOR` is decoded with meshoptimizer's colour filter (the add-on runs the exponential
 //! filter on it, `decodeFilterExp`, which garbles the colours); a decoded `ATTRIBUTES` view
 //! gets the extension's `byteStride` when it had none (the add-on keeps the view's, which only
-//! differs for padded elements); and a build without the codec decodes nothing but still
+//! differs for padded elements); a `QUATERNION` view of byteStride 16 (the add-on's own
+//! sampled object rotations, `blender/exp/animation/sampled/object/sampler.py`, against the
+//! specification's 8) decodes as Blender's bridge decodes it: the vertex stream at stride 16,
+//! the filter on its first `count * 8` bytes (release `meshopt_decodeFilterQuat` ignores the
+//! stride), the view those bytes; and a build without the codec decodes nothing but still
 //! imports views whose fallback data is present (the extension then only saves space), where
 //! the add-on fails without its library.
 //!

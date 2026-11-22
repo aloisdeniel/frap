@@ -11,7 +11,9 @@
 //! [`validate_view`]): `mode` and `filter` are known values; `ATTRIBUTES` strides are
 //! multiples of 4 in 4..=256, index strides 2 or 4, `TRIANGLES` counts multiples of 3; a
 //! filter only on `ATTRIBUTES`, with the stride it needs (`OCTAHEDRAL` and `COLOR` 4 or 8,
-//! `QUATERNION` 8, `EXPONENTIAL` a multiple of 4); `COLOR` only for the KHR variant; the
+//! `QUATERNION` 8, `EXPONENTIAL` a multiple of 4; `QUATERNION` at 16, the add-on's sampled
+//! object rotations, is a warning: Blender's decoder reads the quaternions from the first
+//! `count * 8` bytes and imports the file); `COLOR` only for the KHR variant; the
 //! stream lies inside its buffer; a parent `byteStride` equals the extension's (warning), and so
 //! does `count * byteStride` the parent's `byteLength` (warning: the add-on writes the float
 //! length for its quaternion-filtered GPU instance rotations); a fallback buffer has no `uri`
@@ -162,6 +164,21 @@ pub fn validate_view(
         let ok = match f {
             "NONE" => true,
             "OCTAHEDRAL" => stride == 4 || stride == 8,
+            "QUATERNION" if stride == 16 => {
+                // The add-on's sampled object rotations (`sampled/object/sampler.py`, the
+                // default `export_force_sampling`): the quaternions fill the first
+                // `count * 8` bytes, where release meshoptimizer's decoder (Blender's, and
+                // frap's) reads them; Blender 5.2.4 imports these files.
+                r.warning(
+                    "MESHOPT_QUATERNION_STRIDE",
+                    cx.member("filter"),
+                    "filter QUATERNION with byteStride 16 (the specification requires 8): the \
+                     quaternions are read from the first count × 8 bytes, as Blender's decoder \
+                     reads them"
+                        .to_owned(),
+                );
+                true
+            }
             "QUATERNION" => stride == 8,
             "EXPONENTIAL" => stride.is_multiple_of(4),
             "COLOR" if allow_color => stride == 4 || stride == 8,
@@ -326,6 +343,15 @@ mod tests {
         );
         let r = crate::validate::validate(&d);
         assert!(r.is_ok(), "{r}");
+        // The add-on's sampled object rotation (stride 16): a warning, not an error.
+        let q = doc(
+            serde_json::json!({"buffer": 0, "byteOffset": 0, "byteStride": 16, "byteLength": 60,
+                "count": 4, "mode": "ATTRIBUTES", "filter": "QUATERNION"}),
+            serde_json::json!({}),
+        );
+        let r = crate::validate::validate(&q);
+        assert!(r.is_ok(), "{r}");
+        assert!(r.has("MESHOPT_QUATERNION_STRIDE"), "{r}");
         let (name, e) = view_compression(&d.buffer_views[0].extensions)
             .unwrap()
             .unwrap();

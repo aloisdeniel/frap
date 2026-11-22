@@ -51,6 +51,7 @@ use smol_str::SmolStr;
 
 use crate::export::ExportError;
 use crate::export::gather::Gather;
+use crate::export::mesh::post::meshopt;
 use crate::export::node_map::NodeMap;
 use crate::export::settings::ExportSettings;
 use crate::export::{extras, scenes, vtree};
@@ -193,6 +194,21 @@ impl AnimSettings {
     }
 }
 
+/// The add-on module that built a sampler: with `export_meshopt_compression_enable` each one
+/// meshopt-encodes its own outputs (`MeshoptEncoder.encode_attribute`), with its own strides.
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) enum SamplerOrigin {
+    /// `fcurves/sampler.py` (object and bone TRS, rotations at stride 8; shape keys `SK_ANIM`).
+    #[default]
+    Fcurves,
+    /// `sampled/object/sampler.py` (rotations at stride 16).
+    Object,
+    /// `sampled/armature/sampler.py` (rotations at stride 8).
+    Armature,
+    /// `sampled/shapekeys/sampler.py` (`SK_ANIM`).
+    ShapeKeys,
+}
+
 /// One sampler before writing (input seconds, flattened output).
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct GSampler {
@@ -205,6 +221,8 @@ pub(crate) struct GSampler {
     pub ty: AccessorType,
     /// Interpolation.
     pub interp: Interp,
+    /// The add-on module that builds it (its meshopt compression).
+    pub origin: SamplerOrigin,
 }
 
 impl GSampler {
@@ -214,7 +232,14 @@ impl GSampler {
             values,
             ty,
             interp,
+            origin: SamplerOrigin::Fcurves,
         }
+    }
+
+    /// The same sampler, built by `origin`.
+    pub(crate) fn built_by(mut self, origin: SamplerOrigin) -> Self {
+        self.origin = origin;
+        self
     }
 }
 
@@ -439,7 +464,8 @@ fn write(g: &mut Gather, anims: Vec<GAnim>) {
         for c in a.channels {
             let times: Vec<f32> = c.sampler.times.iter().map(|t| *t as f32).collect();
             let input = accessor(g, &times, AccessorType::Scalar, Some(&c.sampler.times));
-            let output = accessor(g, &c.sampler.values, c.sampler.ty, None);
+            let kind = meshopt::anim_output(g, c.sampler.origin, &c.path);
+            let output = accessor_compressed(g, &c.sampler.values, c.sampler.ty, None, kind);
             samplers.push(AnimationSampler {
                 extensions: Default::default(),
                 extras: None,
@@ -472,23 +498,39 @@ fn write(g: &mut Gather, anims: Vec<GAnim>) {
 /// The animation accessors written so far, by content: the add-on's `@cached
 /// gather_accessor` is export-wide, so the object, bone and shape-key channels and the
 /// `KHR_animation_pointer` channels ([`crate::export::pointer`]) share one input accessor
-/// when they sample the same times.
+/// when they sample the same times. The key also holds whether meshopt's quaternion filter
+/// makes the accessor normalized SHORT (`component_type` is part of the cache key; the
+/// `BinaryData` compares by its float bytes only, so the first accessor's compression wins).
 #[derive(Default)]
-struct SharedAccessors(HashMap<(Vec<u8>, bool), Index>);
+struct SharedAccessors(HashMap<(Vec<u8>, bool, bool), Index>);
 
 /// One float accessor without buffer-view target, shared by content with every animation
 /// accessor written before it; inputs carry `min`/`max` (the add-on writes the doubles it
-/// computed).
+/// computed). Inputs are meshopt-compressed as `TIME` by every add-on sampler module
+/// (`mesh/post/meshopt.rs`); outputs given by [`accessor_compressed`].
 pub(crate) fn accessor(
     g: &mut Gather,
     data: &[f32],
     ty: AccessorType,
     min_max: Option<&[f64]>,
 ) -> Index {
+    accessor_compressed(g, data, ty, min_max, None)
+}
+
+/// [`accessor`] for an output that meshopt compresses as `kind`
+/// ([`meshopt::anim_output`]).
+pub(crate) fn accessor_compressed(
+    g: &mut Gather,
+    data: &[f32],
+    ty: AccessorType,
+    min_max: Option<&[f64]>,
+    kind: Option<meshopt::AnimOutput>,
+) -> Index {
     let comps = ty.components().max(1);
     let mut bytes: Vec<u8> = data.iter().flat_map(|v| v.to_le_bytes()).collect();
     bytes.extend_from_slice(&(comps as u32).to_le_bytes());
-    let k = (bytes, min_max.is_some());
+    let quat = kind.is_some_and(meshopt::AnimOutput::is_quaternion);
+    let k = (bytes, min_max.is_some(), quat);
     if let Some(i) = g.state::<SharedAccessors>().0.get(&k) {
         return *i;
     }
@@ -504,5 +546,8 @@ pub(crate) fn accessor(
         acc.max = Some(vec![hi]);
     }
     g.state::<SharedAccessors>().0.insert(k, i);
+    if let Some(kind) = kind {
+        meshopt::record_anim_output(g, i, kind);
+    }
     i
 }

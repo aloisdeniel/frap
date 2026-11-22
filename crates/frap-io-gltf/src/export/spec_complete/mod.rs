@@ -9,7 +9,8 @@
 //!   `KHR_materials_variants` required); animation times follow Blender's clock
 //!   (`frame × fps_base / fps`) instead of the add-on's `frame / (fps × fps_base)`; and
 //!   primitive indices use UNSIGNED_BYTE when every index is below 255 ([`layout`]; the add-on
-//!   writes UNSIGNED_SHORT at least).
+//!   writes UNSIGNED_SHORT at least); and skinned mesh nodes move to the scene roots
+//!   (`compat::skinned_roots`; the validator's `NODE_SKINNED_MESH_NON_ROOT`).
 //! - `frap_interleave` ([`layout`]): the vertex attributes of each primitive (and of each
 //!   morph target) share one ARRAY_BUFFER view with a `byteStride`.
 //! - `frap_node_visibility` ([`visibility`]): `KHR_node_visibility` (`visible: false`) on the
@@ -18,8 +19,10 @@
 //!   `materials/ext/diffuse_transmission.rs` from the Principled BSDF's thin-walled subsurface
 //!   (`frap_material::patterns::diffuse_transmission`).
 //!
-//! The output of every option passes the Khronos glTF-Validator (tests:
-//! `tests/spec_complete.rs`, which runs it when `FRAP_GLTF_VALIDATOR` names its install).
+//! The output of every option under `frap_compat='SPEC'` passes the Khronos glTF-Validator
+//! with no error and no warning, skinned rigs included (tests: `spec_complete/tests.rs`, which
+//! runs it when `FRAP_GLTF_VALIDATOR` names its install); without SPEC the add-on's skinned
+//! mesh under its armature keeps the validator's `NODE_SKINNED_MESH_NON_ROOT` warning.
 //!
 //! `write::finish` calls [`finish`] once, on the gathered document and buffer, before the
 //! buffer-level meshopt compression (WP 7.1), the extension order and the buffer are fixed.
@@ -62,6 +65,7 @@ pub fn finish(g: &mut Gather) -> Result<(), ExportError> {
     layout::apply(g, g.settings.props.frap_interleave.value, spec)?;
     if spec {
         compat::extensions_required(g);
+        compat::skinned_roots(g);
     }
     Ok(())
 }

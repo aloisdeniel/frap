@@ -459,7 +459,15 @@ impl RnaMut for NodeMut<'_> {
                 }
                 n.location = [f[0], f[1]];
             }
-            "width" => n.width = as_f32(prop, &v)?,
+            // `rna_Node_width_range`: the type's `minwidth..maxwidth` (`bl_width_min` /
+            // `bl_width_max`), as animation writes (`frap_eval::animate::data_range`).
+            "width" => {
+                let w = as_f32(prop, &v)?;
+                n.width = match node_info(n.bl_idname) {
+                    Some(info) if !w.is_nan() => w.clamp(info.width_min, info.width_max),
+                    _ => w,
+                };
+            }
             "hide" => n.hide = as_bool(prop, &v)?,
             "mute" => n.mute = as_bool(prop, &v)?,
             id if prop.is_readonly() => return Err(read_only(srna, id)),

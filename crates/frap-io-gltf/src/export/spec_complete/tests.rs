@@ -233,6 +233,70 @@ fn spec_writes_byte_indices_and_optional_extensions() {
     valid(&out, "spec");
 }
 
+/// Blender's usual rig (the skinned cylinder of the meshopt fixtures, parented to its
+/// armature): the add-on writes the skinned mesh node under the armature's node, which the
+/// Khronos validator warns about (`NODE_SKINNED_MESH_NON_ROOT`); SPEC moves it to the scene
+/// roots, alone and with the other options.
+#[test]
+fn spec_moves_skinned_meshes_to_the_roots() {
+    let (main, win) = crate::export::mesh::post::meshopt::tests::import_with_window(
+        &crate::export::mesh::post::meshopt::tests::fixtures().join("ext.glb"),
+    );
+    let s = Scene {
+        main,
+        win,
+        prefs: Preferences::default(),
+        log: ChangeLog::default(),
+    };
+    let skinned = |doc: &Document| {
+        doc.nodes
+            .iter()
+            .position(|n| n.skin.is_some() && n.mesh.is_some())
+            .expect("a skinned mesh node") as Index
+    };
+    let blender = s.export(&[]);
+    let (doc, _) = parse(&blender);
+    let k = skinned(&doc);
+    assert!(doc.nodes.iter().any(|n| n.children.contains(&k)));
+    assert!(!doc.scenes[0].nodes.contains(&k));
+    let variants: [(&str, Vec<(&'static str, Value)>); 4] = [
+        ("spec skinned", vec![spec()]),
+        (
+            "spec skinned interleaved",
+            vec![spec(), on("frap_interleave")],
+        ),
+        (
+            "spec skinned meshopt",
+            vec![
+                spec(),
+                on("export_meshopt_compression_enable"),
+                (
+                    "export_meshopt_extension",
+                    Value::Str("KHR_meshopt_compression".into()),
+                ),
+            ],
+        ),
+        (
+            "spec skinned quantized",
+            vec![spec(), on("frap_mesh_quantization")],
+        ),
+    ];
+    for (what, props) in variants {
+        let out = s.export(&props);
+        let (doc, _) = parse(&out);
+        let k = skinned(&doc);
+        assert!(!doc.nodes.iter().any(|n| n.children.contains(&k)), "{what}");
+        assert!(doc.scenes[0].nodes.contains(&k), "{what}");
+        if what == "spec skinned" {
+            assert_eq!(attributes(&out), attributes(&blender));
+            assert_eq!(doc.nodes.len(), parse(&blender).0.nodes.len());
+        }
+        khronos(&out.bytes, what);
+        let r = frap_gltf::validate_file(&out.bytes).unwrap();
+        assert!(r.is_ok(), "{what}: {r}");
+    }
+}
+
 #[test]
 fn spec_keeps_wide_indices() {
     let mut s = Scene::factory();

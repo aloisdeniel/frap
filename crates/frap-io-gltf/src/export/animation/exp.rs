@@ -30,7 +30,7 @@ use smol_str::SmolStr;
 
 use super::keys::{Convert, Interp, Key, optimize, sampled_interpolation};
 use super::world::{World, exported_shape_keys};
-use super::{AnimSettings, GChannel, GSampler, Mode};
+use super::{AnimSettings, GChannel, GSampler, Mode, SamplerOrigin};
 use crate::export::node_map::NodeMap;
 use crate::export::vtree::{VTree, inverted_safe, matmul};
 
@@ -548,7 +548,9 @@ impl<'a> Exp<'a> {
         } else {
             AccessorType::Vec3
         };
-        let sampler = self.sampler(ob, key, keys, conv, ty, interp);
+        let sampler = self
+            .sampler(ob, key, keys, conv, ty, interp)
+            .built_by(SamplerOrigin::Object);
         Some(GChannel {
             node,
             path: trs_path(channel),
@@ -592,7 +594,9 @@ impl<'a> Exp<'a> {
         } else {
             AccessorType::Vec3
         };
-        let sampler = self.sampler(ob, key, keys, conv, ty, interp);
+        let sampler = self
+            .sampler(ob, key, keys, conv, ty, interp)
+            .built_by(SamplerOrigin::Armature);
         Some(GChannel {
             node,
             path: trs_path(channel),
@@ -670,7 +674,9 @@ impl<'a> Exp<'a> {
             fps: self.fps,
         };
         let interp = self.s.fallback;
-        let sampler = self.sampler(ob, key, keys, conv, AccessorType::Scalar, interp);
+        let sampler = self
+            .sampler(ob, key, keys, conv, AccessorType::Scalar, interp)
+            .built_by(SamplerOrigin::ShapeKeys);
         Some(GChannel {
             node,
             path: AnimationPath::Weights,

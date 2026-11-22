@@ -25,6 +25,12 @@
 //! - `extensionsUsed` / `extensionsRequired` in file order (the add-on's traversal order is
 //!   deterministic); `asset.generator` is ignored
 //!   (GLTF §7.2); `extras` and unknown extensions are kept verbatim;
+//! - `EXT_meshopt_compression` / `KHR_meshopt_compression` views are decoded with
+//!   meshoptimizer's own decoder (`frap_codec_mesh::meshopt`, the library Blender's bridge
+//!   wraps; a `QUATERNION` view of byteStride 16 is read from its first `count * 8` bytes, as
+//!   Blender reads it); each compressed accessor's layout is kept in `meshopt` (mode, filter,
+//!   byteStride, count, the accessor's componentType and normalized, the fallback byteLength),
+//!   a sorted list compared for every case whose files use meshopt;
 //! - the numbers of accessors and buffer views are kept (`structure`; compared only for cases
 //!   with the `glb_structure` header flag): data the add-on shares by content (`@cached
 //!   gather_accessor`) must be shared.
@@ -165,11 +171,74 @@ pub fn load(bytes: &[u8], base_dir: Option<&Path>) -> Result<GltfDoc, String> {
             None => buffers.push(Vec::new()),
         }
     }
+    let mut json = json;
+    decode_meshopt(&mut json, &mut buffers)?;
     Ok(GltfDoc {
         json,
         buffers,
         base_dir: base_dir.map(Path::to_owned),
     })
+}
+
+const MESHOPT: [&str; 2] = ["EXT_meshopt_compression", "KHR_meshopt_compression"];
+
+/// Decodes every meshopt view into a buffer of its own and re-points the view at it; the
+/// extension object stays on the view, with the fallback `byteLength` as `_fallbackByteLength`
+/// (read by `Canon::meshopt`).
+fn decode_meshopt(json: &mut Json, buffers: &mut Vec<Vec<u8>>) -> Result<(), String> {
+    use frap_codec_mesh::meshopt::{self as mo, MeshoptFilter, MeshoptMode};
+    let n = arr(json, "bufferViews").len();
+    for vi in 0..n {
+        let v = &arr(json, "bufferViews")[vi];
+        let Some((name, e)) = MESHOPT
+            .iter()
+            .find_map(|k| v.get("extensions")?.get(*k).map(|e| (*k, e.clone())))
+        else {
+            continue;
+        };
+        let codec = mo::codec().ok_or("meshopt: no decoder in this build")?;
+        let mode = e
+            .get("mode")
+            .and_then(Json::as_str)
+            .and_then(MeshoptMode::from_identifier)
+            .ok_or_else(|| format!("bufferView {vi}: bad {name} mode"))?;
+        let filter = match e.get("filter").and_then(Json::as_str) {
+            None => MeshoptFilter::None,
+            Some(f) => MeshoptFilter::from_identifier(f)
+                .ok_or_else(|| format!("bufferView {vi}: bad {name} filter {f}"))?,
+        };
+        let stride = idx(&e, "byteStride").unwrap_or(0);
+        let count = idx(&e, "count").unwrap_or(0);
+        let src = buffers
+            .get(idx(&e, "buffer").unwrap_or(0))
+            .ok_or_else(|| format!("bufferView {vi}: {name} buffer missing"))?;
+        let off = idx(&e, "byteOffset").unwrap_or(0);
+        let len = idx(&e, "byteLength").unwrap_or(0);
+        let stream = src
+            .get(off..off + len)
+            .ok_or_else(|| format!("bufferView {vi}: {name} stream out of range"))?;
+        let mut bytes = codec
+            .decode(stream, count, stride, mode, filter)
+            .map_err(|err| format!("bufferView {vi}: {name}: {err}"))?;
+        let element = mo::filter_stride(filter, stride);
+        if mode == MeshoptMode::Attributes {
+            bytes.truncate(count * element);
+        }
+        let fallback_len = v.get("byteLength").cloned().unwrap_or(Json::Null);
+        let had_stride = v.get("byteStride").is_some();
+        let bi = buffers.len();
+        let blen = bytes.len();
+        buffers.push(bytes);
+        let v = &mut json["bufferViews"][vi];
+        v["buffer"] = json!(bi);
+        v["byteOffset"] = json!(0);
+        v["byteLength"] = json!(blen);
+        if mode == MeshoptMode::Attributes && !had_stride {
+            v["byteStride"] = json!(element);
+        }
+        v["extensions"][name]["_fallbackByteLength"] = fallback_len;
+    }
+    Ok(())
 }
 
 fn arr<'a>(v: &'a Json, key: &str) -> &'a [Json] {
@@ -421,6 +490,39 @@ struct Canon<'a> {
 }
 
 impl Canon<'_> {
+    /// The layout of every meshopt-compressed accessor (`None` without meshopt): one string
+    /// per accessor, sorted.
+    fn meshopt(&self) -> Option<Json> {
+        let j = &self.doc.json;
+        let views = arr(j, "bufferViews");
+        let mut out: Vec<String> = Vec::new();
+        for a in arr(j, "accessors") {
+            let Some(v) = idx(a, "bufferView").and_then(|v| views.get(v)) else {
+                continue;
+            };
+            let Some(e) = MESHOPT.iter().find_map(|k| v.get("extensions")?.get(*k)) else {
+                continue;
+            };
+            let s = |k: &str| e.get(k).map_or("-".to_owned(), |x| x.to_string());
+            out.push(format!(
+                "{} {} byteStride {} count {} componentType {} {} normalized {} fallback byteLength {}",
+                s("mode"),
+                s("filter"),
+                s("byteStride"),
+                s("count"),
+                a.get("componentType").map_or("-".to_owned(), |x| x.to_string()),
+                a.get("type").map_or("-".to_owned(), |x| x.to_string()),
+                a.get("normalized").and_then(Json::as_bool).unwrap_or(false),
+                s("_fallbackByteLength"),
+            ));
+        }
+        if out.is_empty() {
+            return None;
+        }
+        out.sort();
+        Some(json!(out))
+    }
+
     fn image(&self, i: usize) -> Result<Json, String> {
         let img = arr(&self.doc.json, "images")
             .get(i)
@@ -927,6 +1029,9 @@ impl Canon<'_> {
                 "bufferViews": arr(j, "bufferViews").len(),
             }),
         );
+        if let Some(m) = self.meshopt() {
+            o.insert("meshopt".into(), m);
+        }
         let mut anims = arr(j, "animations")
             .iter()
             .map(|a| self.animation(a))
@@ -1708,6 +1813,48 @@ pub(crate) mod tests {
             json!([[0, 0, 0, 1], [0, 0, 0.5, 0.866_025_4], [0, 0, 1, 0]]),
         );
         assert!(!compare("glb", &rot, &rot_off, 1e-6).is_empty());
+    }
+
+    /// Blender-written meshopt animation (`gltf/meshopt/import_blender_anim`): the views are
+    /// decoded with meshoptimizer, the object rotation's QUATERNION view of byteStride 16 from
+    /// its first `count * 8` bytes, and every compressed accessor's layout is listed.
+    #[test]
+    fn meshopt_views_are_decoded_and_listed() {
+        let p = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/golden/cases/gltf/meshopt/import_blender_anim.inputs/anim_ext.glb");
+        let c = canonicalize_file(&p).unwrap();
+        let m: Vec<&str> = c["meshopt"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|s| s.as_str().unwrap())
+            .collect();
+        assert!(m.contains(
+            &"\"ATTRIBUTES\" \"QUATERNION\" byteStride 16 count 10 componentType 5122 \"VEC4\" normalized true fallback byteLength 160"
+        ), "{m:?}");
+        assert!(m.iter().any(|s| s.contains("\"TRIANGLES\"")), "{m:?}");
+        // The Cube's sampled rotation decodes to unit quaternions.
+        let a = c["animations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["name"] == "CubeAction")
+            .unwrap();
+        let rot = a["channels"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|ch| ch["target"]["path"] == "rotation" && ch["target"]["node"] == "Cube")
+            .unwrap();
+        for q in rot["output"].as_array().unwrap() {
+            let n: f64 = q
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_f64().unwrap().powi(2))
+                .sum();
+            assert!((n.sqrt() - 1.0).abs() < 2e-2, "{q}");
+        }
     }
 
     #[test]

@@ -17,6 +17,12 @@
 //!   WARNING. `KHR_animation_pointer` samplers stay as written (the pointer bake uses
 //!   `(frame − slide) / fps` when it slides, which the written times no longer tell apart)
 //!   and get a WARNING instead.
+//! - **Skinned mesh nodes at the scene root** ([`skinned_roots`]). The add-on keeps a skinned
+//!   mesh under its armature's node (Blender's usual rig: the mesh parented to the armature),
+//!   which the Khronos validator reports (`NODE_SKINNED_MESH_NON_ROOT`: the specification
+//!   ignores a skinned mesh node's transform and its parents', the joints place the mesh).
+//!   SPEC moves such a node to the roots of the scenes that held it; a node with children
+//!   first takes its former global transform, so its children stay in place.
 
 use std::collections::{HashMap, HashSet};
 
@@ -194,6 +200,72 @@ pub fn animation_times(g: &mut Gather) -> Result<(), ExportError> {
         }
     }
     Ok(())
+}
+
+/// Moves every node with a skinned mesh that has a parent to the roots of the scenes that
+/// reach it (see the module docs).
+pub fn skinned_roots(g: &mut Gather) {
+    use frap_math::glam::{DMat4, DQuat, DVec3};
+    let doc = &mut g.doc;
+    let n = doc.nodes.len();
+    let mut parent: Vec<Option<usize>> = vec![None; n];
+    for (i, node) in doc.nodes.iter().enumerate() {
+        for &c in &node.children {
+            if let Some(p) = parent.get_mut(c as usize) {
+                *p = Some(i);
+            }
+        }
+    }
+    let local = |node: &frap_gltf::json::Node| -> DMat4 {
+        if let Some(m) = node.matrix {
+            return DMat4::from_cols_array(&m);
+        }
+        let t = node.translation.unwrap_or([0.0; 3]);
+        let r = node.rotation.unwrap_or([0.0, 0.0, 0.0, 1.0]);
+        let s = node.scale.unwrap_or([1.0; 3]);
+        DMat4::from_scale_rotation_translation(
+            DVec3::from_array(s),
+            DQuat::from_array(r),
+            DVec3::from_array(t),
+        )
+    };
+    let root_of = |parent: &[Option<usize>], mut i: usize| {
+        while let Some(p) = parent[i] {
+            i = p;
+        }
+        i
+    };
+    for i in 0..n {
+        let Some(p) = parent[i] else { continue };
+        if doc.nodes[i].skin.is_none() || doc.nodes[i].mesh.is_none() {
+            continue;
+        }
+        let root = root_of(&parent, p) as Index;
+        if !doc.nodes[i].children.is_empty() {
+            let mut world = local(&doc.nodes[i]);
+            let mut q = Some(p);
+            while let Some(j) = q {
+                world = local(&doc.nodes[j]) * world;
+                q = parent[j];
+            }
+            let node = &mut doc.nodes[i];
+            if node.matrix.is_some() {
+                node.matrix = Some(world.to_cols_array());
+            } else {
+                let (s, r, t) = world.to_scale_rotation_translation();
+                node.translation = (t != DVec3::ZERO).then(|| t.to_array());
+                node.rotation = (r != DQuat::IDENTITY).then(|| r.to_array());
+                node.scale = (s != DVec3::ONE).then(|| s.to_array());
+            }
+        }
+        doc.nodes[p].children.retain(|&c| c as usize != i);
+        parent[i] = None;
+        for sc in &mut doc.scenes {
+            if sc.nodes.contains(&root) && !sc.nodes.contains(&(i as Index)) {
+                sc.nodes.push(i as Index);
+            }
+        }
+    }
 }
 
 #[cfg(test)]

@@ -5,8 +5,8 @@
 //! views go to a second buffer compressed, the first becomes a `fallback` buffer without data.
 //! `compress.rs` calls [`compress_buffer_views`] once, before the buffer is finished; it finds
 //! what each view holds from the finished document (the meshes' attributes, indices and morph
-//! targets, the GPU-instancing attributes of the nodes), so the per-primitive post-processor
-//! of this file has nothing to do.
+//! targets, the GPU-instancing attributes of the nodes, the animation samplers), so the
+//! per-primitive post-processor of this file has nothing to do.
 //!
 //! Ported from blender/scripts/addons_core/io_scene_gltf2 5.2.41 (Apache-2.0, The
 //! glTF-Blender-IO authors): `blender/exp/accessors.py::array_to_accessor`,
@@ -17,13 +17,21 @@
 //! - compressed: the views the add-on builds through `array_to_accessor` with an attribute
 //!   name (POSITION, NORMAL, TANGENT, TEXCOORD_n, JOINTS_n, WEIGHTS_n, float `COLOR_n` and
 //!   `_`-attributes, dense morph targets `SK_*`), the primitive indices (mode `TRIANGLES` for
-//!   triangle lists, `INDICES` otherwise) and the GPU-instancing TRS; not compressed: the
-//!   integer colours (`COLOR_n` and `_`/`KHR_` attributes as UNSIGNED_SHORT, the fake white
-//!   `COLOR_0` as UNSIGNED_BYTE, written as raw `BinaryData`), sparse morph targets, animation
-//!   data, inverse bind matrices and images;
+//!   triangle lists, `INDICES` otherwise), the GPU-instancing TRS, and the animation samplers
+//!   the add-on's sampler modules encode themselves (`blender/exp/animation/fcurves/sampler.py`,
+//!   `sampled/{object,armature,shapekeys,data}/sampler.py`): every input as `TIME`, the
+//!   `location`/`scale` outputs as `POSITION`/`SCALE`, rotations as `ROTATION`, shape-key
+//!   weights as `SK_ANIM` ([`anim_output`]); not compressed: the integer colours (`COLOR_n` and
+//!   `_`/`KHR_` attributes as UNSIGNED_SHORT, the fake white `COLOR_0` as UNSIGNED_BYTE,
+//!   written as raw `BinaryData`), sparse morph targets, the outputs of
+//!   `KHR_animation_pointer` channels (`sampled/data/sampler.py` encodes only their input),
+//!   inverse bind matrices and images;
 //! - filters: `EXPONENTIAL` (12 bits, shared exponent per vector) for float POSITION, NORMAL,
-//!   TANGENT, morph targets and instance translations and scales, `QUATERNION` (8 bits) for
-//!   instance rotations (their accessor becomes normalized SHORT), none otherwise; the vertex
+//!   TANGENT, morph targets, instance translations and scales, and the animation times,
+//!   translations, scales and weights; `QUATERNION` (8 bits) for instance and animation
+//!   rotations (their accessor becomes normalized SHORT; byteStride 8, but 16 for the sampled
+//!   object rotations, whose filtered quaternions fill the first half of the encoded array),
+//!   none otherwise; the vertex
 //!   codec version is 0 for EXT and 1 for KHR, the index codec version 1, level 2
 //!   (meshoptimizer's default);
 //! - layout: for a GLB the data buffer is buffer 0 (the BIN chunk) and the fallback buffer 1;
@@ -41,6 +49,8 @@
 //! non-byte weights); a view whose layout meshopt cannot encode (a stride that is not a
 //! multiple of 4, UNSIGNED_BYTE indices of `frap_compat='SPEC'`) stays uncompressed;
 //! `GLTF_EMBEDDED` lays the buffers out like a GLB (data first: `write.rs` embeds buffer 0);
+//! `frap_compat='SPEC'` writes the sampled object rotations at the specification's byteStride
+//! 8; the second half of a stride-16 rotation array is zeros (the add-on's is `np.empty`);
 //! with nothing compressed no empty fallback buffer is written (the add-on writes one with
 //! `byteLength` 0, which the specification forbids); and the quaternion-filtered rotation
 //! view's fallback length is the filtered one (the add-on keeps the float length).
@@ -98,6 +108,73 @@ struct Plan {
     rotation: Option<Index>,
 }
 
+/// How meshopt encodes an animation sampler's output: the add-on's sampler modules call
+/// `MeshoptEncoder.encode_attribute` themselves (`blender/exp/animation/fcurves/sampler.py`,
+/// `sampled/{object,armature,shapekeys}/sampler.py`).
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub(crate) enum AnimOutput {
+    /// `POSITION`, `SCALE` (VEC3, stride 12) and `SK_ANIM` (scalar weights, stride 4).
+    Exponential,
+    /// `ROTATION`: the 8-bit quaternion filter at this byteStride (8, or 16 for the sampled
+    /// object path); the accessor becomes normalized SHORT.
+    Quaternion {
+        /// The extension's byteStride.
+        stride: usize,
+    },
+}
+
+impl AnimOutput {
+    /// Whether the accessor becomes normalized SHORT.
+    pub(crate) fn is_quaternion(self) -> bool {
+        matches!(self, AnimOutput::Quaternion { .. })
+    }
+}
+
+/// The animation outputs to compress, by accessor (first writer wins, as the add-on's
+/// `@cached gather_accessor` keeps the first `BinaryData` of equal bytes).
+#[derive(Default)]
+struct AnimOutputs(std::collections::HashMap<Index, AnimOutput>);
+
+/// The compression of an output of `origin` animating `path`, `None` without
+/// `export_meshopt_compression_enable`. Every add-on module encodes `location` and `scale`
+/// as `POSITION`/`SCALE` (EXPONENTIAL, stride 12) and rotations as `ROTATION` (QUATERNION,
+/// stride 8; 16 on the sampled object path, `sampled/object/sampler.py`, which
+/// `frap_compat='SPEC'` writes at the specification's 8); shape-key weights are `SK_ANIM`
+/// (EXPONENTIAL, stride 4). Any other channel gets the add-on's WARNING and stays
+/// uncompressed. The `key_blocks` channels of `fcurves/sampler.py`
+/// (`export_force_sampling=False`) are `SK_ANIM` as the add-on intends: its
+/// `__convert_keyframes` raises `UnboundLocalError` there (Blender 5.2.4; deviations §2).
+pub(crate) fn anim_output(
+    g: &mut Gather,
+    origin: crate::export::animation::SamplerOrigin,
+    path: &frap_gltf::json::animation::AnimationPath,
+) -> Option<AnimOutput> {
+    use crate::export::animation::SamplerOrigin as O;
+    use frap_gltf::json::animation::AnimationPath as P;
+    if !g.settings.props.export_meshopt_compression_enable.value {
+        return None;
+    }
+    let spec = g.settings.props.frap_compat.value == FrapCompat::Spec;
+    match (origin, path) {
+        (_, P::Translation | P::Scale) => Some(AnimOutput::Exponential),
+        (O::Object, P::Rotation) if !spec => Some(AnimOutput::Quaternion { stride: 16 }),
+        (_, P::Rotation) => Some(AnimOutput::Quaternion { stride: 8 }),
+        (O::ShapeKeys | O::Fcurves, P::Weights) => Some(AnimOutput::Exponential),
+        _ => {
+            g.warn(format!(
+                "Meshopt compression for channel {} is not supported, skipping compression for this channel",
+                path.as_str()
+            ));
+            None
+        }
+    }
+}
+
+/// Records that animation output accessor `acc` is compressed as `kind`.
+pub(crate) fn record_anim_output(g: &mut Gather, acc: Index, kind: AnimOutput) {
+    g.state::<AnimOutputs>().0.entry(acc).or_insert(kind);
+}
+
 /// The extension name `export_meshopt_extension` selects, and its vertex codec version.
 pub fn extension(g: &Gather) -> (&'static str, MeshoptVersion) {
     match g.settings.props.export_meshopt_extension.value {
@@ -128,7 +205,8 @@ pub fn compress_buffer_views(g: &mut Gather) -> Result<(), ExportError> {
     if g.buf.views.is_empty() {
         return Ok(());
     }
-    let plans = plan_views(&g.doc, &g.buf);
+    let anim = std::mem::take(&mut g.state::<AnimOutputs>().0);
+    let plans = plan_views(&g.doc, &g.buf, &anim);
     if plans.iter().all(Option::is_none) {
         return Ok(());
     }
@@ -263,12 +341,18 @@ fn encode_view(
                     &filtered
                 }
                 MeshoptFilter::Quaternion => {
-                    filtered = codec::encode_filter_quat(
+                    let mut q = codec::encode_filter_quat(
                         &f32s(&raw[..p.count * 16]),
                         p.count,
                         QUAT_FILTER_BITS,
                     )
                     .map_err(err)?;
+                    // At byteStride 16 (the sampled object rotations) the add-on encodes a
+                    // `count * 16`-byte array whose first half `encodeFilterQuat` filled
+                    // (meshoptimizer ignores the stride); its second half is `np.empty`'s,
+                    // zeros here.
+                    q.resize(p.count * p.stride, 0);
+                    filtered = q;
                     &filtered
                 }
                 _ => &raw[..p.count * p.stride],
@@ -305,9 +389,13 @@ fn element_size(a: &Accessor) -> usize {
     frap_gltf::accessor::element_size(a.component_type, a.type_)
 }
 
-/// One plan per view of `buf` (`None`: written uncompressed), from the document's meshes and
-/// instancing nodes.
-fn plan_views(doc: &Document, buf: &BufferBuilder) -> Vec<Option<Plan>> {
+/// One plan per view of `buf` (`None`: written uncompressed), from the document's meshes,
+/// instancing nodes and animation samplers (`anim`: the outputs to compress).
+fn plan_views(
+    doc: &Document,
+    buf: &BufferBuilder,
+    anim: &std::collections::HashMap<Index, AnimOutput>,
+) -> Vec<Option<Plan>> {
     let mut plans: Vec<Option<Plan>> = vec![None; buf.views.len()];
     // A view several accessors share (interleaved, `frap_interleave`) is compressed once,
     // without a filter.
@@ -449,6 +537,57 @@ fn plan_views(doc: &Document, buf: &BufferBuilder) -> Vec<Option<Plan>> {
             }
         }
     }
+    // The animation samplers: every add-on sampler module encodes its input as `TIME`
+    // (EXPONENTIAL, stride 4), and its outputs as `anim` records them.
+    let float_view = |acc: Index, ty: AccessorType| -> Option<(usize, &Accessor)> {
+        let (v, a) = view_of(acc)?;
+        (users[v] == 1
+            && a.component_type == ComponentType::Float
+            && a.type_ == ty
+            && buf.views[v].byte_stride.is_none())
+        .then_some((v, a))
+    };
+    for an in &doc.animations {
+        for s in &an.samplers {
+            if let Some((v, a)) = float_view(s.input, AccessorType::Scalar) {
+                plans[v].get_or_insert(Plan {
+                    mode: MeshoptMode::Attributes,
+                    filter: MeshoptFilter::Exponential,
+                    stride: 4,
+                    count: a.count as usize,
+                    rotation: None,
+                });
+            }
+            let Some(&kind) = anim.get(&s.output) else {
+                continue;
+            };
+            let Some(ty) = buf.accessor(s.output).map(|a| a.type_) else {
+                continue;
+            };
+            let Some((v, a)) = float_view(s.output, ty) else {
+                continue;
+            };
+            let count = a.count as usize;
+            let plan = match kind {
+                AnimOutput::Exponential => Plan {
+                    mode: MeshoptMode::Attributes,
+                    filter: MeshoptFilter::Exponential,
+                    stride: element_size(a),
+                    count,
+                    rotation: None,
+                },
+                AnimOutput::Quaternion { stride } if ty == AccessorType::Vec4 => Plan {
+                    mode: MeshoptMode::Attributes,
+                    filter: MeshoptFilter::Quaternion,
+                    stride,
+                    count,
+                    rotation: Some(s.output),
+                },
+                AnimOutput::Quaternion { .. } => continue,
+            };
+            plans[v].get_or_insert(plan);
+        }
+    }
     plans
 }
 
@@ -542,15 +681,24 @@ pub fn decode_document(
                 filter,
             )
             .map_err(|e| bad(e.to_string()))?;
+        // A QUATERNION view of byteStride 16 (the add-on's sampled object rotations) holds
+        // its quaternions in the first `count * 8` bytes (`codec::filter_stride`): the
+        // decoded view is those, tightly packed, as Blender's decoder reads them.
+        let element = codec::filter_stride(filter, ext.byte_stride as usize);
+        let bytes = if mode == MeshoptMode::Attributes && element != ext.byte_stride as usize {
+            &bytes[..ext.count as usize * element]
+        } else {
+            &bytes[..]
+        };
         pad4(&mut data);
         let offset = data.len() as u64;
-        data.extend_from_slice(&bytes);
+        data.extend_from_slice(bytes);
         let bv = &mut doc.buffer_views[vi];
         bv.buffer = new_buffer;
         bv.byte_offset = Some(offset);
         bv.byte_length = bytes.len() as u64;
         if mode == MeshoptMode::Attributes && bv.byte_stride.is_none() {
-            bv.byte_stride = Some(ext.byte_stride);
+            bv.byte_stride = Some(element as u32);
         }
         for n in MESHOPT_EXTENSIONS {
             bv.extensions.remove(n);
@@ -934,6 +1082,123 @@ pub(crate) mod tests {
         let j = json_of(&plain);
         assert!(j.get("extensionsUsed").is_none());
         assert_eq!(j["buffers"], json!([{"byteLength": 840}]));
+    }
+
+    /// The layout of each compressed animation accessor: (mode, filter, byteStride, count,
+    /// componentType, normalized), by (node name, path, input/output).
+    fn anim_layout(j: &J, name: &str) -> Vec<(String, String, J)> {
+        let mut out = Vec::new();
+        for a in j["animations"].as_array().unwrap() {
+            for c in a["channels"].as_array().unwrap() {
+                let node = j["nodes"][c["target"]["node"].as_u64().unwrap() as usize]["name"]
+                    .as_str()
+                    .unwrap()
+                    .to_owned();
+                let s = &a["samplers"][c["sampler"].as_u64().unwrap() as usize];
+                for k in ["input", "output"] {
+                    let acc = &j["accessors"][s[k].as_u64().unwrap() as usize];
+                    let v = &j["bufferViews"][acc["bufferView"].as_u64().unwrap() as usize];
+                    let e = &v["extensions"][name];
+                    out.push((
+                        node.clone(),
+                        format!("{} {k}", c["target"]["path"].as_str().unwrap()),
+                        json!([
+                            e["filter"],
+                            e["byteStride"],
+                            acc["componentType"],
+                            acc["normalized"]
+                        ]),
+                    ));
+                }
+            }
+        }
+        out
+    }
+
+    /// `export_meshopt_compression_enable` with animation (M7 stabilization): Blender's
+    /// `anim_ext.glb` (sampled object TRS, bone TRS, shape-key weights) re-exported by frap
+    /// compresses every sampler as the add-on's sampler modules do; `frap_compat='SPEC'`
+    /// writes the object rotation at byteStride 8 and validates; the fcurves path
+    /// (`export_force_sampling=False`) writes its rotations at 8 and the weights as SK_ANIM.
+    #[test]
+    fn animation_samplers_are_compressed() {
+        let dir = fixtures().join("../import_blender_anim.inputs");
+        let (main, win) = import_with_window(&dir.join("anim_ext.glb"));
+        let name = "EXT_meshopt_compression";
+        let ex = |f: fn(&mut ExportSceneGltf)| {
+            let out = run_export(
+                &main,
+                &win,
+                &settings(|p| {
+                    p.export_meshopt_compression_enable.value = true;
+                    f(p);
+                }),
+            );
+            (json_of(&out), out)
+        };
+        let row = |l: &[(String, String, J)], node: &str, what: &str| -> J {
+            l.iter()
+                .find(|(n, w, _)| n == node && w == what)
+                .unwrap_or_else(|| panic!("{node} {what}: {l:?}"))
+                .2
+                .clone()
+        };
+        let (j, _) = ex(|_| {});
+        let l = anim_layout(&j, name);
+        assert_eq!(
+            row(&l, "Cube", "rotation input"),
+            json!(["EXPONENTIAL", 4, 5126, null])
+        );
+        assert_eq!(
+            row(&l, "Cube", "translation output"),
+            json!(["EXPONENTIAL", 12, 5126, null])
+        );
+        assert_eq!(
+            row(&l, "Cube", "scale output"),
+            json!(["EXPONENTIAL", 12, 5126, null])
+        );
+        assert_eq!(
+            row(&l, "Cube", "rotation output"),
+            json!(["QUATERNION", 16, 5122, true])
+        );
+        assert_eq!(
+            row(&l, "Cube", "weights output"),
+            json!(["EXPONENTIAL", 4, 5126, null])
+        );
+        assert_eq!(
+            row(&l, "Bone", "rotation output"),
+            json!(["QUATERNION", 8, 5122, true])
+        );
+        // Re-imported, the animation is Blender's (lossy only within the filters' bits).
+        let (j, out) = ex(|p| p.frap_compat.value = FrapCompat::Spec);
+        let l = anim_layout(&j, name);
+        assert_eq!(
+            row(&l, "Cube", "rotation output"),
+            json!(["QUATERNION", 8, 5122, true])
+        );
+        let r = frap_gltf::validate::validate_file(&out.bytes).unwrap();
+        assert!(r.is_ok(), "{r}");
+        assert!(!r.has("MESHOPT_QUATERNION_STRIDE"), "{r}");
+        let (j, _) = ex(|p| p.export_force_sampling.value = false);
+        let l = anim_layout(&j, name);
+        assert_eq!(
+            row(&l, "Cube", "rotation output"),
+            json!(["QUATERNION", 8, 5122, true])
+        );
+        assert_eq!(
+            row(&l, "Cube", "weights output"),
+            json!(["EXPONENTIAL", 4, 5126, null])
+        );
+        // frap decodes its own stride-16 rotations as Blender's.
+        let sd = scratch("anim");
+        let (_, out) = ex(|_| {});
+        let f = write(&sd, "anim.glb", &out);
+        let (m, reports) = import(&f);
+        assert!(
+            !reports.iter().any(|r| r.message.contains("meshopt")),
+            "{reports:?}"
+        );
+        assert!(m.actions.iter().count() >= 2);
     }
 
     /// frap's own round trip of the Blender fixture scene (skin, shape keys, loose edges,

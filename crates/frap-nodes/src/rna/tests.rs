@@ -563,6 +563,16 @@ fn socket_and_node_writes() {
         Value::Str("Steel".into()),
     );
     assert_eq!(t.nodes[0].label, "Steel");
+    // `Node.width` clamps to the type's range (Blender 5.2.4: Principled BSDF 1e9 -> 700.0,
+    // 1 -> 100.0, 250.5 kept).
+    for (w, want) in [(1e9, 700.0), (1.0, 100.0), (250.5, 250.5)] {
+        set(
+            &mut t,
+            &[P("nodes"), K("Principled BSDF"), P("width")],
+            Value::Float(w),
+        );
+        assert_eq!(t.nodes[0].width, want);
+    }
     // Shader sockets have no default_value.
     assert!(t.srna().find_prop("nodes").is_some());
     let bsdf_out = super::socket_srna(&t.nodes[0], true, 0);

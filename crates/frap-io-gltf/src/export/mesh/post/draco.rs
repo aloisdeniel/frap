@@ -27,9 +27,14 @@
 //! uncompressed twins of Blender's `gltf/draco` fixtures and compare every bitstream byte for
 //! byte). A backend this build lacks fails the export with the missing cargo feature
 //! (Blender hides the props when its bridge library is missing). An encoder error fails the
-//! export too, where the add-on logs `Could not encode primitive. Skipping primitive.` and
-//! still writes the (empty) bitstream; draco-core refuses only inputs the gatherer never
-//! produces (indices out of range, a partial triangle).
+//! export too (`RuntimeError` naming Draco's message), where the add-on logs `Could not encode
+//! primitive. Skipping primitive.`, returns FINISHED and still writes the failed encoder's
+//! partial bitstream with accessor counts of 0, which no loader decodes (Blender's own import
+//! gives an empty mesh; deviations D-144). Two user-reachable inputs do this:
+//! `export_draco_normal_quantization=1` (inside the prop's range 0..=30, but Draco's
+//! octahedral transform needs 2..=30) and a non-finite vertex coordinate or attribute value
+//! (no finite quantization range); the others draco-core refuses (indices out of range, a
+//! partial triangle) the gatherer never produces.
 
 use frap_codec_mesh::draco::{self, DracoBackend, DracoEncoded, DracoQuantization};
 use frap_codec_mesh::{AttrData, Attribute, AttributeKind, MeshData};

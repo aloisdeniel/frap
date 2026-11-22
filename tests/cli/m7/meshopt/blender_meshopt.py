@@ -7,6 +7,15 @@
 #       ext.glb, khr.glb, ext_sep.gltf (+ .bin) and khr_sep.gltf (+ .bin), the GPU-instancing
 #       scene as instances.glb (KHR), and writes <dir>/blender_import.json: Blender's own import
 #       of each file (dump below).
+#   $BLENDER_BIN -b --factory-startup --python tests/cli/m7/meshopt/blender_meshopt.py -- anim <dir>
+#       builds the animated scene (keyed object TRS, a keyed shape key, keyed pose bones) and
+#       exports it with meshopt as anim_ext.glb (EXT, the sampled paths: object rotations
+#       QUATERNION at byteStride 16, bone rotations at 8, TIME/location/scale EXPONENTIAL,
+#       weights SK_ANIM), anim_khr_sep.gltf (+ .bin; KHR, GLTF_SEPARATE, the same paths) and
+#       anim_curves.glb (EXT, export_force_sampling=False: the fcurves path, rotations at 8;
+#       without the shape-key animation, on which the add-on's fcurves path raises
+#       UnboundLocalError in Blender 5.2.4). The golden gltf/meshopt/import_blender_anim reads
+#       them from tests/golden/cases/gltf/meshopt/import_blender_anim.inputs/.
 #   $BLENDER_BIN -b --factory-startup --python tests/cli/m7/meshopt/blender_meshopt.py -- dump <out.json> <file>...
 #       imports each file into an empty scene and writes the same dump (used by the live test
 #       `frap-io-gltf` `blender_decodes_frap_compressed_files` on frap-written files).
@@ -128,6 +137,37 @@ def build_instances():
         ob.parent = holder
 
 
+def build_anim(sk_anim=True):
+    bpy.ops.wm.read_factory_settings(use_empty=False)
+    cube = bpy.data.objects["Cube"]
+    cube.shape_key_add(name="Basis", from_mix=False)
+    k = cube.shape_key_add(name="Lift", from_mix=False)
+    for i in range(4):
+        k.data[i].co.z += 0.5
+    if sk_anim:
+        k.value = 0.0
+        k.keyframe_insert("value", frame=1)
+        k.value = 1.0
+        k.keyframe_insert("value", frame=10)
+    for p in ("location", "rotation_euler", "scale"):
+        cube.keyframe_insert(p, frame=1)
+    cube.location = (1.0, 2.0, 0.5)
+    cube.rotation_euler = (0.3, 0.5, 1.2)
+    cube.scale = (1.5, 1.0, 0.5)
+    for p in ("location", "rotation_euler", "scale"):
+        cube.keyframe_insert(p, frame=10)
+    bpy.ops.object.armature_add(location=(0.0, 3.0, 0.0))
+    arm = bpy.context.object
+    arm.name = "Rig"
+    pb = arm.pose.bones["Bone"]
+    pb.keyframe_insert("rotation_quaternion", frame=1)
+    pb.keyframe_insert("location", frame=1)
+    pb.rotation_quaternion = (0.9, 0.3, 0.1, 0.2)
+    pb.location = (0.0, 0.5, 0.0)
+    pb.keyframe_insert("rotation_quaternion", frame=10)
+    pb.keyframe_insert("location", frame=10)
+
+
 def export(path, ext, fmt, **kw):
     bpy.ops.export_scene.gltf(filepath=path, export_format=fmt, export_meshopt_compression_enable=True,
                               export_meshopt_extension=ext, **kw)
@@ -150,7 +190,17 @@ if argv[0] == "make":
     # same scene with export_tangents (verified on 5.2.4), so the four imports are not equal.
     write_dumps(os.path.join(out, "blender_import.json"),
                 [(name, os.path.join(out, name)) for name in files])
+elif argv[0] == "anim":
+    out = os.path.abspath(argv[1])
+    os.makedirs(out, exist_ok=True)
+    build_anim()
+    export(os.path.join(out, "anim_ext.glb"), "EXT_meshopt_compression", "GLB")
+    build_anim()
+    export(os.path.join(out, "anim_khr_sep.gltf"), "KHR_meshopt_compression", "GLTF_SEPARATE")
+    build_anim(sk_anim=False)
+    export(os.path.join(out, "anim_curves.glb"), "EXT_meshopt_compression", "GLB",
+           export_force_sampling=False)
 elif argv[0] == "dump":
     write_dumps(argv[1], [(os.path.basename(p), p) for p in argv[2:]])
 else:
-    raise SystemExit("usage: make <dir> | dump <out.json> <file>...")
+    raise SystemExit("usage: make <dir> | anim <dir> | dump <out.json> <file>...")

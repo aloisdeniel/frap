@@ -183,6 +183,22 @@ impl RnaMut for Modifier {
             "type" | "is_override_data" | "persistent_uid" | "execution_time" | "properties" => {
                 Err(frap_rna::traits::read_only(self.srna(), prop.identifier))
             }
+            // `rna_MultiresModifier_level_range`: `0..max(0, totlvl)`, as animation writes
+            // (`frap_eval::animate::data_range`); frap's Multires modifiers have no levels
+            // (subdivision is OUT), so every write reads back 0 (Blender 5.2.4: `levels = 5`
+            // on a fresh Multires reads 0).
+            "levels" | "sculpt_levels" | "render_levels"
+                if matches!(self.settings, ModifierSettings::Multires(_)) =>
+            {
+                let srna = self.srna();
+                let v = match v {
+                    Value::Int(_) => Value::Int(0),
+                    v => v,
+                };
+                self.settings
+                    .rna_set(prop, v)
+                    .unwrap_or_else(|| Err(frap_rna::traits::no_attribute(srna, prop.identifier)))
+            }
             _ => {
                 let srna = self.srna();
                 self.settings
@@ -906,5 +922,44 @@ mod pin_tests {
         assert_eq!(mods[3].name, "Cloth");
         let path = [frap_rna::Seg::Prop("modifiers"), frap_rna::Seg::Index(3)];
         assert_eq!(modifier_index(&mods, &path), Some(3));
+    }
+}
+
+#[cfg(test)]
+mod range_tests {
+    use super::*;
+    use crate::generated::modifier_settings::ModifierType;
+
+    /// Direct writes of the Multires levels clamp to `0..totlvl` (0 in frap), as Blender
+    /// 5.2.4 (`levels = 5`, `sculpt_levels = 3`, `render_levels = 2` on a fresh Multires read
+    /// 0); a Subdivision Surface keeps its static range.
+    #[test]
+    fn multires_levels_clamp_to_the_total_levels() {
+        for (ty, want) in [("MULTIRES", 0), ("SUBSURF", 5)] {
+            let mut m = Modifier {
+                name: "M".into(),
+                show_viewport: true,
+                show_render: true,
+                show_in_editmode: false,
+                show_on_cage: false,
+                show_expanded: true,
+                is_active: false,
+                use_pin_to_last: false,
+                persistent_uid: 1,
+                settings: ModifierSettings::new(ModifierType::from_identifier(ty).unwrap()),
+            };
+            for p in ["levels", "render_levels"] {
+                let prop = m.srna().find_prop(p).unwrap();
+                m.set(prop, Value::Int(5)).unwrap();
+                assert_eq!(
+                    m.get(prop).ok().and_then(|f| match f {
+                        Field::Value(Value::Int(i)) => Some(i),
+                        _ => None,
+                    }),
+                    Some(want),
+                    "{ty}.{p}"
+                );
+            }
+        }
     }
 }
