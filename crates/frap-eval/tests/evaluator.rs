@@ -136,12 +136,12 @@ fn modifier(name: &str, ty: ModifierType) -> Modifier {
 
 #[test]
 fn modifiers_without_an_evaluator_pass_through_with_a_warning() {
-    // Types no M4 work package evaluates (REMESH, SKIN, UV_PROJECT), so the test does not
+    // Types frap never evaluates (REMESH, SKIN, MESH_CACHE), so the test does not
     // depend on which modifiers are implemented.
     let (mut h, [_, mid, _, _]) = scene();
     let me = h.main.meshes.find("Box").unwrap();
     h.edit_obj(mid, |o| {
-        let mut pinned = modifier("Pinned", ModifierType::UvProject);
+        let mut pinned = modifier("Pinned", ModifierType::MeshCache);
         pinned.use_pin_to_last = true;
         let mut hidden = modifier("Hidden", ModifierType::Bevel);
         hidden.show_viewport = false;
@@ -180,7 +180,7 @@ fn modifiers_without_an_evaluator_pass_through_with_a_warning() {
         [
             "Modifier 'Remesh' (REMESH) is not evaluated by frap; passed through",
             "Modifier 'NoRender' (SKIN) is not evaluated by frap; passed through",
-            "Modifier 'Pinned' (UV_PROJECT) is not evaluated by frap; passed through",
+            "Modifier 'Pinned' (MESH_CACHE) is not evaluated by frap; passed through",
         ]
     );
     assert!(e.warnings.iter().all(|r| r.level == ReportType::Warning));

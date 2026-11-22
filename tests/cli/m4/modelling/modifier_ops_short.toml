@@ -2,7 +2,7 @@
 # (§11.4), the same statements as `modifier_ops_bpy` plus a second remove of an already removed
 # modifier (CANCELLED, frap WARNING listing the modifiers left). Moving
 # the first modifier up / the last down is CANCELLED with Blender's WARNING; a pinned modifier
-# (`use_pin_to_last`) stays last and cannot move up (CANCELLED, silent); WAVE has no frap
+# (`use_pin_to_last`) stays last and cannot move up (CANCELLED, silent); REMESH has no frap
 # evaluator (PASSED_THROUGH, WARNING); a BOOLEAN without operand is DISABLED and applying it
 # fails (`Modifier is disabled, skipping apply`, after the INFO `Applied modifier was not
 # first, …`); applying a modifier that is not first gives that INFO; a misspelt name is

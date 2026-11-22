@@ -61,15 +61,28 @@ struct Extra {
 }
 
 /// Stored fields of generated modifier settings structs that are no RNA property, by struct.
-const MODIFIER_EXTRAS: &[(&str, &[Extra])] = &[(
-    "NodesModifier",
-    &[Extra {
-        name: "inputs",
-        doc: "`properties.inputs`: the group inputs by identifier (5.2 runtime-defined RNA `NodesModifierProperties`, bound by `frap-scene/src/id/modifier.rs`, WP 4.1)",
-        default: "",
-        ty: Some("crate::id::GnInputs"),
-    }],
-)];
+/// A typed extra whose type holds `IdAny` is not serialized (`#[serde(skip)]`, like the ID
+/// pointer fields: the `.frap` scene map writes ID references).
+const MODIFIER_EXTRAS: &[(&str, &[Extra])] = &[
+    (
+        "NodesModifier",
+        &[Extra {
+            name: "inputs",
+            doc: "`properties.inputs`: the group inputs by identifier (5.2 runtime-defined RNA `NodesModifierProperties`, bound by `frap-scene/src/id/modifier.rs`, WP 4.1)",
+            default: "",
+            ty: Some("crate::id::GnInputs"),
+        }],
+    ),
+    (
+        "UVProjectModifier",
+        &[Extra {
+            name: "projectors",
+            doc: "`projectors[i].object`: DNA `UVProjectModifierData::projectors[MOD_UVPROJECT_MAXPROJECTORS]` (the collection shows the first `projector_count`; bound by `frap-scene/src/hooks/uv_project_modifier_projectors.rs`, WP 8.3.12)",
+            default: "[None; 10]",
+            ty: Some("[Option<IdAny>; 10]"),
+        }],
+    ),
+];
 
 /// RNA properties of generated modifier settings structs that are another name for a stored
 /// field (Blender defines both on one DNA member), as `(struct, &[(alias, target)])`: the alias
@@ -756,9 +769,14 @@ fn emit_struct(
         let _ = writeln!(out, "    pub {}: {},", ident(&p.identifier), f.ty.rust());
     }
     for e in extra {
+        let skip = if e.ty.is_some_and(|t| t.contains("IdAny")) {
+            "\n    #[serde(skip)]"
+        } else {
+            ""
+        };
         let _ = writeln!(
             out,
-            "    /// {}\n    pub {}: {},",
+            "    /// {}{skip}\n    pub {}: {},",
             e.doc,
             ident(e.name),
             e.ty.unwrap_or("SmolStr")

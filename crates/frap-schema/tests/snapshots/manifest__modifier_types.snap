@@ -48,14 +48,14 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "UV_PROJECT",
     "name": "UV Project",
     "struct": "UVProjectModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
     "identifier": "UV_WARP",
     "name": "UV Warp",
     "struct": "UVWarpModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
@@ -391,7 +391,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "SHRINKWRAP",
     "name": "Shrinkwrap",
     "struct": "ShrinkwrapModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
@@ -412,7 +412,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "CORRECTIVE_SMOOTH",
     "name": "Smooth Corrective",
     "struct": "CorrectiveSmoothModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
@@ -433,14 +433,14 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "WARP",
     "name": "Warp",
     "struct": "WarpModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
     "identifier": "WAVE",
     "name": "Wave",
     "struct": "WaveModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {

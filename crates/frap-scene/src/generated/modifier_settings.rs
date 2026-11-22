@@ -800,6 +800,9 @@ pub struct UVProjectSettings {
     pub scale_x: f32,
     /// `scale_y`: Vertical scale (only used for camera projectors)
     pub scale_y: f32,
+    /// `projectors[i].object`: DNA `UVProjectModifierData::projectors[MOD_UVPROJECT_MAXPROJECTORS]` (the collection shows the first `projector_count`; bound by `frap-scene/src/hooks/uv_project_modifier_projectors.rs`, WP 8.3.12)
+    #[serde(skip)]
+    pub projectors: [Option<IdAny>; 10],
 }
 
 impl Default for UVProjectSettings {
@@ -811,6 +814,7 @@ impl Default for UVProjectSettings {
             aspect_y: 1.0,
             scale_x: 1.0,
             scale_y: 1.0,
+            projectors: [None; 10],
         }
     }
 }
