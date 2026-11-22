@@ -237,7 +237,9 @@ fn exec(cx: &mut OpCtx, p: uv::ExportLayout) -> OpResult {
     }
     let mut polys: Vec<Poly> = Vec::new();
     for ob in objects {
-        let Some(o) = cx.main().objects.get(ob) else { continue };
+        let Some(o) = cx.main().objects.get(ob) else {
+            continue;
+        };
         if o.object_type() != "MESH" {
             continue;
         }
@@ -295,7 +297,9 @@ fn exec(cx: &mut OpCtx, p: uv::ExportLayout) -> OpResult {
         }
         let path = ensure_ext(&path, ext);
         let bytes = match mode {
-            Mode::Svg => vector::svg(tile, &polys, size[0], size[1], opacity, &blend_name).into_bytes(),
+            Mode::Svg => {
+                vector::svg(tile, &polys, size[0], size[1], opacity, &blend_name).into_bytes()
+            }
             Mode::Eps => vector::eps(tile, &polys, size[0], size[1], opacity).into_bytes(),
             Mode::Png => {
                 let rgba = png::draw(tile, &polys, size[0], size[1], opacity);

@@ -151,7 +151,10 @@ fn bmesh_before(rec: &J) -> (Mesh, BMesh) {
     let me = mesh_of(before);
     let sm = bools(&rec["select_mode"]).unwrap();
     let mut mode = SelectMode::empty();
-    for (on, m) in sm.iter().zip([SelectMode::VERT, SelectMode::EDGE, SelectMode::FACE]) {
+    for (on, m) in sm
+        .iter()
+        .zip([SelectMode::VERT, SelectMode::EDGE, SelectMode::FACE])
+    {
         if *on {
             mode |= m;
         }

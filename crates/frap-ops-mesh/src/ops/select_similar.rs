@@ -537,9 +537,9 @@ fn similar_edge(cx: &mut OpCtx, ty: Type, thresh: f32, compare: SimilarCmp) -> O
                 }
                 Type::EdgeDir => {
                     let dir = edge_dir_world(&bm, &o.obmat, e);
-                    tree_3d.find_nearest(&dir).is_some_and(|n| {
-                        math::angle_normalized_v3v3(dir, n.co) <= thresh_radians
-                    })
+                    tree_3d
+                        .find_nearest(&dir)
+                        .is_some_and(|n| math::angle_normalized_v3v3(dir, n.co) <= thresh_radians)
                 }
                 Type::EdgeLength => {
                     tree_1d.compare(edge_len_sq_world(&bm, &o.obmat, e), thresh, compare)
@@ -552,12 +552,8 @@ fn similar_edge(cx: &mut OpCtx, ty: Type, thresh: f32, compare: SimilarCmp) -> O
                             SimilarCmp::Eq,
                         )
                 }
-                Type::EdgeSeam => {
-                    flag(&bm, e, ElemFlag::SEAM) == (data_value & DATA_TRUE != 0)
-                }
-                Type::EdgeSharp => {
-                    flag(&bm, e, ElemFlag::SMOOTH) == (data_value & DATA_TRUE != 0)
-                }
+                Type::EdgeSeam => flag(&bm, e, ElemFlag::SEAM) == (data_value & DATA_TRUE != 0),
+                Type::EdgeSharp => flag(&bm, e, ElemFlag::SMOOTH) == (data_value & DATA_TRUE != 0),
                 Type::EdgeFreestyle => match freestyle {
                     None => true,
                     Some(l) => at(l, e.slot()) == (data_value & DATA_TRUE != 0),
@@ -741,9 +737,7 @@ fn similar_face(cx: &mut OpCtx, ty: Type, thresh: f32, compare: SimilarCmp) -> O
                             ) <= thresh_radians
                     })
                 }
-                Type::FaceSmooth => {
-                    flag(&bm, f, ElemFlag::SMOOTH) == (data_value & DATA_TRUE != 0)
-                }
+                Type::FaceSmooth => flag(&bm, f, ElemFlag::SMOOTH) == (data_value & DATA_TRUE != 0),
                 Type::FaceFreestyle => match freestyle {
                     None => true,
                     Some(l) => at(l, f.slot()) == (data_value & DATA_TRUE != 0),

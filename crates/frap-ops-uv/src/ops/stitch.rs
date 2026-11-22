@@ -221,7 +221,10 @@ fn selection_items(v: &Value) -> Result<Vec<UvElementId>, OpError> {
     let mut out = Vec::with_capacity(items.len());
     for it in items {
         let mut index = [0i32; 2];
-        for (slot, key) in ["name", "face_index", "element_index"].into_iter().enumerate() {
+        for (slot, key) in ["name", "face_index", "element_index"]
+            .into_iter()
+            .enumerate()
+        {
             let Some(val) = it.get(key) else {
                 return Err(err(format!("keyword \"{key}\" missing")));
             };

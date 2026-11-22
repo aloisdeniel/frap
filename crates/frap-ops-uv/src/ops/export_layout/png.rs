@@ -47,7 +47,8 @@ impl Fb {
     /// The pixels whose centre lies inside triangle `t` (top-left rule), in raster order.
     fn triangle(&self, t: [[f32; 2]; 3], mut f: impl FnMut(usize, usize, f64, f64)) {
         let p = t.map(|v| [f64::from(v[0]), f64::from(v[1])]);
-        let area = (p[1][0] - p[0][0]) * (p[2][1] - p[0][1]) - (p[2][0] - p[0][0]) * (p[1][1] - p[0][1]);
+        let area =
+            (p[1][0] - p[0][0]) * (p[2][1] - p[0][1]) - (p[2][0] - p[0][0]) * (p[1][1] - p[0][1]);
         if area == 0.0 || !area.is_finite() {
             return;
         }
@@ -93,7 +94,13 @@ fn to_px(uv: [f64; 2], tile: (i64, i64), w: f32, h: f32) -> [f32; 2] {
 }
 
 /// `export_uv_png.export`: the RGBA8 image (un-premultiplied, top row first).
-pub(crate) fn draw(tile: (i64, i64), polys: &[Poly], width: i32, height: i32, opacity: f64) -> Vec<u8> {
+pub(crate) fn draw(
+    tile: (i64, i64),
+    polys: &[Poly],
+    width: i32,
+    height: i32,
+    opacity: f64,
+) -> Vec<u8> {
     let (w, h) = (width.max(1) as usize, height.max(1) as usize);
     let mut fb = Fb {
         w,
@@ -106,7 +113,11 @@ pub(crate) fn draw(tile: (i64, i64), polys: &[Poly], width: i32, height: i32, op
     for p in polys {
         let pts: Vec<[f32; 2]> = p.uvs.iter().map(|&uv| to_px(uv, tile, wf, hf)).collect();
         let rgb = p.color.map(|c| c as f32);
-        let uv32: Vec<[f32; 2]> = p.uvs.iter().map(|uv| [uv[0] as f32, uv[1] as f32]).collect();
+        let uv32: Vec<[f32; 2]> = p
+            .uvs
+            .iter()
+            .map(|uv| [uv[0] as f32, uv[1] as f32])
+            .collect();
         let tris = if uv32.len() < 3 {
             Vec::new()
         } else {
@@ -166,7 +177,8 @@ fn line(fb: &mut Fb, a: [f32; 2], b: [f32; 2]) {
     let mut frags = Vec::new();
     for tri in [[q[0], q[1], q[2]], [q[1], q[3], q[2]]] {
         fb.triangle(tri, |x, y, cx, cy| {
-            let s = (cx - f64::from(a[0])) * f64::from(o[0]) + (cy - f64::from(a[1])) * f64::from(o[1]);
+            let s =
+                (cx - f64::from(a[0])) * f64::from(o[0]) + (cy - f64::from(a[1])) * f64::from(o[1]);
             frags.push((x, y, s as f32));
         });
     }
@@ -182,7 +194,11 @@ fn crc32(data: &[u8]) -> u32 {
     for (n, t) in table.iter_mut().enumerate() {
         let mut c = n as u32;
         for _ in 0..8 {
-            c = if c & 1 != 0 { 0xedb8_8320 ^ (c >> 1) } else { c >> 1 };
+            c = if c & 1 != 0 {
+                0xedb8_8320 ^ (c >> 1)
+            } else {
+                c >> 1
+            };
         }
         *t = c;
     }

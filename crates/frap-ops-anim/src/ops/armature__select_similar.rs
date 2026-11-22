@@ -83,9 +83,7 @@ fn exec(cx: &mut OpCtx, p: armature::SelectSimilar) -> OpResult {
             .to_owned();
             if !part.is_empty() {
                 for (_, arm) in arms {
-                    common::with_edit(cx, arm, |ea, a| {
-                        ea.select_similar_affix(a, &part, suffix)
-                    });
+                    common::with_edit(cx, arm, |ea, a| ea.select_similar_affix(a, &part, suffix));
                 }
             }
         }
@@ -102,8 +100,17 @@ fn exec(cx: &mut OpCtx, p: armature::SelectSimilar) -> OpResult {
             }
         }
         Type::Shape => {
-            let shapes: Option<Vec<(smol_str::SmolStr, Option<frap_rna::IdRef<frap_rna::ObjectId>>)>> =
-                cx.main().objects.get(ob_act).and_then(|o| o.pose.as_ref()).map(|pose| {
+            let shapes: Option<
+                Vec<(
+                    smol_str::SmolStr,
+                    Option<frap_rna::IdRef<frap_rna::ObjectId>>,
+                )>,
+            > = cx
+                .main()
+                .objects
+                .get(ob_act)
+                .and_then(|o| o.pose.as_ref())
+                .map(|pose| {
                     pose.bones
                         .iter()
                         .map(|pb| (pb.name.clone(), pb.custom_shape))

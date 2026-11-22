@@ -610,8 +610,18 @@ pub(crate) fn process_data(
             Mode::Vert => p.propagate(sel, i, &final_position, final_),
             Mode::Edge => {
                 let e = p.st.edges[sel as usize];
-                p.propagate(p.st.uvs[e.uv1 as usize], e.uv1 as usize, &final_position, final_);
-                p.propagate(p.st.uvs[e.uv2 as usize], e.uv2 as usize, &final_position, final_);
+                p.propagate(
+                    p.st.uvs[e.uv1 as usize],
+                    e.uv1 as usize,
+                    &final_position,
+                    final_,
+                );
+                p.propagate(
+                    p.st.uvs[e.uv2 as usize],
+                    e.uv2 as usize,
+                    &final_position,
+                    final_,
+                );
                 p.st.edges[sel as usize].flag &= STITCH_SELECTED | STITCH_BOUNDARY;
             }
         }

@@ -75,8 +75,8 @@ impl PyRandom {
         k = N - 1;
         while k > 0 {
             let prev = mt[i - 1];
-            mt[i] = (mt[i] ^ (prev ^ (prev >> 30)).wrapping_mul(1_566_083_941))
-                .wrapping_sub(i as u32);
+            mt[i] =
+                (mt[i] ^ (prev ^ (prev >> 30)).wrapping_mul(1_566_083_941)).wrapping_sub(i as u32);
             i += 1;
             if i >= N {
                 mt[0] = mt[N - 1];

@@ -200,7 +200,11 @@ mod tests {
             let rv = RegionView::ortho_along(dir, loc);
             assert_eq!(rv.mouse_over(loc), [787.0, 477.0]);
             // Every point of the mouse ray projects onto the mouse.
-            let far = [loc[0] + 7.0 * dir[0], loc[1] + 7.0 * dir[1], loc[2] + 7.0 * dir[2]];
+            let far = [
+                loc[0] + 7.0 * dir[0],
+                loc[1] + 7.0 * dir[1],
+                loc[2] + 7.0 * dir[2],
+            ];
             assert_eq!(rv.mouse_over(far), [787.0, 477.0]);
             // The scale is the factory ortho one: `ortho_scale` world units per half width.
             let p = Projection::for_object(&rv, &frap_bmesh::IDENTITY);

@@ -7,7 +7,10 @@ use super::py::round_half_even;
 use super::vector::{self, GENERATOR, Poly};
 use super::*;
 
-const TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/src/ops/export_layout/testdata");
+const TESTDATA: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/ops/export_layout/testdata"
+);
 
 /// The lines of `text` without the header's generator line.
 fn body(text: &str) -> Vec<&str> {
@@ -85,7 +88,10 @@ fn tiles_and_file_names() {
     ];
     assert_eq!(tiles_to_export(ExportTiles::None, &polys), vec![(0, 0)]);
     // (1.0, 1.0) and (2.0, 0.5) sit on the upper/right border of tiles (0, 0) and (1, 0).
-    assert_eq!(tiles_to_export(ExportTiles::Udim, &polys), vec![(0, 0), (1, 0)]);
+    assert_eq!(
+        tiles_to_export(ExportTiles::Udim, &polys),
+        vec![(0, 0), (1, 0)]
+    );
     assert_eq!(strip_name("cube.1001.svg", ExportTiles::Udim), "cube");
     assert_eq!(strip_name("cube.1001.svg", ExportTiles::None), "cube.1001");
     assert_eq!(strip_name("cube.u2_v1.png", ExportTiles::Uv), "cube");

@@ -419,7 +419,13 @@ impl UvElementMap {
                     {
                         let tail = head_table[next as usize];
                         stack.push(tail);
-                        self.assign_unique(Some(tail), nislands, map, islandbuf, &mut islandbufsize);
+                        self.assign_unique(
+                            Some(tail),
+                            nislands,
+                            map,
+                            islandbuf,
+                            &mut islandbufsize,
+                        );
                     }
                     if (!uv_selected || s.edge_select_test(s.prev(l)))
                         && let Some(prev) = self.get(s, s.prev(l))
@@ -427,7 +433,13 @@ impl UvElementMap {
                     {
                         let tail = head_table[prev as usize];
                         stack.push(tail);
-                        self.assign_unique(Some(tail), nislands, map, islandbuf, &mut islandbufsize);
+                        self.assign_unique(
+                            Some(tail),
+                            nislands,
+                            map,
+                            islandbuf,
+                            &mut islandbufsize,
+                        );
                     }
                     element = self.storage[el as usize].next;
                     if let Some(n) = element
@@ -495,14 +507,21 @@ impl UvElementMap {
                         }
                         if s.lf(self.storage[el as usize].l) == efa {
                             // Found the UV corresponding to our face and vertex.
-                            self.assign_island(el, nislands, &mut map, &mut islandbuf, islandbufsize);
+                            self.assign_island(
+                                el,
+                                nislands,
+                                &mut map,
+                                &mut islandbuf,
+                                islandbufsize,
+                            );
                             islandbufsize += 1;
                             let mut e2 = initelement;
                             while let Some(x) = e2 {
                                 if self.storage[x as usize].separate && Some(x) != initelement {
                                     break;
                                 }
-                                let fi = self.fidx[s.lf(self.storage[x as usize].l).slot()] as usize;
+                                let fi =
+                                    self.fidx[s.lf(self.storage[x as usize].l).slot()] as usize;
                                 if island_number[fi] == INVALID_ISLAND {
                                     stack.push(s.lf(self.storage[x as usize].l));
                                     island_number[fi] = nislands;

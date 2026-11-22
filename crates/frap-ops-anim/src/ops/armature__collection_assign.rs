@@ -46,7 +46,9 @@ pub(crate) mod bcoll {
     /// No armature in the context (a silent `false` in Blender).
     fn no_armature(c: &Context) -> PollFail {
         let hint = match c.active_object().and_then(|o| c.main.objects.get(o)) {
-            Some(_) => "make an armature object active, e.g. bpy.context.view_layer.objects.active = bpy.data.objects['Armature']",
+            Some(_) => {
+                "make an armature object active, e.g. bpy.context.view_layer.objects.active = bpy.data.objects['Armature']"
+            }
             None => "add one first, e.g. bpy.ops.object.armature_add()",
         };
         PollFail {
@@ -69,8 +71,7 @@ pub(crate) mod bcoll {
         let Some((_, arm)) = armature_context(c) else {
             return Err(no_armature(c));
         };
-        if c
-            .main
+        if c.main
             .armatures
             .get(arm)
             .is_some_and(|a| a.header.library.is_some())
@@ -94,10 +95,11 @@ pub(crate) mod bcoll {
         let Some((_, arm)) = armature_context(c) else {
             return Err(no_armature(c));
         };
-        let has_active = c.main.armatures.get(arm).is_some_and(|a| {
-            a.active_collection
-                .is_some_and(|i| i < a.collections.len())
-        });
+        let has_active = c
+            .main
+            .armatures
+            .get(arm)
+            .is_some_and(|a| a.active_collection.is_some_and(|i| i < a.collections.len()));
         if !has_active {
             let mut f = fail(
                 "armature.collection_remove",
@@ -273,8 +275,7 @@ pub(crate) mod bcoll {
             ContextMode::Pose => {
                 let bones: Vec<SmolStr> = {
                     let main = cx.main();
-                    let (Some(o), Some(a)) = (main.objects.get(ob), main.armatures.get(arm))
-                    else {
+                    let (Some(o), Some(a)) = (main.objects.get(ob), main.armatures.get(arm)) else {
                         return out;
                     };
                     o.pose
@@ -283,7 +284,8 @@ pub(crate) mod bcoll {
                         .filter(|pb| {
                             pb.select
                                 && !pb.hide
-                                && a.bone(&pb.name).is_some_and(|b| a.bone_collections_visible(b))
+                                && a.bone(&pb.name)
+                                    .is_some_and(|b| a.bone_collections_visible(b))
                         })
                         .map(|pb| pb.name.clone())
                         .collect()

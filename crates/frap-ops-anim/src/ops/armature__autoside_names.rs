@@ -49,7 +49,8 @@ fn exec(cx: &mut OpCtx, p: armature::ArmatureAutosideNames) -> OpResult {
                 && !ea.edit_bones[f].select[SEL]
             {
                 let fb = &ea.edit_bones[f];
-                if let Some(new) = bone_autoside_name(&fb.name, axis, fb.head[axis], fb.tail[axis]) {
+                if let Some(new) = bone_autoside_name(&fb.name, axis, fb.head[axis], fb.tail[axis])
+                {
                     let old = fb.name.to_string();
                     rename_cx::rename(cx, arm, &old, &new);
                     changed_multi = true;

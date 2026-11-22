@@ -14,8 +14,8 @@
 //! are checked before the arguments, the edit mesh's deform weights at the start of the
 //! execution (same error).
 
-use frap_op::{Poll, PollFail, PollReq, operator};
 use frap_op::prelude::*;
+use frap_op::{Poll, PollFail, PollReq, operator};
 use frap_rna::{FrapError, MeshId, PyExc};
 use frap_scene::Context;
 use frap_spec_ops_mesh::mesh;
@@ -87,7 +87,8 @@ fn exec(cx: &mut OpCtx, p: mesh::SelectUngrouped) -> OpResult {
                 bm.vert_ids()
                     .into_iter()
                     .filter(|&v| {
-                        !common::hidden(bm, v) && dv.get(v.slot()).is_none_or(|d| d.weights.is_empty())
+                        !common::hidden(bm, v)
+                            && dv.get(v.slot()).is_none_or(|d| d.weights.is_empty())
                     })
                     .collect::<Vec<_>>(),
             )

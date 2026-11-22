@@ -126,7 +126,11 @@ pub(crate) fn set_order(keys: &[[f64; 3]]) -> Vec<usize> {
                 }
             }
             perturb >>= PERTURB_SHIFT;
-            i = (i.wrapping_mul(5).wrapping_add(1).wrapping_add(perturb as usize)) & mask;
+            i = (i
+                .wrapping_mul(5)
+                .wrapping_add(1)
+                .wrapping_add(perturb as usize))
+                & mask;
         };
         if found {
             continue;
@@ -168,7 +172,11 @@ fn insert_clean(table: &mut [Option<(i64, usize)>], hash: i64, idx: usize) {
             }
         }
         perturb >>= PERTURB_SHIFT;
-        i = (i.wrapping_mul(5).wrapping_add(1).wrapping_add(perturb as usize)) & mask;
+        i = (i
+            .wrapping_mul(5)
+            .wrapping_add(1)
+            .wrapping_add(perturb as usize))
+            & mask;
     }
 }
 

@@ -129,7 +129,11 @@ mod tests {
         assert_eq!(weight_factor(100.0), 32767.0);
         assert_eq!(weight_factor(1.0), 1.0 / 32767.0);
         assert_eq!(weight_factor(75.0), 12.5);
-        assert_eq!(weight_factor(51.0), 51.0 / 50.0, "(1.02 - 1) * 25 = 0.5 is not above 1");
+        assert_eq!(
+            weight_factor(51.0),
+            51.0 / 50.0,
+            "(1.02 - 1) * 25 = 0.5 is not above 1"
+        );
         assert_eq!(weight_factor(25.0), 0.5);
     }
 }

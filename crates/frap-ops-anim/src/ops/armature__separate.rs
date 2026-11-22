@@ -46,7 +46,10 @@ fn exec(cx: &mut OpCtx, _p: armature::Separate) -> OpResult {
             separate::separate(main, log, scene, ob, arm, &ea)
         };
         let back = back.map(|(_, b)| b).unwrap_or(ea);
-        cx.split_edit().1.armatures.insert(arm.key(), Arc::new(back));
+        cx.split_edit()
+            .1
+            .armatures
+            .insert(arm.key(), Arc::new(back));
         cx.main_mut().1.modified.insert(arm.any());
         ok = true;
     }

@@ -14,8 +14,8 @@
 
 use frap_bmesh::{BMesh, EdgeId, ElemFlag, LoopId};
 use frap_geom::normals::{
-    CornerNormalSpace, V3, corner_space_custom_data_to_normal, dot, normalize_v3,
-    safe_acos_approx, sub,
+    CornerNormalSpace, V3, corner_space_custom_data_to_normal, dot, normalize_v3, safe_acos_approx,
+    sub,
 };
 
 /// One smooth fan (`MLoopNorSpace`).
@@ -94,7 +94,8 @@ fn calc_for_loop(bm: &mut BMesh, out: &mut Fans, l_curr: LoopId) {
         let vec_curr = normalize_v3(sub(co(bm, lc.next), pivot)).0;
         let vec_prev = normalize_v3(sub(co(bm, lc.prev), pivot)).0;
         let space = frap_bmesh::clnor::fan_space_define(no, vec_curr, vec_prev, &[]);
-        out.cur_lnors[l_curr.slot()] = corner_space_custom_data_to_normal(&space, clnor(bm, l_curr));
+        out.cur_lnors[l_curr.slot()] =
+            corner_space_custom_data_to_normal(&space, clnor(bm, l_curr));
         out.fans.push(Fan {
             space,
             loops: vec![l_curr],
@@ -134,7 +135,11 @@ fn calc_for_loop(bm: &mut BMesh, out: &mut Fans, l_curr: LoopId) {
         let f = bm.lp(pivot).f;
         let fac = safe_acos_approx(dot(vec_next, vec_curr));
         let no = bm.face(f).no;
-        lnor = [lnor[0] + no[0] * fac, lnor[1] + no[1] * fac, lnor[2] + no[2] * fac];
+        lnor = [
+            lnor[0] + no[0] * fac,
+            lnor[1] + no[1] * fac,
+            lnor[2] + no[2] * fac,
+        ];
         let c = clnor(bm, pivot);
         match clnor_ref {
             Some(r) => clnors_invalid |= r != c,

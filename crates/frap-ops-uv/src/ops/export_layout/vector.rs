@@ -21,7 +21,9 @@ pub(crate) const GENERATOR: &str = concat!("frap v", env!("CARGO_PKG_VERSION"));
 
 /// `xml.sax.saxutils.escape`.
 fn xml_escape(s: &str) -> String {
-    s.replace('&', "&amp;").replace('>', "&gt;").replace('<', "&lt;")
+    s.replace('&', "&amp;")
+        .replace('>', "&gt;")
+        .replace('<', "&lt;")
 }
 
 /// `export_uv_svg.get_color_string`.
@@ -87,7 +89,13 @@ fn eps_path(out: &mut String, tile: (i64, i64), uvs: &[[f64; 2]], w: f64, h: f64
 
 /// `export_uv_eps.get_file_parts`. The colours are named in the iteration order of the
 /// add-on's `set` of polygon colours.
-pub(crate) fn eps(tile: (i64, i64), polys: &[Poly], width: i32, height: i32, opacity: f64) -> String {
+pub(crate) fn eps(
+    tile: (i64, i64),
+    polys: &[Poly],
+    width: i32,
+    height: i32,
+    opacity: f64,
+) -> String {
     let mut out = String::new();
     out.push_str("%!PS-Adobe-3.0 EPSF-3.0\n");
     out.push_str(&format!("%%Creator: {GENERATOR}\n"));

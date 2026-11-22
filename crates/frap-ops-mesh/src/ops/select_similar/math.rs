@@ -203,7 +203,10 @@ mod tests {
         assert!((back[0] - 1.0).abs() < 1e-6);
         let id = mul_m3_m3m3(&r, &invert_m3(&r));
         assert!((id[0][0] - 1.0).abs() < 1e-6 && id[1][0].abs() < 1e-6);
-        assert_eq!(plane_from_point_normal([0.0, 0.0, 2.0], [0.0, 0.0, 1.0])[3], -2.0);
+        assert_eq!(
+            plane_from_point_normal([0.0, 0.0, 2.0], [0.0, 0.0, 1.0])[3],
+            -2.0
+        );
         assert_eq!(normalize_m3(&[[2.0, 0.0, 0.0]; 3])[1], [1.0, 0.0, 0.0]);
     }
 }

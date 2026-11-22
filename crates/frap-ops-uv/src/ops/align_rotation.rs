@@ -131,7 +131,8 @@ fn rotation_geometry(s: &UvSel, faces: &[FaceId], axis: usize, aspect_y: f64) ->
                 dc0[0] * dc1[1] - dc0[1] * dc1[0],
             ];
             // `Vector.length`: `sqrt(dot_vn_vn(...))` in double, from the last component.
-            let dot = f64::from(cr[2] * cr[2]) + f64::from(cr[1] * cr[1]) + f64::from(cr[0] * cr[0]);
+            let dot =
+                f64::from(cr[2] * cr[2]) + f64::from(cr[1] * cr[1]) + f64::from(cr[0] * cr[0]);
             let w = dot.sqrt() as f32;
             for k in 0..3 {
                 let u = dc0[k] * mat[0][0] + dc1[k] * mat[0][1];
@@ -158,7 +159,10 @@ fn invert_safe_m2(m: [[f32; 2]; 2]) -> [[f32; 2]; 2] {
             det = 1.0;
         }
     }
-    [[m[1][1] / det, -m[0][1] / det], [-m[1][0] / det, m[0][0] / det]]
+    [
+        [m[1][1] / det, -m[0][1] / det],
+        [-m[1][0] / det, m[0][0] / det],
+    ]
 }
 
 /// `align_uv_rotation_island`.

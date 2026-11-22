@@ -36,7 +36,11 @@ fn rotate_col<T: Clone + Default>(col: &mut Vec<T>, faces: &[Vec<usize>], use_cc
         let vals: Vec<T> = slots.iter().map(|&s| col[s].clone()).collect();
         let n = slots.len();
         for (i, &s) in slots.iter().enumerate() {
-            let src = if use_ccw { (i + 1) % n } else { (i + n - 1) % n };
+            let src = if use_ccw {
+                (i + 1) % n
+            } else {
+                (i + n - 1) % n
+            };
             col[s] = vals[src].clone();
         }
     }
@@ -132,10 +136,18 @@ mod tests {
         let faces = vec![vec![0, 1, 2, 3], vec![5, 4, 6]];
         let mut c = vec![0, 1, 2, 3, 4, 5, 6];
         rotate_col(&mut c, &faces, false);
-        assert_eq!(c, [3, 0, 1, 2, 5, 6, 4], "clockwise: the previous corner's value");
+        assert_eq!(
+            c,
+            [3, 0, 1, 2, 5, 6, 4],
+            "clockwise: the previous corner's value"
+        );
         let mut c = vec![0, 1, 2, 3, 4, 5, 6];
         rotate_col(&mut c, &faces, true);
-        assert_eq!(c, [1, 2, 3, 0, 6, 4, 5], "counter-clockwise: the next corner's value");
+        assert_eq!(
+            c,
+            [1, 2, 3, 0, 6, 4, 5],
+            "counter-clockwise: the next corner's value"
+        );
         let mut c = vec![0, 1, 2, 3, 4, 5, 6];
         reverse_col(&mut c, &faces);
         assert_eq!(c, [3, 2, 1, 0, 4, 6, 5]);

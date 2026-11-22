@@ -156,7 +156,12 @@ fn elems_depth_search(
 
 /// `elems_depth_measure`: the depths of `ele_dst`'s vertices from `ele_src`, aligned with
 /// them (`None` when one is unreachable).
-fn elems_depth_measure(bm: &BMesh, ele_dst: BMElem, ele_src: BMElem, step: Step) -> Option<Vec<i64>> {
+fn elems_depth_measure(
+    bm: &BMesh,
+    ele_dst: BMElem,
+    ele_src: BMElem,
+    step: Step,
+) -> Option<Vec<i64>> {
     let mut stack_old = edges_from_elem(bm, ele_src);
     let mut visited: BTreeSet<EdgeId> = stack_old.iter().copied().collect();
     let dst_verts = verts_from_elem(bm, ele_dst);
@@ -362,6 +367,9 @@ mod tests {
             Next::Info(m) => panic!("{m}"),
         }
         bm.select_history.clear();
-        assert!(matches!(select_next(&bm), Next::Info("Selection pair not found")));
+        assert!(matches!(
+            select_next(&bm),
+            Next::Info("Selection pair not found")
+        ));
     }
 }

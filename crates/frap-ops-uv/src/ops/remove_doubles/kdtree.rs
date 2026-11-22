@@ -224,7 +224,13 @@ mod tests {
 
     #[test]
     fn nearest_and_duplicates() {
-        let pts = [[0.0, 0.0], [0.5, 0.5], [0.501, 0.5], [1.0, 0.0], [0.0, 0.0001]];
+        let pts = [
+            [0.0, 0.0],
+            [0.5, 0.5],
+            [0.501, 0.5],
+            [1.0, 0.0],
+            [0.0, 0.0001],
+        ];
         let mut t = KdTree2::new(pts.len());
         for (i, p) in pts.iter().enumerate() {
             t.insert(i as i32, *p);

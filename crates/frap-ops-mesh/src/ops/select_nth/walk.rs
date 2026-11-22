@@ -101,11 +101,7 @@ pub(crate) fn face_shell(
 }
 
 /// `BMW_ISLAND` from `f` over faces where `mask` holds (no edge mask).
-pub(crate) fn island(
-    bm: &BMesh,
-    f: FaceId,
-    mask: &dyn Fn(FaceId) -> bool,
-) -> Vec<(FaceId, i32)> {
+pub(crate) fn island(bm: &BMesh, f: FaceId, mask: &dyn Fn(FaceId) -> bool) -> Vec<(FaceId, i32)> {
     let mut out = Vec::new();
     if !mask(f) {
         return out;

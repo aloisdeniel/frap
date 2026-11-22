@@ -156,7 +156,9 @@ impl StitchState {
             }
             for l in s.face_loops(f) {
                 let element = map.get(s, l).expect("visible corner has an element");
-                let element2 = map.get(s, s.next(l)).expect("visible corner has an element");
+                let element2 = map
+                    .get(s, s.next(l))
+                    .expect("visible corner has an element");
                 let offset1 = umap[element as usize];
                 let offset2 = umap[element2 as usize];
                 let (uv1, uv2) = if offset1 < offset2 {
@@ -424,7 +426,8 @@ pub(crate) fn goto_next_island(ssc: &mut Ssc, states: &[&StitchState]) -> bool {
     let original_island = ssc.static_island;
     loop {
         ssc.static_island += 1;
-        if ssc.static_island as usize >= states[ssc.active_object_index as usize].map.total_islands {
+        if ssc.static_island as usize >= states[ssc.active_object_index as usize].map.total_islands
+        {
             ssc.active_object_index = (ssc.active_object_index + 1) % states.len() as i32;
             ssc.static_island = 0;
         }

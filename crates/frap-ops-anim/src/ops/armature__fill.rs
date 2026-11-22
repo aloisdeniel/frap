@@ -45,7 +45,9 @@ fn exec(cx: &mut OpCtx, _p: armature::Fill) -> OpResult {
         return Err(OpError::Runtime("No joints selected".into()));
     }
     if mixed {
-        return Err(OpError::Runtime("Bones for different objects selected".into()));
+        return Err(OpError::Runtime(
+            "Bones for different objects selected".into(),
+        ));
     }
     let Some((ob, arm, points)) = chosen else {
         return Err(OpError::Runtime("No joints selected".into()));

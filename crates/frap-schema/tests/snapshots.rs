@@ -62,7 +62,7 @@ fn manifest_selected_operators() {
         "object.track_set",
         "anim.keying_set_active_set",
         "object.voxel_remesh",
-        "anim.keying_set_active_set",
+        "object.track_clear",
     ] {
         let e = find_op(idname).unwrap();
         assert!(

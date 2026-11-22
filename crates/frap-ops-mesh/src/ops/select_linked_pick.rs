@@ -123,9 +123,9 @@ fn exec(cx: &mut OpCtx, p: mesh::SelectLinkedPick) -> OpResult {
     let Some(&me) = bases.get(object_index) else {
         return Ok(OpStatus::Cancelled);
     };
-    let Some(Some((ele, mode))) =
-        common::read(cx, me, |bm| Some((elem_from_index_any(bm, index)?, bm.select_mode)))
-    else {
+    let Some(Some((ele, mode))) = common::read(cx, me, |bm| {
+        Some((elem_from_index_any(bm, index)?, bm.select_mode))
+    }) else {
         return Ok(OpStatus::Cancelled);
     };
     let delimit = if p.delimit.is_set {

@@ -24,12 +24,16 @@ use frap_bmesh::{BMElem, BMesh, VertId};
 use frap_math::EulerOrder;
 use frap_math::euler::eul_o_to_mat3;
 use frap_math::matrix::RotationMode;
-use frap_math::quat::{QuatWxyz, axis_angle_to_mat3, axis_angle_to_quat, normalize_qt, quat_to_mat3};
+use frap_math::quat::{
+    QuatWxyz, axis_angle_to_mat3, axis_angle_to_quat, normalize_qt, quat_to_mat3,
+};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_rna::{MeshId, ObjectId};
 use frap_scene::id::transform::world_matrix_in;
-use frap_spec_ops_mesh::mesh::{self, select_axis::Axis, select_axis::Orientation, select_axis::Sign};
+use frap_spec_ops_mesh::mesh::{
+    self, select_axis::Axis, select_axis::Orientation, select_axis::Sign,
+};
 use glam::Mat3;
 
 use super::select_more::common;
@@ -147,7 +151,10 @@ fn axis_angle_to_gimbal_axis(axis: V3, angle: f32) -> M3 {
     let mut gmat = [[0.0f32; 3]; 3];
     gmat[0] = normalize_v3(cross(cross_vec, axis)).0;
     gmat[0] = mul_qt_v3(axis_angle_to_quat(axis, angle), gmat[0]);
-    gmat[1] = mul_qt_v3(axis_angle_to_quat(axis, std::f32::consts::FRAC_PI_2), gmat[0]);
+    gmat[1] = mul_qt_v3(
+        axis_angle_to_quat(axis, std::f32::consts::FRAC_PI_2),
+        gmat[0],
+    );
     gmat[2] = axis;
     math::normalize_m3(&gmat)
 }

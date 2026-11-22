@@ -408,10 +408,7 @@ impl Rip<'_, '_> {
             let u = self.ul_mut(l_other);
             u.in_stack = true;
             u.side = side;
-        } else if u.side != side
-            && !u.side_was_swapped
-            && self.change_sides_test(l_other, l_step)
-        {
+        } else if u.side != side && !u.side_was_swapped && self.change_sides_test(l_other, l_step) {
             self.set_side_and_remove(l_other, side, stack, pairs);
         }
     }

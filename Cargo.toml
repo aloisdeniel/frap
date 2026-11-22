@@ -279,3 +279,27 @@ opt-level = 3
 opt-level = 3
 [profile.dev.package.adler2]
 opt-level = 3
+# M8 W2 (WP 8.3.3): `mesh.vertices_smooth_laplacian`'s sparse LU (faer and its gemm kernels)
+# takes minutes on large meshes at opt-level 0.
+[profile.dev.package.faer]
+opt-level = 3
+[profile.dev.package.faer-traits]
+opt-level = 3
+[profile.dev.package.gemm]
+opt-level = 3
+[profile.dev.package.gemm-common]
+opt-level = 3
+[profile.dev.package.gemm-f32]
+opt-level = 3
+[profile.dev.package.gemm-f64]
+opt-level = 3
+[profile.dev.package.nano-gemm]
+opt-level = 3
+[profile.dev.package.nano-gemm-core]
+opt-level = 3
+[profile.dev.package.nano-gemm-f32]
+opt-level = 3
+[profile.dev.package.nano-gemm-f64]
+opt-level = 3
+[profile.dev.package.pulp]
+opt-level = 3

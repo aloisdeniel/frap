@@ -144,7 +144,12 @@ fn closest_to_line_segment(p: Uv, l1: Uv, l2: Uv) -> Uv {
 }
 
 /// `uvedit_uv_straighten_elements`.
-fn straighten_elements(s: &mut UvSel, loops: &[frap_bmesh::LoopId], pins: &[bool], tool: Axis) -> bool {
+fn straighten_elements(
+    s: &mut UvSel,
+    loops: &[frap_bmesh::LoopId],
+    pins: &[bool],
+    tool: Axis,
+) -> bool {
     let mut uv_start: Uv = [0.0; 2];
     let mut uv_end: Uv = [0.0; 2];
     let mut prec_start = 0u8;
@@ -218,17 +223,33 @@ mod tests {
 
     #[test]
     fn closest_point_clamps_to_the_segment() {
-        assert_eq!(closest_to_line_segment([0.5, 1.0], [0.0, 0.0], [1.0, 0.0]), [0.5, 0.0]);
-        assert_eq!(closest_to_line_segment([-1.0, 1.0], [0.0, 0.0], [1.0, 0.0]), [0.0, 0.0]);
-        assert_eq!(closest_to_line_segment([2.0, 1.0], [0.0, 0.0], [1.0, 0.0]), [1.0, 0.0]);
-        assert_eq!(closest_to_line_segment([2.0, 1.0], [0.5, 0.5], [0.5, 0.5]), [0.5, 0.5]);
+        assert_eq!(
+            closest_to_line_segment([0.5, 1.0], [0.0, 0.0], [1.0, 0.0]),
+            [0.5, 0.0]
+        );
+        assert_eq!(
+            closest_to_line_segment([-1.0, 1.0], [0.0, 0.0], [1.0, 0.0]),
+            [0.0, 0.0]
+        );
+        assert_eq!(
+            closest_to_line_segment([2.0, 1.0], [0.0, 0.0], [1.0, 0.0]),
+            [1.0, 0.0]
+        );
+        assert_eq!(
+            closest_to_line_segment([2.0, 1.0], [0.5, 0.5], [0.5, 0.5]),
+            [0.5, 0.5]
+        );
     }
 
     #[test]
     fn pinned_end_points_win() {
         let (mut a, mut b) = ([0.0; 2], [0.0; 2]);
         let (mut pa, mut pb) = (0u8, 0u8);
-        for (uv, pin) in [([0.1, 0.1], false), ([0.9, 0.2], false), ([0.5, 0.15], true)] {
+        for (uv, pin) in [
+            ([0.1, 0.1], false),
+            ([0.9, 0.2], false),
+            ([0.5, 0.15], true),
+        ] {
             line_update_endpoint(uv, pin, &mut a, &mut pa, &mut b, &mut pb);
         }
         assert_eq!(pa, 3);

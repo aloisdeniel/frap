@@ -64,11 +64,7 @@ impl<T: Copy> HeapSimple<T> {
             let mut smallest = i;
             // `NODE(i).value` was spilled to `active_val` before the comparisons.
             let val_at = |k: usize, tree: &[Node<T>]| {
-                if k == i {
-                    active_val
-                } else {
-                    tree[k].value
-                }
+                if k == i { active_val } else { tree[k].value }
             };
             if l < size && self.tree[l].value < active_val {
                 smallest = l;
@@ -97,7 +93,10 @@ mod tests {
     #[test]
     fn pops_in_value_order() {
         let mut h = HeapSimple::new();
-        for (i, v) in [3.0f32, 1.0, 2.0, 1.0, 5.0, 0.5, 2.0].into_iter().enumerate() {
+        for (i, v) in [3.0f32, 1.0, 2.0, 1.0, 5.0, 0.5, 2.0]
+            .into_iter()
+            .enumerate()
+        {
             h.insert(v, i);
         }
         let mut out = Vec::new();

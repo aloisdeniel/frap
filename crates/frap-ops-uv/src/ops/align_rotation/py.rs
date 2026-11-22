@@ -88,8 +88,7 @@ pub(crate) fn face_uv_selected(s: &UvSel, face: FaceId, any_edge: bool) -> bool 
             return true;
         }
         return any_edge
-            && s
-                .face_loops(face)
+            && s.face_loops(face)
                 .into_iter()
                 .any(|l| s.eflag(s.le(l), ElemFlag::SELECT));
     }
@@ -99,8 +98,7 @@ pub(crate) fn face_uv_selected(s: &UvSel, face: FaceId, any_edge: bool) -> bool 
             return true;
         }
         if any_edge
-            && s
-                .face_loops(face)
+            && s.face_loops(face)
                 .into_iter()
                 .any(|l| s.lflag(l, ElemFlag::SELECT_UV_EDGE))
         {
