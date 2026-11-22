@@ -542,3 +542,146 @@ fn cancelled_and_failed_undo_statements_change_nothing() {
     assert_eq!(step_names(&fresh), ["M:Original"]);
     assert!(!frap_op::undo_status().can_undo);
 }
+
+#[test]
+fn the_step_limit_chain_matches_blender() {
+    // Golden `undo/step_limit`, with the intermediate values the golden does not compare
+    // (Blender 5.2.4, `ed.undo_push` after each of 40 writes: the 32 undos give 39, 38, …,
+    // 8; the 33rd fails its poll; 32 redos give 40 again).
+    let mut s = session();
+    for i in 1..=40 {
+        ok(
+            &mut s,
+            &format!("bpy.data.objects['Cube'].location.x = {i}.0"),
+        );
+    }
+    let mut xs = vec![];
+    for _ in 0..32 {
+        ok(&mut s, "bpy.ops.ed.undo()");
+        xs.push(value(&mut s, "bpy.data.objects['Cube'].location.x").as_f64());
+    }
+    let want: Vec<Option<f64>> = (8..=39).rev().map(|x| Some(f64::from(x))).collect();
+    assert_eq!(xs, want);
+    assert_eq!(ok(&mut s, "bpy.ops.ed.undo.poll()")["value"], false);
+    for _ in 0..32 {
+        ok(&mut s, "bpy.ops.ed.redo()");
+    }
+    assert_eq!(value(&mut s, "bpy.data.objects['Cube'].location.x"), 40.0);
+    assert_eq!(ok(&mut s, "bpy.ops.ed.redo.poll()")["value"], false);
+}
+
+/// The session of the `--stmt-timeout` tests: a 300 x 300 grid in Edit Mode, three selection
+/// steps (decoding one rebuilds the 90 601-vertex edit BMesh, which has cancellation points).
+fn big_edit_mesh() -> Session {
+    let mut s = session();
+    ok(
+        &mut s,
+        "bpy.ops.mesh.primitive_grid_add(x_subdivisions=300, y_subdivisions=300)",
+    );
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    for action in ["DESELECT", "SELECT", "INVERT"] {
+        ok(
+            &mut s,
+            &format!("bpy.ops.mesh.select_all(action='{action}')"),
+        );
+    }
+    s
+}
+
+/// Runs an `ed.*` operator, then [`super::finish`] (which decodes the steps) under a budget
+/// whose deadline has already passed: the statement itself ran, the decode is interrupted.
+fn finish_after_the_deadline(s: &mut Session, op: &str) -> J {
+    super::enter(s);
+    let mut r = s
+        .invoke_values(1, op, vec![], vec![])
+        .unwrap_or_else(|_| panic!("{op} runs"));
+    assert_eq!(r.status, crate::response::Status::Finished);
+    let timeout = std::time::Duration::from_nanos(1);
+    s.opts.limits.stmt_timeout = Some(timeout);
+    let budget = frap_math::budget::scope(frap_math::budget::Budget {
+        timeout: Some(timeout),
+        max_elements: u64::MAX,
+    });
+    std::thread::sleep(std::time::Duration::from_millis(1));
+    super::finish(s, super::Origin::Other, &mut r);
+    drop(budget);
+    s.opts.limits.stmt_timeout = None;
+    r.to_json()
+}
+
+#[test]
+fn a_timeout_while_a_step_is_decoded_keeps_the_history() {
+    // `ed.undo` decodes the previous step; `ed.undo_redo` loads the step before the repeated
+    // operator's, runs it again (which times out) and decodes the step it left (`ED_undo_redo`).
+    for op in ["ed.undo", "ed.undo_redo"] {
+        let mut s = big_edit_mesh();
+        let steps = step_names(&s);
+        let active = active_name(&s);
+        let dump = s.state_dump();
+        assert!(s.undo.last_redo.is_some());
+        let r = finish_after_the_deadline(&mut s, op);
+        assert_eq!(r["error"]["code"], "TIMEOUT", "{op}: {r:#}");
+        assert_eq!(r["state"], "unchanged", "{op}");
+        // The statement was rolled back, its history included.
+        assert_eq!(s.state_dump(), dump, "{op}");
+        assert_eq!(step_names(&s), steps, "{op}");
+        assert_eq!(active_name(&s), active, "{op}");
+        assert!(s.undo.last_redo.is_some(), "{op}");
+        assert!(frap_op::undo_status().can_undo_redo, "{op}");
+        // Without the limit, every step can still be undone.
+        let r = ok(&mut s, "bpy.ops.ed.undo()");
+        assert_eq!(r["result"]["undone"], "(De)select All", "{op}");
+        for _ in 0..3 {
+            ok(&mut s, "bpy.ops.ed.undo()");
+        }
+        let r = ok(&mut s, "bpy.ops.ed.undo()");
+        assert_eq!(r["result"]["undone"], "Add Grid", "{op}");
+        assert_eq!(r["context"]["mode"], "OBJECT", "{op}");
+        assert!(s.main().objects.find("Grid").is_none(), "{op}");
+    }
+}
+
+#[test]
+fn a_bug_while_a_step_is_decoded_clears_the_history_and_says_so() {
+    let mut s = big_edit_mesh();
+    let dump = s.state_dump();
+    // A panic in the decode stands for any bug there.
+    super::enter(&mut s);
+    let mut r = s
+        .invoke_values(1, "ed.undo", vec![], vec![])
+        .unwrap_or_else(|_| panic!("ed.undo runs"));
+    super::steps::PANIC_ON_DECODE.with(|p| p.set(true));
+    super::finish(&mut s, super::Origin::Other, &mut r);
+    super::steps::PANIC_ON_DECODE.with(|p| p.set(false));
+    let j = r.to_json();
+    assert_eq!(j["error"]["code"], "INTERNAL", "{j:#}");
+    assert!(
+        j["reports"]
+            .as_array()
+            .is_some_and(|a| a.iter().any(|x| x["message"]
+                .as_str()
+                .is_some_and(|m| m.contains("undo history was cleared")))),
+        "{j:#}"
+    );
+    assert_eq!(s.state_dump(), dump);
+    // The new history starts at the statement's result.
+    assert_eq!(step_names(&s), ["M:Original", "E:Original Mode"]);
+    assert_eq!(active_name(&s), "Original Mode");
+}
+
+#[test]
+fn a_limit_while_a_step_is_decoded_keeps_the_history() {
+    // `--max-elements` below the grid's corner count: rebuilding the edit BMesh of a step
+    // exceeds it (`budget::check_corners`).
+    let mut s = big_edit_mesh();
+    let steps = step_names(&s);
+    let dump = s.state_dump();
+    s.opts.limits.max_elements = 1000;
+    let r = run(&mut s, "bpy.ops.ed.undo()")
+        .pop()
+        .expect("one response");
+    assert_ne!(r["status"], "FINISHED", "{r:#}");
+    assert_eq!(r["error"]["code"], "LIMIT_EXCEEDED", "{r:#}");
+    assert_eq!(s.state_dump(), dump);
+    assert_eq!(step_names(&s), steps);
+}

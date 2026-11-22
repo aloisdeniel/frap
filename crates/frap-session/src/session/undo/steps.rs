@@ -241,11 +241,21 @@ pub(crate) fn encode(state: &State, kind: Kind) -> Data {
 
 /// Decodes `data` into the session (`undosys_step_decode`).
 pub(crate) fn decode(session: &mut Session, data: &Data) {
+    #[cfg(test)]
+    if PANIC_ON_DECODE.with(std::cell::Cell::get) {
+        panic!("a test's decode bug");
+    }
     match data {
         Data::Memfile(snap) => decode_memfile(session, snap),
         Data::EditMesh(step) => decode_edit_mesh(session, step),
         Data::EditArmature(step) => decode_edit_armature(session, step),
     }
+}
+
+#[cfg(test)]
+thread_local! {
+    /// Tests: [`decode`] panics (an internal bug while a step is loaded).
+    pub(crate) static PANIC_ON_DECODE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
 }
 
 /// `memfile_undosys_step_decode`.

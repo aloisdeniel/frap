@@ -29,11 +29,17 @@
 //! - an RNA function call (or an expression with one) that changed data pushes a step named
 //!   after the function, with the same Edit Mode rule;
 //! - an `ed.*` operator applies its [`UndoRequest`] (recorded through `Services::undo`,
-//!   [`request`]): `undo_push` pushes a named step (and tags the file modified), `undo` and
+//!   [`request`]): `undo_push` pushes a named step (and tags the file modified, as
+//!   `ED_undo_push` does in `blender -b` too, before it returns for a missing stack), `undo` and
 //!   `redo` load the previous / next step (`ed_undo_step_direction`, forgetting the operator
 //!   to repeat as `WM_operator_stack_clear` does), `undo_redo` loads the step before the
 //!   repeated operator's (`ED_undo_pop_op`) and runs it again (`ED_undo_operator_repeat`).
 //!   Their response's `changes` name what came back (`undo/diff.rs`).
+//!
+//! The implicit steps above leave `bpy.data.is_dirty` alone (D-145), although the interactive
+//! `ED_undo_push` they emulate calls `WM_file_tag_modified`: `is_dirty` keeps the `blender -b`
+//! behaviour, where Python's operator calls and RNA writes never push and the file stays
+//! unmodified, so the other goldens' `is_dirty` still compare. Only `ed.undo_push` tags it.
 //!
 //! Steps are pushed through `ED_undo_push` (`edit.undo_steps`, 32, limits the stack) and
 //! `BKE_undosys_step_push` (`undo/stack.rs`, typed Memfile / Edit Mesh / Edit Armature steps
@@ -105,7 +111,9 @@ struct LastRedo {
     rerun: Rerun,
 }
 
-/// The ring of committed states (`wm->runtime->undo_stack`).
+/// The ring of committed states (`wm->runtime->undo_stack`). Cloning it is cheap: the steps
+/// share their data (`Arc`s).
+#[derive(Clone)]
 pub(crate) struct UndoRing {
     stack: Stack<Data>,
     /// The stack was created (lazily, before the session's first statement).
@@ -209,17 +217,42 @@ pub(crate) fn finish(session: &mut Session, origin: Origin<'_>, r: &mut Response
             UndoRequest::Undo | UndoRequest::Redo | UndoRequest::UndoRedo
         )
     });
-    let saved = decodes.then(|| session.host.state.clone());
+    // What an unwind while a step is decoded goes back to: the statement's result and the
+    // history it was made with (the steps are `Arc`-shared, so both copies are cheap).
+    let saved = decodes.then(|| (session.host.state.clone(), ring.clone()));
     let outcome = catch_unwind(AssertUnwindSafe(|| {
         apply(session, &mut ring, origin, req, r);
     }));
     if let Err(payload) = outcome {
-        // A bug while loading or encoding a step: back to the statement's result, with a new
-        // history that starts there.
-        if let Some(s) = saved {
-            session.host.state = s;
-        }
+        // `--stmt-timeout` or `--max-elements` while a step was decoded (an Edit Mesh step
+        // goes through `BMesh::to_mesh`/`from_mesh`, which have cancellation points): the
+        // statement is rolled back, history included.
+        let budget = frap_math::budget::interrupted(&*payload).is_some()
+            || frap_math::budget::elements_exceeded(&*payload).is_some();
         let err = session.unwind_error(payload);
+        let mut reports = vec![];
+        match saved {
+            Some((state, saved_ring)) if budget => {
+                session.host.state = state;
+                ring = saved_ring;
+            }
+            saved => {
+                // A bug while loading or encoding a step: back to the statement's result,
+                // with a new history that starts there.
+                if let Some((state, _)) = saved {
+                    session.host.state = state;
+                }
+                ring = UndoRing {
+                    steps: ring.steps,
+                    ..UndoRing::default()
+                };
+                reset(session, &mut ring);
+                reports.push(Report::new(
+                    ReportType::Warning,
+                    "frap: the undo history was cleared; it starts again at the current state",
+                ));
+            }
+        }
         if decodes {
             let op = r.op.clone();
             *r = session.error_response(
@@ -227,7 +260,7 @@ pub(crate) fn finish(session: &mut Session, origin: Origin<'_>, r: &mut Response
                     kind: "op",
                     op,
                     err,
-                    reports: vec![],
+                    reports,
                 },
                 r.line,
             );
@@ -239,9 +272,8 @@ pub(crate) fn finish(session: &mut Session, origin: Origin<'_>, r: &mut Response
                     err.message
                 ),
             ));
+            r.reports.extend(reports);
         }
-        ring = UndoRing::default();
-        reset(session, &mut ring);
     }
     ring.edit_armatures = session.host.state.edit.armatures.keys().copied().collect();
     session.undo = ring;
