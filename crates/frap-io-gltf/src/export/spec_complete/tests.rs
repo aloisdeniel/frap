@@ -650,3 +650,78 @@ fn golden_inputs() -> Vec<(&'static str, Vec<u8>)> {
     valid(&out, "golden input");
     vec![("spec.glb", out.bytes)]
 }
+
+/// WP 8.12: `KHR_animation_pointer` samplers are baked on Blender's clock under SPEC
+/// (`(frame − slide) × fps_base / fps`), like the node samplers, and the export gives no
+/// fps_base WARNING; the add-on's default keeps `frame / (fps × fps_base)`.
+#[test]
+fn spec_pointer_times_follow_blenders_clock() {
+    let mut s = Scene::factory();
+    let sc = s.win.scene;
+    {
+        let scene = s.main.scenes.get_mut(sc, &mut s.log).unwrap();
+        scene.render.fps = 24;
+        scene.render.fps_base = 1.001;
+        scene.frame_end = 12;
+    }
+    let mut fc = FCurve::new("nodes[\"Principled BSDF\"].inputs[2].default_value", 0);
+    for (f, v) in [(1.0, 0.2), (12.0, 0.9)] {
+        let mut k = Keyframe::new(f, v);
+        k.interpolation = Interpolation::Linear;
+        fc.keyframe_points.push(k);
+    }
+    frap_anim::eval::recalc_handles(&mut fc);
+    let mut a = Action::new("Rough");
+    let h = a.slot_add_for_id_type("NODETREE", "Shader Nodetree");
+    let mut layer = ActionLayer::new("Layer");
+    layer.strips.push(ActionStrip::Keyframe(KeyframeStrip {
+        channelbags: vec![Channelbag {
+            slot_handle: h,
+            groups: Vec::new(),
+            fcurves: vec![fc],
+        }],
+    }));
+    a.layers.push(layer);
+    let a = s.main.actions.insert("Rough", a, &mut s.log);
+    let mr = s.main.materials.find("Material").unwrap();
+    let m = s.main.materials.get_mut(mr, &mut s.log).unwrap();
+    let adt = m
+        .node_tree
+        .animation_data
+        .get_or_insert_with(AnimData::default);
+    adt.action = Some(a);
+    adt.action_slot_handle = h;
+    let props = [
+        ("export_animation_mode", Value::Str("SCENE".into())),
+        ("export_pointer_animation", Value::Bool(true)),
+    ];
+    let pointer_times = |o: &ExportOutput| {
+        let (doc, bufs) = parse(o);
+        let is_pointer = |c: &frap_gltf::json::Channel| {
+            c.target.path == frap_gltf::json::AnimationPath::Pointer
+        };
+        let anim = doc
+            .animations
+            .iter()
+            .find(|an| an.channels.iter().any(is_pointer))
+            .expect("a pointer channel");
+        let c = anim.channels.iter().find(|c| is_pointer(c)).unwrap();
+        let smp = &anim.samplers[c.sampler as usize];
+        read_accessor(&doc, &bufs, smp.input).unwrap().to_f32()
+    };
+    let blender = s.export(&props);
+    let mut with_spec = props.to_vec();
+    with_spec.push(spec());
+    let out = s.export(&with_spec);
+    let b = f64::from(1.001f32);
+    let tb = pointer_times(&blender);
+    let ts = pointer_times(&out);
+    assert_eq!(tb.len(), ts.len());
+    let lb = f64::from(*tb.last().unwrap());
+    let ls = f64::from(*ts.last().unwrap());
+    assert!((lb - 12.0 / (24.0 * b)).abs() < 1e-6, "{lb}");
+    assert!((ls - 12.0 * b / 24.0).abs() < 1e-6, "{ls}");
+    let warned = |o: &ExportOutput| o.reports.iter().any(|r| r.message.contains("fps_base"));
+    assert!(!warned(&out), "{:?}", out.reports);
+    valid(&out, "spec pointer times");
+}

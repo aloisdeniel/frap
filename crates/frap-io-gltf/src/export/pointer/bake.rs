@@ -18,7 +18,8 @@
 //!   are merged into the first one and take the track's name;
 //! - `blender/exp/animation/sampled/data/{channels,sampler,keyframes}.py`: one channel per
 //!   registered path (the base colour and its alpha once), constant channels dropped
-//!   (`fcurve_is_constant`), times `frame / (fps · fps_base)` (or `(frame − slide) / fps` when
+//!   (`fcurve_is_constant`; under `frap_compat='SPEC'`, Blender's clock `(frame − slide) ×
+//!   fps_base / fps`, WP 8.12), times `frame / (fps · fps_base)` (or `(frame − slide) / fps` when
 //!   slid), input min/max, `export_sampling_interpolation_fallback`;
 //! - `blender/exp/exporter.py` (`__traverse_property`): the target becomes
 //!   `{path: "pointer", extensions: {KHR_animation_pointer: {pointer}}}`, a material whose
@@ -110,6 +111,12 @@ pub struct BakeCx<'g, 'a> {
 
 impl BakeCx<'_, '_> {
     fn seconds(&self, frame: i32, slide: Option<i32>) -> f64 {
+        // `frap_compat='SPEC'` (WP 8.12): Blender's clock, `(frame − slide) × fps_base / fps`,
+        // the time base `spec_complete::compat::animation_times` gives the other samplers.
+        if crate::export::spec_complete::spec(self.g) {
+            let base = f64::from(self.g.ctx.scene().render.fps_base);
+            return f64::from(frame - slide.unwrap_or(0)) * base / self.fps.1;
+        }
         match slide {
             Some(s) => f64::from(frame - s) / self.fps.1,
             None => f64::from(frame) / self.fps.0,
