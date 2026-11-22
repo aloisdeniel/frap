@@ -6,7 +6,8 @@
 //! armature}` (`blenkernel/intern/modifier.cc`), the defaults of `ED_object_modifier_add` /
 //! `BKE_modifier_new`, and `ED_object_vgroup_calc_from_armature` with `bone_looper`,
 //! `vgroup_add_unique_bone_cb`, `dgroup_skinnable_cb`, `add_verts_to_dgroups` and
-//! `envelope_bone_weighting` (`editors/armature/armature_skinning.cc`), Blender 5.2.4,
+//! `envelope_bone_weighting` (`editors/armature/armature_skinning.cc`) and
+//! `bke::subdiv::calculate_limit_positions` (`blenkernel/intern/subdiv_mesh.cc`), Blender 5.2.4,
 //! GPL-2.0-or-later.
 //!
 //! Verified on 5.2.4 (mesh Cube parented to Light): `LATTICE` adds a `Lattice` LATTICE
@@ -32,10 +33,15 @@
 //!   every vertex gets the bone's envelope factor (`distfactor_to_bone` in world space, the
 //!   radii and distance scaled by the armature's `mat4_to_scale`) as its weight, or leaves the
 //!   group when the factor is 0; `xmirror` writes the same weight to the mirrored vertex
-//!   (spatial X mirror) in the group of the flipped bone name.
+//!   (spatial X mirror) in the group of the flipped bone name;
+//! - `ARMATURE_AUTO` (WP 8.5): the same groups filled by bone heat (`support::heat`, the port
+//!   of `heat_bone_weighting`), mirrored the same way.
+//!
+//! With a SUBSURF modifier on the mesh (any, even disabled) both weigh the vertices at their
+//! Catmull-Clark limit positions ([`limit_positions`], `calculate_limit_positions`).
 
 use frap_bmesh::shape::deform as dv;
-use frap_mesh::Mesh;
+use frap_mesh::{AttrData, Domain, Mesh};
 use frap_modifiers::types::armature::distfactor_to_bone;
 use frap_rna::naming::unique_subname;
 use frap_rna::{ArmatureId, IdAny, IdCode, IdRef, ObjectId};
@@ -43,8 +49,11 @@ use frap_scene::Main;
 use frap_scene::edit_armature::names::flip_side_name;
 use frap_scene::generated::modifier_settings::ModifierType;
 use frap_scene::id::{Armature, Modifier, ModifierSettings, Object};
+use frap_subdiv::{SubdivSettings, SubdivTopology, VtxBoundary};
 use glam::{Mat4, Vec3};
 use smol_str::SmolStr;
+
+use crate::support::heat;
 
 /// The modifier type a parent type adds (`None` for the other types).
 pub fn parent_type_modifier(parent_type: &str) -> Option<ModifierType> {
@@ -329,8 +338,8 @@ impl<'a> MirrorTable<'a> {
     }
 }
 
-/// What [`envelope_weights`] reads besides the mesh.
-pub struct EnvelopeInput<'a> {
+/// What [`add_verts_to_dgroups`] reads besides the mesh.
+pub struct SkinInput<'a> {
     /// The armature.
     pub arm: &'a Armature,
     /// The armature object's world matrix.
@@ -339,23 +348,96 @@ pub struct EnvelopeInput<'a> {
     pub ob_world: Mat4,
     /// `xmirror`
     pub mirror: bool,
+    /// The mesh object has a SUBSURF modifier (`BKE_modifiers_findby_type`, enabled or not):
+    /// the vertices are taken on the limit surface.
+    pub subsurf: bool,
 }
 
-/// `add_verts_to_dgroups(heat = false)` with `envelope_bone_weighting`, in Object Mode (all
-/// bones "selected"). Returns the index of the last group added (the new active group), if
-/// any.
-pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize> {
+/// What [`add_verts_to_dgroups`] did.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Skinning {
+    /// The index of the last group added (the new active group), if any.
+    pub active: Option<usize>,
+    /// WARNING reports (the bone heat failure, frap's B-Bone notice).
+    pub warnings: Vec<String>,
+}
+
+/// `bke::subdiv::calculate_limit_positions`: the vertices of faces moved to the Catmull-Clark
+/// limit surface (isolation level 1, creases on, boundary `ALL`), the others unchanged.
+pub fn limit_positions(me: &Mesh) -> Vec<[f32; 3]> {
+    let mut out = me.positions().to_vec();
+    if me.faces_num() == 0 {
+        return out;
+    }
+    let float_attr = |name: &str, domain: Domain| -> Option<&[f32]> {
+        let a = me.attributes().get(name)?;
+        if a.domain != domain {
+            return None;
+        }
+        match &a.data {
+            AttrData::Float(v) => Some(v.as_slice()),
+            _ => None,
+        }
+    };
+    let edges: Vec<[u32; 2]> = me
+        .edges()
+        .iter()
+        .map(|e| [e[0] as u32, e[1] as u32])
+        .collect();
+    let offsets: Vec<u32> = me.face_offsets().iter().map(|&o| o as u32).collect();
+    let corner_verts: Vec<u32> = me.corner_verts().iter().map(|&v| v as u32).collect();
+    let corner_edges: Vec<u32> = me.corner_edges().iter().map(|&e| e as u32).collect();
+    let mut topo = SubdivTopology::new(
+        me.positions(),
+        &edges,
+        &offsets,
+        &corner_verts,
+        &corner_edges,
+    );
+    topo.edge_creases = float_attr("crease_edge", Domain::Edge);
+    topo.vert_creases = float_attr("crease_vert", Domain::Point);
+    // `Settings{is_simple = false, is_adaptive = true, level = 1, use_creases = true,
+    // EDGE_ONLY, CORNERS_AND_JUNCTIONS}`: adaptive at level 1 is the limit surface isolated
+    // to one level (frap's `quality`).
+    let mut settings = SubdivSettings::default();
+    settings.is_simple = false;
+    settings.level = 1;
+    settings.use_creases = true;
+    settings.vtx_boundary = VtxBoundary::EdgeOnly;
+    settings.use_limit_surface = true;
+    settings.quality = 1;
+    // Rejected topology: Blender keeps the coarse positions (`deform_coarse_vertices`).
+    let Ok(r) = frap_subdiv::default_subdivider().subdivide(&topo, &settings) else {
+        return out;
+    };
+    // `subdiv_mesh_vert_corner`: the corner vertices of faces, which come first in the
+    // subdivided mesh in coarse order.
+    for &v in me.corner_verts() {
+        let v = v as usize;
+        if let Some(p) = r.positions.get(v) {
+            out[v] = *p;
+        }
+    }
+    out
+}
+
+/// `add_verts_to_dgroups` (Object Mode: every deforming bone "selected"): the groups of the
+/// deforming bones (created when missing, a locked one left alone), filled with envelope
+/// weights (`heat = false`, `envelope_bone_weighting`) or bone heat (`heat = true`,
+/// `heat_bone_weighting`, [`crate::support::heat`]), from the world-space vertices (on the
+/// limit surface with a SUBSURF modifier).
+pub fn add_verts_to_dgroups(me: &mut Mesh, inp: &SkinInput<'_>, heat: bool) -> Skinning {
     let arm = inp.arm;
+    let mut out = Skinning::default();
     let rest = frap_scene::edit_armature::rest::rest_pose(arm);
     let bones: Vec<usize> = bone_order(arm)
         .into_iter()
         .filter(|&i| arm.bones[i].use_deform)
         .collect();
     if bones.is_empty() {
-        return None;
+        return out;
     }
     me.deform_verts_mut();
-    let mut last_added = None;
     // `dgroup_skinnable_cb`: the group of each bone (created when missing; a locked one is
     // left alone).
     let groups: Vec<Option<usize>> = bones
@@ -365,7 +447,7 @@ pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize>
             match me.vertex_group_names.iter().position(|n| n == name) {
                 None => {
                     let g = add_group(me, name);
-                    last_added = Some(g);
+                    out.active = Some(g);
                     Some(g)
                 }
                 Some(g) if me.vertex_group_locked(g) => None,
@@ -381,6 +463,20 @@ pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize>
             me.vertex_group_names.iter().position(|n| *n == flipped)
         })
         .collect();
+    if heat {
+        // B-Bone segments are separate heat sources in Blender (M9 in frap).
+        let bbones: Vec<&str> = bones
+            .iter()
+            .filter(|&&i| arm.bones[i].bbone_segments > 1)
+            .map(|&i| arm.bones[i].name.as_str())
+            .collect();
+        if !bbones.is_empty() {
+            out.warnings.push(format!(
+                "frap: bone heat weighting treats the B-Bone segments of {} as one segment",
+                bbones.join(", ")
+            ));
+        }
+    }
     let roots: Vec<Vec3> = bones
         .iter()
         .map(|&i| mul_m4_v3(&inp.arm_world, rest[i].arm_head))
@@ -389,9 +485,13 @@ pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize>
         .iter()
         .map(|&i| mul_m4_v3(&inp.arm_world, rest[i].arm_tail))
         .collect();
-    let scale = mat4_to_scale(&inp.arm_world);
     let local = me.positions().to_vec();
-    let verts: Vec<Vec3> = local
+    let base = if inp.subsurf {
+        limit_positions(me)
+    } else {
+        local.clone()
+    };
+    let verts: Vec<Vec3> = base
         .iter()
         .map(|p| mul_m4_v3(&inp.ob_world, Vec3::from_array(*p)))
         .collect();
@@ -399,6 +499,40 @@ pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize>
         .iter()
         .any(Option::is_some)
         .then(|| MirrorTable::new(&local));
+    if heat {
+        let tris: Vec<[usize; 3]> = {
+            let cv = me.corner_verts();
+            me.looptris()
+                .iter()
+                .map(|t| t.map(|c| cv[c as usize] as usize))
+                .collect()
+        };
+        let vertsflipped: Option<Vec<Option<usize>>> = mirror
+            .as_ref()
+            .map(|t| (0..local.len()).map(|i| t.mirror_vert(i)).collect());
+        let verts: Vec<[f32; 3]> = verts.iter().map(|v| v.to_array()).collect();
+        let roots: Vec<[f32; 3]> = roots.iter().map(|v| v.to_array()).collect();
+        let tips: Vec<[f32; 3]> = tips.iter().map(|v| v.to_array()).collect();
+        let to_u32 = |g: &Option<usize>| g.map(|g| g as u32);
+        let groups: Vec<Option<u32>> = groups.iter().map(to_u32).collect();
+        let flips: Vec<Option<u32>> = flips.iter().map(to_u32).collect();
+        let selected = vec![true; bones.len()];
+        let hin = heat::HeatInput {
+            verts: &verts,
+            tris: &tris,
+            roots: &roots,
+            tips: &tips,
+            groups: &groups,
+            flips: &flips,
+            selected: &selected,
+            mirror: vertsflipped.as_deref(),
+        };
+        if let Some(e) = heat::heat_bone_weighting(me.deform_verts_mut(), &hin) {
+            out.warnings.push(e.to_owned());
+        }
+        return out;
+    }
+    let scale = mat4_to_scale(&inp.arm_world);
     let dverts = me.deform_verts_mut();
     for (i, v) in verts.iter().enumerate() {
         let iflip = mirror.as_ref().and_then(|t| t.mirror_vert(i));
@@ -428,7 +562,18 @@ pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize>
             }
         }
     }
-    last_added
+    out
+}
+
+/// `add_verts_to_dgroups(heat = false)` with `envelope_bone_weighting`. Returns the index of
+/// the last group added (the new active group), if any.
+pub fn envelope_weights(me: &mut Mesh, inp: &SkinInput<'_>) -> Option<usize> {
+    add_verts_to_dgroups(me, inp, false).active
+}
+
+/// `add_verts_to_dgroups(heat = true)` with `heat_bone_weighting`.
+pub fn heat_weights(me: &mut Mesh, inp: &SkinInput<'_>) -> Skinning {
+    add_verts_to_dgroups(me, inp, true)
 }
 
 #[cfg(test)]
@@ -562,11 +707,12 @@ mod tests {
             [-0.9, 0.0, 1.0],
             [5.0, 5.0, 5.0],
         ]);
-        let inp = EnvelopeInput {
+        let inp = SkinInput {
             arm: &arm,
             arm_world: Mat4::IDENTITY,
             ob_world: Mat4::IDENTITY,
             mirror: true,
+            subsurf: false,
         };
         assert_eq!(envelope_weights(&mut me, &inp), Some(2));
         assert_eq!(me.vertex_group_names, ["Root", "Arm.R", "Arm.L"]);

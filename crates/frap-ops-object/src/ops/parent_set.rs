@@ -22,8 +22,12 @@
 //!   (virtual armature-parent modifier included, `support::deform::deformed_by`), whatever the
 //!   parent's type; `FOLLOW`/`PATH_CONST` without a curve parent: `CANCELLED`, nothing changes;
 //! - with an armature parent and a mesh child, `ARMATURE_NAME` adds an empty vertex group per
-//!   deforming bone and `ARMATURE_ENVELOPE` fills one per deforming bone with envelope
-//!   weights (`xmirror` mirrors them along X); the last group added becomes active;
+//!   deforming bone, `ARMATURE_ENVELOPE` fills one per deforming bone with envelope weights
+//!   and `ARMATURE_AUTO` with bone heat weights (`support::heat`, WP 8.5; a failed solve
+//!   reports the WARNING `Bone Heat Weighting: failed to find solution for one or more
+//!   bones` and stays `FINISHED`); `xmirror` mirrors them along X; the last group added
+//!   becomes active; on a mesh with a SUBSURF modifier both weight its vertices on the limit
+//!   surface (`bke::subdiv::calculate_limit_positions`);
 //! - `BONE` and `BONE_RELATIVE` parent to the armature's active bone (`parent_type = 'BONE'`,
 //!   `parent_bone`), which must be in a visible bone collection (`Error: No active bone`, also
 //!   for a parent that is not an armature); they clear / set the bone's
@@ -32,9 +36,9 @@
 //! - poll `ED_operator_object_active_editable` (no active object: `poll() failed, context is
 //!   incorrect`).
 //!
-//! Not in frap: vertex parents (`VERTEX`, `VERTEX_TRI`, Edit Mode parenting) and
-//! `ARMATURE_AUTO` (bone heat weighting, M8) answer `NotImplementedError`; so does
-//! `ARMATURE_ENVELOPE` on a mesh with a SUBSURF modifier (Blender weights the limit surface).
+//! Not in frap: vertex parents (`VERTEX`, `VERTEX_TRI`, Edit Mode parenting) answer
+//! `NotImplementedError`; bone heat treats B-Bone segments as one source, with a WARNING
+//! (B-Bones are M9).
 
 use std::collections::BTreeMap;
 
@@ -52,15 +56,12 @@ use crate::support::xform;
 #[operator(
     poll = poll::ACTIVE_EDITABLE,
     tier = T0,
-    support = Partial(
-        "type='VERTEX'/'VERTEX_TRI' (Edit Mode) and 'ARMATURE_AUTO' (bone heat, M8) answer \
-         NotImplementedError"
-    ),
+    support = Partial("type='VERTEX'/'VERTEX_TRI' (Edit Mode) answer NotImplementedError"),
     notes = [
         "A parent loop (Error: Loop in parents) rolls the whole operator back; Blender keeps the \
          children parented before the loop.",
-        "ARMATURE_ENVELOPE on a mesh with a Subdivision Surface modifier answers \
-         NotImplementedError (Blender weights the limit surface)."
+        "ARMATURE_AUTO treats B-Bone segments (bbone_segments > 1) as one heat source, with a \
+         WARNING (Blender heats each segment)."
     ]
 )]
 fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
@@ -89,12 +90,6 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
         .and_then(|o| o.data)
         .filter(|d| d.code == IdCode::AR)
         .and_then(|d| d.typed());
-    let is_mesh = |cx: &OpCtx, ob: IdRef<ObjectId>| {
-        cx.main()
-            .objects
-            .get(ob)
-            .is_some_and(deform::supports_deform_modifiers)
-    };
     // The active bone of `BKE_pose_channel_active_if_bonecoll_visible`.
     let mut bone = None;
     match ty {
@@ -128,30 +123,6 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
                 ),
             );
             return Ok(OpStatus::Cancelled);
-        }
-        Type::ArmatureAuto if arm_ref.is_some() && children.iter().any(|&o| is_mesh(cx, o)) => {
-            return Err(OpError::NotImplemented(
-                "frap: parent_set(type='ARMATURE_AUTO') needs bone heat weighting, which arrives \
-                 in M8; use 'ARMATURE_ENVELOPE' or 'ARMATURE_NAME' and assign weights"
-                    .into(),
-            ));
-        }
-        Type::ArmatureEnvelope if arm_ref.is_some() => {
-            let subsurf = children.iter().any(|&o| {
-                cx.main().objects.get(o).is_some_and(|ob| {
-                    deform::supports_deform_modifiers(ob)
-                        && ob.modifiers.iter().any(|m| {
-                            m.settings.type_identifier() == ModifierType::Subsurf.identifier()
-                        })
-                })
-            });
-            if subsurf {
-                return Err(OpError::NotImplemented(
-                    "frap: parent_set(type='ARMATURE_ENVELOPE') on a mesh with a Subdivision \
-                     Surface modifier weights the limit surface, which frap does not compute"
-                        .into(),
-                ));
-            }
         }
         _ => {}
     }
@@ -211,16 +182,26 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
         if let (Some(a), Some(me)) = (arm_ref, me) {
             let arm = cx.main().armatures.get(a).cloned();
             if let Some(arm) = arm {
+                let has_subsurf = o
+                    .modifiers
+                    .iter()
+                    .any(|m| m.settings.type_identifier() == ModifierType::Subsurf.identifier());
+                let inp = deform::SkinInput {
+                    arm: &arm,
+                    arm_world: par_world,
+                    ob_world,
+                    mirror: xmirror,
+                    subsurf: has_subsurf,
+                };
                 let active = match ty {
                     Type::ArmatureName => deform::groups_from_bone_names(cx.mesh_mut(me)?, &arm),
-                    Type::ArmatureEnvelope => {
-                        let inp = deform::EnvelopeInput {
-                            arm: &arm,
-                            arm_world: par_world,
-                            ob_world,
-                            mirror: xmirror,
-                        };
-                        deform::envelope_weights(cx.mesh_mut(me)?, &inp)
+                    Type::ArmatureEnvelope => deform::envelope_weights(cx.mesh_mut(me)?, &inp),
+                    Type::ArmatureAuto => {
+                        let r = deform::heat_weights(cx.mesh_mut(me)?, &inp);
+                        for w in r.warnings {
+                            cx.report(ReportType::Warning, w);
+                        }
+                        r.active
                     }
                     _ => None,
                 };
