@@ -135,6 +135,7 @@ impl<'a> ParamFace<'a> {
 // `PVertFlag`.
 pub(crate) const PVERT_PIN: u32 = 1;
 pub(crate) const PVERT_SELECT: u32 = 2;
+pub(crate) const PVERT_INTERIOR: u32 = 4;
 pub(crate) const PVERT_SPLIT: u32 = 16;
 // `PEdgeFlag`.
 pub(crate) const PEDGE_SEAM: u32 = 1;
@@ -148,6 +149,7 @@ const PEDGE_VERTEX_FLAGS: u32 = PEDGE_PIN;
 // `PFaceFlag`.
 pub(crate) const PFACE_CONNECTED: u32 = 1;
 pub(crate) const PFACE_FILLED: u32 = 2;
+pub(crate) const PFACE_DONE: u32 = 8;
 
 /// `PVert`.
 #[derive(Clone, Debug)]
@@ -161,9 +163,12 @@ pub(crate) struct PVert {
     pub(crate) co: V3,
     pub(crate) uv: V2,
     pub(crate) flag: u32,
-    /// Read by SLIM (`weight_influence`, M8, WP 8.1).
-    #[allow(dead_code)]
+    /// The vertex-group weight, read by SLIM (`weight_influence`).
     pub(crate) weight: f32,
+    /// `on_boundary_flag` (SLIM: on the outer boundary).
+    pub(crate) on_boundary_flag: bool,
+    /// `slim_id` (SLIM matrix row).
+    pub(crate) slim_id: i32,
 }
 
 /// `PEdge`.
@@ -182,6 +187,8 @@ pub(crate) struct PEdge {
     pub(crate) orig_uv: u32,
     pub(crate) old_uv: V2,
     pub(crate) flag: u32,
+    /// `u.id` (ABF angle index).
+    pub(crate) id: i32,
 }
 
 /// `PFace`.
@@ -194,6 +201,10 @@ pub(crate) struct PFace {
     pub(crate) chart: i32,
     pub(crate) edge: u32,
     pub(crate) flag: u32,
+    /// `u.id` (ABF face index).
+    pub(crate) id: i32,
+    /// `u.area3d` (stretch minimisation).
+    pub(crate) area3d: f32,
 }
 
 #[allow(clippy::misnamed_getters)]
@@ -325,6 +336,8 @@ pub struct ParamMesh {
     pub(crate) charts: Vec<PChart>,
     /// `blend` (stretch).
     pub(crate) blend: f32,
+    /// `rng` (stretch): `BLI_rng` state.
+    pub(crate) rng: crate::stretch::Rng,
     /// The `orig_uv` targets: current value per slot (Blender reads them through the pointer).
     uv_store: Vec<Cell<V2>>,
     /// Caller corner index per slot.
@@ -355,6 +368,7 @@ impl ParamMesh {
             unique_pin_count: 0,
             charts: Vec::new(),
             blend: 0.0,
+            rng: crate::stretch::Rng::new(0),
             uv_store: Vec::new(),
             uv_target: Vec::new(),
             uv_slot_of: FxHashMap::default(),
@@ -664,6 +678,8 @@ impl ParamMesh {
             uv: [0.0; 2],
             flag: 0,
             weight,
+            on_boundary_flag: false,
+            slim_id: 0,
         });
         self.hash_verts
             .insert(&mut self.verts, &mut self.construction.verts, v);
@@ -737,6 +753,8 @@ impl ParamMesh {
             chart: 0,
             edge: e1,
             flag: 0,
+            id: 0,
+            area3d: 0.0,
         });
         for (e, next) in [(e1, e2), (e2, e3), (e3, e1)] {
             let _ = e;
@@ -751,6 +769,7 @@ impl ParamMesh {
                 orig_uv: NIL,
                 old_uv: [0.0; 2],
                 flag: 0,
+                id: 0,
             });
         }
         f

@@ -6,12 +6,12 @@
 //! `island_margin`. Layout equal to Blender's headless output [MESH App. B.5].
 //!
 //! Ported from blender/source/blender/editors/uvedit/uvedit_unwrap_ops.cc (Blender 5.2.4).
-//! The face sort is the BSD `qsort` (what Blender's macOS builds call, and an insertion sort
-//! below 7 faces, hence stable there), because faces of equal area are common.
+//! The face sort is macOS's C library `qsort` ([`crate::pack::qsort_libc`], what the reference
+//! build calls), because faces of equal area are common and their order decides the groups.
 
 use core::cmp::Ordering;
 
-use crate::pack::qsort_bsd;
+use crate::pack::qsort_libc;
 use crate::param::bli::{self, V3};
 
 /// One projection group: the normal and the faces projected along it (face indices in the
@@ -122,7 +122,7 @@ pub fn project_groups(
 
     // `qsort(thick_faces, smart_uv_project_thickface_area_cmp_fn)`: largest area first.
     let mut thick: Vec<usize> = (0..face_normals.len()).collect();
-    qsort_bsd(&mut thick, &mut |&a: &usize, &b: &usize| {
+    qsort_libc(&mut thick, &mut |&a: &usize, &b: &usize| {
         let (aa, ab) = (face_areas[a], face_areas[b]);
         if !(aa > AREA_IGNORE || ab > AREA_IGNORE) {
             return Ordering::Equal;

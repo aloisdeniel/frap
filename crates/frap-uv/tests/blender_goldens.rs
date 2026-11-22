@@ -369,13 +369,13 @@ fn sphere_unwrap_single_pin() {
 }
 
 #[test]
-fn tube_unwrap_with_tool_settings_defaults_is_valid() {
+fn tube_unwrap_with_tool_settings_defaults() {
     // `bpy.ops.uv.unwrap()` with the factory tool settings is ANGLE_BASED with `fill_holes`:
-    // ABF++ is M8 (WP 8.1), so frap's LSCM fallback differs on this non-developable chart; the
-    // layout must still be a valid pack.
-    let (mesh, mut uvs, _) = case("tube_unwrap_toolsettings");
+    // ABF++ (WP 8.1) on this non-developable chart, then LSCM from its angles.
+    let (mesh, mut uvs, want) = case("tube_unwrap_toolsettings");
     unwrap(&mesh, &mut uvs, true, true, 0.001);
     check_packed_invariants("tube_unwrap_toolsettings", &mesh, &uvs, 1e-6);
+    check("tube_unwrap_toolsettings", &uvs, &want, LSCM_TOL);
 }
 
 // ------------------------------------------------------------------ chained operators

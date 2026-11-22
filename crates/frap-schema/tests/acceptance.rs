@@ -125,16 +125,17 @@ fn angles_are_shown_as_rotation_radians() {
 fn unimplemented_operators_are_listed_as_not_implemented() {
     link();
     let opts = DescribeOptions::default();
-    // mesh.bevel was the example until WP 2.11 implemented it, uv.smart_project until WP 3.8.
-    let unwrap = describe(&Target::Op("uv.minimize_stretch".into()), &opts).unwrap();
+    // mesh.bevel was the example until WP 2.11 implemented it, uv.smart_project until WP 3.8,
+    // uv.minimize_stretch until WP 8.1 (object.track_set is post-M8, M8W0-3).
+    let unwrap = describe(&Target::Op("object.track_set".into()), &opts).unwrap();
     assert_eq!(unwrap["frap"]["status"], "not_implemented");
-    assert_eq!(unwrap["frap"]["planned"], "M8");
+    assert_eq!(unwrap["frap"]["planned"], "M9");
     assert!(
         unwrap["properties"]
             .as_array()
             .unwrap()
             .iter()
-            .any(|p| p["identifier"] == "iterations")
+            .any(|p| p["identifier"] == "type")
     );
     let cube = describe(&Target::Op("mesh.primitive_cube_add".into()), &opts).unwrap();
     assert_eq!(cube["frap"]["status"], "implemented");

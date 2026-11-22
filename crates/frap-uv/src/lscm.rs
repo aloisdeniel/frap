@@ -468,8 +468,10 @@ impl ParamMesh {
                 .find(|&v| self.verts[v as usize].flag & PVERT_PIN != 0)
                 .unwrap_or(NIL);
         }
-        // ABF++ is M8 (WP 8.1): `abf` falls back to LSCM, as Blender does when ABF fails.
-        let _ = abf;
+        // ABF++ (`crate::abf`); on failure LSCM uses the 3D angles ("falling back to LSCM").
+        if abf {
+            let _ = self.chart_abf_solve(c);
+        }
 
         for (id, &v) in verts.iter().enumerate() {
             self.verts[v as usize].id = id as i32;
