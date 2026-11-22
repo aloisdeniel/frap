@@ -12,10 +12,11 @@
 //! `opensubdiv-rs` 0.7 has no `generateLegacySharpCornerPatches`, so smooth boundary corners
 //! are evaluated as smooth end caps where Blender's OpenSubdiv uses sharp corner patches
 //! (within `6e-3` there; the own backend keeps those faces), and its face-varying patches are
-//! built over a separate value mesh (UVs inside face-varying Gregory caps within `5e-3`,
-//! D-121). Positions are exact elsewhere, including the Gregory caps
+//! built over a separate value mesh (UVs inside face-varying Gregory caps within `5e-3`).
+//! Positions are exact elsewhere, including the Gregory caps
 //! (`tests/blender_dumps.rs::osd_backend_matches_blender`). Without `use_limit_surface` it
-//! uses frap's own uniform refinement.
+//! uses frap's own uniform refinement. When frap's own backend calls it for end caps, only
+//! the positions are used: every UV map comes from `crate::far` (bit-exact, WP 8.11).
 
 use opensubdiv_rs::far::{
     AdaptiveOptions, FVarChannelDescriptor, PatchMap, PatchTableFactory, PatchTableOptions,
