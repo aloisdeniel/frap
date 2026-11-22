@@ -10,22 +10,36 @@ publish.workspace = true
 
 # M8 W0 (decision log M8W0-9). Owned whole by WP 8.10, this manifest included (like
 # frap-draco-sys for WP 7.2): the spike may add what it needs. Nothing depends on it; frap-cli
-# does not link it (the spike's RFC decides whether a `--lua` front-end ships).
+# does not link it (RFC 0002 recommends against shipping a `--lua` front-end for now).
 #
 # Native code: `mlua` with `lua54` + `vendored` builds the Lua 5.4 C sources with `cc`, so it
 # sits behind the `lua` feature, off by default (rule 2.2.9: the default-features clean
-# container build stays C-free for this crate). `luau` (sandboxing) is the alternative the
-# spike evaluates.
+# container build stays C-free for this crate). Every other dependency of the front-end is
+# optional too, so the default build of this crate is `frap-session` plus one constant.
 [dependencies]
 frap-session.workspace = true
 mlua = { workspace = true, optional = true }
+frap-lang = { workspace = true, optional = true }
+frap-rna = { workspace = true, optional = true }
+indexmap = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 frap-ops-all.workspace = true
+serde_json.workspace = true
+toml.workspace = true
 
 [features]
 default = []
-lua = ["dep:mlua"]
+lua = ["dep:mlua", "dep:frap-lang", "dep:frap-rna", "dep:indexmap", "dep:serde_json"]
+# The M1 exit transcript renders (`render.render(write_still=True)`); with `gpu` the
+# transcript tests render through wgpu like `frap-cli` does. Off: both front-ends answer
+# GPU_UNAVAILABLE at the same statement and the comparison still holds.
+gpu = ["frap-session/gpu"]
+
+[[example]]
+name = "frap_lua"
+required-features = ["lua"]
 
 [lints]
 workspace = true
