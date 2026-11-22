@@ -1,0 +1,111 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Blender 5.2.x spec refresh (ARCHITECTURE §22.10 WP 8.9, docs/spec-refresh.md), on demand:
+# downloads the requested Blender 5.2.x, re-dumps spec/blender-5.2/ with
+# `cargo xtask spec-refresh` and reports the drift (job summary + artifact).
+#   mode=check    fails on API drift (a version-only difference passes with a warning)
+#   mode=refresh  uploads the refreshed spec/blender-5.2/ as an artifact, to be committed by hand
+#                 with `cargo xtask codegen` and the report's follow-ups
+# For 5.2.4 (the spec's own release) it also runs the Blender tests of the routine: the re-dump
+# is byte-identical and the seeded drift fixture gives the expected report.
+
+name: spec-refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      blender_version:
+        description: "Blender 5.2.x release to dump (download.blender.org)"
+        required: true
+        default: "5.2.4"
+      mode:
+        description: "check: fail on drift; refresh: upload the refreshed spec/blender-5.2/"
+        required: true
+        type: choice
+        options: [check, refresh]
+        default: check
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  spec-refresh:
+    name: spec-refresh (Blender ${{ inputs.blender_version }}, ${{ inputs.mode }})
+    runs-on: ubuntu-24.04
+    env:
+      BLENDER_VERSION: ${{ inputs.blender_version }}
+      MODE: ${{ inputs.mode }}
+    steps:
+      - name: validate inputs
+        run: |
+          case "$BLENDER_VERSION" in
+            5.2.[0-9]|5.2.[0-9][0-9]) ;;
+            *) echo "::error::spec-refresh needs a Blender 5.2.x release, got '$BLENDER_VERSION'"; exit 1 ;;
+          esac
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97"
+      - uses: Swatinem/rust-cache@v2
+      - name: cache Blender
+        id: blender-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: blender-${{ inputs.blender_version }}-linux-x64
+      - name: download Blender
+        if: steps.blender-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/blender
+          curl -fsSL -A "frap-ci" \
+            "https://download.blender.org/release/Blender5.2/blender-${BLENDER_VERSION}-linux-x64.tar.xz" \
+            | tar -xJ -C ~/blender --strip-components=1
+      - name: system libraries for headless Blender
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6
+      - name: Blender version
+        run: ~/blender/blender --version
+
+      - name: routine tests (no drift, seeded drift fixture)
+        if: inputs.blender_version == '5.2.4'
+        run: |
+          export BLENDER_BIN="$HOME/blender/blender"
+          cargo test -p xtask --locked spec_refresh -- --include-ignored
+
+      - name: spec-refresh
+        run: |
+          set -o pipefail
+          args=(--blender "$HOME/blender/blender" --out "$RUNNER_TEMP/spec-refresh")
+          if [ "$MODE" = check ]; then args=(--check "${args[@]}"); fi
+          cargo xtask spec-refresh "${args[@]}" | tee "$RUNNER_TEMP/spec-refresh.out"
+      - name: job summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/spec-refresh/report.md" ]; then
+            cat "$RUNNER_TEMP/spec-refresh/report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: upload report and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-refresh-report-${{ inputs.blender_version }}
+          path: |
+            ${{ runner.temp }}/spec-refresh/report.md
+            ${{ runner.temp }}/spec-refresh/report.json
+            ${{ runner.temp }}/spec-refresh/logs/
+          if-no-files-found: warn
+      - name: upload refreshed spec
+        if: inputs.mode == 'refresh'
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-blender-5.2-${{ inputs.blender_version }}
+          path: |
+            spec/blender-5.2/rna/
+            spec/blender-5.2/ops/
+            spec/blender-5.2/nodes/
+            spec/blender-5.2/modifiers/
+            spec/blender-5.2/startup.json
