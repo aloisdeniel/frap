@@ -1,7 +1,7 @@
 # WP 2.11: two bevels in one Edit Mode session: the second reuses the element slots the
-# first one freed. Blender frees the replaced faces in the hash order of their pointers (not
-# reproducible), frap in rebuild order, so the face order is compared canonically.
-# golden: startup=factory compare=objects,context,mesh:Cube tier=T2
+# first one freed, in the iteration order of Blender's `Set<BMFace *>` of rebuilt faces (frap
+# models their addresses in the mempool chunk, WP 8.2 `bevel/ptrset.rs`): index-exact.
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_mode(type='EDGE')

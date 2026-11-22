@@ -23,6 +23,9 @@
 //! conversion, are treated as missing (weight 0, WARNING). `harden_normals` writes custom normals as Blender does
 //! (`bevel_harden_normals`, M5+M6 W0) and `profile_type='CUSTOM'` is a modifier error (no custom
 //! profile curve yet).
+//!
+//! The result is index-exact with Blender for every segment count, vertex mesh, miter and
+//! profile (T1 at 1e-5, WP 8.2: `tests/golden/cases/modifiers/bevel_m8/`).
 
 use frap_bmesh::ops::bevel::{BevelIn, MeshBevelWeights, mesh_bevel_tagged};
 use frap_bmesh::{BMesh, BmError, ElemFlag, FromMeshParams, ToMeshParams};

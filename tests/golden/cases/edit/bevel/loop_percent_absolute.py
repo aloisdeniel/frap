@@ -1,6 +1,6 @@
 # WP 2.11: the top loop of a box with PERCENT (two segments) and ABSOLUTE (three
 # segments) offsets: no width adjustment, legs slide by the amount.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0), scale=(1, 2, 1))
 bpy.ops.object.mode_set(mode='OBJECT')

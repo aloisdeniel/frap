@@ -1,6 +1,6 @@
 # WP 2.11: the four top edges of a box (a loop: two beveled edges and one unbeveled
 # edge at each corner, loop slide and width adjustment), then without loop slide.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0), scale=(1, 2, 1))
 bpy.ops.object.mode_set(mode='OBJECT')

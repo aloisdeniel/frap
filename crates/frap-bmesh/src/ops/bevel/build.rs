@@ -1652,8 +1652,10 @@ impl Bevel {
         }
         let spaces = crate::clnor::update(bm);
         let fno = |bm: &BMesh, f: FaceId| bm.face(f).no;
+        // `add_v3_v3v3(norm, …); normalize_v3(norm)`: the C `normalize_v3` scales by `1 / len`
+        // (C++ `math::normalize` divides; the two round differently).
         let add_norm = |a: [f32; 3], b: [f32; 3]| -> [f32; 3] {
-            frap_geom::normals::normalize([a[0] + b[0], a[1] + b[1], a[2] + b[2]])
+            frap_geom::normals::normalize_v3([a[0] + b[0], a[1] + b[1], a[2] + b[2]]).0
         };
         let mut writes: Vec<(crate::types::LoopId, [f32; 3])> = Vec::new();
         for f in bm.face_ids() {

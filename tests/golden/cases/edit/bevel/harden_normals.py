@@ -1,6 +1,6 @@
 # M5+M6 W0 (M3+M4 leftover, D-79 closed): `mesh.bevel(harden_normals=True)` writes the edit
 # mesh's custom normals (`bevel_harden_normals`), for edges and for vertices.
-# golden: startup=factory compare=mesh:Cube,mesh:Cube.001 tier=T1 tol=1e-4
+# golden: startup=factory compare=mesh:Cube,mesh:Cube.001 tier=T1
 import bpy
 bpy.ops.object.shade_smooth()
 bpy.ops.object.mode_set(mode='EDIT')

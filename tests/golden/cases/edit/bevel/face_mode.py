@@ -1,6 +1,6 @@
 # WP 2.11: a face selected in face select mode: its four edges are beveled with two
 # segments; in face mode the selection is not flushed afterwards.
-# golden: startup=factory compare=objects,context,mesh:Cube tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_mode(type='FACE')

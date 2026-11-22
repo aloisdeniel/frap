@@ -1,6 +1,6 @@
 # WP 2.11: vertex bevel of plane corners (two edges each: no vertex mesh, a curved
 # edge with three segments) and of a circle vertex (no face: new edges).
-# golden: startup=factory compare=objects,context,mesh:Plane,mesh:Circle tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Plane,mesh:Circle tier=T1
 import bpy
 bpy.ops.mesh.primitive_plane_add()
 bpy.ops.object.mode_set(mode='EDIT')

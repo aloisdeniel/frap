@@ -1,6 +1,6 @@
 # WP 2.11: profile shapes on cube corners: square (1.0) with even and odd segment
 # counts, square-in (0.0), concave (0.25).
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002,mesh:Cube.003 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002,mesh:Cube.003 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0))
 bpy.ops.mesh.primitive_cube_add(location=(6, 0, 0))

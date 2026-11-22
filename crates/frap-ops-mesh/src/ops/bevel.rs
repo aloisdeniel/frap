@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.bevel(offset_type='OFFSET', offset=0, offset_pct=0, segments=1, profile=0.5,
-//! affect='EDGES', …)`, tier T2 (one segment at T1; `tests/golden/cases/edit/bevel/*.py`).
+//! affect='EDGES', …)`, tier T1 for every segment count (WP 8.2; `tests/golden/cases/edit/bevel/*.py`).
 //! Port of `edbm_bevel_exec` / `edbm_bevel_init` / `edbm_bevel_calc` / `edbm_bevel_exit`
 //! (`editors/mesh/editmesh_bevel.cc`, Blender 5.2.4, GPL-2.0-or-later); the geometry is
 //! `frap_bmesh::ops::bevel` (`BM_mesh_bevel`).
@@ -95,11 +95,11 @@ fn bm_error(e: BmError) -> OpError {
 
 #[operator(
     poll = poll::EDITMESH,
-    tier = T2,
+    tier = T1,
     support = Partial("profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED"),
     notes = [
         "offset defaults to 0, which bevels nothing: pass offset (or offset_pct with offset_type='PERCENT'); frap answers the hint NO_OP_DEFAULT",
-        "segments=1 matches Blender at T1; more segments match within 1e-5 in Blender's element order (T2)",
+        "index-exact with Blender at T1 for every segment count, vertex mesh, miter and profile (WP 8.2), including a second bevel in the same Edit Mode session",
         "selection after: the new bevel faces (vertex bevel: also the new vertices and edges); the selection history is cleared",
         "nothing selected cancels (Blender is silent; frap adds a WARNING)",
     ]
