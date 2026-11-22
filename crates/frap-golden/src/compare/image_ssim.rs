@@ -443,9 +443,21 @@ pub(crate) mod tests {
             channels: 3,
             pixels: PixelData::U8(p),
         };
-        assert!(!compare("c", &img(contour.clone()), &img(flat.clone()), SELF_MIN_SSIM, 2.0).is_empty());
+        assert!(
+            !compare(
+                "c",
+                &img(contour.clone()),
+                &img(flat.clone()),
+                SELF_MIN_SSIM,
+                2.0
+            )
+            .is_empty()
+        );
         // ...but not the one-level comparison; a two-level difference still does.
-        assert!(compare_within_one_level("c", &img(contour), &img(flat.clone()), SELF_MIN_SSIM, 2.0).is_empty());
+        assert!(
+            compare_within_one_level("c", &img(contour), &img(flat.clone()), SELF_MIN_SSIM, 2.0)
+                .is_empty()
+        );
         for y in 0..32 {
             for x in 0..32 {
                 if x + y == 31 || x + y == 32 {
@@ -453,7 +465,16 @@ pub(crate) mod tests {
                 }
             }
         }
-        assert!(!compare_within_one_level("c", &img(flat), &img(vec![100u8; 32 * 32 * 3]), SELF_MIN_SSIM, 2.0).is_empty());
+        assert!(
+            !compare_within_one_level(
+                "c",
+                &img(flat),
+                &img(vec![100u8; 32 * 32 * 3]),
+                SELF_MIN_SSIM,
+                2.0
+            )
+            .is_empty()
+        );
         // The picture itself is unchanged by snapping onto itself.
         let s = snap_one_level(&a, &a).unwrap();
         assert_eq!(score(&s, &a).unwrap().ssim, 1.0);
