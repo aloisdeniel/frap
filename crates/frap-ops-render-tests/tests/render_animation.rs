@@ -7,8 +7,9 @@
 //! - frap through the golden runner (`frap_golden::runner::run_frap`, the same dump), Blender
 //!   5.2.4 through `golden_runner.py`; the two states are compared with the case's comparators
 //!   (`frap_golden::runner::compare`): every line's outcome, render lines included (errors, and
-//!   the strerror of `Render error (…) cannot save` normalised, it is the platform's), and what
-//!   `compare=` dumps (`frame_current` and the scene range are moved into the cursor);
+//!   the strerror of `Render error (…) cannot save` and of `Error writing render result, …`
+//!   normalised, it is the platform's), and what `compare=` dumps (`frame_current` and the
+//!   scene range are moved into the cursor);
 //! - `files`: every file the case writes under `out/` (relative path, empty or not) equals the
 //!   list Blender wrote (`tests/golden/fixtures/render/animation/<case>/files.txt`);
 //! - `images=a,b,…`: those files against Blender's (`…/<case>/<file name>`): SSIM ≥ 0.95 and
@@ -123,14 +124,22 @@ fn written_files(work: &Path) -> Vec<String> {
 }
 
 /// `Render error (<strerror>) cannot save` names the platform's strerror (`Undefined error:
-/// 0` on macOS, `Success` on Linux): normalised on both sides.
+/// 0` on macOS, `Success` on Linux), and so does the OpenEXR writer's `Error writing render
+/// result, <strerror> (see console)` (opening a file below a regular file is `Not a directory`
+/// on POSIX, `No such file or directory` on Windows): normalised on both sides.
 fn normalise_lines(lines: &mut [LineOutcome]) {
     for l in lines {
-        if let Some(m) = l.message.as_mut()
-            && let Some(i) = m.find("Render error (")
-            && let Some(j) = m[i..].find(") cannot save")
-        {
-            m.replace_range(i + "Render error (".len()..i + j, "…");
+        if let Some(m) = l.message.as_mut() {
+            for (open, close) in [
+                ("Render error (", ") cannot save"),
+                ("Error writing render result, ", " (see console)"),
+            ] {
+                if let Some(i) = m.find(open)
+                    && let Some(j) = m[i..].find(close)
+                {
+                    m.replace_range(i + open.len()..i + j, "…");
+                }
+            }
         }
     }
 }
