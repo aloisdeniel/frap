@@ -1,0 +1,237 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.arrange_islands",
+  "bl_idname": "UV_OT_arrange_islands",
+  "label": "Arrange/Align Islands",
+  "description": "Arrange selected UV islands on a line",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "initial_position",
+      "name": "Initial Position",
+      "description": "Initial position to arrange islands from",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BOUNDING_BOX",
+      "enum_items": [
+        {
+          "identifier": "BOUNDING_BOX",
+          "name": "Bounding Box",
+          "description": "Initial alignment based on the islands bounding box",
+          "value": 0
+        },
+        {
+          "identifier": "UV_GRID",
+          "name": "UV Grid",
+          "description": "Initial alignment based on UV Tile Grid",
+          "value": 1
+        },
+        {
+          "identifier": "ACTIVE_UDIM",
+          "name": "Active UDIM",
+          "description": "Initial alignment based on Active UDIM",
+          "value": 2
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "2D Cursor",
+          "description": "Initial alignment based on 2D cursor",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "axis",
+      "name": "Axis",
+      "description": "Axis to arrange UV islands on",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Y",
+      "enum_items": [
+        {
+          "identifier": "X",
+          "name": "X",
+          "description": "Align UV islands along the X axis",
+          "value": 0
+        },
+        {
+          "identifier": "Y",
+          "name": "Y",
+          "description": "Align UV islands along the Y axis",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "align",
+      "name": "Align",
+      "description": "Location to align islands on",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "MIN",
+      "enum_items": [
+        {
+          "identifier": "MIN",
+          "name": "Min",
+          "description": "Align the islands to the min of the island",
+          "value": 1
+        },
+        {
+          "identifier": "MAX",
+          "name": "Max",
+          "description": "Align the islands to the max side of the island",
+          "value": 0
+        },
+        {
+          "identifier": "CENTER",
+          "name": "Center",
+          "description": "Align the islands to the center of the largest island",
+          "value": 2
+        },
+        {
+          "identifier": "NONE",
+          "name": "None",
+          "description": "Preserve island alignment",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "order",
+      "name": "Order",
+      "description": "Order of islands",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "LARGE_TO_SMALL",
+      "enum_items": [
+        {
+          "identifier": "LARGE_TO_SMALL",
+          "name": "Largest to Smallest",
+          "description": "Sort islands from largest to smallest",
+          "value": 0
+        },
+        {
+          "identifier": "SMALL_TO_LARGE",
+          "name": "Smallest to Largest",
+          "description": "Sort islands from smallest to largest",
+          "value": 1
+        },
+        {
+          "identifier": "Fixed",
+          "name": "Fixed",
+          "description": "Preserve island order",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "margin",
+      "name": "Margin",
+      "description": "Space between islands",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.05,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "initial_position='CURSOR' starts at the 2D cursor of frap's virtual Image Editor (uv.snap_cursor moves it); Blender without an Image Editor starts at the origin"
+    ]
+  }
+}

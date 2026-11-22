@@ -420,20 +420,20 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `uv.shortest_path_select` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
 | [x] | `uv.hide` | M8 | P2 | WP 8.3.8 |
 | [x] | `uv.reveal` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.weld` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.remove_doubles` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.stitch` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.align` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.align_rotation` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.arrange_islands` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.randomize_uv_transform` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.copy_mirrored_faces` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.snap_selected` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.snap_cursor` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.move_on_axis` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.rip` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.rip_move` | M8 | P2 | WP 8.3.9 |
-| [ ] | `uv.export_layout` | M8 | P2 | WP 8.3.9 |
+| [x] | `uv.weld` | M8 | P2 | WP 8.3.9 (golden `uv/edit_m8/weld_align`) |
+| [x] | `uv.remove_doubles` | M8 | P2 | 2D kd-tree clusters as Blender's; WP 8.3.9 (golden `uv/edit_m8/remove_doubles`) |
+| [x] | `uv.stitch` | M8 | P2 | headless-extended: runs as in an Image Editor (`blender -b` crashes without one); `selection` argument with `name`, `face_index`, `element_index`; WP 8.3.9 (goldens `uv/edit_m8/stitch*`) |
+| [x] | `uv.align` | M8 | P2 | straighten reads the pin layer (Blender reads past it without one); WP 8.3.9 (golden `uv/edit_m8/weld_align`) |
+| [x] | `uv.align_rotation` | M8 | P2 | Python operator ported; `correct_aspect` sees no image; WP 8.3.9 (golden `uv/edit_m8/align_rotation`) |
+| [x] | `uv.arrange_islands` | M8 | P2 | libc++ `stable_sort` order; `initial_position='CURSOR'` uses the virtual Image Editor's cursor; WP 8.3.9 (goldens `uv/edit_m8/arrange`, `snap`) |
+| [x] | `uv.randomize_uv_transform` | M8 | P2 | Python operator ported with CPython's Mersenne Twister; WP 8.3.9 (golden `uv/edit_m8/randomize`) |
+| [x] | `uv.copy_mirrored_faces` | M8 | P2 | WP 8.3.9 (golden `uv/edit_m8/copy_mirrored_faces`) |
+| [x] | `uv.snap_selected` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode without an image, its 2D cursor kept per scene; WP 8.3.9 (golden `uv/edit_m8/snap`) |
+| [x] | `uv.snap_cursor` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode without an image, its 2D cursor kept per scene; WP 8.3.9 (golden `uv/edit_m8/snap`) |
+| [x] | `uv.move_on_axis` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode without an image, its 2D cursor kept per scene; WP 8.3.9 (golden `uv/edit_m8/snap`) |
+| [x] | `uv.rip` | M8 | P2 | `location` in UV space; WP 8.3.9 (goldens `uv/edit_m8/rip*`) |
+| [x] | `uv.rip_move` | M8 | P2 | headless-extended: the translate step moves the UVs that stay selected, as in an Image Editor; WP 8.3.9 (goldens `uv/edit_m8/rip*`) |
+| [x] | `uv.export_layout` | M8 | P2 | add-on operator; SVG/EPS byte-equal except the generator line, PNG drawn on the CPU (SSIM vs Blender); WP 8.3.9 (golden `uv/edit_m8/export_layout`, unit test `export_layout::tests`) |
 | — | `uv.select` | OUT | — | mouse pick |
 | — | `uv.select_box` | OUT | — |  |
 | — | `uv.select_circle` | OUT | — |  |
