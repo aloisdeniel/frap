@@ -179,6 +179,11 @@ pub enum Role {
     /// `Alpha` fed by an image's colour output (`Channel.RGB2BW`, WP 8.12): its grey value
     /// → A, as [`Role::Alpha`] otherwise.
     AlphaBw,
+    /// `Anisotropic` of a grayscale anisotropy texture (WP 8.12): its grey value → B.
+    AnisotropyStrength,
+    /// `Anisotropic Rotation` of a grayscale anisotropy texture (WP 8.12): the direction of its
+    /// grey value × 2π → R, G.
+    AnisotropyRotation,
     /// Another socket with a fixed destination channel (`Coat Weight` → R, `Thickness` → G,
     /// `Specular IOR Level` → A, …).
     Channel(u8),
@@ -215,6 +220,9 @@ enum Fill {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub(crate) struct ExportImage {
     fills: Vec<(u8, Fill)>,
+    /// `set_calc(grayscale_anisotropy_calculation)` with the stored images (WP 8.12):
+    /// `(anisotropy, anisotropic_rotation)`, `None` for a stored value (an unlinked socket).
+    anisotropy: Option<(Option<IdRef<ImageId>>, Option<IdRef<ImageId>>)>,
 }
 
 impl ExportImage {
@@ -233,6 +241,7 @@ impl ExportImage {
     fn from_image(image: IdRef<ImageId>) -> ExportImage {
         ExportImage {
             fills: (0..4).map(|c| (c, Fill::Image(image, c))).collect(),
+            anisotropy: None,
         }
     }
 
@@ -865,6 +874,9 @@ fn encode_unhappy(
     target: Target,
 ) -> Result<Option<Vec<u8>>, ExportError> {
     let main = g.main;
+    if let Some((strength, rotation)) = ex.anisotropy {
+        return encode_anisotropy(g, strength, rotation, target);
+    }
     let images = ex.images();
     let (w, h, out) = if images.is_empty() {
         (1, 1, vec![1.0f32; 4])
@@ -940,6 +952,88 @@ fn encode_unhappy(
     let names: Vec<&Image> = images.iter().filter_map(|r| main.images.get(*r)).collect();
     let name = images_name(&names);
     finish_encode(g, &name, target, r)
+}
+
+/// `grayscale_anisotropy_calculation` (WP 8.12), ported from blender/scripts/addons_core/
+/// io_scene_gltf2/blender/exp/material/extensions/anisotropy.py (io_scene_gltf2 5.2.41,
+/// Apache-2.0, The glTF-Blender-IO authors): the size of the largest image, each image
+/// (scaled to it) as its grey value `0.2989 R + 0.5870 G + 0.1140 B` (an unlinked socket: 1);
+/// B = the strength, R, G = `(cos, sin)` of the rotation × 2π, normalised, then `(x + 1) / 2`;
+/// A = 1. In `float32` as the add-on's numpy arrays, except that an unlinked rotation is the
+/// integer 1 (`np.full(…, 1)`), so its angle `2π` and the direction are in double precision.
+/// Written without alpha (`images.new(alpha=False)`: no Alpha fill), named `Image`.
+fn encode_anisotropy(
+    g: &mut Gather,
+    strength: Option<IdRef<ImageId>>,
+    rotation: Option<IdRef<ImageId>>,
+    target: Target,
+) -> Result<Option<Vec<u8>>, ExportError> {
+    let main = g.main;
+    let images: Vec<IdRef<ImageId>> = [strength, rotation].into_iter().flatten().collect();
+    let (w, h) = if images.is_empty() {
+        (1, 1)
+    } else {
+        let sizes: Vec<(u32, u32)> = images
+            .iter()
+            .map(|r| main.images.get(*r).map_or((0, 0), |im| image_size(g, im)))
+            .collect();
+        (
+            sizes.iter().map(|s| s.0).max().unwrap_or(1),
+            sizes.iter().map(|s| s.1).max().unwrap_or(1),
+        )
+    };
+    frap_math::budget::check_buffer(
+        frap_scene::id::imbuf::BUFFER,
+        frap_scene::id::imbuf::buffer_bytes(w, h, true),
+    );
+    let n = w as usize * h as usize;
+    let gray = |g: &Gather, r: Option<IdRef<ImageId>>| -> Option<Option<Vec<f32>>> {
+        let Some(r) = r else { return Some(None) };
+        let im = main.images.get(r)?;
+        let mut buf = acquire(g, im)?;
+        if (buf.x, buf.y) != (w, h) {
+            buf.scale(w, h);
+        }
+        let px = buf.pixels();
+        Some(Some(
+            px.chunks_exact(4)
+                .map(|p| 0.2989f32 * p[0] + 0.5870f32 * p[1] + 0.1140f32 * p[2])
+                .collect(),
+        ))
+    };
+    let Some(s) = gray(g, strength) else {
+        return Ok(None);
+    };
+    let Some(rt) = gray(g, rotation) else {
+        return Ok(None);
+    };
+    let mut out = vec![0.0f32; n * 4];
+    for (k, o) in out.chunks_exact_mut(4).enumerate() {
+        o[3] = 1.0;
+        o[2] = s.as_ref().map_or(1.0, |v| v[k]);
+        let (x, y) = match &rt {
+            Some(v) => {
+                let a = v[k] * 2.0f32 * std::f32::consts::PI;
+                let (c, sn) = (a.cos(), a.sin());
+                let norm = (c * c + sn * sn).sqrt();
+                ((c / norm + 1.0) / 2.0, (sn / norm + 1.0) / 2.0)
+            }
+            None => {
+                let a = 2.0 * std::f64::consts::PI;
+                let (c, sn) = (a.cos(), a.sin());
+                let norm = (c * c + sn * sn).sqrt();
+                (((c / norm + 1.0) / 2.0) as f32, ((sn / norm + 1.0) / 2.0) as f32)
+            }
+        };
+        o[0] = x;
+        o[1] = y;
+    }
+    let mut bytes: Vec<u8> = out.iter().map(|v| unit_to_u8(*v)).collect();
+    bytes = ImBuf::flip_rows(&bytes, w as usize * 4);
+    let format = Format::of(target, false, g.settings.export_image_quality);
+    let img = DecodedImage::new(w, h, 4, PixelData::U8(bytes)).and_then(|i| i.with_channels(3));
+    let r = img.and_then(|i| encode_pixels(&i, &format));
+    finish_encode(g, "Image", target, r)
 }
 
 /// The encoded bytes of `ex` as `target` (cached per description and target; `None` with a
@@ -1038,6 +1132,12 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
                 }
             }
             Role::Channel(dst) => ex.fill(dst, Fill::Image(img, src(i.tex, dst))),
+            Role::AnisotropyStrength => {
+                ex.anisotropy.get_or_insert((None, None)).0 = Some(img);
+            }
+            Role::AnisotropyRotation => {
+                ex.anisotropy.get_or_insert((None, None)).1 = Some(img);
+            }
         }
     }
     // "Check that we don't have some empty channels".
@@ -1167,7 +1267,7 @@ fn gather_new_texture(
         return gather_original_texture(g, inputs);
     }
     let ex = compose(g, inputs);
-    if ex.fills.is_empty() {
+    if ex.fills.is_empty() && ex.anisotropy.is_none() {
         return Ok(None);
     }
     // `exported_images[name] = 1 / 2` (`encode_image.py`): fully or partly used.

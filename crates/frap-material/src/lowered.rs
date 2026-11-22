@@ -269,6 +269,21 @@ pub struct MaterialExts {
     /// (converted to grey). When it is the only texture, [`LoweredMaterial::base_color`]'s
     /// texture is the same reference, read through `A`.
     pub base_alpha: Option<PackedAlpha>,
+    /// `export_anisotropy_from_grayscale_textures` (WP 8.12): `anisotropyTexture` is baked from
+    /// the grey values of the images behind `Anisotropic` (B) and `Anisotropic Rotation`
+    /// (R, G: the unit direction of the angle × 2π, mapped to [0, 1]); an unlinked one counts
+    /// as 1. [`Anisotropy::texture`] is the primary socket's texture (texture coordinates,
+    /// transform).
+    pub anisotropy_grayscale: Option<GrayscaleAnisotropy>,
+}
+
+/// The grayscale textures of a baked `anisotropyTexture` (WP 8.12).
+#[derive(Clone, Debug, PartialEq)]
+pub struct GrayscaleAnisotropy {
+    /// The texture behind `Anisotropic`.
+    pub strength: Option<TexRef>,
+    /// The texture behind `Anisotropic Rotation`.
+    pub rotation: Option<TexRef>,
 }
 
 /// An alpha texture packed into the base colour image (`__get_image_data_mapping` with the

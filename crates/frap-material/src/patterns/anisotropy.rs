@@ -12,9 +12,9 @@
 //!   by 2π → `Anisotropic Rotation`; Separate XYZ ← Vector Math MULTIPLY_ADD (×(2, 2, 1),
 //!   +(−1, −1, 0)) ← Image Texture): strength = the MULTIPLY's constant, rotation = the ADD's
 //!   constant (already in radians), the image copied whole;
-//! - otherwise the add-on bakes an image from grayscale textures on the two sockets
-//!   (`export_anisotropy_from_grayscale_textures`), which frap does not do: the extension is
-//!   not exported and a WARNING says so; without any image there is no extension.
+//! - otherwise, with an image behind either socket, the add-on bakes an image from their
+//!   grey values (`export_anisotropy_from_grayscale_textures`, `MaterialExts::
+//!   anisotropy_grayscale`, WP 8.12); without any image there is no extension.
 //!
 //! Raising ports `anisotropy()` (`imp/KHR_materials_anisotropy.py`): the two socket values, or
 //! the setup above (Tangent, "Anisotropy strength", "Rotation conversion", "Anisotropy
@@ -25,9 +25,12 @@ use std::f64::consts::TAU;
 use frap_nodes::{Node, SocketAddr, SocketValue};
 use frap_rna::Value;
 
-use super::transmission::ext_common::{image_from_socket, konst_f32, uv_map_name};
-use crate::graph::{Src, unrecognised};
-use crate::{Anisotropy, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef};
+use super::transmission::ext_common::{factor_f32, image_from_socket, konst_f32, uv_map_name};
+use crate::graph::Src;
+use crate::{
+    Anisotropy, ChannelSel, GrayscaleAnisotropy, LowerCx, LoweredMaterial, MaterialPattern,
+    RaiseCx, TexRef,
+};
 
 /// The 2π that `detect_anisotropy_nodes` compares the DIVIDE node's input with (a literal in
 /// the add-on, within 1e-4).
@@ -157,13 +160,28 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         });
         return;
     }
-    if image_from_socket(cx, p, ai).is_some() || image_from_socket(cx, p, ri).is_some() {
-        unrecognised(
-            &mut out.diagnostics,
-            "Anisotropic: textures outside the glTF importer's anisotropy setup (the add-on \
-             bakes them into a new image) are not supported; KHR_materials_anisotropy not exported",
-        );
+    // `export_anisotropy_from_grayscale_textures` (WP 8.12): the primary socket is
+    // `Anisotropic` when it has an image, else `Anisotropic Rotation`; the strength is the
+    // factor of `Anisotropic` (1 without one), the rotation the factor of `Anisotropic Rotation`
+    // × 2π (0 without one).
+    let (sh, rh) = (image_from_socket(cx, p, ai), image_from_socket(cx, p, ri));
+    if sh.is_none() && rh.is_none() {
+        return;
     }
+    let strength_tex = sh.and_then(|h| cx.tex_ref(h.node, ChannelSel::Rgb, &mut out.diagnostics));
+    let rotation_tex = rh.and_then(|h| cx.tex_ref(h.node, ChannelSel::Rgb, &mut out.diagnostics));
+    let primary = strength_tex.clone().or_else(|| rotation_tex.clone());
+    let strength = factor_f32(cx, cx.src_at(p, ai)).unwrap_or(1.0);
+    let rotation = factor_f32(cx, cx.src_at(p, ri)).map_or(0.0, |f| (f64::from(f) * TAU) as f32);
+    out.ext.anisotropy = Some(Anisotropy {
+        strength,
+        rotation,
+        texture: primary,
+    });
+    out.ext.anisotropy_grayscale = Some(GrayscaleAnisotropy {
+        strength: strength_tex,
+        rotation: rotation_tex,
+    });
 }
 
 fn raise_texture(cx: &mut RaiseCx, bsdf: u32, a: &Anisotropy, tex: &TexRef) {
