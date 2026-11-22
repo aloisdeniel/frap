@@ -74,7 +74,7 @@
       "line": 25,
       "ok": false,
       "exception": "RuntimeError",
-      "message": "Error: Error writing render result, No such file or directory (see console)\nError: Render error (No such file or directory) cannot save: '/nonexistent_dir/x/y.exr'\n"
+      "message": "Error: Error writing render result, Not a directory (see console)\nError: Render error (Not a directory) cannot save: 'out/s0_0001.png/y.exr'\n"
     },
     {
       "line": 26,

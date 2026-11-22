@@ -543,8 +543,10 @@ fn deterministic_and_cached() {
 }
 
 /// Cold start (new device, pipelines, first render) of the factory-like scene at the M5
-/// golden size, within the CI budget (`FRAP_EEVEE_COLD_BUDGET_S`, default 60 s: lavapipe and
-/// WARP run it in gpu.yml). The adapter, cold and warm times are printed and appended to
+/// golden size, within the CI budget (`FRAP_EEVEE_COLD_BUDGET_S`; default 60 s on a hardware
+/// adapter and 180 s on a software one, wgpu's `DeviceType::Cpu`: WARP's FXC compile of the
+/// uber-shader plus 64 samples rasterised on the CPU take 85-105 s on the 4-core Windows
+/// runner, lavapipe about 40 s; see the ARCHITECTURE Decision log). The adapter, cold and warm times are printed and appended to
 /// `FRAP_RENDER_TIMINGS` (gpu.yml's per-adapter timings artifact), as Workbench's
 /// `cold_first_render_time` does.
 #[test]
@@ -566,11 +568,12 @@ fn cold_start_within_budget() {
     let t1 = std::time::Instant::now();
     let _ = render(&gpu, &mut e, &sc);
     let warm = t1.elapsed().as_secs_f64();
+    let a = gpu.summary();
+    let software = gpu.info.device_type == wgpu::DeviceType::Cpu;
     let budget: f64 = std::env::var("FRAP_EEVEE_COLD_BUDGET_S")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(60.0);
-    let a = gpu.summary();
+        .unwrap_or(if software { 180.0 } else { 60.0 });
     eprintln!(
         "FRAP_RENDER_TIMING engine=BLENDER_EEVEE adapter={:?} backend={} cold_first_render_ms={:.1} warm_render_ms={:.1} (device + pipelines + 64 samples, 320x180)",
         a.name,
@@ -595,7 +598,11 @@ fn cold_start_within_budget() {
         )
         .expect("FRAP_RENDER_TIMINGS write");
     }
-    assert!(cold < budget, "cold start {cold:.1} s > budget {budget} s");
+    assert!(
+        cold < budget,
+        "cold start {cold:.1} s > budget {budget} s ({} adapter)",
+        a.device_type
+    );
 }
 
 // A test-only shading feature: proves the WP 5.5 extension point (flag bit, `pack`, WGSL
@@ -707,33 +714,79 @@ fn image_decoding() {
     assert_eq!(d[0], [0.5; 4]);
 }
 
-// DIAG (temporary): per-face shadow ratios of a point light 2 m above the plane.
+// DIAG (temporary): per-face shadow ratios of a point light above the plane, and the depth
+// of the cube faces.
+fn diag_depth_layer(gpu: &Gpu, tex: &wgpu::Texture, size: u32, layer: u32) -> Vec<f32> {
+    let bpr = (size * 4).div_ceil(256) * 256;
+    let buf = gpu.device.create_buffer(&wgpu::BufferDescriptor {
+        label: None,
+        size: u64::from(bpr * size),
+        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+        mapped_at_creation: false,
+    });
+    let mut enc = gpu.device.create_command_encoder(&Default::default());
+    enc.copy_texture_to_buffer(
+        wgpu::TexelCopyTextureInfo {
+            texture: tex,
+            mip_level: 0,
+            origin: wgpu::Origin3d { x: 0, y: 0, z: layer },
+            aspect: wgpu::TextureAspect::DepthOnly,
+        },
+        wgpu::TexelCopyBufferInfo {
+            buffer: &buf,
+            layout: wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(bpr),
+                rows_per_image: Some(size),
+            },
+        },
+        wgpu::Extent3d { width: size, height: size, depth_or_array_layers: 1 },
+    );
+    gpu.queue.submit([enc.finish()]);
+    let slice = buf.slice(..);
+    slice.map_async(wgpu::MapMode::Read, |_| {});
+    let _ = gpu.device.poll(wgpu::PollType::wait_indefinitely());
+    let data = slice.get_mapped_range().unwrap();
+    let mut out = Vec::with_capacity((size * size) as usize);
+    for y in 0..size {
+        let row = &data[(y * bpr) as usize..(y * bpr + size * 4) as usize];
+        out.extend(row.chunks_exact(4).map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]])));
+    }
+    out
+}
+
 #[test]
 fn diag_shadow_faces() {
     if std::env::var("FRAP_DIAG").is_err() {
         return;
     }
     let Some(gpu) = gpu() else { return };
-    for slope in [-1.5f32, 0.0, -6.0, 1.5] {
+    for slope in [-1.5f32, 1.5] {
         DIAG_SLOPE.store(slope.to_bits(), std::sync::atomic::Ordering::Relaxed);
-        for pre in [false, true] {
+        for (radius, samples, off) in [
+            (0.0f32, 1u32, [0.0f32, 0.0]),
+            (0.0, 1, [0.1, 0.03]),
+            (0.25, 1, [0.0, 0.0]),
+            (0.25, 16, [0.0, 0.0]),
+        ] {
             let mut e = crate::eevee::Eevee::new();
-            let mut l = light(RLightKind::Point, 100.0, Vec3::new(0.0, 0.0, 2.0));
-            l.radius = 0.0;
+            let mut l = light(RLightKind::Point, 100.0, Vec3::new(off[0], off[1], 2.0));
+            l.radius = radius;
             let mut sc = plane_scene(l);
-            sc.settings.taa_render_samples = 1;
-            if pre {
-                // A dim shadowed light first: the main light's maps start at 6.
-                let mut d = light(RLightKind::Point, 1e-6, Vec3::new(0.0, 0.0, 50.0));
-                d.radius = 0.0;
-                sc.lights.insert(0, d);
-            }
+            sc.settings.taa_render_samples = samples;
             let lit = render(&gpu, &mut e, &sc);
-            let mut off = sc.clone();
-            for l in &mut off.lights {
+            let depth: Vec<Vec<f32>> = {
+                let (size, layers, tex) = e.state.shadow_atlas.as_ref().unwrap();
+                (0..(*layers).min(6))
+                    .map(|l| diag_depth_layer(&gpu, tex, *size, l))
+                    .collect()
+            };
+            let size = e.state.shadow_atlas.as_ref().unwrap().0;
+            let mut off_sc = sc.clone();
+            for l in &mut off_sc.lights {
                 l.use_shadow = false;
             }
-            let free = render(&gpu, &mut e, &off);
+            let free = render(&gpu, &mut e, &off_sc);
             let r = |x: u32, y: u32| px(&lit, x, y)[0] / px(&free, x, y)[0].max(1e-9);
             let row = |f: &dyn Fn(u32) -> (u32, u32)| -> String {
                 (0..16)
@@ -744,12 +797,24 @@ fn diag_shadow_faces() {
                     .collect::<Vec<_>>()
                     .join(" ")
             };
-            eprintln!("DIAG slope={slope} pre={pre}");
+            eprintln!("DIAG slope={slope} radius={radius} samples={samples} off={off:?}");
             eprintln!("  +X: {}", row(&|i| (32 + i, 32)));
             eprintln!("  -X: {}", row(&|i| (31 - i, 32)));
             eprintln!("  +Y: {}", row(&|i| (32, 31 - i)));
             eprintln!("  -Y: {}", row(&|i| (32, 32 + i)));
-            eprintln!("  diag: {}", row(&|i| (32 + i, 31 - i)));
+            for (f, d) in depth.iter().enumerate().take(4) {
+                eprintln!("  face {f} depth x1e5 (16 x 16 grid, rows top to bottom):");
+                for gy in 0..16 {
+                    let line: Vec<String> = (0..16)
+                        .map(|gx| {
+                            let x = gx * size / 16 + size / 32;
+                            let y = gy * size / 16 + size / 32;
+                            format!("{:6.0}", d[(y * size + x) as usize] * 1e5)
+                        })
+                        .collect();
+                    eprintln!("    {}", line.join(""));
+                }
+            }
         }
     }
 }

@@ -4,7 +4,8 @@
 
 struct Layer {
     view_proj: mat4x4<f32>,
-    // x: the sample's transparency random (`SAMPLING_TRANSPARENCY`, WP 5.5).
+    // x: the sample's transparency random (`SAMPLING_TRANSPARENCY`, WP 5.5), y: the map
+    // index.
     params: vec4<f32>,
 };
 
@@ -20,7 +21,6 @@ struct Draw {
 
 struct ShadowOut {
     @builtin(position) clip: vec4<f32>,
-    @location(0) world_pos: vec3<f32>,
 };
 
 @vertex
@@ -28,14 +28,13 @@ fn vs_shadow(@location(0) position: vec3<f32>) -> ShadowOut {
     var o: ShadowOut;
     let wp = draw.model * vec4<f32>(position, 1.0);
     o.clip = layer.view_proj * wp;
-    o.world_pos = wp.xyz;
     return o;
 }
 
-// `pcg4d` (eevee_sampling_lib.bsl.hh, Blender 5.2.4, GPL-2.0-or-later).
-fn shadow_pcg4d(v: vec4<f32>) -> vec4<f32> {
-    var u = bitcast<vec4<u32>>(v);
-    u = u * 1664525u + 1013904223u;
+// `pcg4d` (eevee_sampling_lib.bsl.hh, Blender 5.2.4, GPL-2.0-or-later), returning 24-bit
+// uniform values (exact in f32).
+fn shadow_pcg4d(v: vec4<u32>) -> vec4<f32> {
+    var u = v * 1664525u + 1013904223u;
     u.x += u.y * u.w;
     u.y += u.z * u.x;
     u.z += u.x * u.y;
@@ -45,17 +44,24 @@ fn shadow_pcg4d(v: vec4<f32>) -> vec4<f32> {
     u.y += u.z * u.x;
     u.z += u.x * u.y;
     u.w += u.y * u.z;
-    return vec4<f32>(u) / f32(0xffffffffu);
+    return vec4<f32>(u >> vec4<u32>(8u)) * (1.0 / 16777216.0);
 }
 
 // Transparent shadows (`use_transparent_shadow`, `surf_shadow`, WP 5.5): a transparent caster
-// discards a fragment when its transparency exceeds `pcg4d(P, sample random)`; the maps of
+// discards a fragment when its transparency exceeds a per-sample random threshold; the maps of
 // jittered lights are re-rendered every TAA sample, so the samples average the shadow.
+// Blender hashes the bits of the interpolated world position (`pcg4d(P, sample random)`); frap
+// hashes the shadow-map texel (integral `@builtin(position)`), the map and the sample random
+// instead: the interpolated position differs in its last bits between rasterisers, which gave
+// every adapter its own noise (deviations D-130). One random per texel, map and sample either
+// way.
 @fragment
 fn fs_shadow(v: ShadowOut) {
     if (draw.flags.w == 1u) {
         let transparency = 1.0 - bitcast<f32>(draw.flags.z);
-        let threshold = shadow_pcg4d(vec4<f32>(v.world_pos, layer.params.x)).x;
+        let texel = vec2<u32>(v.clip.xy);
+        let key = vec4<u32>(texel, u32(layer.params.y), bitcast<u32>(layer.params.x));
+        let threshold = shadow_pcg4d(key).x;
         if (transparency > threshold) {
             discard;
         }
