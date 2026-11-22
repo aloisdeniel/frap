@@ -126,6 +126,13 @@ pub struct Object {
     pub display_bounds_type: SmolStr,
     /// `Object.animation_data`
     pub animation_data: Option<AnimData>,
+    /// `Object.pass_index` (`ob->index`, 0..32767; WP 8.3.4).
+    pub pass_index: i32,
+    /// `Object.instance_type` (the `OB_DUPLI` bits of `transflag`: "NONE", "VERTS", "FACES",
+    /// "COLLECTION"; WP 8.3.4).
+    pub instance_type: SmolStr,
+    /// `Object.instance_collection` (a user-counting reference; WP 8.3.4).
+    pub instance_collection: Option<IdRef<CollectionId>>,
 }
 
 impl Object {
@@ -175,6 +182,9 @@ impl Object {
             show_only_shape_key: false,
             display_bounds_type: "BOX".into(),
             animation_data: None,
+            pass_index: 0,
+            instance_type: "NONE".into(),
+            instance_collection: None,
         }
     }
     /// `Object.type`.
@@ -237,6 +247,10 @@ crate::id::id_rna! { Object as frap_spec_rna::OBJECT, "OBJECT" {
     show_all_edges => show_all_edges,
     show_in_front => show_in_front,
     show_only_shape_key => show_only_shape_key,
+    pass_index => pass_index,
+    instance_type => instance_type (set = hook),
+    instance_collection => hook,
+    is_instancer => readonly(|o| o.instance_type != "NONE"),
     active_shape_key_index => get(|o| o.active_shape_key_index.max(0)) set(|o, v: i32| o.active_shape_key_index = v),
     children => python_only hook_coll,
     children_recursive => python_only hook_coll,
@@ -267,6 +281,9 @@ impl IdType for Object {
         if let Some(a) = self.animation_data.as_ref().and_then(|a| a.action) {
             f(a.any());
         }
+        if let Some(c) = self.instance_collection {
+            f(c.any());
+        }
         // Modifier settings: operand objects, node groups, textures (M4 W0); pose: M6.
         for m in &self.modifiers {
             for (_, r) in m.settings.id_refs() {
@@ -282,6 +299,9 @@ impl IdType for Object {
         }
         if self.parent.map(|p| p.any()) == Some(from) {
             self.parent = to.and_then(IdRef::from_any);
+        }
+        if self.instance_collection.map(|c| c.any()) == Some(from) {
+            self.instance_collection = to.and_then(IdRef::from_any);
         }
         for o in &mut self.material_slot_overrides {
             if o.material.map(|m| m.any()) == Some(from) {

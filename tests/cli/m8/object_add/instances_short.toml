@@ -1,0 +1,12 @@
+# WP 8.3.4: object.add, collection instances and their data in short form (§11.4): a type frap
+# has no data for, and a point cloud entering Edit Mode, answer OP_NOT_IMPLEMENTED before
+# anything changes; radius scales a light's soft size (0 for a point light), a camera's
+# display size and an empty's display size; drop_x/drop_y (placement under the mouse) are not
+# implemented; a collection instance (instance_type, instance_collection, is_instancer,
+# pass_index, the collection's instance_offset) survives a save and an open; making it real
+# copies the collection's objects through the offset, clears the instancing and drops the
+# collection's user; vertex instancing of a mesh with children is OP_NOT_IMPLEMENTED.
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

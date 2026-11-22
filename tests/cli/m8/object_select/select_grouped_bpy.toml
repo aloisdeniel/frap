@@ -1,0 +1,12 @@
+# WP 8.3.4: what frap answers where Blender -b cannot be compared (deviations D-154, D-155):
+# object.select_grouped is headless-extended (its poll passes, Blender's fails in background
+# mode); KEYINGSET always fails (no keying sets are bound), LIGHT_TYPE needs a light, a
+# statement without a change cancels with a WARNING; COLLECTION with an active object in two
+# collections only deselects and names select_same_collection in a WARNING; no active object is
+# Blender's error for select_grouped and select_linked and the poll failure of
+# select_hierarchy; collection_objects_select runs on the active collection; the poll of
+# mode_set_with_submode needs an active object; hide_collection with an index no layer
+# collection has cancels. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

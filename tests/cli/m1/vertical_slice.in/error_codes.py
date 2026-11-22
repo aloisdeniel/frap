@@ -21,7 +21,7 @@ bpy.data.objects['Cube'].rotation_mode = 'FOO'
 bpy.data.objects['Cube'].select_set()
 print(1 / 0)
 bpy.data.objects['Cube'].location = (1, 2)
-bpy.data.objects['Cube'].pass_index
+bpy.data.objects['Cube'].track_axis
 bpy.data.objects.remove(bpy.data.objects['Cube'], do_unlink=False)
 bpy.ops.export_scene.gltf(filepath='')
 bpy.context.view_layer.objects.active = None

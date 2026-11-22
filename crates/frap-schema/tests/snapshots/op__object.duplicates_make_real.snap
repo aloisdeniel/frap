@@ -1,0 +1,78 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.duplicates_make_real",
+  "bl_idname": "OBJECT_OT_duplicates_make_real",
+  "label": "Make Instances Real",
+  "description": "Make instanced objects attached to this object real",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an editable scene, Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "use_base_parent",
+      "name": "Parent",
+      "description": "Parent newly created objects to the original instancer",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_hierarchy",
+      "name": "Keep Hierarchy",
+      "description": "Maintain parent child relationships",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "collection instances only: vertex and face instancing answer OP_NOT_IMPLEMENTED",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "copies share their data with the instanced objects (BKE_id_copy), as in Blender"
+    ]
+  }
+}

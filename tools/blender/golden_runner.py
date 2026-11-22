@@ -207,6 +207,9 @@ NORMALISE = {
     "D-151": ("cases", "cases do not point normals with nothing selected on a mesh without custom_normal"),
     "D-152": ("cases", "cases do not create __mod_weightednormals_faceweight with another type"),
     "D-153": ("cases", "rip cases run mesh.rip only in frap (#@frap) and rebuild the interactive Blender result with #@blender bmesh lines (split_edges / vert_separate and the recorded selection)"),
+    "D-154": ("cases", "Blender runs a #@blender transcription of select_grouped, and collection_objects_select in a #@blender temp_override(collection=...)"),
+    "D-155": ("cases", "cases only cancel or fail the object selection operators with nothing selected or with extend=True"),
+    "D-156": ("cases", "cases do not read users after duplicates_make_real"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

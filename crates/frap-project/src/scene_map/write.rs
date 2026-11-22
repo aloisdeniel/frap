@@ -656,6 +656,10 @@ impl<'a> Writer<'a> {
         m.insert("hide_viewport".into(), json!(c.hide_viewport));
         m.insert("hide_render".into(), json!(c.hide_render));
         m.insert("color_tag".into(), json!(c.color_tag.as_str()));
+        // WP 8.3.4: written only when set, so files without instancing keep their bytes.
+        if c.instance_offset != [0.0; 3] {
+            m.insert("instance_offset".into(), f32s(&c.instance_offset));
+        }
         m
     }
 
@@ -747,6 +751,16 @@ impl<'a> Writer<'a> {
             json!(o.display_bounds_type.as_str()),
         );
         m.insert("animation_data".into(), self.anim(&o.animation_data));
+        // WP 8.3.4: written only when set, so files without instancing keep their bytes.
+        if o.pass_index != 0 {
+            m.insert("pass_index".into(), json!(o.pass_index));
+        }
+        if o.instance_type != "NONE" {
+            m.insert("instance_type".into(), json!(o.instance_type.as_str()));
+        }
+        if o.instance_collection.is_some() {
+            m.insert("instance_collection".into(), self.r(o.instance_collection));
+        }
         Ok(m)
     }
 

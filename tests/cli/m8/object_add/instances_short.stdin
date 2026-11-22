@@ -1,0 +1,27 @@
+object.add type=CURVE
+object.add type=POINTCLOUD enter_editmode=True
+object.add type=LIGHT radius=4
+print(bpy.context.object.data.shadow_soft_size, bpy.context.object.data.type)
+object.add type=CAMERA radius=3
+print(bpy.context.object.data.display_size)
+object.add type=EMPTY radius=0.25
+print(bpy.context.object.empty_display_size)
+object.add_named name=Cube drop_x=10 drop_y=20
+bpy.data.collections.new('Src')
+bpy.data.collections['Src'].instance_offset = (0, 0, 1)
+bpy.data.collections['Src'].objects.link(bpy.data.objects.new('Bolt', None))
+object.collection_instance_add name=Src location=(2,0,0)
+print(bpy.context.object.instance_type, bpy.context.object.instance_collection, bpy.context.object.is_instancer)
+object.collection_instance_add name=Src drop_x=10 drop_y=20
+bpy.context.object.pass_index = 4
+bpy.ops.wm.save_as_mainfile(filepath='instances.frap')
+bpy.ops.wm.open_mainfile(filepath='instances.frap')
+print(bpy.data.objects['Src'].instance_type, bpy.data.objects['Src'].instance_collection, bpy.data.objects['Src'].pass_index, bpy.data.collections['Src'].instance_offset)
+print(bpy.data.collections['Src'].users)
+object.duplicates_make_real
+print(bpy.data.objects['Bolt.001'].location, bpy.data.objects['Src'].instance_type, bpy.data.collections['Src'].users)
+bpy.data.objects['Cube'].instance_type = 'VERTS'
+bpy.data.objects['Bolt.001'].parent = bpy.data.objects['Cube']
+bpy.ops.object.select_all(action='DESELECT')
+bpy.data.objects['Cube'].select_set(True)
+object.duplicates_make_real

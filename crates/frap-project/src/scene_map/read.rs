@@ -746,6 +746,7 @@ fn collection(c: &mut Collection, o: &mut Obj, cx: &mut Cx) -> Result<(), MapErr
     o.bool("hide_viewport", &mut c.hide_viewport)?;
     o.bool("hide_render", &mut c.hide_render)?;
     o.smol("color_tag", &mut c.color_tag)?;
+    o.arr("instance_offset", &mut c.instance_offset)?;
     Ok(())
 }
 
@@ -845,6 +846,9 @@ fn object(ob: &mut Object, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
     o.bool("show_bounds", &mut ob.show_bounds)?;
     o.bool("show_only_shape_key", &mut ob.show_only_shape_key)?;
     o.smol("display_bounds_type", &mut ob.display_bounds_type)?;
+    o.i32("pass_index", &mut ob.pass_index)?;
+    o.smol("instance_type", &mut ob.instance_type)?;
+    cx.opt_typed(o, "instance_collection", &mut ob.instance_collection)?;
     cx.anim(o, &mut ob.animation_data)
 }
 
