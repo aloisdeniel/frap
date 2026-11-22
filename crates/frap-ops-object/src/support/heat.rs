@@ -25,7 +25,9 @@
 //! - weights below 0.025 are dropped, 0.025–0.05 ramp to 0–0.05 (`heat_limit_weight`), and
 //!   `xmirror` writes each weight to the mirrored vertex's flipped group too. A failed solve
 //!   stops at that bone with `Bone Heat Weighting: failed to find solution for one or more
-//!   bones` (a WARNING report).
+//!   bones` (a WARNING report). A fully occluded mesh part (no vertex sees a bone) leaves the
+//!   system singular; Blender then fails or not depending on Eigen's exact pivots, frap
+//!   always solves (deviations §2, `heat/solver.rs`).
 //!
 //! The B-Bone branch (several sources per bone, `WEIGHT_ADD`, the final clean-up) is ported
 //! but only reached by consecutive bones sharing a group (locked groups): frap hands one

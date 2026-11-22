@@ -182,9 +182,10 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
         if let (Some(a), Some(me)) = (arm_ref, me) {
             let arm = cx.main().armatures.get(a).cloned();
             if let Some(arm) = arm {
-                let has_subsurf = o.modifiers.iter().any(|m| {
-                    m.settings.type_identifier() == ModifierType::Subsurf.identifier()
-                });
+                let has_subsurf = o
+                    .modifiers
+                    .iter()
+                    .any(|m| m.settings.type_identifier() == ModifierType::Subsurf.identifier());
                 let inp = deform::SkinInput {
                     arm: &arm,
                     arm_world: par_world,

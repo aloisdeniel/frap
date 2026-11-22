@@ -6,11 +6,21 @@
 //! and reused for every bone.
 //!
 //! Blender factors `MᵀM` with Eigen's `SparseLU`; frap with `faer`'s sparse LU (partial
-//! pivoting). Both work in `f64` on the same `f32`-rounded entries, so solutions agree to far
-//! below the 1e-4 weight tolerance. Eigen reports failure for a structurally or exactly
-//! singular pivot; frap for a symbolically singular matrix or a non-finite solution (an
-//! exactly singular system gives infinities or NaNs in `faer`), which is what the meshes with
-//! NaN coordinates and the fully occluded components produce.
+//! pivoting). Both work in `f64` on the same `f32`-rounded entries, so on a regular system the
+//! solutions agree to far below the 1e-4 weight tolerance. Eigen reports failure when a
+//! pivot column is exactly zero (`pivotL`: `pivmax <= 0`); frap when the matrix is symbolically
+//! singular or the solution is not finite. Both fail on NaN coordinates.
+//!
+//! Not matched (deviations §2): a mesh part none of whose vertices sees a bone (fully
+//! occluded, `H = 0` on the whole part) makes its Laplacian block singular, and whether Eigen
+//! then meets an *exactly* zero pivot depends on its COLAMD ordering and the rounding of its
+//! supernodal kernels. A C++ program linked against Eigen 3.4, fed frap's triplets, reproduces
+//! Blender 5.2.4 on every probe: an axis-aligned cube or plane hat above a box fails (Blender
+//! warns and writes no weight on the whole mesh), a shifted smaller cube, a rotated cube or an
+//! icosphere hat succeeds (the box gets its weights, the hat none). `faer` meets no exact
+//! zero on any of them, so frap always takes the second outcome; matching the first needs a
+//! bit-exact port of Eigen's `SparseLU` (golden `armature/heat/occluded_part` pins the case
+//! where both succeed).
 //!
 //! Ported from blender/intern/eigen/intern/linear_solver.cc (Blender 5.2.4,
 //! GPL-2.0-or-later).
