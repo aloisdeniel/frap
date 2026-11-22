@@ -14,7 +14,8 @@
 //! compares `EQUAL` (within `threshold`), `GREATER` or `LESS` against the values of the
 //! selected ones (a one-dimensional kd-tree, see `select/kdtree.rs`) get selected.
 //! `threshold` defaults to the tool settings' `select_thresh` (0.01) and is stored there when
-//! given. Without `type` the comparison is `PIN` in every mode (the enum's first item, as in
+//! given (`ts->select_thresh` is shared with `mesh.select_similar`, which must read and write
+//! it with the same is-set rule). Without `type` the comparison is `PIN` in every mode (the enum's first item, as in
 //! Blender 5.2.4, whose itemf leaves the default out of the face and island lists: there it
 //! counts pinned corners / compares 0). Always finishes.
 

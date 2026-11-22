@@ -10,15 +10,20 @@
 //! the meshes) are selected with the sticky mode, with `use_uv_select_island` their whole UV
 //! islands. Touching corners or edges are no overlap; identical triangles are. Always finishes.
 //!
-//! Blender walks a BVH of the triangles and stops each face's query at its first overlap; the
-//! set of faces it tags is every face with an overlapping partner, which this port finds by
-//! testing every pair whose bounds touch.
+//! The triangles go into a BVH (`BLI_bvhtree_new(n, 0, 4, 6)`, the shared port of
+//! `BLI_kdopbvh`), probed with each triangle in turn, Blender's order: a source triangle whose
+//! face is already tagged is skipped, the others test `overlap_tri_tri_uv_test(src, dst)`
+//! against the leaves their bounds touch, in the tree's traversal order, and stop at the first
+//! hit (`max_interactions` 1), tagging both faces. The test is not symmetric in floating point
+//! (the intersection point is found on the source's segment), so both the probe direction and
+//! the order are Blender's.
 
 mod beautify;
 mod heap;
 
 use frap_bmesh::{ElemFlag, FaceId};
 use frap_bmesh::ops::contextual_create::connect_islands::isect_seg_seg_v2_point_ex;
+use frap_bmesh::ops::contextual_create::kdopbvh::BvhTree;
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_uv::uv;
@@ -31,9 +36,9 @@ use crate::select::{SelAction, Uv, UvSel, op};
 struct Tri {
     ob: usize,
     face: FaceId,
+    /// Index of the face among all triangulated faces (of every mesh).
+    slot: usize,
     co: [Uv; 3],
-    min: Uv,
-    max: Uv,
 }
 
 /// `line_point_side_v2`.
@@ -76,8 +81,8 @@ pub(crate) fn overlap_tri_tri_uv_test(t1: &[Uv; 3], t2: &[Uv; 3], endpoint_bias:
     isect_point_tri_v2(mid3(t2), t1[0], t1[1], t1[2])
 }
 
-/// The triangles of the visible faces of one mesh.
-fn triangles(s: &UvSel, ob: usize, out: &mut Vec<Tri>) {
+/// The triangles of the visible faces of one mesh; `slots` counts the faces so far.
+fn triangles(s: &UvSel, ob: usize, slots: &mut usize, out: &mut Vec<Tri>) {
     for f in s.faces() {
         if !s.face_visible(f) {
             continue;
@@ -86,55 +91,67 @@ fn triangles(s: &UvSel, ob: usize, out: &mut Vec<Tri>) {
         let mut tris = frap_geom::polyfill::polyfill_calc(&coords, 0);
         beautify::polyfill_beautify(&coords, &mut tris);
         for t in tris {
-            let co = [
-                coords[t[0] as usize],
-                coords[t[1] as usize],
-                coords[t[2] as usize],
-            ];
-            let mut min = co[0];
-            let mut max = co[0];
-            for c in &co[1..] {
-                for k in 0..2 {
-                    min[k] = min[k].min(c[k]);
-                    max[k] = max[k].max(c[k]);
-                }
-            }
             out.push(Tri {
                 ob,
                 face: f,
-                co,
-                min,
-                max,
+                slot: *slots,
+                co: [
+                    coords[t[0] as usize],
+                    coords[t[1] as usize],
+                    coords[t[2] as usize],
+                ],
             });
         }
+        *slots += 1;
     }
 }
 
-/// The faces (by object) with a triangle overlapping another face's.
-fn overlapping(tris: &[Tri], objects: usize) -> Vec<Vec<FaceId>> {
-    let mut hit = vec![false; tris.len()];
-    for i in 0..tris.len() {
-        frap_math::budget::check();
-        let a = &tris[i];
-        for (j, b) in tris.iter().enumerate().skip(i + 1) {
-            if a.ob == b.ob && a.face == b.face {
-                continue;
-            }
-            let bounds = a.min[0] <= b.max[0]
-                && a.max[0] >= b.min[0]
-                && a.min[1] <= b.max[1]
-                && a.max[1] >= b.min[1];
-            if bounds && overlap_tri_tri_uv_test(&a.co, &b.co, -1e-4) {
-                hit[i] = true;
-                hit[j] = true;
-            }
-        }
+/// The triangle as the 3D points the BVH takes.
+fn tri_3d(t: &Tri) -> [[f32; 3]; 3] {
+    t.co.map(|c| [c[0], c[1], 0.0])
+}
+
+// Ported from blender/source/blender/editors/uvedit/uvedit_select.cc (uv_select_overlap:
+// the BVH, the probe tree and `bvh_overlap_fn`), Blender 5.2.4, GPL-2.0-or-later.
+/// The faces (by object) with a triangle overlapping another face's, `faces` faces in all.
+fn overlapping(tris: &[Tri], faces: usize, objects: usize) -> Vec<Vec<FaceId>> {
+    let mut uv_tree = BvhTree::new(0.0, 4, 6);
+    for (i, t) in tris.iter().enumerate() {
+        uv_tree.insert(i as i32, &tri_3d(t));
     }
+    uv_tree.balance();
+    let mut tagged = vec![false; faces];
     let mut out = vec![Vec::new(); objects];
-    for (t, h) in tris.iter().zip(hit) {
-        if h && !out[t.ob].contains(&t.face) {
+    let mut tag = |t: &Tri, tagged: &mut [bool]| {
+        if !tagged[t.slot] {
+            tagged[t.slot] = true;
             out[t.ob].push(t.face);
         }
+    };
+    for (i, src) in tris.iter().enumerate() {
+        frap_math::budget::check();
+        if tagged[src.slot] {
+            continue;
+        }
+        let mut probe = BvhTree::new(0.0, 4, 6);
+        probe.insert(0, &tri_3d(src));
+        probe.balance();
+        probe.overlap_ex(&uv_tree, 1, false, &mut |_, dst_i, _| {
+            let dst_i = dst_i as usize;
+            if dst_i == i {
+                return false;
+            }
+            let dst = &tris[dst_i];
+            if src.ob == dst.ob && src.face == dst.face {
+                return false;
+            }
+            if overlap_tri_tri_uv_test(&src.co, &dst.co, -1e-4) {
+                tag(src, &mut tagged);
+                tag(dst, &mut tagged);
+                return true;
+            }
+            false
+        });
     }
     out
 }
@@ -147,10 +164,11 @@ fn exec(cx: &mut OpCtx, p: uv::SelectOverlap) -> OpResult {
     let select_island = ts.select_island_check();
     let objects = op::objects(cx);
     let mut tris = Vec::new();
+    let mut slots = 0;
     for (i, &(_, me)) in objects.iter().enumerate() {
-        op::read(cx, me, ts, |s| triangles(s, i, &mut tris));
+        op::read(cx, me, ts, |s| triangles(s, i, &mut slots, &mut tris));
     }
-    let tagged = overlapping(&tris, objects.len());
+    let tagged = overlapping(&tris, slots, objects.len());
     for (i, &(_, me)) in objects.iter().enumerate() {
         let faces = &tagged[i];
         op::edit(cx, me, ts, |s| {

@@ -36,8 +36,18 @@ impl Checker {
     /// `WM_operator_properties_checker_interval_test`.
     fn test(&self, depth: i32) -> bool {
         self.skip == 0
-            || (self.offset.wrapping_add(depth)) % (self.skip.wrapping_add(self.nth)) >= self.skip
+            || (self.offset.wrapping_add(depth)).wrapping_rem(self.skip.wrapping_add(self.nth))
+                >= self.skip
     }
+}
+
+/// `mod_i(i, n)` = `(i % n + n) % n`, with C's two's-complement wrap (`nth + skip` may wrap to
+/// `i32::MIN`); `n == 0` (unreachable: `nth >= 1`) gives 0.
+fn mod_i(i: i32, n: i32) -> i32 {
+    if n == 0 {
+        return 0;
+    }
+    i.wrapping_rem(n).wrapping_add(n).wrapping_rem(n)
 }
 
 /// `PathSelectParams`.
@@ -184,11 +194,7 @@ fn exec(cx: &mut OpCtx, p: uv::ShortestPathSelect) -> OpResult {
     let nth = p.nth.value;
     let skip = p.skip.value;
     let n = nth.wrapping_add(skip);
-    let offset = if n == 0 {
-        0
-    } else {
-        (p.offset.value % n + n) % n
-    };
+    let offset = mod_i(p.offset.value, n);
     let params = Params {
         path: PathParams {
             use_topology_distance: p.use_topology_distance.value,
@@ -224,4 +230,28 @@ fn exec(cx: &mut OpCtx, p: uv::ShortestPathSelect) -> OpResult {
         return Ok(OpStatus::Cancelled);
     }
     Ok(OpStatus::Finished)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn checker_offset_wraps_like_c() {
+        let n = 1i32.wrapping_add(i32::MAX);
+        assert_eq!(n, i32::MIN);
+        // (-5 % MIN + MIN) % MIN with two's-complement wrap: (-5 + MIN) wraps to MAX - 4.
+        assert_eq!(mod_i(-5, n), i32::MAX - 4);
+        assert_eq!(mod_i(-1, 4), 3);
+        assert_eq!(mod_i(6, 4), 2);
+        let c = Checker {
+            nth: 1,
+            skip: i32::MAX,
+            offset: mod_i(-5, n),
+        };
+        // Must not panic: (offset + depth) wraps, % INT_MIN keeps it, never >= INT_MAX here.
+        for d in 0..4 {
+            assert!(!c.test(d));
+        }
+    }
 }
