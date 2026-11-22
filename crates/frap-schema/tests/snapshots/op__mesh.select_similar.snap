@@ -1,5 +1,5 @@
 ---
-source: crates/frap-schema/tests/snapshots.rs
+source: crates/frap-schema/tests/describe_ops.rs
 ---
 {
   "idname": "mesh.select_similar",
@@ -13,8 +13,10 @@ source: crates/frap-schema/tests/snapshots.rs
   "kind": "NORMAL",
   "macro_steps": [],
   "poll": {
-    "requires": null,
-    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
     "matrix": {
       "plain": "NNYNN",
       "view3d": "NNYNN"
@@ -245,15 +247,17 @@ source: crates/frap-schema/tests/snapshots.rs
     }
   ],
   "frap": {
-    "status": "not_implemented",
-    "tier": null,
-    "support": null,
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
     "support_note": null,
-    "headless": null,
+    "headless": "native",
     "planned": "M8",
     "extension": false,
     "notes": [
-      "mesh.select_similar exists in Blender 5.2; frap implements it in M8 (OP_NOT_IMPLEMENTED until then)"
+      "the kind of type decides what is compared, whatever the select mode: an unset type is VERT_NORMAL, which in face mode selects vertices as in Blender",
+      "threshold defaults to the tool settings' select_thresh (0.01) and is stored there when given (shared with uv.select_similar)",
+      "Blender's LESS on area, perimeter, length, crease and bevel weight finds no node in its kd-tree and selects nothing (reproduced)"
     ]
   }
 }

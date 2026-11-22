@@ -1,0 +1,67 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "anim.keying_set_active_set",
+  "bl_idname": "ANIM_OT_keying_set_active_set",
+  "label": "Set Active Keying Set",
+  "description": "Set a new active keying set",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: A (Object Mode, the factory 'Cube' (a mesh) active and selected, with a 3D View); B (Object Mode, nothing selected and no active object, with a 3D View); C (Edit Mode on a mesh, with a 3D View); D (Pose Mode on an armature, with a 3D View); E (Edit Mode on an armature, with a 3D View)",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Keying Set",
+      "description": "The Keying Set to use",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "DEFAULT",
+      "enum_items": [
+        {
+          "identifier": "DEFAULT",
+          "name": "Default",
+          "description": "",
+          "value": 0
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M9",
+    "extension": false,
+    "notes": [
+      "anim.keying_set_active_set exists in Blender 5.2; frap implements it in M9 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}

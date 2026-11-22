@@ -21,7 +21,7 @@
 //! selected`. An unset `edge_mode` is the tool setting's factory value `SELECT` (frap keeps no
 //! `tool_settings.edge_mode`).
 
-mod path;
+pub(crate) mod path;
 
 use std::sync::Arc;
 
@@ -72,15 +72,18 @@ impl Interval {
     }
 }
 
-struct Params {
-    edge_mode: EdgeMode,
-    path: PathParams,
-    use_fill: bool,
-    interval: Interval,
+/// `PathSelectParams`.
+pub(crate) struct Params {
+    pub(crate) edge_mode: EdgeMode,
+    pub(crate) path: PathParams,
+    pub(crate) use_fill: bool,
+    pub(crate) interval: Interval,
+    /// `track_active`: the pick operator moves the active element along the path.
+    pub(crate) track_active: bool,
 }
 
 /// Toggles the flag of every path element (`!all_set`), keeping the checker pattern on ordered
-/// paths.
+/// paths; returns the last element set on an ordered path (`*_dst_last`).
 fn toggle<T: Copy>(
     bm: &mut BMesh,
     path: &[T],
@@ -88,18 +91,23 @@ fn toggle<T: Copy>(
     interval: Interval,
     test: impl Fn(&BMesh, T) -> bool,
     mut set: impl FnMut(&mut BMesh, T, bool),
-) {
+) -> Option<T> {
     let all_set = path.iter().all(|&x| test(bm, x));
+    let mut last = None;
     // The source has depth -1.
     for (depth, &x) in (-1..).zip(path.iter()) {
         if !ordered || interval.test(depth) {
             set(bm, x, !all_set);
+            if ordered {
+                last = Some(x);
+            }
         }
     }
+    last
 }
 
-/// `mouse_mesh_shortest_path_vert` (with `track_active = false`).
-fn shortest_path_vert(bm: &mut BMesh, p: &Params, v_act: VertId, v_dst: VertId) {
+/// `mouse_mesh_shortest_path_vert`.
+pub(crate) fn shortest_path_vert(bm: &mut BMesh, p: &Params, v_act: VertId, v_dst: VertId) {
     let mut path: Option<Vec<VertId>> = None;
     let mut ordered = false;
     if v_act != v_dst {
@@ -115,16 +123,40 @@ fn shortest_path_vert(bm: &mut BMesh, p: &Params, v_act: VertId, v_dst: VertId) 
         }
     }
     let test = |bm: &BMesh, v: VertId| common::selected(bm, v);
-    match path.filter(|x| !x.is_empty()) {
-        Some(path) => toggle(bm, &path, ordered, p.interval, test, |bm, v, val| {
-            bm.vert_select_set(v, val);
-        }),
+    let path = path.filter(|x| !x.is_empty());
+    if path.is_some() && p.track_active {
+        bm.select_history_remove(BMElem::Vert(v_act));
+    }
+    let mut v_dst_last = v_dst;
+    match path {
+        Some(path) => {
+            if let Some(last) = toggle(bm, &path, ordered, p.interval, test, |bm, v, val| {
+                bm.vert_select_set(v, val);
+            }) {
+                v_dst_last = last;
+            }
+        }
         None => {
             let is_act = !test(bm, v_dst);
             bm.vert_select_set(v_dst, is_act);
         }
     }
     common::selectmode_flush(bm);
+    if p.track_active {
+        let set = common::selected(bm, v_dst_last);
+        track_last(bm, BMElem::Vert(v_dst_last), set);
+    }
+}
+
+/// The end of `mouse_mesh_shortest_path_*` with `track_active`: the last element joins the
+/// selection history when it is set (`BM_select_history_store`: appended unless already
+/// stored), else leaves it.
+fn track_last(bm: &mut BMesh, ele: BMElem, set: bool) {
+    if set {
+        bm.select_history_store_if_absent(ele);
+    } else {
+        bm.select_history_remove(ele);
+    }
 }
 
 /// Layer name and default of the custom-data `edge_mode`s.
@@ -212,8 +244,8 @@ fn edge_set(bm: &mut BMesh, mode: EdgeMode, e: EdgeId, val: bool) {
     }
 }
 
-/// `mouse_mesh_shortest_path_edge` (with `track_active = false`).
-fn shortest_path_edge(bm: &mut BMesh, p: &Params, e_act: EdgeId, e_dst: EdgeId) {
+/// `mouse_mesh_shortest_path_edge`.
+pub(crate) fn shortest_path_edge(bm: &mut BMesh, p: &Params, e_act: EdgeId, e_dst: EdgeId) {
     ensure_edge_layer(bm, p.edge_mode);
     let mode = p.edge_mode;
     let mut path: Option<Vec<EdgeId>> = None;
@@ -231,20 +263,45 @@ fn shortest_path_edge(bm: &mut BMesh, p: &Params, e_act: EdgeId, e_dst: EdgeId) 
         }
     }
     let test = move |bm: &BMesh, e: EdgeId| edge_test(bm, mode, e);
-    match path.filter(|x| !x.is_empty()) {
-        Some(path) => toggle(bm, &path, ordered, p.interval, test, |bm, e, val| {
-            edge_set(bm, mode, e, val);
-        }),
+    let path = path.filter(|x| !x.is_empty());
+    if path.is_some() && p.track_active {
+        bm.select_history_remove(BMElem::Edge(e_act));
+    }
+    let mut e_dst_last = e_dst;
+    match path {
+        Some(path) => {
+            if let Some(last) = toggle(bm, &path, ordered, p.interval, test, |bm, e, val| {
+                edge_set(bm, mode, e, val);
+            }) {
+                e_dst_last = last;
+            }
+        }
         None => {
             let is_act = !test(bm, e_dst);
             edge_set(bm, mode, e_dst, is_act);
         }
     }
+    if mode != EdgeMode::Select && p.track_active {
+        // Simple rules: the last edge is always active and selected.
+        bm.edge_select_set(e_act, false);
+        bm.edge_select_set(e_dst_last, true);
+        track_last(bm, BMElem::Edge(e_dst_last), true);
+    }
     common::selectmode_flush(bm);
+    if p.track_active && mode == EdgeMode::Select {
+        let set = edge_test(bm, mode, e_dst_last);
+        track_last(bm, BMElem::Edge(e_dst_last), set);
+    }
 }
 
-/// `mouse_mesh_shortest_path_face` (with `track_active = false`).
-fn shortest_path_face(bm: &mut BMesh, p: &Params, f_act: FaceId, f_dst: FaceId) {
+/// `mouse_mesh_shortest_path_face`; returns the last face (`f_dst_last`) for the caller's
+/// `material_active_index_set` when `track_active`.
+pub(crate) fn shortest_path_face(
+    bm: &mut BMesh,
+    p: &Params,
+    f_act: FaceId,
+    f_dst: FaceId,
+) -> FaceId {
     let path: Option<Vec<FaceId>>;
     let mut ordered = false;
     if p.use_fill {
@@ -257,16 +314,31 @@ fn shortest_path_face(bm: &mut BMesh, p: &Params, f_act: FaceId, f_dst: FaceId) 
         path = path::path_face(bm, f_act, f_dst, p.path);
     }
     let test = |bm: &BMesh, f: FaceId| common::selected(bm, f);
-    match path.filter(|x| !x.is_empty()) {
-        Some(path) => toggle(bm, &path, ordered, p.interval, test, |bm, f, val| {
-            bm.face_select_set(f, val);
-        }),
+    let path = path.filter(|x| !x.is_empty());
+    if f_act != f_dst && path.is_some() && p.track_active {
+        bm.select_history_remove(BMElem::Face(f_act));
+    }
+    let mut f_dst_last = f_dst;
+    match path {
+        Some(path) => {
+            if let Some(last) = toggle(bm, &path, ordered, p.interval, test, |bm, f, val| {
+                bm.face_select_set(f, val);
+            }) {
+                f_dst_last = last;
+            }
+        }
         None => {
             let is_act = !test(bm, f_dst);
             bm.face_select_set(f_dst, is_act);
         }
     }
     common::selectmode_flush(bm);
+    if p.track_active {
+        let set = common::selected(bm, f_dst_last);
+        track_last(bm, BMElem::Face(f_dst_last), set);
+        bm.act_face = Some(f_dst_last);
+    }
+    f_dst_last
 }
 
 /// The two endpoints of `edbm_shortest_path_select_exec`: the last two history entries of the
@@ -325,6 +397,7 @@ fn exec(cx: &mut OpCtx, p: mesh::ShortestPathSelect) -> OpResult {
         },
         use_fill: p.use_fill.value,
         interval: Interval::new(p.nth.value, p.skip.value, p.offset.value),
+        track_active: false,
     };
     let mut found_valid_elements = false;
     for (_, me) in common::edit_meshes(cx) {
@@ -342,7 +415,9 @@ fn exec(cx: &mut OpCtx, p: mesh::ShortestPathSelect) -> OpResult {
         match (src, dst) {
             (BMElem::Vert(a), BMElem::Vert(b)) => shortest_path_vert(bm, &params, a, b),
             (BMElem::Edge(a), BMElem::Edge(b)) => shortest_path_edge(bm, &params, a, b),
-            (BMElem::Face(a), BMElem::Face(b)) => shortest_path_face(bm, &params, a, b),
+            (BMElem::Face(a), BMElem::Face(b)) => {
+                shortest_path_face(bm, &params, a, b);
+            }
             _ => {}
         }
         found_valid_elements = true;
