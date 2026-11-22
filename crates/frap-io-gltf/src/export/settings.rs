@@ -215,6 +215,15 @@ pub const SUPPORTED_PROPS: &[&str] = &[
     "will_save_settings",
     "export_loglevel",
     "filter_glob",
+    // WP 8.12: `at_collection_center` (`nodes.rs`, `VTree::collection_center`) and
+    // `export_original_specular` (kept by the add-on "for back compatibility, but no more
+    // used": no export reads it).
+    "at_collection_center",
+    "export_original_specular",
+    // `mesh/extract/triangles.rs` + `mesh/gather.rs` (`primitive_creation_shared`).
+    "export_shared_accessors",
+    // `mesh/writers/custom_attributes.rs`.
+    "export_attributes",
 ];
 
 /// Props honoured by a feature file of a later milestone: each file registers the props it

@@ -95,6 +95,12 @@ pub fn column_data(c: &AttrColumn) -> AccessorData {
         AttrValues::I16x4(v) => AccessorData::from_elements(v),
         AttrValues::U16x2(v) => AccessorData::from_elements(v),
         AttrValues::U16x3(v) => AccessorData::from_elements(v),
+        AttrValues::F32(v) => AccessorData::from_elements(v),
+        AttrValues::F32x16(v) => AccessorData {
+            type_: frap_gltf::json::AccessorType::Mat4,
+            normalized: false,
+            components: frap_gltf::Components::F32(v.iter().flatten().copied().collect()),
+        },
     };
     AccessorData {
         normalized: c.normalized && d.component_type().can_normalize(),
@@ -233,6 +239,8 @@ fn build_mesh(
         }
     };
     let fresh = matches!(source, Source::Fresh(_));
+    type SharedAccessors = (IndexMap<String, Index>, Vec<IndexMap<String, Index>>);
+    let mut shared: Option<SharedAccessors> = None;
     let mut out: Vec<Primitive> = Vec::new();
     let mut written_all: Vec<WrittenPrimitive> = Vec::new();
     loop {
@@ -247,7 +255,27 @@ fn build_mesh(
                 for (name, required) in &d.encoding.extensions_used {
                     g.use_extension(name, *required);
                 }
-                let w = write_accessors(g, &d)?;
+                // `export_shared_accessors` (WP 8.12): one set of vertex and morph-target
+                // accessors for every triangle primitive (`__gather_cache_primitives` with
+                // `shared_attributes`); a compressed primitive (Draco) keeps its own.
+                let share = d.shared_vertices && !d.encoding.without_buffer_views;
+                let w = match (&shared, share) {
+                    (Some((attributes, targets)), true) => WrittenPrimitive {
+                        attributes: attributes.clone(),
+                        indices: write_indices(g, &d)?,
+                        mode: d.mode,
+                        material_slot: d.material_slot,
+                        targets: targets.clone(),
+                        extensions: d.encoding.extensions.clone(),
+                    },
+                    _ => {
+                        let w = write_accessors(g, &d)?;
+                        if share {
+                            shared = Some((w.attributes.clone(), w.targets.clone()));
+                        }
+                        w
+                    }
+                };
                 written_all.push(w.clone());
                 w
             }
@@ -349,44 +377,7 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         let i = push(g, &data, &AccessorOpts::attribute(false));
         attributes.insert(name.to_string(), i);
     }
-    // `primitive_creation_edges_and_points` gives the POINTS primitive no `indices`.
-    let indices = if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
-        None
-    } else if enc.without_buffer_views {
-        // The add-on's `gather_accessor` cache shares index accessors by content under Draco
-        // too (WP 7.2, verified on 5.2.4: two meshes with the same triangles share one
-        // view-less index accessor). Keyed apart from the accessors with a view (`u32::MAX`
-        // is never an index).
-        let mut key = d.indices.clone();
-        key.push(u32::MAX);
-        Some(match g.index_accessors.get(&key) {
-            Some(i) => *i,
-            None => {
-                if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
-                    return Err(ExportError::Invalid(format!(
-                        "index {bad} out of range ({n} vertices)"
-                    )));
-                }
-                let i = g.buf.push_indices_without_view(&d.indices);
-                g.index_accessors.insert(key, i);
-                i
-            }
-        })
-    } else {
-        Some(match g.index_accessors.get(&d.indices) {
-            Some(i) => *i,
-            None => {
-                if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
-                    return Err(ExportError::Invalid(format!(
-                        "index {bad} out of range ({n} vertices)"
-                    )));
-                }
-                let i = g.buf.push_indices(&d.indices);
-                g.index_accessors.insert(d.indices.clone(), i);
-                i
-            }
-        })
-    };
+    let indices = write_indices(g, d)?;
     let mut targets = Vec::with_capacity(d.targets.len());
     for (ti, t) in d.targets.iter().enumerate() {
         let mut m = IndexMap::new();
@@ -415,6 +406,53 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         targets,
         extensions: enc.extensions.clone(),
     })
+}
+
+/// The index accessor of one primitive (shared by content, the add-on's `@cached
+/// gather_accessor`); `None` for the POINTS primitive of loose vertices.
+fn write_indices(g: &mut Gather, d: &PrimitiveDraft) -> Result<Option<Index>, ExportError> {
+    let n = d.positions.len();
+    let enc = &d.encoding;
+    // `primitive_creation_edges_and_points` gives the POINTS primitive no `indices`.
+    Ok(
+        if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
+            None
+        } else if enc.without_buffer_views {
+            // The add-on's `gather_accessor` cache shares index accessors by content under Draco
+            // too (WP 7.2, verified on 5.2.4: two meshes with the same triangles share one
+            // view-less index accessor). Keyed apart from the accessors with a view (`u32::MAX`
+            // is never an index).
+            let mut key = d.indices.clone();
+            key.push(u32::MAX);
+            Some(match g.index_accessors.get(&key) {
+                Some(i) => *i,
+                None => {
+                    if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
+                        return Err(ExportError::Invalid(format!(
+                            "index {bad} out of range ({n} vertices)"
+                        )));
+                    }
+                    let i = g.buf.push_indices_without_view(&d.indices);
+                    g.index_accessors.insert(key, i);
+                    i
+                }
+            })
+        } else {
+            Some(match g.index_accessors.get(&d.indices) {
+                Some(i) => *i,
+                None => {
+                    if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
+                        return Err(ExportError::Invalid(format!(
+                            "index {bad} out of range ({n} vertices)"
+                        )));
+                    }
+                    let i = g.buf.push_indices(&d.indices);
+                    g.index_accessors.insert(d.indices.clone(), i);
+                    i
+                }
+            })
+        },
+    )
 }
 
 #[cfg(test)]

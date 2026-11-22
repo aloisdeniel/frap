@@ -138,6 +138,8 @@ fn attr_data(values: &AttrValues) -> (u8, AttrData) {
         AttrValues::I16x4(v) => (4, AttrData::I16(flat(v))),
         AttrValues::U16x2(v) => (2, AttrData::U16(flat(v))),
         AttrValues::U16x3(v) => (3, AttrData::U16(flat(v))),
+        AttrValues::F32(v) => (1, AttrData::F32(v.clone())),
+        AttrValues::F32x16(v) => (16, AttrData::F32(flat(v))),
     }
 }
 
@@ -272,6 +274,8 @@ fn stand_in_values(v: &AttrValues, count: usize) -> AttrValues {
         AttrValues::I16x4(v) => AttrValues::I16x4(stand_in(v, count, false)),
         AttrValues::U16x2(v) => AttrValues::U16x2(stand_in(v, count, false)),
         AttrValues::U16x3(v) => AttrValues::U16x3(stand_in(v, count, false)),
+        AttrValues::F32(v) => AttrValues::F32(vec![v.first().copied().unwrap_or_default(); count]),
+        AttrValues::F32x16(v) => AttrValues::F32x16(stand_in(v, count, false)),
     }
 }
 

@@ -181,6 +181,10 @@ pub enum AttrValues {
     U16x2(Vec<[u16; 2]>),
     /// UNSIGNED_SHORT VEC3 (KHR_mesh_quantization)
     U16x3(Vec<[u16; 3]>),
+    /// FLOAT SCALAR (`export_attributes`: FLOAT, INT, INT8, BOOLEAN, WP 8.12)
+    F32(Vec<f32>),
+    /// FLOAT MAT4 (`export_attributes`: FLOAT4X4, column-major, WP 8.12)
+    F32x16(Vec<[f32; 16]>),
 }
 
 /// One glTF vertex attribute of a draft primitive.
@@ -226,6 +230,10 @@ pub struct PrimitiveDraft {
     /// How the accessors are written (M7 W0, decision log M7W0-6): set by the M7
     /// post-processors (quantization, Draco); the default writes the data above as it is.
     pub encoding: PrimitiveEncoding,
+    /// `export_shared_accessors` (WP 8.12): every triangle primitive of the mesh carries the
+    /// same vertex set (`primitive_creation_shared`), so the mesh gatherer writes the vertex
+    /// and morph-target accessors of the first one and reuses them for the others.
+    pub shared_vertices: bool,
 }
 
 /// What M7 post-processors change about how a draft's accessors are written (CONTRACT, M7 W0,

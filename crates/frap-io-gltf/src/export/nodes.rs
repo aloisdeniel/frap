@@ -98,6 +98,26 @@ fn mesh_has_primitives(
         || (p.use_mesh_vertices.value && mesh.verts_num() > 0)
 }
 
+/// `export_settings['gltf_collection_center']`, computed once per exported scene from its
+/// filtered tree (`gather_scene` calls `calculate_collection_center` after `vtree.filter()`).
+#[derive(Default)]
+struct CollectionCenter(
+    std::collections::HashMap<frap_rna::IdRef<frap_rna::SceneId>, frap_math::glam::Vec3>,
+);
+
+impl CollectionCenter {
+    fn get(
+        &mut self,
+        scene: frap_rna::IdRef<frap_rna::SceneId>,
+        tree: &VTree,
+    ) -> frap_math::glam::Vec3 {
+        *self
+            .0
+            .entry(scene)
+            .or_insert_with(|| tree.collection_center())
+    }
+}
+
 /// `__gather_trans_rot_scale`'s local matrix: relative to the kept parent, except that the
 /// parent's own transform is skipped when the parent is skinned (glTF ignores it): then
 /// relative to the skinned parent's armature when that parent is the armature's child, else
@@ -105,7 +125,16 @@ fn mesh_has_primitives(
 fn node_local_matrix(g: &mut Gather, tree: &VTree, i: usize) -> Mat4 {
     let n = &tree.nodes[i];
     let Some(p) = n.parent else {
-        return n.matrix_world;
+        // `at_collection_center` with `collection` (WP 8.12): a root moves by minus the
+        // collection centre (`trans -= gltf_collection_center` after the decomposition, which
+        // is the matrix's translation column).
+        let mut m = n.matrix_world;
+        if !g.settings.collection.is_empty() && g.settings.props.at_collection_center.value {
+            let scene = g.scene;
+            let c = g.state::<CollectionCenter>().get(scene, tree);
+            m.w_axis -= c.extend(0.0);
+        }
+        return m;
     };
     if !skins::is_skinned(g, p) {
         return tree.local_matrix(i);

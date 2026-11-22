@@ -1191,6 +1191,24 @@ impl VTree {
         }
     }
 
+    /// `calculate_collection_center` (WP 8.12, `at_collection_center` with `collection`): the
+    /// mean of the world translations of the kept nodes without a parent that are objects,
+    /// armatures, lights or cameras, summed in construction order in `f32` as `mathutils`
+    /// does (`sum(centers, Vector()) / len(centers)`); the origin when there is none.
+    pub fn collection_center(&self) -> Vec3 {
+        let mut sum = Vec3::ZERO;
+        let mut n = 0usize;
+        for (i, node) in self.nodes.iter().enumerate() {
+            // `exists`: an armature dropped by `export_armature_object_remove` is still in the
+            // add-on's `nodes`, without a parent.
+            if self.exists(i) && node.parent.is_none() && node.kind != VType::Bone {
+                sum += node.matrix_world.w_axis.truncate();
+                n += 1;
+            }
+        }
+        if n == 0 { Vec3::ZERO } else { sum / n as f32 }
+    }
+
     /// Kept nodes in pre-order (roots in export order, then their subtrees).
     pub fn kept(&self) -> Vec<usize> {
         let mut out = Vec::new();
