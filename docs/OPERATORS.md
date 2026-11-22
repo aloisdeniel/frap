@@ -275,31 +275,31 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.vertex_group_set_active` | M6 | P1 | dynamic enum; WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_normalize` | M6 | P1 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_clean` | M6 | P1 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.vertex_group_copy` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_copy_to_selected` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_invert` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_quantize` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_levels` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_lock` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_mirror` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_move` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_smooth` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_group_sort` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_weight_copy` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_weight_delete` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_weight_normalize_active_vertex` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_weight_paste` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.vertex_weight_set_active` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_copy` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_copy_to_selected` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_invert` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_quantize` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_levels` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_lock` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_mirror` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_move` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_smooth` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_group_sort` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_weight_copy` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_weight_delete` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_weight_normalize_active_vertex` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_weight_paste` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.vertex_weight_set_active` | M8 | P2 | WP 8.3.7 |
 | [x] | `object.shape_key_add` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.shape_key_remove` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.shape_key_clear` | M6 | P1 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.shape_key_move` | M6 | P1 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.shape_key_mirror` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.shape_key_copy` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.shape_key_lock` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.shape_key_make_basis` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.shape_key_apply_to_basis` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.shape_key_transfer` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.shape_key_mirror` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.shape_key_copy` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.shape_key_lock` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.shape_key_make_basis` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.shape_key_apply_to_basis` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.shape_key_transfer` | M8 | P2 | WP 8.3.7 |
 | [x] | `object.move_to_collection` | M1 | P1 |  |
 | [x] | `object.link_to_collection` | M1 | P2 |  |
 | [x] | `object.collection_add` | M1 | P2 |  |
@@ -326,7 +326,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.copy_relative_transform` | M8 | P2 | WP 8.3.5 |
 | [ ] | `object.paste_transform` | M8 | P2 | WP 8.3.5 |
 | [ ] | `object.unlink_data` | M8 | P2 | WP 8.3.6 |
-| [ ] | `object.update_shapes` | M8 | P2 | WP 8.3.7 |
+| [x] | `object.update_shapes` | M8 | P2 | WP 8.3.7 |
 | [ ] | `object.visual_geometry_to_objects` | M8 | P2 | WP 8.3.6 |
 | [ ] | `object.voxel_remesh` | M9 | P2 | post-M8 (M8 W0, M8W0-3): OpenVDB level-set remesher (`BKE_mesh_remesh_voxel`), no pure-Rust port planned in M8 |
 | [ ] | `object.modifier_convert` | M8 | P2 | WP 8.3.6 |

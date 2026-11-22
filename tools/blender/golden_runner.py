@@ -200,6 +200,8 @@ NORMALISE = {
     "D-144": ("cases", "cases use Draco normal quantization 0 or 2..30 and finite meshes"),
     "D-145": ("cases", "FLOAT goldens compare at T2 and use inputs with one canonical result over several Blender runs"),
     "D-146": ("cases", "gltf/subsurf_split/mirror_stack writes Blender's smart_project UVs literally (foreach_set) instead of calling uv.smart_project"),
+    "D-147": ("cases", "cases mirror one mesh per run or meshes with different element counts"),
+    "D-148": ("cases", "vertex_group_copy_to_selected only fails where Blender changes nothing"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
