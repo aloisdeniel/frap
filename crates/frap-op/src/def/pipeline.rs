@@ -577,6 +577,11 @@ pub fn prepare(
 
 // ------------------------------------------------------------------------------- execution
 
+/// Macros whose own `exec` runs their steps (M8, WP 8.3.9): `UV_OT_rip_move`'s
+/// `TRANSFORM_OT_translate` is the Image Editor's and moves UVs, while frap's
+/// `transform.translate` is the virtual 3D View's (D-10) and moves the mesh selection.
+pub const MACRO_OWN_STEPS: &[&str] = &["UV_OT_rip_move"];
+
 /// Step properties a macro definition sets (`RNA_boolean_set(otmacro->ptr, …)` in
 /// `WM_operatortype_macro_define` callers): they win over the caller's nested arguments
 /// (verified on 5.2.4: `duplicate_move_linked(OBJECT_OT_duplicate={'linked': False})` still
@@ -619,9 +624,10 @@ pub fn macro_step_forced(macro_bl: &str, step_bl: &str) -> Vec<(&'static str, bo
 /// §10.2 step 7: runs an operator. A macro runs its steps in order with their nested args
 /// (defaults for steps without one), stops at the first cancelled step and reports `FINISHED`
 /// if an earlier step finished (`wm_macro_exec`/`wm_macro_end`); its own `exec` then runs as a
-/// post-step hook. Errors propagate (the session rolls back).
+/// post-step hook (a macro of [`MACRO_OWN_STEPS`] runs only its `exec`). Errors propagate (the
+/// session rolls back).
 pub fn execute(def: &'static OperatorDef, cx: &mut OpCtx, args: &OpArgs) -> OpResult {
-    if def.kind == OpKind::Normal {
+    if def.kind == OpKind::Normal || MACRO_OWN_STEPS.contains(&def.spec.bl_idname) {
         return (def.exec)(cx, args);
     }
     let reg = Registry::global();
