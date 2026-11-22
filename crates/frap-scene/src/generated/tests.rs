@@ -132,7 +132,10 @@ fn default_equals_fresh_tool_settings() {
     check("ToolSettings", "snap_target", |p| v.rna_get(p));
     check("ToolSettings", "use_keyframe_insert_auto", |p| v.rna_get(p));
     check("ToolSettings", "keyframe_type", |p| v.rna_get(p));
+    check("ToolSettings", "uv_select_mode", |p| v.rna_get(p));
+    check("ToolSettings", "uv_sticky_select_mode", |p| v.rna_get(p));
     check("ToolSettings", "use_uv_select_sync", |p| v.rna_get(p));
+    check("ToolSettings", "use_uv_select_island", |p| v.rna_get(p));
     check("ToolSettings", "mesh_select_mode", |p| v.rna_get(p));
     check("ToolSettings", "vertex_group_weight", |p| v.rna_get(p));
     let _ = ["ToolSettings"];

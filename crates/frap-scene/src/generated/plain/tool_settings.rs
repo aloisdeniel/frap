@@ -54,8 +54,14 @@ pub struct ToolSettings {
     pub use_keyframe_insert_auto: bool,
     /// `keyframe_type`: Type of keyframes to create when inserting keyframes
     pub keyframe_type: SmolStr,
+    /// `uv_select_mode`: UV selection and display mode
+    pub uv_select_mode: SmolStr,
+    /// `uv_sticky_select_mode`: Method for extending UV vertex selection
+    pub uv_sticky_select_mode: SmolStr,
     /// `use_uv_select_sync`: Keep UV and edit mode mesh selection in sync
     pub use_uv_select_sync: bool,
+    /// `use_uv_select_island`: Island selection
+    pub use_uv_select_island: bool,
     /// `mesh_select_mode`: Which mesh elements selection works on
     pub mesh_select_mode: [bool; 3],
     /// `vertex_group_weight`: Weight to assign in vertex groups
@@ -72,6 +78,8 @@ pub struct ToolSettings {
     pub uvcalc_weight_factor: f32,
     /// DNA `uvcalc_weight_group`: `uv.unwrap` `weight_group` (no RNA property)
     pub uvcalc_weight_group: SmolStr,
+    /// DNA `select_thresh`: the `threshold` a `select_similar` call without one uses; a call with one stores it (no RNA property)
+    pub select_thresh: f32,
 }
 
 impl Default for ToolSettings {
@@ -96,7 +104,10 @@ impl Default for ToolSettings {
             snap_target: SmolStr::new_static("CLOSEST"),
             use_keyframe_insert_auto: false,
             keyframe_type: SmolStr::new_static("KEYFRAME"),
+            uv_select_mode: SmolStr::new_static("VERTEX"),
+            uv_sticky_select_mode: SmolStr::new_static("SHARED_LOCATION"),
             use_uv_select_sync: true,
+            use_uv_select_island: false,
             mesh_select_mode: [true, false, false],
             vertex_group_weight: 1.0,
             unwrapper: SmolStr::new_static("ANGLE_BASED"),
@@ -105,13 +116,14 @@ impl Default for ToolSettings {
             uvcalc_iterations: 10,
             uvcalc_weight_factor: 1.0,
             uvcalc_weight_group: SmolStr::new_static("uv_importance"),
+            select_thresh: 0.01,
         }
     }
 }
 
 impl ToolSettings {
     /// Names of the stored RNA properties, in field order.
-    pub const STORED: [&'static str; 22] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "lock_markers", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "use_uv_select_sync", "mesh_select_mode", "vertex_group_weight"];
+    pub const STORED: [&'static str; 25] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "lock_markers", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "uv_select_mode", "uv_sticky_select_mode", "use_uv_select_sync", "use_uv_select_island", "mesh_select_mode", "vertex_group_weight"];
     /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
     /// `.frap`; serde skips them).
     pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
@@ -148,7 +160,10 @@ impl ToolSettings {
             "snap_target" => Field::Value(Value::Enum(self.snap_target.clone())),
             "use_keyframe_insert_auto" => Field::Value(Value::Bool(self.use_keyframe_insert_auto)),
             "keyframe_type" => Field::Value(Value::Enum(self.keyframe_type.clone())),
+            "uv_select_mode" => Field::Value(Value::Enum(self.uv_select_mode.clone())),
+            "uv_sticky_select_mode" => Field::Value(Value::Enum(self.uv_sticky_select_mode.clone())),
             "use_uv_select_sync" => Field::Value(Value::Bool(self.use_uv_select_sync)),
+            "use_uv_select_island" => Field::Value(Value::Bool(self.use_uv_select_island)),
             "mesh_select_mode" => Field::Value(Value::BoolArray(SmallVec::from_slice(&self.mesh_select_mode))),
             "vertex_group_weight" => Field::Value(Value::Float(self.vertex_group_weight)),
             _ => return None,
@@ -177,7 +192,10 @@ impl ToolSettings {
             "snap_target" => self.snap_target = FromValue::from_value(&v),
             "use_keyframe_insert_auto" => self.use_keyframe_insert_auto = FromValue::from_value(&v),
             "keyframe_type" => self.keyframe_type = FromValue::from_value(&v),
+            "uv_select_mode" => self.uv_select_mode = FromValue::from_value(&v),
+            "uv_sticky_select_mode" => self.uv_sticky_select_mode = FromValue::from_value(&v),
             "use_uv_select_sync" => self.use_uv_select_sync = FromValue::from_value(&v),
+            "use_uv_select_island" => self.use_uv_select_island = FromValue::from_value(&v),
             "mesh_select_mode" => self.mesh_select_mode = FromValue::from_value(&v),
             "vertex_group_weight" => self.vertex_group_weight = FromValue::from_value(&v),
             _ => return None,

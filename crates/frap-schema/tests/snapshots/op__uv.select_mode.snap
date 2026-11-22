@@ -1,0 +1,82 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.select_mode",
+  "bl_idname": "UV_OT_select_mode",
+  "label": "UV Select Mode",
+  "description": "Change UV selection mode",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VERTEX",
+      "enum_items": [
+        {
+          "identifier": "VERTEX",
+          "name": "Vertex",
+          "description": "Vertex selection mode",
+          "value": 1
+        },
+        {
+          "identifier": "EDGE",
+          "name": "Edge",
+          "description": "Edge selection mode",
+          "value": 2
+        },
+        {
+          "identifier": "FACE",
+          "name": "Face",
+          "description": "Face selection mode",
+          "value": 4
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

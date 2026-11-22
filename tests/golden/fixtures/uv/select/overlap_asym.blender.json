@@ -1,0 +1,2475 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": true
+    },
+    {
+      "line": 76,
+      "ok": true
+    },
+    {
+      "line": 77,
+      "ok": true
+    },
+    {
+      "line": 78,
+      "ok": true
+    },
+    {
+      "line": 79,
+      "ok": true
+    },
+    {
+      "line": 80,
+      "ok": true
+    },
+    {
+      "line": 81,
+      "ok": true
+    },
+    {
+      "line": 82,
+      "ok": true
+    },
+    {
+      "line": 83,
+      "ok": true
+    },
+    {
+      "line": 84,
+      "ok": true
+    },
+    {
+      "line": 85,
+      "ok": true
+    },
+    {
+      "line": 86,
+      "ok": true
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 90,
+      "ok": true
+    },
+    {
+      "line": 91,
+      "ok": true
+    },
+    {
+      "line": 92,
+      "ok": true
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": true
+    },
+    {
+      "line": 96,
+      "ok": true
+    },
+    {
+      "line": 97,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": true
+    },
+    {
+      "line": 99,
+      "ok": true
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": true
+    },
+    {
+      "line": 102,
+      "ok": true
+    },
+    {
+      "line": 103,
+      "ok": true
+    },
+    {
+      "line": 104,
+      "ok": true
+    },
+    {
+      "line": 105,
+      "ok": true
+    },
+    {
+      "line": 106,
+      "ok": true
+    },
+    {
+      "line": 107,
+      "ok": true
+    },
+    {
+      "line": 108,
+      "ok": true
+    },
+    {
+      "line": 109,
+      "ok": true
+    },
+    {
+      "line": 110,
+      "ok": true
+    },
+    {
+      "line": 111,
+      "ok": true
+    },
+    {
+      "line": 112,
+      "ok": true
+    },
+    {
+      "line": 113,
+      "ok": true
+    },
+    {
+      "line": 114,
+      "ok": true
+    },
+    {
+      "line": 115,
+      "ok": true
+    },
+    {
+      "line": 116,
+      "ok": true
+    },
+    {
+      "line": 117,
+      "ok": true
+    },
+    {
+      "line": 118,
+      "ok": true
+    },
+    {
+      "line": 119,
+      "ok": true
+    },
+    {
+      "line": 120,
+      "ok": true
+    },
+    {
+      "line": 121,
+      "ok": true
+    },
+    {
+      "line": 122,
+      "ok": true
+    },
+    {
+      "line": 123,
+      "ok": true
+    },
+    {
+      "line": 124,
+      "ok": true
+    },
+    {
+      "line": 125,
+      "ok": true
+    },
+    {
+      "line": 126,
+      "ok": true
+    },
+    {
+      "line": 127,
+      "ok": true
+    },
+    {
+      "line": 128,
+      "ok": true
+    },
+    {
+      "line": 129,
+      "ok": true
+    },
+    {
+      "line": 130,
+      "ok": true
+    },
+    {
+      "line": 131,
+      "ok": true
+    },
+    {
+      "line": 132,
+      "ok": true
+    },
+    {
+      "line": 133,
+      "ok": true
+    },
+    {
+      "line": 134,
+      "ok": true
+    },
+    {
+      "line": 135,
+      "ok": true
+    },
+    {
+      "line": 136,
+      "ok": true
+    },
+    {
+      "line": 137,
+      "ok": true
+    },
+    {
+      "line": 138,
+      "ok": true
+    },
+    {
+      "line": 139,
+      "ok": true
+    },
+    {
+      "line": 140,
+      "ok": true
+    },
+    {
+      "line": 141,
+      "ok": true
+    },
+    {
+      "line": 142,
+      "ok": true
+    },
+    {
+      "line": 143,
+      "ok": true
+    },
+    {
+      "line": 144,
+      "ok": true
+    },
+    {
+      "line": 145,
+      "ok": true
+    },
+    {
+      "line": 146,
+      "ok": true
+    },
+    {
+      "line": 147,
+      "ok": true
+    },
+    {
+      "line": 148,
+      "ok": true
+    },
+    {
+      "line": 149,
+      "ok": true
+    },
+    {
+      "line": 150,
+      "ok": true
+    },
+    {
+      "line": 151,
+      "ok": true
+    },
+    {
+      "line": 152,
+      "ok": true
+    },
+    {
+      "line": 153,
+      "ok": true
+    },
+    {
+      "line": 154,
+      "ok": true
+    },
+    {
+      "line": 155,
+      "ok": true
+    },
+    {
+      "line": 156,
+      "ok": true
+    },
+    {
+      "line": 157,
+      "ok": true
+    },
+    {
+      "line": 158,
+      "ok": true
+    },
+    {
+      "line": 159,
+      "ok": true
+    },
+    {
+      "line": 160,
+      "ok": true
+    },
+    {
+      "line": 161,
+      "ok": true
+    },
+    {
+      "line": 162,
+      "ok": true
+    },
+    {
+      "line": 163,
+      "ok": true
+    },
+    {
+      "line": 164,
+      "ok": true
+    },
+    {
+      "line": 165,
+      "ok": true
+    },
+    {
+      "line": 166,
+      "ok": true
+    },
+    {
+      "line": 167,
+      "ok": true
+    },
+    {
+      "line": 168,
+      "ok": true
+    },
+    {
+      "line": 169,
+      "ok": true
+    },
+    {
+      "line": 170,
+      "ok": true
+    },
+    {
+      "line": 171,
+      "ok": true
+    },
+    {
+      "line": 172,
+      "ok": true
+    },
+    {
+      "line": 173,
+      "ok": true
+    },
+    {
+      "line": 174,
+      "ok": true
+    },
+    {
+      "line": 175,
+      "ok": true
+    },
+    {
+      "line": 176,
+      "ok": true
+    },
+    {
+      "line": 177,
+      "ok": true
+    },
+    {
+      "line": 178,
+      "ok": true
+    },
+    {
+      "line": 179,
+      "ok": true
+    },
+    {
+      "line": 180,
+      "ok": true
+    },
+    {
+      "line": 181,
+      "ok": true
+    },
+    {
+      "line": 182,
+      "ok": true
+    },
+    {
+      "line": 183,
+      "ok": true
+    },
+    {
+      "line": 184,
+      "ok": true
+    },
+    {
+      "line": 185,
+      "ok": true
+    },
+    {
+      "line": 186,
+      "ok": true
+    },
+    {
+      "line": 187,
+      "ok": true
+    },
+    {
+      "line": 188,
+      "ok": true
+    },
+    {
+      "line": 189,
+      "ok": true
+    },
+    {
+      "line": 190,
+      "ok": true
+    },
+    {
+      "line": 191,
+      "ok": true
+    },
+    {
+      "line": 192,
+      "ok": true
+    },
+    {
+      "line": 193,
+      "ok": true
+    },
+    {
+      "line": 194,
+      "ok": true
+    },
+    {
+      "line": 195,
+      "ok": true
+    },
+    {
+      "line": 196,
+      "ok": true
+    },
+    {
+      "line": 197,
+      "ok": true
+    },
+    {
+      "line": 198,
+      "ok": true
+    },
+    {
+      "line": 199,
+      "ok": true
+    },
+    {
+      "line": 200,
+      "ok": true
+    },
+    {
+      "line": 201,
+      "ok": true
+    },
+    {
+      "line": 202,
+      "ok": true
+    },
+    {
+      "line": 203,
+      "ok": true
+    },
+    {
+      "line": 204,
+      "ok": true
+    },
+    {
+      "line": 205,
+      "ok": true
+    },
+    {
+      "line": 206,
+      "ok": true
+    },
+    {
+      "line": 207,
+      "ok": true
+    },
+    {
+      "line": 208,
+      "ok": true
+    },
+    {
+      "line": 209,
+      "ok": true
+    },
+    {
+      "line": 210,
+      "ok": true
+    },
+    {
+      "line": 211,
+      "ok": true
+    },
+    {
+      "line": 212,
+      "ok": true
+    },
+    {
+      "line": 213,
+      "ok": true
+    },
+    {
+      "line": 214,
+      "ok": true
+    },
+    {
+      "line": 215,
+      "ok": true
+    },
+    {
+      "line": 216,
+      "ok": true
+    },
+    {
+      "line": 217,
+      "ok": true
+    },
+    {
+      "line": 218,
+      "ok": true
+    },
+    {
+      "line": 219,
+      "ok": true
+    },
+    {
+      "line": 220,
+      "ok": true
+    },
+    {
+      "line": 221,
+      "ok": true
+    },
+    {
+      "line": 222,
+      "ok": true
+    },
+    {
+      "line": 223,
+      "ok": true
+    },
+    {
+      "line": 224,
+      "ok": true
+    },
+    {
+      "line": 225,
+      "ok": true
+    },
+    {
+      "line": 226,
+      "ok": true
+    },
+    {
+      "line": 227,
+      "ok": true
+    },
+    {
+      "line": 228,
+      "ok": true
+    },
+    {
+      "line": 229,
+      "ok": true
+    },
+    {
+      "line": 230,
+      "ok": true
+    },
+    {
+      "line": 231,
+      "ok": true
+    },
+    {
+      "line": 232,
+      "ok": true
+    },
+    {
+      "line": 233,
+      "ok": true
+    },
+    {
+      "line": 234,
+      "ok": true
+    },
+    {
+      "line": 235,
+      "ok": true
+    },
+    {
+      "line": 236,
+      "ok": true
+    },
+    {
+      "line": 237,
+      "ok": true
+    },
+    {
+      "line": 238,
+      "ok": true
+    },
+    {
+      "line": 239,
+      "ok": true
+    },
+    {
+      "line": 240,
+      "ok": true
+    },
+    {
+      "line": 241,
+      "ok": true
+    },
+    {
+      "line": 242,
+      "ok": true
+    },
+    {
+      "line": 243,
+      "ok": true
+    },
+    {
+      "line": 244,
+      "ok": true
+    },
+    {
+      "line": 245,
+      "ok": true
+    },
+    {
+      "line": 246,
+      "ok": true
+    },
+    {
+      "line": 247,
+      "ok": true
+    },
+    {
+      "line": 248,
+      "ok": true
+    },
+    {
+      "line": 249,
+      "ok": true
+    },
+    {
+      "line": 250,
+      "ok": true
+    },
+    {
+      "line": 251,
+      "ok": true
+    },
+    {
+      "line": 252,
+      "ok": true
+    },
+    {
+      "line": 253,
+      "ok": true
+    },
+    {
+      "line": 254,
+      "ok": true
+    },
+    {
+      "line": 255,
+      "ok": true
+    },
+    {
+      "line": 256,
+      "ok": true
+    },
+    {
+      "line": 257,
+      "ok": true
+    },
+    {
+      "line": 258,
+      "ok": true
+    },
+    {
+      "line": 259,
+      "ok": true
+    },
+    {
+      "line": 260,
+      "ok": true
+    },
+    {
+      "line": 261,
+      "ok": true
+    },
+    {
+      "line": 262,
+      "ok": true
+    },
+    {
+      "line": 263,
+      "ok": true
+    },
+    {
+      "line": 264,
+      "ok": true
+    },
+    {
+      "line": 265,
+      "ok": true
+    },
+    {
+      "line": 266,
+      "ok": true
+    },
+    {
+      "line": 267,
+      "ok": true
+    },
+    {
+      "line": 268,
+      "ok": true
+    },
+    {
+      "line": 269,
+      "ok": true
+    },
+    {
+      "line": 270,
+      "ok": true
+    },
+    {
+      "line": 271,
+      "ok": true
+    },
+    {
+      "line": 272,
+      "ok": true
+    },
+    {
+      "line": 273,
+      "ok": true
+    },
+    {
+      "line": 274,
+      "ok": true
+    },
+    {
+      "line": 275,
+      "ok": true
+    },
+    {
+      "line": 276,
+      "ok": true
+    },
+    {
+      "line": 277,
+      "ok": true
+    },
+    {
+      "line": 278,
+      "ok": true
+    },
+    {
+      "line": 279,
+      "ok": true
+    },
+    {
+      "line": 280,
+      "ok": true
+    },
+    {
+      "line": 281,
+      "ok": true
+    },
+    {
+      "line": 282,
+      "ok": true
+    },
+    {
+      "line": 283,
+      "ok": true
+    },
+    {
+      "line": 284,
+      "ok": true
+    },
+    {
+      "line": 285,
+      "ok": true
+    },
+    {
+      "line": 286,
+      "ok": true
+    },
+    {
+      "line": 287,
+      "ok": true
+    },
+    {
+      "line": 288,
+      "ok": true
+    },
+    {
+      "line": 289,
+      "ok": true
+    },
+    {
+      "line": 290,
+      "ok": true
+    },
+    {
+      "line": 291,
+      "ok": true
+    },
+    {
+      "line": 292,
+      "ok": true
+    },
+    {
+      "line": 293,
+      "ok": true
+    },
+    {
+      "line": 294,
+      "ok": true
+    },
+    {
+      "line": 295,
+      "ok": true
+    },
+    {
+      "line": 296,
+      "ok": true
+    },
+    {
+      "line": 297,
+      "ok": true
+    },
+    {
+      "line": 298,
+      "ok": true
+    },
+    {
+      "line": 299,
+      "ok": true
+    },
+    {
+      "line": 300,
+      "ok": true
+    },
+    {
+      "line": 301,
+      "ok": true
+    },
+    {
+      "line": 302,
+      "ok": true
+    },
+    {
+      "line": 303,
+      "ok": true
+    },
+    {
+      "line": 304,
+      "ok": true
+    },
+    {
+      "line": 305,
+      "ok": true
+    },
+    {
+      "line": 306,
+      "ok": true
+    },
+    {
+      "line": 307,
+      "ok": true
+    },
+    {
+      "line": 308,
+      "ok": true
+    },
+    {
+      "line": 309,
+      "ok": true
+    },
+    {
+      "line": 310,
+      "ok": true
+    },
+    {
+      "line": 311,
+      "ok": true
+    },
+    {
+      "line": 312,
+      "ok": true
+    },
+    {
+      "line": 313,
+      "ok": true
+    },
+    {
+      "line": 314,
+      "ok": true
+    },
+    {
+      "line": 315,
+      "ok": true
+    },
+    {
+      "line": 316,
+      "ok": true
+    },
+    {
+      "line": 317,
+      "ok": true
+    },
+    {
+      "line": 318,
+      "ok": true
+    },
+    {
+      "line": 319,
+      "ok": true
+    },
+    {
+      "line": 320,
+      "ok": true
+    },
+    {
+      "line": 321,
+      "ok": true
+    },
+    {
+      "line": 322,
+      "ok": true
+    },
+    {
+      "line": 323,
+      "ok": true
+    },
+    {
+      "line": 324,
+      "ok": true
+    },
+    {
+      "line": 325,
+      "ok": true
+    },
+    {
+      "line": 326,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Plane": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.001": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.002": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.003": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.004": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.005": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.006": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.007": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.008": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.009": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.010": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.011": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.012": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.013": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.014": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Plane.015": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {
+    "P0": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.8590175, 0.050442804],
+          [0.06948748, 0.83165616],
+          [0.36734802, 0.3309185],
+          [0.06956625, 0.83157814],
+          [-0.40301642, 1.0820042],
+          [2.6918082, 0.50961864]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [false, false],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P1": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.06956625, 0.83157814],
+          [-0.40301642, 1.0820042],
+          [2.6918082, 0.50961864],
+          [0.8590175, 0.050442804],
+          [0.06948748, 0.83165616],
+          [0.36734802, 0.3309185]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [false, false],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P10": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.00049391063, 0.43578124],
+          [0.14236246, 0.8994214],
+          [0.29916206, 0.55052215],
+          [0.14234827, 0.8993751],
+          [0.3225295, 0.96823037],
+          [2.1543796, 0.8239282]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P11": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.14234827, 0.8993751],
+          [0.3225295, 0.96823037],
+          [2.1543796, 0.8239282],
+          [0.00049391063, 0.43578124],
+          [0.14236246, 0.8994214],
+          [0.29916206, 0.55052215]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P12": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.24640091, 0.062040143],
+          [0.12757596, 0.17876689],
+          [0.6028397, 0.703693],
+          [0.12762344, 0.17881933],
+          [-0.04843247, -0.13825926],
+          [2.0533462, 0.8054816]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P13": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.12762344, 0.17881933],
+          [-0.04843247, -0.13825926],
+          [2.0533462, 0.8054816],
+          [0.24640091, 0.062040143],
+          [0.12757596, 0.17876689],
+          [0.6028397, 0.703693]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P14": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.5752326, 0.3053539],
+          [0.07343517, 0.64902127],
+          [0.8508978, 0.36511365],
+          [0.8508703, 0.3651077],
+          [0.81948924, 0.35835513],
+          [2.7754314, 0.08696748]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [false, false],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P15": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.8508703, 0.3651077],
+          [0.81948924, 0.35835513],
+          [2.7754314, 0.08696748],
+          [0.5752326, 0.3053539],
+          [0.07343517, 0.64902127],
+          [0.8508978, 0.36511365]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [false, false],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P2": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.7942262, 0.043628145],
+          [0.6671253, 0.90950155],
+          [0.031604134, 0.09001942],
+          [0.667138, 0.90941507],
+          [0.57286614, 0.9149958],
+          [2.7952693, 0.9371377]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P3": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.667138, 0.90941507],
+          [0.57286614, 0.9149958],
+          [2.7952693, 0.9371377],
+          [0.7942262, 0.043628145],
+          [0.6671253, 0.90950155],
+          [0.031604134, 0.09001942]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P4": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.3498542, 0.19070165],
+          [0.56335074, 0.5421996],
+          [0.20556797, 0.052977014],
+          [0.20560381, 0.05302605],
+          [0.24660248, -0.056094855],
+          [2.81166, 0.42284977]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P5": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.20560381, 0.05302605],
+          [0.24660248, -0.056094855],
+          [2.81166, 0.42284977],
+          [0.3498542, 0.19070165],
+          [0.56335074, 0.5421996],
+          [0.20556797, 0.052977014]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P6": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.16142535, 0.9078425],
+          [0.74681515, 0.5555605],
+          [0.38822526, 0.09768051],
+          [0.3882026, 0.09776137],
+          [1.1362069, -0.04505705],
+          [2.6736383, 0.24188794]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P7": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.3882026, 0.09776137],
+          [1.1362069, -0.04505705],
+          [2.6736383, 0.24188794],
+          [0.16142535, 0.9078425],
+          [0.74681515, 0.5555605],
+          [0.38822526, 0.09768051]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P8": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.14199556, 0.66457593],
+          [0.20563166, 0.60832167],
+          [0.45520884, 0.50058305],
+          [0.45517752, 0.50059944],
+          [0.34437808, 0.55874676],
+          [2.9133825, 0.44291428]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [false, false],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "P9": {
+      "positions": [
+        [-1.0, -1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0]
+      ],
+      "edges": [
+        [2, 0],
+        [0, 1],
+        [1, 3],
+        [3, 2],
+        [2, 1]
+      ],
+      "faces": [
+        [1, 2, 0],
+        [1, 3, 2]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "face_normals": [
+        [-0.0, 0.0, 1.0],
+        [-0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.45517752, 0.50059944],
+          [0.34437808, 0.55874676],
+          [2.9133825, 0.44291428],
+          [0.14199556, 0.66457593],
+          [0.20563166, 0.60832167],
+          [0.45520884, 0.50058305]
+        ]
+      },
+      "attributes": {
+        "ov": {
+          "data": [false, false],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        },
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Plane.015",
+    "selected": [],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}
