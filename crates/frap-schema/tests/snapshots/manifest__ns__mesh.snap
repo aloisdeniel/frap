@@ -110,7 +110,7 @@ source: crates/frap-schema/tests/snapshots.rs
   "mesh.remove_doubles | planned M2 | poll NNYNN/NNYNN | threshold,use_centroid,use_unselected,use_sharp_edge_from_normals",
   "mesh.reorder_vertices_spatial | planned M8 | poll YNYNN/YNYNN | ",
   "mesh.reveal | planned M2 | poll NNYNN/NNYNN | select",
-  "mesh.rip | planned M8 | poll NNNNN/NNYNN | mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,release_confirm,use_accurate,use_fill",
+  "mesh.rip | planned M8 | poll NNNNN/NNYNN | mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,release_confirm,use_accurate,use_fill,frap_location,frap_direction",
   "mesh.rip_edge | planned M8 | poll NNNNN/NNYNN | location,direction",
   "mesh.rip_edge_move | planned M8 | poll NNNNN/NNYNN | MESH_OT_rip_edge,TRANSFORM_OT_translate",
   "mesh.rip_move | planned M8 | poll NNNNN/NNYNN | MESH_OT_rip,TRANSFORM_OT_translate",

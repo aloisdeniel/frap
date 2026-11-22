@@ -386,9 +386,14 @@ fn tagged_loop_pairs_do_fill_faces(bm: &mut BMesh, pairs: &[LoopPair], normals: 
 
 // --------------------------------------------------------------------- custom normals
 
-/// `BM_custom_loop_normals_to_vector_layer` / `…_from_vector_layer`: the custom normals as
-/// vectors by loop slot while the topology changes, re-encoded in the new corner spaces
-/// afterwards.
+/// `BM_custom_loop_normals_to_vector_layer` / `BM_custom_loop_normals_from_vector_layer(bm,
+/// false)`: the custom normals as vectors by loop slot (the temporary `CD_NORMAL` layer)
+/// while the topology changes, copied with the corners of new faces, then re-encoded in the
+/// new corner spaces, averaged over each smooth fan.
+///
+/// Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
+/// (`bm_mesh_loops_custom_normals_set` without fan splitting,
+/// `bm_mesh_loops_assign_normal_data`).
 #[derive(Default)]
 pub(crate) struct ClnorKeep {
     vecs: Option<Vec<Option<V3>>>,
@@ -408,6 +413,7 @@ impl ClnorKeep {
         }
         ClnorKeep { vecs: Some(vecs) }
     }
+    /// `BM_elem_attrs_copy` of the `CD_NORMAL` layer.
     fn copy(&mut self, src: LoopId, dst: LoopId) {
         if let Some(v) = &mut self.vecs {
             if v.len() <= dst.slot() {
@@ -420,16 +426,39 @@ impl ClnorKeep {
         let Some(vecs) = self.vecs else {
             return;
         };
-        bm.lnor_spacearr.invalidate_all();
-        let sp = frap_bmesh::clnor::rebuild(bm);
-        for f in bm.face_ids() {
-            for l in bm.face_loops(f) {
-                if let Some(Some(n)) = vecs.get(l.slot()) {
-                    let data = sp.encode(l, *n);
+        // `bm_mesh_loops_calc_normals` on the new topology: smooth fans from the smooth flags
+        // only, the face normals as they are, the custom normals decoded into `cur_lnors`.
+        let sp = super::fan_spaces::fans(bm);
+        // Validate the new normals: a zero (or missing) vector takes the current normal.
+        let custom = |l: LoopId| -> V3 {
+            match vecs.get(l.slot()).copied().flatten() {
+                Some(n) if n != [0.0; 3] => normalize_v3(n).0,
+                _ => sp.cur_lnors.get(l.slot()).copied().unwrap_or([0.0; 3]),
+            }
+        };
+        // `bm_mesh_loops_assign_normal_data`: one encoded value per fan, from the average of
+        // the fan's custom normals (summed in the order the space lists its loops).
+        for fan in &sp.fans {
+            if fan.single {
+                let l = fan.loops[0];
+                let data = frap_bmesh::clnor::custom_normal_to_data(&fan.space, custom(l));
+                frap_bmesh::clnor::set(bm, l, data);
+            } else {
+                let mut avg = [0.0f32; 3];
+                for &l in &fan.loops {
+                    let n = custom(l);
+                    avg = [avg[0] + n[0], avg[1] + n[1], avg[2] + n[2]];
+                }
+                let f = 1.0 / fan.loops.len() as f32;
+                avg = [avg[0] * f, avg[1] * f, avg[2] * f];
+                let data = frap_bmesh::clnor::custom_normal_to_data(&fan.space, avg);
+                for &l in &fan.loops {
                     frap_bmesh::clnor::set(bm, l, data);
                 }
             }
         }
+        // Spaces stored before the topology change are stale.
+        bm.lnor_spacearr.invalidate_all();
     }
 }
 

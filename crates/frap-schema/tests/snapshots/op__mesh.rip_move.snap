@@ -74,7 +74,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T1",
     "support": "full",
-    "support_note": "headless-extended (deviations D-150): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over the 3D cursor in the factory Layout 3D View (scene.cursor.location projected into the 1574x954 WINDOW region): put the cursor on the side to rip towards",
+    "support_note": "headless-extended (deviations D-150): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over MESH_OT_rip's frap_location (unset: the 3D cursor), seen in the factory Layout 3D View (1574x954 WINDOW region) or, with a non-zero frap_direction, in an orthographic view looking along frap_direction: put the point on the side to rip towards",
     "headless": "extended",
     "planned": "M8",
     "extension": false,

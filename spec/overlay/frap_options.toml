@@ -27,6 +27,7 @@ draco_backend = "choice of the Draco encoder implementation (draco-core | draco-
 gpu_instancing = "EXT_mesh_gpu_instancing for objects sharing a mesh"
 draco_compression = "KHR_draco_mesh_compression"
 image_format = "PNG/JPEG/WebP image choice"
+rip_mouse = "a world-space stand-in for the mouse of an invoke-only rip (mesh.rip: point and view direction)"
 
 [covered."export_scene.gltf"]
 gpu_instancing = "export_gpu_instances"
@@ -121,3 +122,27 @@ items = [
   ["SYS", "draco-sys", "Google Draco (feature draco-sys)"],
 ]
 description = "Draco encoder implementation (frap extension)"
+
+[[option]]
+op = "mesh.rip"
+identifier = "frap_location"
+name = "Location"
+feature = "rip_mouse"
+milestone = 8
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+description = "World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-150)"
+
+[[option]]
+op = "mesh.rip"
+identifier = "frap_direction"
+name = "Direction"
+feature = "rip_mouse"
+milestone = 8
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+description = "World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-150)"

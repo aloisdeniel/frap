@@ -12,7 +12,14 @@
 //! was smoothed). Nothing selected anywhere: WARNING `No selected vertex` and `CANCELLED`. frap
 //! meshes have no X-mirror editing (`use_mirror_x`), so Blender's mirror step never runs.
 //! The linear solve is `faer`'s sparse LU instead of Eigen's `SparseLU` (same normal
-//! equations in double precision), hence tier T2.
+//! equations in double precision), hence tier T2: well-conditioned solves match within 1e-5
+//! (`vertices_smooth_laplacian_closed.py`: `lambda_factor` up to 3 on closed meshes);
+//! ill-conditioned or diverging runs (many repeats with a large `lambda_factor`, volume
+//! preservation on, where the shape grows without bound) amplify the 1e-7 differences of the
+//! other LU and summation order and are only T3-comparable (same topology, no positional
+//! guarantee). In unoptimised (dev/test) builds faer's sparse LU is slow: one call on a
+//! 200 × 200 grid (40k vertices) takes about 90 s (Blender: 2 s) unless faer and gemm are
+//! built with optimisation in the dev profile.
 
 use frap_bmesh::ops::smooth_laplacian::{SmoothLaplacianIn, smooth_laplacian_vert};
 use frap_op::operator;

@@ -6244,7 +6244,7 @@ impl OpProps for Reveal {
 
 // ---------------------------------------------------------------- mesh.rip
 /// Props of `mesh.rip`, RNA order.
-pub static RIP_PROPS: [PropDef; 9] = [
+pub static RIP_PROPS: [PropDef; 11] = [
     PropDef { identifier: "mirror", name: "Mirror Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_proportional_edit", name: "Proportional Editing", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "proportional_edit_falloff", name: "Proportional Falloff", description: "Falloff type for proportional editing mode", kind: PropKind::Enum { items: &enums::E35, default: EnumDefault::Item("SMOOTH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -6254,6 +6254,8 @@ pub static RIP_PROPS: [PropDef; 9] = [
     PropDef { identifier: "release_confirm", name: "Confirm on Release", description: "Always confirm operation when releasing button", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_accurate", name: "Accurate", description: "Use accurate transformation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_fill", name: "Fill", description: "Fill the ripped region", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "frap_location", name: "Location", description: "World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-150)", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_direction", name: "Direction", description: "World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-150)", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::empty(), deprecated: None },
 ];
 /// `MESH_OT_rip`
 pub static OPSPEC_MESH_OT_RIP: OperatorSpec = OperatorSpec {
@@ -6352,6 +6354,10 @@ pub struct Rip {
     pub use_accurate: Prop<bool>,
     /// Fill the ripped region; default false [ANIMATABLE]
     pub use_fill: Prop<bool>,
+    /// World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-150); default [0.0, 0.0, 0.0]
+    pub frap_location: Prop<[f32; 3]>,
+    /// World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-150); default [0.0, 0.0, 0.0]
+    pub frap_direction: Prop<[f32; 3]>,
 }
 impl OpProps for Rip {
     const IDNAME: &'static str = "mesh.rip";
@@ -6370,6 +6376,8 @@ impl OpProps for Rip {
             release_confirm: a.prop(6, "release_confirm"),
             use_accurate: a.prop(7, "use_accurate"),
             use_fill: a.prop(8, "use_fill"),
+            frap_location: a.prop(9, "frap_location"),
+            frap_direction: a.prop(10, "frap_direction"),
         }
     }
 }
