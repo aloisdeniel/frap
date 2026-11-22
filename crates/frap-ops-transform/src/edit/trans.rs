@@ -16,7 +16,9 @@
 //! (`transform_mode_shrink_fatten.cc`), `to_sphere_radius_update`,
 //! `transdata_elem_to_sphere` (`transform_mode_tosphere.cc`), `transdata_elem_push_pull`
 //! (`transform_mode_push_pull.cc`), `ElementMirror`, `applyMirror`
-//! (`transform_mode_mirror.cc`) and `transdata_elem_value` (`transform_mode_customdata.cc`).
+//! (`transform_mode_mirror.cc`) and `transdata_elem_value` (`transform_mode_customdata.cc`);
+//! for WP 8.3.5 `apply_shear_value`, `transdata_elem_shear` (`transform_mode_shear.cc`) and
+//! `applyNormalRotation`, `initNormalRotation` (`transform_mode_edge_rotate_normal.cc`).
 //!
 //! World-space semantics follow Blender: the pivot is computed in world space from the
 //! selection of every edit mesh, values (`value`, the constraint, the orientation) are world
@@ -78,6 +80,15 @@ pub enum Mode {
     EdgeSlide,
     /// `TFM_VERT_SLIDE`
     VertSlide,
+    /// `TFM_SHEAR` (WP 8.3.5): `values[0]` is `tan(angle)`, `Request::orient_axis` the shear
+    /// axis and `ortho` its `orient_axis_ortho`.
+    Shear {
+        /// `t->orient_axis_ortho`
+        ortho: usize,
+    },
+    /// `TFM_NORMAL_ROTATION` (WP 8.3.5, `transform.rotate_normal`): rotates the custom normals
+    /// of the selection by `values[0]`.
+    NormalRotation,
 }
 
 /// What the transform data are made from (the `TransConvertType`).
@@ -747,20 +758,7 @@ fn apply(t: &mut TransInfo) {
         }
         Mode::Rotate => {
             let angle = t.req.values[0];
-            let axis = match con {
-                Some(c) => {
-                    let axes = if c.space == ConstraintSpace::PerElement {
-                        t.tcs
-                            .first()
-                            .and_then(|tc| tc.data.first().map(|td| tc.mat3_unit * td.axismtx))
-                            .unwrap_or(Mat3::IDENTITY)
-                    } else {
-                        spacemtx
-                    };
-                    con_axis_index(&c).map_or(Vec3::ZERO, |i| axes.col(i))
-                }
-                None => -spacemtx.col(t.req.orient_axis),
-            };
+            let axis = rotation_axis(t, true);
             for tc in &mut t.tcs {
                 let center_local = tc.center_local;
                 let (mtx, smtx, mat3_unit) = (tc.mtx, tc.smtx, tc.mat3_unit);
@@ -912,8 +910,85 @@ fn apply(t: &mut TransInfo) {
                 }
             }
         }
-        Mode::EdgeSlide | Mode::VertSlide => {}
+        Mode::Shear { ortho } => {
+            let mat_final = shear_matrix(&spacemtx, t.req.orient_axis, ortho, t.req.values[0]);
+            for tc in &mut t.tcs {
+                let center_local = tc.center_local;
+                // `mul_m3_series(tmat, td->smtx, mat_final, td->mtx)`.
+                let tmat = (tc.smtx * mat_final) * tc.mtx;
+                for td in &mut tc.data {
+                    let center = if local { td.center } else { center_local };
+                    let mut vec = tmat * (td.iloc - center);
+                    vec += center;
+                    vec -= td.iloc;
+                    vec *= td.factor;
+                    td.loc = td.iloc + vec;
+                }
+            }
+        }
+        Mode::EdgeSlide | Mode::VertSlide | Mode::NormalRotation => {}
     }
+}
+
+/// `apply_shear_value`'s `mat_final`: the shear `x += value · y` in the frame whose X is the
+/// `ortho` axis of `spacemtx`, whose Z is its `axis` axis and whose Y is `X × Z`.
+pub fn shear_matrix(spacemtx: &Mat3, axis: usize, ortho: usize, value: f32) -> Mat3 {
+    let mut smat = Mat3::IDENTITY;
+    // `smat[1][0] = value`: column 1, row 0.
+    smat.y_axis.x = value;
+    let x = spacemtx.col(ortho);
+    let z = spacemtx.col(axis);
+    let axismat_inv = Mat3::from_cols(x, super::mathx::cross(x, z), z);
+    let axismat = invert_m3(&axismat_inv).unwrap_or(Mat3::ZERO);
+    // `mul_m3_series(mat_final, axismat_inv, smat, axismat)`: `(axismat_inv · smat) · axismat`
+    // (glam sums each product in `mul_m3_m3m3`'s order, k = 0, 1, 2, without contraction).
+    (axismat_inv * smat) * axismat
+}
+
+/// The rotation axis of `rotate`/`rotate_normal` (`transform_mode_rotation_axis_get` /
+/// `applyAxisConstraintRot` / `applyObjectConstraintRot` without an element): the constrained
+/// axis, else the orientation's `orient_axis`, negated for `TFM_ROTATION`.
+fn rotation_axis(t: &TransInfo, negate: bool) -> Vec3 {
+    match t.con {
+        Some(c) => {
+            let axes = if c.space == ConstraintSpace::PerElement {
+                t.tcs
+                    .first()
+                    .and_then(|tc| tc.data.first().map(|td| tc.mat3_unit * td.axismtx))
+                    .unwrap_or(Mat3::IDENTITY)
+            } else {
+                t.orient.matrix
+            };
+            con_axis_index(&c).map_or(Vec3::ZERO, |i| axes.col(i))
+        }
+        None if negate => -t.orient.matrix.col(t.req.orient_axis),
+        None => t.orient.matrix.col(t.req.orient_axis),
+    }
+}
+
+// Ported from blender/source/blender/editors/transform/transform_mode_edge_rotate_normal.cc
+// (initNormalRotation, storeCustomLNorValue, applyNormalRotation), Blender 5.2.4,
+// GPL-2.0-or-later.
+/// `transform.rotate_normal`: every container's custom normals (`BKE_editmesh_lnorspace_update`
+/// adds the `custom_normal` layer when missing) of the loops chosen by the selection
+/// (`BM_loop_normal_editdata_array_init(bm, false)`) are turned by the angle about the axis
+/// and encoded in their fan spaces. The normals are object-space values turned by the
+/// world-space rotation, as in Blender.
+fn rotate_normals(cx: &mut OpCtx, t: &TransInfo) -> OpResult {
+    use frap_bmesh::clnor;
+    let axis = rotation_axis(t, false);
+    let mat = axis_angle_normalized_to_mat3(axis, t.req.values[0]);
+    for tc in &t.tcs {
+        let bm = cx.bmesh_mut(tc.me)?;
+        let sp = clnor::update(bm);
+        let arr = clnor::editdata_array(bm, &sp, false, clnor::Mark::Indiv);
+        for ed in &arr.data {
+            let n = mat * Vec3::from_array(ed.nloc);
+            let v = sp.encode(ed.loop_, n.to_array());
+            clnor::set(bm, ed.loop_, v);
+        }
+    }
+    Ok(OpStatus::Finished)
 }
 
 /// `to_sphere_radius_update`.
@@ -1180,6 +1255,7 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
     let mes: Vec<IdRef<MeshId>> = t.tcs.iter().map(|tc| tc.me).collect();
     let status = match t.req.mode {
         Mode::EdgeSlide | Mode::VertSlide => super::slide::run(cx, t)?,
+        Mode::NormalRotation => rotate_normals(cx, &t)?,
         _ => {
             apply(&mut t);
             write_back(cx, &t)?

@@ -1,0 +1,104 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.transforms_to_deltas",
+  "bl_idname": "OBJECT_OT_transforms_to_deltas",
+  "label": "Transforms to Deltas",
+  "description": "Convert normal object transforms to delta transforms, any existing delta transforms will be included as well",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE"
+    ],
+    "text": "requires an editable scene",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "mode",
+      "name": "Mode",
+      "description": "Which transforms to transfer",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "ALL",
+      "enum_items": [
+        {
+          "identifier": "ALL",
+          "name": "All Transforms",
+          "description": "Transfer location, rotation, and scale transforms",
+          "value": 0
+        },
+        {
+          "identifier": "LOC",
+          "name": "Location",
+          "description": "Transfer location transforms only",
+          "value": 1
+        },
+        {
+          "identifier": "ROT",
+          "name": "Rotation",
+          "description": "Transfer rotation transforms only",
+          "value": 2
+        },
+        {
+          "identifier": "SCALE",
+          "name": "Scale",
+          "description": "Transfer scale transforms only",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "reset_values",
+      "name": "Reset Values",
+      "description": "Clear transform values after transferring to deltas",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

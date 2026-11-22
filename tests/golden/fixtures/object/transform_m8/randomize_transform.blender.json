@@ -1,0 +1,143 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.object.randomize_transform.poll() failed, context is incorrect"
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.6728816, -0.6734501, 0.12496165, 2.4754436],
+        [1.2122838, 0.34125856, 0.27785417, -3.94801],
+        [-1.2478182, -0.031615216, 0.3373268, 2.446554],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.2377218, -1.974005, 1.223277],
+      "rotation_mode": "XYZ",
+      "rotation": [0.030534506, 0.87302816, 1.3277385],
+      "scale": [1.3657705, 0.8692756, 0.6741967],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.6198215, -0.12116736, 0.18876058, 1.1154144],
+        [0.3111292, 0.4098569, 0.31892535, -3.799914],
+        [-0.5081187, -0.13530512, 0.7970293, -1.7997655],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.5577072, -1.899957, -0.89988273],
+      "rotation_mode": "XYZ",
+      "rotation": [-0.16607356, 0.14188273, 0.1060197],
+      "scale": [1.3137436, 0.6695511, 0.93753743],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "EDIT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [0.16812667, 1.122409, -0.29024258, 2.295844],
+        [0.2928392, -0.5627072, -0.60533726, 1.082313],
+        [-0.60335505, 0.039651915, -0.37467822, 5.544117],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.1766553, 2.207761, 5.522696],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.2774265, 0.7379808, 0.4461623, -0.42350692],
+      "scale": [0.66742194, 1.6180665, 0.71756],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube", "Light", "Camera"],
+    "mode": "EDIT_MESH",
+    "select_mode": [true, false, false],
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

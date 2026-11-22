@@ -1,0 +1,230 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.paste_transform",
+  "bl_idname": "OBJECT_OT_paste_transform",
+  "label": "Paste Global Transform",
+  "description": "Pastes the matrix from the clipboard to the currently active pose bone or object. Uses world-space matrices",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active)",
+    "matrix": {
+      "plain": "YNYYY",
+      "view3d": "YNYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "method",
+      "name": "Paste Method",
+      "description": "Update the current transform, selected keyframes, or even create new keys",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CURRENT",
+      "enum_items": [
+        {
+          "identifier": "CURRENT",
+          "name": "Current Transform",
+          "description": "Paste onto the current values only, only manipulating the animation data if auto-keying is enabled",
+          "value": 0
+        },
+        {
+          "identifier": "EXISTING_KEYS",
+          "name": "Selected Keys",
+          "description": "Paste onto frames that have a selected key, potentially creating new keys on those frames",
+          "value": 1
+        },
+        {
+          "identifier": "BAKE",
+          "name": "Bake on Key Range",
+          "description": "Paste onto all frames between the first and last selected key, creating new keyframes if necessary",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "bake_step",
+      "name": "Frame Step",
+      "description": "Only used for baking. Step=1 creates a key on every frame, step=2 bakes on 2s, etc",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 1,
+      "hard_max": 2147483647,
+      "soft_min": 1,
+      "soft_max": 5,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_mirror",
+      "name": "Mirror Transform",
+      "description": "When pasting, mirror the transform relative to a specific object or bone",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mirror_axis_loc",
+      "name": "Location Axis",
+      "description": "Coordinate axis used to mirror the location part of the transform",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "x",
+      "enum_items": [
+        {
+          "identifier": "x",
+          "name": "X",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "y",
+          "name": "Y",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "z",
+          "name": "Z",
+          "description": "",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mirror_axis_rot",
+      "name": "Rotation Axis",
+      "description": "Coordinate axis used to mirror the rotation part of the transform",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "z",
+      "enum_items": [
+        {
+          "identifier": "x",
+          "name": "X",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "y",
+          "name": "Y",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "z",
+          "name": "Z",
+          "description": "",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_relative",
+      "name": "Use Relative Paste",
+      "description": "When pasting, assume the pasted matrix is relative to another object (set in the user interface)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "headless: the clipboard is always empty (as in blender -b), so pasting always fails with 'Clipboard does not contain a matrix'; assign matrix_world instead",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

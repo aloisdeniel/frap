@@ -22,7 +22,7 @@ pub struct Collection {
     pub hide_render: bool,
     /// `collection.color_tag` ("NONE", "COLOR_01" … "COLOR_08")
     pub color_tag: SmolStr,
-    /// `collection.instance_offset` (subtracted before the instancer's matrix; WP 8.3.4).
+    /// `collection.instance_offset` (subtracted before the instancer's matrix; WP 8.3.4; `object.instance_offset_*`, WP 8.3.5).
     pub instance_offset: [f32; 3],
 }
 

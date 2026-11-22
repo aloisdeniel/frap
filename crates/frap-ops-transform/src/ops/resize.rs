@@ -25,7 +25,8 @@ static RESIZE: OperatorDef = OperatorDef {
     poll: poll::ALWAYS,
     exec,
     kind: OpKind::Normal,
-    dyn_enums: &[],
+    // Custom orientations by name (WP 8.3.5).
+    dyn_enums: crate::core::orient::ORIENT_DYN_ENUMS,
     tier: Tier::T0,
     support: Support::Partial(
         "Object Mode and mesh Edit Mode (pose mode M6); texture_space and the Affect Only \

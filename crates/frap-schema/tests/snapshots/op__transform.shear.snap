@@ -1,0 +1,590 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "transform.shear",
+  "bl_idname": "TRANSFORM_OT_shear",
+  "label": "Shear",
+  "description": "Shear selected items along the given axis",
+  "bl_options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "angle",
+      "name": "Angle",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 0,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -6.2831855,
+      "soft_max": 6.2831855,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_axis",
+      "name": "Axis",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Z",
+      "enum_items": [
+        {
+          "identifier": "X",
+          "name": "X",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "Y",
+          "name": "Y",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "Z",
+          "name": "Z",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_axis_ortho",
+      "name": "Axis Ortho",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "X",
+      "enum_items": [
+        {
+          "identifier": "X",
+          "name": "X",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "Y",
+          "name": "Y",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "Z",
+          "name": "Z",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_type",
+      "name": "Orientation",
+      "description": "Transformation orientation",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GLOBAL",
+      "enum_items": [
+        {
+          "identifier": "GLOBAL",
+          "name": "Global",
+          "description": "Align the transformation axes to world space",
+          "value": 0
+        },
+        {
+          "identifier": "LOCAL",
+          "name": "Local",
+          "description": "Align the transformation axes to the selected objects' local space",
+          "value": 1
+        },
+        {
+          "identifier": "NORMAL",
+          "name": "Normal",
+          "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+          "value": 2
+        },
+        {
+          "identifier": "GIMBAL",
+          "name": "Gimbal",
+          "description": "Align each axis to the Euler rotation axis as used for input",
+          "value": 4
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the transformation axes to the window",
+          "value": 3
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "Cursor",
+          "description": "Align the transformation axes to the 3D cursor",
+          "value": 5
+        },
+        {
+          "identifier": "PARENT",
+          "name": "Parent",
+          "description": "Align the transformation axes to the object's parent space",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": "TRANSFORM_OT_shear.orient_type",
+      "context_rule": "items depend on the context in Blender (TRANSFORM_OT_shear.orient_type); frap narrows them to the live context, enum_items is the superset",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_matrix",
+      "name": "Matrix",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "MATRIX",
+      "unit": "NONE",
+      "array": [
+        3,
+        3
+      ],
+      "default": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 0,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_matrix_type",
+      "name": "Matrix Orientation",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GLOBAL",
+      "enum_items": [
+        {
+          "identifier": "GLOBAL",
+          "name": "Global",
+          "description": "Align the transformation axes to world space",
+          "value": 0
+        },
+        {
+          "identifier": "LOCAL",
+          "name": "Local",
+          "description": "Align the transformation axes to the selected objects' local space",
+          "value": 1
+        },
+        {
+          "identifier": "NORMAL",
+          "name": "Normal",
+          "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+          "value": 2
+        },
+        {
+          "identifier": "GIMBAL",
+          "name": "Gimbal",
+          "description": "Align each axis to the Euler rotation axis as used for input",
+          "value": 4
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the transformation axes to the window",
+          "value": 3
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "Cursor",
+          "description": "Align the transformation axes to the 3D cursor",
+          "value": 5
+        },
+        {
+          "identifier": "PARENT",
+          "name": "Parent",
+          "description": "Align the transformation axes to the object's parent space",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": "TRANSFORM_OT_shear.orient_matrix_type",
+      "context_rule": "items depend on the context in Blender (TRANSFORM_OT_shear.orient_matrix_type); frap narrows them to the live context, enum_items is the superset",
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "DYNAMIC_ENUM",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mirror",
+      "name": "Mirror Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_edit",
+      "name": "Proportional Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "proportional_edit_falloff",
+      "name": "Proportional Falloff",
+      "description": "Falloff type for proportional editing mode",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SMOOTH",
+      "enum_items": [
+        {
+          "identifier": "SMOOTH",
+          "name": "Smooth",
+          "description": "Smooth falloff",
+          "value": 0
+        },
+        {
+          "identifier": "SPHERE",
+          "name": "Sphere",
+          "description": "Spherical falloff",
+          "value": 1
+        },
+        {
+          "identifier": "ROOT",
+          "name": "Root",
+          "description": "Root falloff",
+          "value": 2
+        },
+        {
+          "identifier": "INVERSE_SQUARE",
+          "name": "Inverse Square",
+          "description": "Inverse Square falloff",
+          "value": 7
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Sharp falloff",
+          "value": 3
+        },
+        {
+          "identifier": "LINEAR",
+          "name": "Linear",
+          "description": "Linear falloff",
+          "value": 4
+        },
+        {
+          "identifier": "CONSTANT",
+          "name": "Constant",
+          "description": "Constant falloff",
+          "value": 5
+        },
+        {
+          "identifier": "RANDOM",
+          "name": "Random",
+          "description": "Random falloff",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "proportional_size",
+      "name": "Proportional Size",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.000001,
+      "hard_max": 1000000000000,
+      "soft_min": 0.001,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_connected",
+      "name": "Connected",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_projected",
+      "name": "Projected (2D)",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap",
+      "name": "Use Snapping Options",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "gpencil_strokes",
+      "name": "Edit Grease Pencil",
+      "description": "Edit selected Grease Pencil strokes",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "release_confirm",
+      "name": "Confirm on Release",
+      "description": "Always confirm operation when releasing button",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_accurate",
+      "name": "Accurate",
+      "description": "Use accurate transformation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "Object Mode and mesh Edit Mode; mirror (mesh symmetry) and snapping options change nothing; the Affect Only Origins/Parents tool settings are not implemented",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "In Object Mode only locations change: Blender shears each object's location channel about the world-space pivot.",
+      "orient_axis_ortho is the direction that moves, by tan(angle) times the coordinate along orient_axis_ortho × orient_axis; passing both axes equal is degenerate and moves everything onto the pivot, as in Blender."
+    ]
+  }
+}

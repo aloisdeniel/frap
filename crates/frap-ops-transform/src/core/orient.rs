@@ -16,12 +16,23 @@
 //! then still constrains each object along its own axes (`translate(value=(1, 0, 0),
 //! orient_type='LOCAL')` with no active object moves a cube turned (0.3, 0.4, 0.5) by
 //! (0.8083, 0.4416, -0.3894)). An `orient_matrix` replaces the computed matrix when
-//! `orient_type` (or the scene default GLOBAL) equals `orient_matrix_type`.
+//! `orient_type` (or the scene orientation) equals `orient_matrix_type`.
+//!
+//! Custom orientations (WP 8.3.5, `transform.create_orientation`): `orient_type` and
+//! `orient_matrix_type` also take the names of the scene's custom orientations
+//! (`rna_TransformOrientation_itemf`: the seven built-in items, then one item per custom
+//! orientation, value `V3D_ORIENT_CUSTOM + index`), and an unset `orient_type` is the scene's
+//! orientation (`scene.transform_orientation_slots[0]`, set by `transform.select_orientation`
+//! and `create_orientation(use=True)`), as `initTransInfo` reads it in a 3D View.
 
 use frap_math::EulerOrder;
 use frap_math::euler::eul_o_to_mat3;
 use frap_math::matrix::RotationMode;
+use frap_op::EnumItemOwned;
+use frap_scene::Context;
+use frap_scene::id::Scene;
 use glam::{Mat3, Vec3};
+use smol_str::SmolStr;
 
 use crate::core::math::{axes_of, invert_m3_or_identity};
 
@@ -44,6 +55,8 @@ pub enum OrientType {
     Parent,
     /// `V3D_ORIENT_CUSTOM_MATRIX`: the operator's `orient_matrix`.
     CustomMatrix,
+    /// `V3D_ORIENT_CUSTOM + i`: the scene's custom orientation `i`.
+    Custom(usize),
 }
 
 impl OrientType {
@@ -60,6 +73,152 @@ impl OrientType {
             _ => OrientType::Global,
         }
     }
+    /// From an `orient_type` identifier, custom orientation names included (the first custom
+    /// orientation of that name; an unknown name reads as GLOBAL).
+    pub fn resolve(s: &str, scene: &SceneOrientations) -> OrientType {
+        match OrientType::from_identifier(s) {
+            OrientType::Global if s != "GLOBAL" => scene
+                .customs
+                .iter()
+                .position(|(n, _)| n == s)
+                .map_or(OrientType::Global, OrientType::Custom),
+            t => t,
+        }
+    }
+    /// From a `V3D_ORIENT_*` value (`Scene::orientation_slot_index`); a custom index past the
+    /// scene's orientations reads as GLOBAL (`initTransInfo`).
+    pub fn from_value(v: i32, custom_count: usize) -> OrientType {
+        match v {
+            1 => OrientType::Local,
+            2 => OrientType::Normal,
+            3 => OrientType::View,
+            4 => OrientType::Gimbal,
+            5 => OrientType::Cursor,
+            6 => OrientType::Parent,
+            v if v >= Scene::ORIENT_CUSTOM
+                && ((v - Scene::ORIENT_CUSTOM) as usize) < custom_count =>
+            {
+                OrientType::Custom((v - Scene::ORIENT_CUSTOM) as usize)
+            }
+            _ => OrientType::Global,
+        }
+    }
+    /// The `V3D_ORIENT_*` value (`CustomMatrix` has none and gives `V3D_ORIENT_CUSTOM - 1`).
+    pub fn value(self) -> i32 {
+        match self {
+            OrientType::Global => 0,
+            OrientType::Local => 1,
+            OrientType::Normal => 2,
+            OrientType::View => 3,
+            OrientType::Gimbal => 4,
+            OrientType::Cursor => 5,
+            OrientType::Parent => 6,
+            OrientType::CustomMatrix => Scene::ORIENT_CUSTOM - 1,
+            OrientType::Custom(i) => Scene::ORIENT_CUSTOM + i as i32,
+        }
+    }
+}
+
+/// The scene's orientation state a transform reads: the default slot's orientation and the
+/// custom orientations (name, axes as columns).
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct SceneOrientations {
+    /// `scene.transform_orientation_slots[0]` resolved (GLOBAL without a 3D View).
+    pub default: Option<OrientType>,
+    /// `scene->transform_spaces`.
+    pub customs: Vec<(SmolStr, Mat3)>,
+}
+
+impl SceneOrientations {
+    /// The orientation state of `scene`.
+    pub fn of(scene: &Scene) -> SceneOrientations {
+        let customs: Vec<(SmolStr, Mat3)> = scene
+            .transform_orientations
+            .iter()
+            .map(|t| (t.name.clone(), t.matrix))
+            .collect();
+        let default = OrientType::from_value(
+            scene.orientation_slot_index(Scene::ORIENT_SLOT_DEFAULT),
+            customs.len(),
+        );
+        SceneOrientations {
+            default: Some(default),
+            customs,
+        }
+    }
+    /// The scene orientation (`orient_type_scene`).
+    pub fn scene_type(&self) -> OrientType {
+        self.default.unwrap_or(OrientType::Global)
+    }
+}
+
+/// The dynamic enums of an operator with `orient_type` and `orient_matrix_type`.
+pub const ORIENT_DYN_ENUMS: &[(&str, frap_op::DynEnumFn)] = &[
+    ("orient_type", orient_type_items),
+    ("orient_matrix_type", orient_type_items),
+];
+
+/// The items of every `orient_type` / `orient_matrix_type` / `orientation` property
+/// (`rna_TransformOrientation_itemf`): the seven built-in orientations, then the context
+/// scene's custom orientations by name.
+pub fn orient_type_items(c: &Context) -> Vec<EnumItemOwned> {
+    const BUILTIN: [(&str, &str, &str); 7] = [
+        (
+            "GLOBAL",
+            "Global",
+            "Align the transformation axes to world space",
+        ),
+        (
+            "LOCAL",
+            "Local",
+            "Align the transformation axes to the selected objects' local space",
+        ),
+        (
+            "NORMAL",
+            "Normal",
+            "Align the transformation axes to average normal of selected elements (bone Y axis \
+             for pose mode)",
+        ),
+        (
+            "GIMBAL",
+            "Gimbal",
+            "Align each axis to the Euler rotation axis as used for input",
+        ),
+        (
+            "VIEW",
+            "View",
+            "Align the transformation axes to the window",
+        ),
+        (
+            "CURSOR",
+            "Cursor",
+            "Align the transformation axes to the 3D cursor",
+        ),
+        (
+            "PARENT",
+            "Parent",
+            "Align the transformation axes to the object's parent space",
+        ),
+    ];
+    let mut out: Vec<EnumItemOwned> = BUILTIN
+        .iter()
+        .map(|(i, n, d)| EnumItemOwned {
+            identifier: (*i).into(),
+            name: (*n).into(),
+            description: (*d).into(),
+        })
+        .collect();
+    out.extend(
+        c.scene()
+            .transform_orientations
+            .iter()
+            .map(|t| EnumItemOwned {
+                identifier: t.name.clone(),
+                name: t.name.clone(),
+                description: SmolStr::default(),
+            }),
+    );
+    out
 }
 
 /// What the orientation of a transform depends on, gathered by the mode handler.
@@ -76,6 +235,8 @@ pub struct OrientSource {
     pub cursor: Mat3,
     /// The 3D View's view matrix (3×3 part); its inverse gives the VIEW axes.
     pub view: Mat3,
+    /// The scene's orientation slot and custom orientations (WP 8.3.5).
+    pub scene: SceneOrientations,
 }
 
 /// A resolved orientation: the requested type (kept even when its matrix falls back to the
@@ -119,21 +280,27 @@ impl Orientation {
             OrientType::View => axes_of(&invert_m3_or_identity(&src.view)),
             OrientType::Cursor => src.cursor,
             OrientType::CustomMatrix => custom,
+            // `applyTransformOrientation`; an index past the list cannot be resolved.
+            OrientType::Custom(i) => src.scene.customs.get(i).map_or(Mat3::IDENTITY, |c| c.1),
         };
         Orientation { kind, matrix }
     }
     /// The orientation of an operator call (`initTransInfo`): `orient_type` when set, else the
-    /// scene's (GLOBAL); a set `orient_matrix` is used as is when `orient_matrix_type` (default
-    /// GLOBAL) equals that orientation (how Blender redoes a transform).
+    /// scene's (`transform_orientation_slots[0]`, GLOBAL by default); a set `orient_matrix` is
+    /// used as is when `orient_matrix_type` (default GLOBAL) equals that orientation (how
+    /// Blender redoes a transform).
     pub fn from_props(
         orient_type: Option<&str>,
         orient_matrix: Option<Mat3>,
         orient_matrix_type: &str,
         src: &OrientSource,
     ) -> Orientation {
-        let kind = OrientType::from_identifier(orient_type.unwrap_or("GLOBAL"));
+        let kind = match orient_type {
+            Some(s) => OrientType::resolve(s, &src.scene),
+            None => src.scene.scene_type(),
+        };
         if let Some(m) = orient_matrix
-            && kind == OrientType::from_identifier(orient_matrix_type)
+            && kind == OrientType::resolve(orient_matrix_type, &src.scene)
         {
             return Orientation::calc(OrientType::CustomMatrix, src, m);
         }
@@ -294,6 +461,32 @@ mod tests {
         assert_eq!(o.matrix, Mat3::IDENTITY);
         assert_eq!(
             OrientType::from_identifier("MyOrientation"),
+            OrientType::Global
+        );
+    }
+
+    #[test]
+    fn custom_orientations_by_name_and_as_the_scene_default() {
+        let m = Mat3::from_rotation_x(0.7);
+        let mut s = src();
+        s.scene.customs = vec![("Face".into(), Mat3::IDENTITY), ("Edge".into(), m)];
+        // By name.
+        let o = Orientation::from_props(Some("Edge"), None, "GLOBAL", &s);
+        assert_eq!(o.kind, OrientType::Custom(1));
+        assert_eq!(o.matrix, m);
+        assert_eq!(OrientType::resolve("Nope", &s.scene), OrientType::Global);
+        assert_eq!(OrientType::resolve("VIEW", &s.scene), OrientType::View);
+        // Unset `orient_type`: the scene orientation.
+        s.scene.default = Some(OrientType::Custom(1));
+        let o = Orientation::from_props(None, None, "GLOBAL", &s);
+        assert_eq!(o.kind, OrientType::Custom(1));
+        assert_eq!(o.matrix, m);
+        // Values round-trip; a custom index past the list reads as GLOBAL.
+        for t in [OrientType::Local, OrientType::Parent, OrientType::Custom(1)] {
+            assert_eq!(OrientType::from_value(t.value(), 2), t);
+        }
+        assert_eq!(
+            OrientType::from_value(OrientType::Custom(5).value(), 2),
             OrientType::Global
         );
     }

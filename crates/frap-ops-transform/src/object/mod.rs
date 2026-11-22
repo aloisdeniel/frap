@@ -99,6 +99,7 @@ pub fn orient_source(c: &Context) -> OrientSource {
         active_parent_world: parent_world,
         cursor: cursor_rot_mat3(c.cursor()),
         view: Mat3::from_mat4(c.win.view3d.view_matrix),
+        scene: crate::core::orient::SceneOrientations::of(c.scene()),
     }
 }
 

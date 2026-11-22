@@ -1,0 +1,35 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.copy_global_transform",
+  "bl_idname": "OBJECT_OT_copy_global_transform",
+  "label": "Copy Global Transform",
+  "description": "Copies the matrix of the currently active object or pose bone to the clipboard. Uses world-space matrices",
+  "bl_options": [
+    "REGISTER"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active)",
+    "matrix": {
+      "plain": "YNYYY",
+      "view3d": "YNYYY"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "headless: nothing reaches a clipboard (as in blender -b); the copied text is in result.clipboard",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

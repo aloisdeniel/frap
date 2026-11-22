@@ -9,8 +9,8 @@
 //! follows its parent, except for a rotation about individual origins, where it rotates in
 //! place (`BA_TRANSFORM_CHILD`: its location is left alone and it does not count for the
 //! center); with proportional editing every other visible, selectable, editable object takes
-//! part with a factor, children of the selection included (they then also follow their
-//! parent), but **not the ancestors** of a selected object (`count_proportional_objects`
+//! part with a factor, children of the selection included, selected ones too (they then also
+//! follow their parent), but **not the ancestors** of a selected object (`count_proportional_objects`
 //! flags them `BA_TRANSFORM_PARENT`): with Light → Cube (selected) → Camera, a proportional
 //! translate leaves Light (and a grandparent) in place and moves Camera twice, by its parent
 //! and by its own factor. Blender's `mark_children` (`BA_TRANSFORM_CHILD`) reads the legacy
@@ -173,12 +173,17 @@ fn has_ancestor_in(c: &Context, o: &Object, set: &[IdRef<ObjectId>]) -> bool {
 /// `createTransObject`: the selected visible objects in base order (minus those following a
 /// selected ancestor, or flagged to rotate in place when `children_in_place`), then, with
 /// proportional editing, every other visible, selectable and editable object that is not an
-/// ancestor of the selection (ancestors included when `children_in_place`).
+/// ancestor of the selection (ancestors included when `children_in_place`), the selected
+/// children of a selected ancestor included.
 pub fn create(c: &Context, children_in_place: bool, proportional: bool) -> Vec<ObjectTd> {
     let selected = c.selected_objects();
     // `set_trans_object_base_flags` looks at selected editable bases only.
     let editable = c.selected_editable_objects();
     let mut out = Vec::new();
+    // Children of a selected ancestor that `set_trans_object_base_flags` deselects for the
+    // transform (`base.flag &= ~BASE_SELECTED`, `BA_WAS_SEL`): proportional editing then
+    // takes them as unselected objects (verified on 5.2.4).
+    let mut deselected = Vec::new();
     for &ob in &selected {
         let Some(o) = c.main.objects.get(ob) else {
             continue;
@@ -186,6 +191,7 @@ pub fn create(c: &Context, children_in_place: bool, proportional: bool) -> Vec<O
         let mut td = object_td(c, ob, o);
         if editable.contains(&ob) && has_ancestor_in(c, o, &editable) {
             if !children_in_place {
+                deselected.push(ob);
                 continue;
             }
             td.no_center = true;
@@ -199,7 +205,10 @@ pub fn create(c: &Context, children_in_place: bool, proportional: bool) -> Vec<O
         // selectable object, except for a rotation about individual origins, which takes
         // every object.
         let mut parents = Vec::new();
-        for &ob in editable.iter().filter(|_| !children_in_place) {
+        for &ob in editable
+            .iter()
+            .filter(|ob| !children_in_place && !deselected.contains(ob))
+        {
             let v = vis.get(&ob).copied().unwrap_or_default();
             if !v.visible || !v.selectable {
                 continue;
@@ -216,7 +225,7 @@ pub fn create(c: &Context, children_in_place: bool, proportional: bool) -> Vec<O
             }
         }
         for b in &c.view_layer().bases {
-            if b.selected() || parents.contains(&b.object) {
+            if (b.selected() && !deselected.contains(&b.object)) || parents.contains(&b.object) {
                 continue;
             }
             let v = vis.get(&b.object).copied().unwrap_or_default();

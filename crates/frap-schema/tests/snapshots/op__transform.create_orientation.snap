@@ -1,0 +1,114 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "transform.create_orientation",
+  "bl_idname": "TRANSFORM_OT_create_orientation",
+  "label": "Create Orientation",
+  "description": "Create transformation orientation from selection",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "name",
+      "name": "Name",
+      "description": "Name of the new custom orientation",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 64,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_view",
+      "name": "Use View",
+      "description": "Use the current view instead of the active object to create the new orientation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use",
+      "name": "Use After Creation",
+      "description": "Select orientation after its creation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "overwrite",
+      "name": "Overwrite Previous",
+      "description": "Overwrite previously created orientation with same name",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "the bone orientations of armature Edit and Pose Mode are not implemented; scene.transform_orientation_slots is not bound (use orient_type='<name>')",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "Use the orientation by name: transform.rotate(value=…, orient_type='Face'), or pass use=True and leave orient_type unset."
+    ]
+  }
+}
