@@ -87,14 +87,6 @@ jobs:
           cp warp/build/native/bin/x64/d3d10warp.dll target/debug/
           cp warp/build/native/bin/x64/d3d10warp.dll target/debug/deps/
 
-      # DIAG (temporary): the shadow lookup readout.
-      - name: DIAG shadow lookup
-        continue-on-error: true
-        env:
-          FRAP_WGPU_BACKEND: ${{ matrix.backend }}
-          FRAP_DIAG: "1"
-        run: cargo test --locked -p frap-render --lib diag_shadow -- --nocapture --test-threads=1
-
       - name: GPU tests (${{ matrix.backend }})
         env:
           FRAP_WGPU_BACKEND: ${{ matrix.backend }}
