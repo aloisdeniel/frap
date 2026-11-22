@@ -1,0 +1,187 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.select_similar",
+  "bl_idname": "UV_OT_select_similar",
+  "label": "Select Similar",
+  "description": "Select similar UVs by property types",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "PIN",
+      "enum_items": [
+        {
+          "identifier": "PIN",
+          "name": "Pinned",
+          "description": "",
+          "value": 1007
+        },
+        {
+          "identifier": "LENGTH",
+          "name": "Length",
+          "description": "Edge length in UV space",
+          "value": 1003
+        },
+        {
+          "identifier": "LENGTH_3D",
+          "name": "Length 3D",
+          "description": "Length of edge in 3D space",
+          "value": 1004
+        },
+        {
+          "identifier": "AREA",
+          "name": "Area",
+          "description": "Face area in UV space",
+          "value": 1000
+        },
+        {
+          "identifier": "AREA_3D",
+          "name": "Area 3D",
+          "description": "Area of face in 3D space",
+          "value": 1001
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "",
+          "value": 1005
+        },
+        {
+          "identifier": "OBJECT",
+          "name": "Object",
+          "description": "",
+          "value": 1006
+        },
+        {
+          "identifier": "SIDES",
+          "name": "Polygon Sides",
+          "description": "",
+          "value": 1008
+        },
+        {
+          "identifier": "WINDING",
+          "name": "Winding",
+          "description": "Face direction defined by clockwise or anti-clockwise winding (facing up or facing down)",
+          "value": 1009
+        },
+        {
+          "identifier": "FACE",
+          "name": "Amount of Faces in Island",
+          "description": "",
+          "value": 1002
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "compare",
+      "name": "Compare",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "EQUAL",
+      "enum_items": [
+        {
+          "identifier": "EQUAL",
+          "name": "Equal",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "GREATER",
+          "name": "Greater",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "LESS",
+          "name": "Less",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "threshold",
+      "name": "Threshold",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

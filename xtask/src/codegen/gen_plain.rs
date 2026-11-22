@@ -119,6 +119,10 @@ const PLAIN: &[PlainSpec] = &[
             "keyframe_type",
             // M7 (WP 7.6): the `marker.*` operators' polls.
             "lock_markers",
+            // M8 (WP 8.3.8): the UV selection modes of the `uv.select_*` operators.
+            "uv_select_mode",
+            "uv_sticky_select_mode",
+            "use_uv_select_island",
         ]),
         exclude: &[],
         own_only: false,
@@ -164,6 +168,13 @@ const PLAIN: &[PlainSpec] = &[
                 doc: "DNA `uvcalc_weight_group`: `uv.unwrap` `weight_group` (no RNA property)",
                 default: "uv_importance",
                 ty: None,
+            },
+            // M8 (WP 8.3.8): `uv.select_similar` without `threshold` (`uv_select_similar_exec`).
+            Extra {
+                name: "select_thresh",
+                doc: "DNA `select_thresh`: the `threshold` a `select_similar` call without one uses; a call with one stores it (no RNA property)",
+                default: "0.01",
+                ty: Some("f32"),
             },
         ],
         doc: "`bpy.types.ToolSettings` (`scene.tool_settings`; the OPERATORS.md §D subset).",

@@ -407,19 +407,19 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `uv.pin` | M3 | P2 |  |
 | [x] | `uv.project_from_view` | M3 | P2 | frap-extended: projects from scene.camera |
 | [ ] | `uv.minimize_stretch` | M8 | P2 | iterations > 0 headless; WP 8.1 |
-| [ ] | `uv.select_all` | M8 | P2 | meaningful with sync select off; WP 8.3.8 |
-| [ ] | `uv.select_mode` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_linked` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_more` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_less` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_split` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_overlap` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_similar` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_pinned` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.select_by_winding` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.shortest_path_select` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.hide` | M8 | P2 | WP 8.3.8 |
-| [ ] | `uv.reveal` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.select_all` | M8 | P2 | meaningful with sync select off; WP 8.3.8 |
+| [x] | `uv.select_mode` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
+| [x] | `uv.select_linked` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.select_more` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
+| [x] | `uv.select_less` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
+| [x] | `uv.select_split` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.select_overlap` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.select_similar` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
+| [x] | `uv.select_pinned` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.select_by_winding` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.shortest_path_select` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
+| [x] | `uv.hide` | M8 | P2 | WP 8.3.8 |
+| [x] | `uv.reveal` | M8 | P2 | WP 8.3.8 |
 | [ ] | `uv.weld` | M8 | P2 | WP 8.3.9 |
 | [ ] | `uv.remove_doubles` | M8 | P2 | WP 8.3.9 |
 | [ ] | `uv.stitch` | M8 | P2 | WP 8.3.9 |
