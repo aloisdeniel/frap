@@ -3,9 +3,9 @@
 # base selection, copied action, bone collections and the moved bones' pose channels, in Object
 # Mode); children of moved bones lose their parent; an object bone-parented to a moved bone
 # follows it; the original keeps the rest, stays active in Edit Mode with nothing selected;
-# only joints selected just deselects; nothing selected does nothing. Blender does not tag the
-# re-parented child for evaluation (its matrix_world stays at the armature's until something
-# else updates it), so the Blender side tags it before the dump; frap always evaluates fresh.
+# only joints selected just deselects; nothing selected does nothing. Blender leaves the re-
+# parented child untagged (matrix_world stale even after view_layer.update()), so a #@blender
+# update_tag() tags it before the dump; frap is always fresh (D-04, docs/deviations.md §1).
 # golden: startup=factory compare=objects,context tier=T0 tol=1e-5
 import bpy
 bpy.data.objects.new('C0', None)

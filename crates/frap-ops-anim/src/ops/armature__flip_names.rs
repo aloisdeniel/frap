@@ -8,7 +8,8 @@
 //! `Armature.use_mirror_x`, their unselected X mirrors) are renamed to their flipped side name
 //! (`BLI_string_flip_side_name`: `.L`↔`.R`, `L_`↔`R_`, `Left`↔`Right`, …; `do_strip_numbers`
 //! drops a trailing `.NNN`). Renames go through `ED_armature_bone_rename` (pose channels,
-//! bone-parented objects and vertex groups follow); a name taken by another bone is first
+//! bone-parented objects, vertex groups and `pose.bones["…"]` F-curve paths and groups
+//! follow); a name taken by another bone is first
 //! made unique and retried once all bones were renamed, so `arm.L`/`arm.R` pairs swap. Always
 //! `FINISHED`.
 //!
