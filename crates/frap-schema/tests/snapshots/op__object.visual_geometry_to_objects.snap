@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.visual_geometry_to_objects",
+  "bl_idname": "OBJECT_OT_visual_geometry_to_objects",
+  "label": "Visual Geometry to Objects",
+  "description": "Convert geometry and instances into editable objects and collections",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active)",
+    "matrix": {
+      "plain": "YNYYY",
+      "view3d": "YNYYY"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "meshes (evaluated), point clouds and collection-instancing empties; frap has no geometry-nodes instances",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

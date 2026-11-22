@@ -252,8 +252,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.modifiers_clear` | M4 | P1 |  |
 | [x] | `object.subdivision_set` | M4 | P1 |  |
 | [x] | `object.modifier_apply_as_shapekey` | M6 | P2 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.modifier_copy_to_selected` | M8 | P2 | WP 8.3.6 |
-| [ ] | `object.modifiers_copy_to_selected` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.modifier_copy_to_selected` | M8 | P2 | persistent_uid D-47; particle systems OUT; WP 8.3.6 |
+| [x] | `object.modifiers_copy_to_selected` | M8 | P2 | Hook/Collision in the stack: RuntimeError, rolled back D-158; WP 8.3.6 |
 | [x] | `object.material_slot_add` | M1 | P0 |  |
 | [x] | `object.material_slot_remove` | M1 | P0 |  |
 | [x] | `object.material_slot_remove_unused` | M1 | P1 |  |
@@ -262,7 +262,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_move` | M3 | P2 | WP 3.1 (M3+M4 W0 assignment) |
-| [ ] | `object.material_slot_copy` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.material_slot_copy` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.vertex_group_add` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_remove` | M6 | P0 | WP 6.3 (M5+M6 W0) |
 | [x] | `object.vertex_group_assign` | M6 | P0 | edit mode; WP 6.3 (M5+M6 W0) |
@@ -317,19 +317,19 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.collection_objects_select` | M8 | P2 | headless-extended (D-154): runs on the active collection, as from the Outliner; WP 8.3.4 |
 | [ ] | `object.data_transfer` | M8 | P2 | WP 8.3.13 |
 | [ ] | `object.datalayout_transfer` | M8 | P2 | WP 8.3.13 |
-| [ ] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |
-| [ ] | `object.make_links_scene` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.make_links_scene` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.instance_offset_from_cursor` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.instance_offset_from_object` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.instance_offset_to_cursor` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.copy_global_transform` | M8 | P2 | WP 8.3.5; headless: no clipboard (as `-b`), the text in `result.clipboard` |
 | [x] | `object.copy_relative_transform` | M8 | P2 | WP 8.3.5; headless: no clipboard (as `-b`), the text in `result.clipboard` |
 | [x] | `object.paste_transform` | M8 | P2 | WP 8.3.5; headless: the clipboard is always empty (as `-b`): `Clipboard does not contain a matrix` |
-| [ ] | `object.unlink_data` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.unlink_data` | M8 | P2 | always fails from scripts, as Blender (needs the template_ID button); WP 8.3.6 |
 | [x] | `object.update_shapes` | M8 | P2 | WP 8.3.7 |
-| [ ] | `object.visual_geometry_to_objects` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.visual_geometry_to_objects` | M8 | P2 | meshes, point clouds, collection-instancing empties (no geometry-nodes instances, deviations section 2); WP 8.3.6 |
 | [ ] | `object.voxel_remesh` | M9 | P2 | post-M8 (M8 W0, M8W0-3): OpenVDB level-set remesher (`BKE_mesh_remesh_voxel`), no pure-Rust port planned in M8 |
-| [ ] | `object.modifier_convert` | M8 | P2 | WP 8.3.6 |
+| [x] | `object.modifier_convert` | M8 | P2 | poll as Blender; particle systems OUT (OP_NOT_IMPLEMENTED); WP 8.3.6 |
 | — | `object.constraint_add` | OUT | — | constraints out of scope |
 | — | `object.constraint_add_with_targets` | OUT | — |  |
 | — | `object.constraints_clear` | OUT | — |  |
@@ -559,7 +559,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
 | [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6; output formats: every image format but JPEG2000 and AVIF, multilayer OpenEXR; video (FFMPEG) M8 (decision log M56S-2); `scene=` / `layer=` other than the context ones and `use_sequencer_scene=True`: `OP_NOT_IMPLEMENTED` until M8 (deviations §2) |
-| [ ] | `render.opengl` | M8 | P2 | maps to Workbench from scene camera; WP 8.3.6 |
+| [x] | `render.opengl` | M8 | P2 | headless-extended D-160: Workbench from the scene camera; WP 8.3.6 |
 
 ### `wm.* (files)`
 
@@ -602,8 +602,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
 | [x] | `material.new` | M1 | P0 | does not assign to a slot from scripts (as Blender) |
-| [ ] | `material.copy` | M8 | P2 | WP 8.3.6 |
-| [ ] | `material.paste` | M8 | P2 | WP 8.3.6 |
+| [x] | `material.copy` | M8 | P2 | headless-extended D-159: active material; session copy buffer outside undo; WP 8.3.6 |
+| [x] | `material.paste` | M8 | P2 | headless-extended D-159: active material; WP 8.3.6 |
 
 ### `image.*`
 
@@ -627,11 +627,11 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `collection.create` | M8 | P2 | WP 8.3.6 |
-| [ ] | `collection.objects_add_active` | M8 | P2 | WP 8.3.6 |
-| [ ] | `collection.objects_remove` | M8 | P2 | WP 8.3.6 |
-| [ ] | `collection.objects_remove_all` | M8 | P2 | WP 8.3.6 |
-| [ ] | `collection.objects_remove_active` | M8 | P2 | WP 8.3.6 |
+| [x] | `collection.create` | M8 | P2 | WP 8.3.6 |
+| [x] | `collection.objects_add_active` | M8 | P2 | WP 8.3.6 |
+| [x] | `collection.objects_remove` | M8 | P2 | WP 8.3.6 |
+| [x] | `collection.objects_remove_all` | M8 | P2 | WP 8.3.6 |
+| [x] | `collection.objects_remove_active` | M8 | P2 | WP 8.3.6 |
 
 ### `import_scene.*`
 

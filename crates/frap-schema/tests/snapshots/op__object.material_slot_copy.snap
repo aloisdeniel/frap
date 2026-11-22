@@ -1,0 +1,37 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.material_slot_copy",
+  "bl_idname": "OBJECT_OT_material_slot_copy",
+  "label": "Copy Material to Selected",
+  "description": "Copy material to selected objects",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active)",
+    "matrix": {
+      "plain": "YNYNN",
+      "view3d": "YNYNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

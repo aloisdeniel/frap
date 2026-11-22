@@ -1,0 +1,40 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "material.paste",
+  "bl_idname": "MATERIAL_OT_paste",
+  "label": "Paste Material",
+  "description": "Paste the material settings and nodes",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_EDITABLE"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is editable (not linked)",
+    "matrix": {
+      "plain": "YNYNN",
+      "view3d": "YNYNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "headless-extended (D-159): pastes into the active object's active material",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "the pasted node tree's images, node groups, texts and objects are relinked by name, other data-blocks cleared, as in Blender"
+    ]
+  }
+}

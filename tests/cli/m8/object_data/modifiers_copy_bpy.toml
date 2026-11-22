@@ -1,0 +1,9 @@
+# WP 8.3.6: copying modifiers to the selected objects (bpy form). modifiers_copy_to_selected with
+# a Hook in the stack raises Blender's RuntimeError (one ERROR line per target) and, frap
+# statements being atomic, copies nothing (deviation D-158), where Blender keeps the other
+# copies; without the Hook the stack is copied in order. modifier_convert only converts particle
+# systems (out of scope): another modifier cancels with a WARNING, and visual_geometry_to_objects
+# turns the evaluated mesh into a new object. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

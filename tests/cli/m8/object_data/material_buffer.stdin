@@ -1,0 +1,16 @@
+material.paste
+bpy.data.materials['Material'].roughness = 0.9
+material.copy
+bpy.data.materials['Material'].roughness = 0.1
+ed.undo
+ed.undo
+print(bpy.data.materials['Material'].roughness)
+object.material_slot_add
+material.paste
+bpy.context.object.active_material = bpy.data.materials.new('Other')
+material.paste
+print(bpy.data.materials['Other'].roughness, bpy.data.materials['Other'].node_tree.nodes.keys())
+wm.read_factory_settings
+bpy.data.materials['Material'].roughness = 0.3
+material.paste
+print(bpy.data.materials['Material'].roughness)

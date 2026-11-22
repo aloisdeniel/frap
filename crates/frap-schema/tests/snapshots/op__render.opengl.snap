@@ -1,0 +1,140 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "render.opengl",
+  "bl_idname": "RENDER_OT_opengl",
+  "label": "Viewport Render",
+  "description": "Take a snapshot of the active viewport",
+  "bl_options": [],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "animation",
+      "name": "Animation",
+      "description": "Render files from the animation range of this scene",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "render_keyed_only",
+      "name": "Render Keyframes Only",
+      "description": "Render only those frames where selected objects have a key in their animation data. Only used when rendering animation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "sequencer",
+      "name": "Sequencer",
+      "description": "Render using the sequencer's OpenGL display",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "write_still",
+      "name": "Write Image",
+      "description": "Save the rendered image to the output path (used only when animation is disabled)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "view_context",
+      "name": "View Context",
+      "description": "Use the current 3D view for rendering, else use scene settings",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T4",
+    "support": "partial",
+    "support_note": "headless-extended (D-160): renders the scene camera with Workbench and the scene display settings; sequencer=True and render_keyed_only=True are not supported",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
+      "frames, output paths, the Render Result image and result fields are render.render's"
+    ]
+  }
+}

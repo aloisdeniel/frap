@@ -1,0 +1,38 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "material.copy",
+  "bl_idname": "MATERIAL_OT_copy",
+  "label": "Copy Material",
+  "description": "Copy the material settings and nodes",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active)",
+    "matrix": {
+      "plain": "YNYNN",
+      "view3d": "YNYNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "headless-extended (D-159): copies the active object's active material",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "the copy buffer lives outside the undo state for the whole session (Blender keeps it in a file of the temporary directory)"
+    ]
+  }
+}

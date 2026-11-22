@@ -1,0 +1,64 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.modifier_copy_to_selected",
+  "bl_idname": "OBJECT_OT_modifier_copy_to_selected",
+  "label": "Copy Modifier to Selected",
+  "description": "Copy the modifier from the active object to all selected objects",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "HAS_SELECTED_OBJECTS"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), at least one selected object",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "modifier",
+      "name": "Modifier",
+      "description": "Name of the modifier to edit",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 64,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "persistent_uid is one more than the largest in use (D-47)",
+      "a particle system modifier is not copied (OP_NOT_IMPLEMENTED: particle systems are out of scope)"
+    ]
+  }
+}

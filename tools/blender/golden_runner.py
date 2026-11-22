@@ -211,6 +211,9 @@ NORMALISE = {
     "D-155": ("cases", "cases only cancel or fail the object selection operators with nothing selected or with extend=True"),
     "D-156": ("cases", "cases do not read users after duplicates_make_real"),
     "D-157": ("cases", "armature/edit_m8/collections keeps its failing assign_to_collection last"),
+    "D-158": ("cases", "cases remove the Hook before modifiers_copy_to_selected"),
+    "D-159": ("cases", "Blender runs material.copy / material.paste in a #@blender temp_override(material=bpy.context.object.active_material)"),
+    "D-160": ("render goldens", "Blender's reference for render.opengl is render.render with BLENDER_WORKBENCH (#@opengl-blender lines)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

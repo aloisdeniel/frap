@@ -1,0 +1,13 @@
+bpy.ops.object.modifier_add(type='SUBSURF')
+bpy.ops.object.modifier_add(type='HOOK')
+bpy.ops.mesh.primitive_plane_add(location=(3, 0, 0))
+bpy.data.objects['Cube'].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
+bpy.ops.object.modifiers_copy_to_selected()
+print(bpy.data.objects['Plane'].modifiers.keys())
+bpy.data.objects['Cube'].modifiers.remove(bpy.data.objects['Cube'].modifiers['Hook'])
+bpy.ops.object.modifiers_copy_to_selected()
+print(bpy.data.objects['Plane'].modifiers.keys(), bpy.data.objects['Plane'].modifiers.active.name)
+bpy.ops.object.modifier_convert(modifier='Subdivision')
+bpy.ops.object.visual_geometry_to_objects()
+print(bpy.context.object.name, bpy.context.object.data.vertices[25].co, bpy.context.object.modifiers.keys())

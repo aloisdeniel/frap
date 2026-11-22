@@ -1,0 +1,61 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.modifier_convert",
+  "bl_idname": "OBJECT_OT_modifier_convert",
+  "label": "Convert Particles to Mesh",
+  "description": "Convert particles to a mesh object",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_EDITABLE"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is editable (not linked)",
+    "matrix": {
+      "plain": "YNYYY",
+      "view3d": "YNYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "modifier",
+      "name": "Modifier",
+      "description": "Name of the modifier to edit",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 64,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "converts particle systems only, which frap does not have: a PARTICLE_SYSTEM modifier answers OP_NOT_IMPLEMENTED, every other modifier is CANCELLED as in Blender",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}
