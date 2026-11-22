@@ -25,8 +25,10 @@
 //! Quirks kept under `frap_compat='BLENDER'` (the default): the surviving channels keep their
 //! `target.node` (the add-on does not renumber them, so a channel of a node after a removed
 //! one targets the wrong node), and so do the roots of the *other* scenes; their samplers and
-//! accessors stay. `frap_compat='SPEC'` renumbers both. With meshopt compression the add-on
-//! also compresses the three accessors; frap writes them uncompressed (deviations.md).
+//! accessors stay. `frap_compat='SPEC'` renumbers both. With meshopt compression the three
+//! accessors are compressed as the add-on does, by `mesh/post/meshopt.rs` (which plans the
+//! views of `EXT_mesh_gpu_instancing` attributes); sharing with equal mesh vertex accessors is
+//! a deviations.md §2 gap.
 
 use frap_gltf::accessor::AccessorData;
 use frap_gltf::builder::AccessorOpts;

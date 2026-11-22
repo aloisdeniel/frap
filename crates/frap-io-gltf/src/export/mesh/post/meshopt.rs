@@ -58,7 +58,7 @@ use frap_gltf::ext::ext_meshopt_compression::{
 use frap_gltf::ext::khr_meshopt_compression::{KhrMeshoptCompression, KhrMeshoptCompressionBuffer};
 use frap_gltf::json::{Accessor, AccessorType, Buffer, ComponentType, Index, Mode};
 use frap_gltf::{BufferBuilder, Document};
-use frap_spec_ops_io::export_scene::gltf::ExportMeshoptExtension;
+use frap_spec_ops_io::export_scene::gltf::{ExportMeshoptExtension, FrapCompat};
 
 use crate::export::gather::Gather;
 use crate::export::mesh::ext::{
@@ -154,7 +154,14 @@ pub fn compress_buffer_views(g: &mut Gather) -> Result<(), ExportError> {
                 view.byte_offset = Some(off);
             }
             Some(p) => {
-                let (stream, raw_len) = encode_view(meshopt, raw, p, version)?;
+                let (stream, mut raw_len) = encode_view(meshopt, raw, p, version)?;
+                // `manage_gpu_instancing_nodes` keeps the FLOAT data's length on the fallback
+                // view of a quaternion-filtered ROTATION (its accessor becomes SHORT, so the
+                // decoded data is half as long); `frap_compat='SPEC'` writes the decoded length
+                // (M7 W1 integration, verified on Blender 5.2.4).
+                if p.rotation.is_some() && g.settings.props.frap_compat.value != FrapCompat::Spec {
+                    raw_len = raw.len();
+                }
                 let off = data.len() as u64;
                 data.extend_from_slice(&stream);
                 pad4(&mut data);

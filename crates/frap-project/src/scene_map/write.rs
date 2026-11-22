@@ -897,12 +897,21 @@ impl<'a> Writer<'a> {
                 .iter()
                 .map(|p| {
                     json!({
+                        "name": p.name.as_str(),
                         "material_slot_index": p.material_slot_index,
                         "material": self.r(p.material),
                         "variants": p
                             .variants
                             .iter()
-                            .map(|v| json!({"variant": {"variant_idx": v.variant_idx}}))
+                            .map(|v| {
+                                json!({
+                                    "name": v.name.as_str(),
+                                    "variant": {
+                                        "variant_idx": v.variant_idx,
+                                        "name": v.variant_name.as_str(),
+                                    },
+                                })
+                            })
                             .collect::<Vec<_>>(),
                         "active_variant_idx": p.active_variant_idx,
                     })
@@ -914,6 +923,7 @@ impl<'a> Writer<'a> {
                 .iter()
                 .map(|d| {
                     json!({
+                        "name": d.name.as_str(),
                         "material_slot_index": d.material_slot_index,
                         "default_material": self.r(d.default_material),
                     })

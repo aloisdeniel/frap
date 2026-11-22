@@ -898,18 +898,28 @@ fn m7_markers_and_gltf_variants_round_trip() {
     {
         let me = main.meshes.find("Cube").unwrap();
         let m = main.meshes.get_mut(me, &mut log).unwrap();
+        // The PropertyGroup names (WP 7.5's fields) round-trip too (M7 W1 integration).
         m.gltf2_variants.mesh_data = vec![GltfVariantPrimitive {
             material_slot_index: 0,
             material: mat,
             variants: vec![
-                GltfVariantPointer { variant_idx: 0 },
-                GltfVariantPointer { variant_idx: 1 },
+                GltfVariantPointer {
+                    variant_idx: 0,
+                    name: "Item".into(),
+                    variant_name: "Red".into(),
+                },
+                GltfVariantPointer {
+                    variant_idx: 1,
+                    ..Default::default()
+                },
             ],
             active_variant_idx: 1,
+            name: "Prim".into(),
         }];
         m.gltf2_variants.default_materials = vec![GltfVariantDefaultMaterial {
             material_slot_index: 0,
             default_material: mat,
+            name: "Default".into(),
         }];
         m.gltf2_variants.pointer = "Red".into();
     }
@@ -931,6 +941,21 @@ fn m7_markers_and_gltf_variants_round_trip() {
     assert_eq!(s.timeline_markers.len(), 3);
     assert_eq!(s.timeline_markers[0].camera, o.main.objects.find("Camera"));
     assert!(s.timeline_markers[1].select);
+    let gv = &o
+        .main
+        .meshes
+        .get(o.main.meshes.find("Cube").unwrap())
+        .unwrap()
+        .gltf2_variants;
+    assert_eq!(gv.mesh_data[0].name, "Prim");
+    assert_eq!(
+        (
+            gv.mesh_data[0].variants[0].name.as_str(),
+            gv.mesh_data[0].variants[0].variant_name.as_str()
+        ),
+        ("Item", "Red")
+    );
+    assert_eq!(gv.default_materials[0].name, "Default");
     // A file without markers or variants has none of the keys (older readers keep reading it).
     for key in [
         "timeline_markers",

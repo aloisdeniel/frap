@@ -1106,6 +1106,7 @@ fn mesh_gltf_variants(gv: &mut MeshGltfVariants, o: &mut Obj, cx: &mut Cx) -> Re
                 let xp = format!("{p}[{i}]");
                 let mut xo = Obj::new(x, &xp, cx.strict)?;
                 let mut d = GltfVariantPrimitive::default();
+                xo.smol("name", &mut d.name)?;
                 xo.i32("material_slot_index", &mut d.material_slot_index)?;
                 cx.opt_typed(&mut xo, "material", &mut d.material)?;
                 if let Some(vs) = xo.opt("variants") {
@@ -1118,7 +1119,9 @@ fn mesh_gltf_variants(gv: &mut MeshGltfVariants, o: &mut Obj, cx: &mut Cx) -> Re
                             let mut yo = Obj::new(y, &yp, cx.strict)?;
                             let mut vo = yo.obj("variant")?;
                             let mut ptr = GltfVariantPointer::default();
+                            yo.smol("name", &mut ptr.name)?;
                             vo.i32("variant_idx", &mut ptr.variant_idx)?;
+                            vo.smol("name", &mut ptr.variant_name)?;
                             vo.finish()?;
                             yo.finish()?;
                             Ok(ptr)
@@ -1139,6 +1142,7 @@ fn mesh_gltf_variants(gv: &mut MeshGltfVariants, o: &mut Obj, cx: &mut Cx) -> Re
             .map(|(i, x)| {
                 let mut xo = Obj::new(x, format!("{p}[{i}]"), cx.strict)?;
                 let mut d = GltfVariantDefaultMaterial::default();
+                xo.smol("name", &mut d.name)?;
                 xo.i32("material_slot_index", &mut d.material_slot_index)?;
                 cx.opt_typed(&mut xo, "default_material", &mut d.default_material)?;
                 xo.finish()?;

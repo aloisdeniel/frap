@@ -94,7 +94,9 @@ const KTX2_IDENTIFIER: [u8; 12] = [
 ];
 
 fn u32_at(b: &[u8], at: usize) -> Option<u32> {
-    Some(u32::from_le_bytes(b.get(at..at.checked_add(4)?)?.try_into().ok()?))
+    Some(u32::from_le_bytes(
+        b.get(at..at.checked_add(4)?)?.try_into().ok()?,
+    ))
 }
 
 /// Byte offset of the first word of the DFD's basic descriptor block that holds
@@ -169,7 +171,10 @@ pub fn ktx2_issues(bytes: &[u8], usage: Option<Usage>) -> Vec<(&'static str, Str
         ));
     }
     match ktx2_dfd_model_offset(bytes) {
-        None => v.push(("KTX2_INVALID", "the data format descriptor is missing".into())),
+        None => v.push((
+            "KTX2_INVALID",
+            "the data format descriptor is missing".into(),
+        )),
         Some(at) => {
             let (model, primaries, transfer) = (bytes[at], bytes[at + 1], bytes[at + 2]);
             match (model, scheme) {
@@ -192,11 +197,9 @@ pub fn ktx2_issues(bytes: &[u8], usage: Option<Usage>) -> Vec<(&'static str, Str
             }
             let want = match usage {
                 Some(Usage::Colour) => Some((DF_PRIMARIES_BT709, DF_TRANSFER_SRGB, "colour")),
-                Some(Usage::Data) => Some((
-                    DF_PRIMARIES_UNSPECIFIED,
-                    DF_TRANSFER_LINEAR,
-                    "non-colour",
-                )),
+                Some(Usage::Data) => {
+                    Some((DF_PRIMARIES_UNSPECIFIED, DF_TRANSFER_LINEAR, "non-colour"))
+                }
                 None => None,
             };
             if let Some((p, t, what)) = want {
@@ -275,11 +278,7 @@ pub fn texture_usages(doc: &crate::json::Document) -> Vec<Option<Option<Usage>>>
 /// [`ktx2_issues`] for the `KHR_texture_basisu` source of every texture whose image bytes are
 /// in a buffer view or a `data:` URI, the colour space checked against the texture's usage
 /// ([`texture_usages`]). Images that cannot be read are left to the other rules.
-pub fn validate_images<B: AsRef<[u8]>>(
-    doc: &crate::json::Document,
-    buffers: &[B],
-    r: &mut Report,
-) {
+pub fn validate_images<B: AsRef<[u8]>>(doc: &crate::json::Document, buffers: &[B], r: &mut Report) {
     let usages = texture_usages(doc);
     // An image shared by several textures is checked once per usage.
     let mut seen: Vec<(Index, Option<Usage>)> = Vec::new();
@@ -422,7 +421,10 @@ mod tests {
         // BT709 with a linear transfer: the primaries are wrong for data.
         let bt709_linear = [DF_MODEL_UASTC, DF_PRIMARIES_BT709, DF_TRANSFER_LINEAR];
         assert_eq!(
-            codes(&ktx2_issues(&ktx(4, 4, bt709_linear, 2, &[]), Some(Usage::Data))),
+            codes(&ktx2_issues(
+                &ktx(4, 4, bt709_linear, 2, &[]),
+                Some(Usage::Data)
+            )),
             ["KTX2_COLOR_PRIMARIES_INVALID"]
         );
         assert_eq!(
@@ -460,8 +462,20 @@ mod tests {
         let mut d = Document::default();
         // Texture 0 is the base colour, texture 1 the metallic-roughness data.
         let images = [
-            ktx(4, 4, [DF_MODEL_UASTC, DF_PRIMARIES_BT709, DF_TRANSFER_SRGB], 2, &[]),
-            ktx(6, 4, [DF_MODEL_UASTC, DF_PRIMARIES_BT709, DF_TRANSFER_LINEAR], 2, &[]),
+            ktx(
+                4,
+                4,
+                [DF_MODEL_UASTC, DF_PRIMARIES_BT709, DF_TRANSFER_SRGB],
+                2,
+                &[],
+            ),
+            ktx(
+                6,
+                4,
+                [DF_MODEL_UASTC, DF_PRIMARIES_BT709, DF_TRANSFER_LINEAR],
+                2,
+                &[],
+            ),
         ];
         for b in &images {
             d.images.push(Image {
