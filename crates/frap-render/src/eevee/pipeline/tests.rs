@@ -706,3 +706,50 @@ fn image_decoding() {
     assert_eq!((w, h), (1, 1));
     assert_eq!(d[0], [0.5; 4]);
 }
+
+// DIAG (temporary): per-face shadow ratios of a point light 2 m above the plane.
+#[test]
+fn diag_shadow_faces() {
+    if std::env::var("FRAP_DIAG").is_err() {
+        return;
+    }
+    let Some(gpu) = gpu() else { return };
+    for slope in [-1.5f32, 0.0, -6.0, 1.5] {
+        DIAG_SLOPE.store(slope.to_bits(), std::sync::atomic::Ordering::Relaxed);
+        for pre in [false, true] {
+            let mut e = crate::eevee::Eevee::new();
+            let mut l = light(RLightKind::Point, 100.0, Vec3::new(0.0, 0.0, 2.0));
+            l.radius = 0.0;
+            let mut sc = plane_scene(l);
+            sc.settings.taa_render_samples = 1;
+            if pre {
+                // A dim shadowed light first: the main light's maps start at 6.
+                let mut d = light(RLightKind::Point, 1e-6, Vec3::new(0.0, 0.0, 50.0));
+                d.radius = 0.0;
+                sc.lights.insert(0, d);
+            }
+            let lit = render(&gpu, &mut e, &sc);
+            let mut off = sc.clone();
+            for l in &mut off.lights {
+                l.use_shadow = false;
+            }
+            let free = render(&gpu, &mut e, &off);
+            let r = |x: u32, y: u32| px(&lit, x, y)[0] / px(&free, x, y)[0].max(1e-9);
+            let row = |f: &dyn Fn(u32) -> (u32, u32)| -> String {
+                (0..16)
+                    .map(|i| {
+                        let (x, y) = f(i * 2);
+                        format!("{:.2}", r(x, y))
+                    })
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            };
+            eprintln!("DIAG slope={slope} pre={pre}");
+            eprintln!("  +X: {}", row(&|i| (32 + i, 32)));
+            eprintln!("  -X: {}", row(&|i| (31 - i, 32)));
+            eprintln!("  +Y: {}", row(&|i| (32, 31 - i)));
+            eprintln!("  -Y: {}", row(&|i| (32, 32 + i)));
+            eprintln!("  diag: {}", row(&|i| (32 + i, 31 - i)));
+        }
+    }
+}
