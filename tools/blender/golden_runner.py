@@ -211,6 +211,9 @@ NORMALISE = {
     "D-155": ("cases", "cases only cancel or fail the object selection operators with nothing selected or with extend=True"),
     "D-156": ("cases", "cases do not read users after duplicates_make_real"),
     "D-157": ("cases", "armature/edit_m8/collections keeps its failing assign_to_collection last"),
+    "D-158": ("cases", "cases copy before every pose.paste (the copy buffer lives in the frap process)"),
+    "D-159": ("cases", "pose selection cases cancel only with extend=True or where the deselect changes nothing"),
+    "D-160": ("cases", "Blender runs anim.channels_bake in a #@blender Graph Editor temp_override and update_tag()s the baked actions before evaluating them"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

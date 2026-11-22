@@ -1,0 +1,3576 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": true
+    },
+    {
+      "line": 76,
+      "ok": true
+    },
+    {
+      "line": 77,
+      "ok": true
+    },
+    {
+      "line": 78,
+      "ok": true
+    },
+    {
+      "line": 79,
+      "ok": true
+    },
+    {
+      "line": 80,
+      "ok": true
+    },
+    {
+      "line": 81,
+      "ok": true
+    },
+    {
+      "line": 82,
+      "ok": true
+    },
+    {
+      "line": 83,
+      "ok": true
+    },
+    {
+      "line": 84,
+      "ok": true
+    },
+    {
+      "line": 85,
+      "ok": true
+    },
+    {
+      "line": 86,
+      "ok": true
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 90,
+      "ok": true
+    },
+    {
+      "line": 91,
+      "ok": true
+    },
+    {
+      "line": 92,
+      "ok": true
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": true
+    },
+    {
+      "line": 96,
+      "ok": true
+    },
+    {
+      "line": 97,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": true
+    },
+    {
+      "line": 99,
+      "ok": true
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": true
+    },
+    {
+      "line": 102,
+      "ok": true
+    },
+    {
+      "line": 103,
+      "ok": true
+    },
+    {
+      "line": 104,
+      "ok": true
+    },
+    {
+      "line": 105,
+      "ok": true
+    },
+    {
+      "line": 106,
+      "ok": true
+    },
+    {
+      "line": 107,
+      "ok": true
+    },
+    {
+      "line": 108,
+      "ok": true
+    },
+    {
+      "line": 109,
+      "ok": true
+    },
+    {
+      "line": 110,
+      "ok": true
+    },
+    {
+      "line": 111,
+      "ok": true
+    },
+    {
+      "line": 112,
+      "ok": true
+    },
+    {
+      "line": 113,
+      "ok": true
+    },
+    {
+      "line": 114,
+      "ok": true
+    },
+    {
+      "line": 115,
+      "ok": true
+    },
+    {
+      "line": 116,
+      "ok": true
+    },
+    {
+      "line": 117,
+      "ok": true
+    },
+    {
+      "line": 118,
+      "ok": true
+    },
+    {
+      "line": 119,
+      "ok": true
+    },
+    {
+      "line": 120,
+      "ok": true
+    },
+    {
+      "line": 121,
+      "ok": true
+    },
+    {
+      "line": 122,
+      "ok": true
+    },
+    {
+      "line": 123,
+      "ok": true
+    },
+    {
+      "line": 124,
+      "ok": true
+    },
+    {
+      "line": 125,
+      "ok": true
+    },
+    {
+      "line": 126,
+      "ok": true
+    },
+    {
+      "line": 127,
+      "ok": true
+    },
+    {
+      "line": 128,
+      "ok": true
+    },
+    {
+      "line": 129,
+      "ok": false
+    },
+    {
+      "line": 130,
+      "ok": true
+    },
+    {
+      "line": 131,
+      "ok": true
+    },
+    {
+      "line": 132,
+      "ok": true
+    },
+    {
+      "line": 133,
+      "ok": true
+    },
+    {
+      "line": 134,
+      "ok": false
+    },
+    {
+      "line": 135,
+      "ok": true
+    },
+    {
+      "line": 136,
+      "ok": true
+    },
+    {
+      "line": 137,
+      "ok": true
+    },
+    {
+      "line": 138,
+      "ok": true
+    },
+    {
+      "line": 139,
+      "ok": true
+    },
+    {
+      "line": 140,
+      "ok": true
+    },
+    {
+      "line": 141,
+      "ok": true
+    },
+    {
+      "line": 142,
+      "ok": true
+    },
+    {
+      "line": 143,
+      "ok": true
+    },
+    {
+      "line": 144,
+      "ok": true
+    },
+    {
+      "line": 145,
+      "ok": true
+    },
+    {
+      "line": 146,
+      "ok": true
+    },
+    {
+      "line": 147,
+      "ok": true
+    },
+    {
+      "line": 148,
+      "ok": true
+    },
+    {
+      "line": 149,
+      "ok": true
+    },
+    {
+      "line": 150,
+      "ok": true
+    },
+    {
+      "line": 151,
+      "ok": true
+    },
+    {
+      "line": 152,
+      "ok": true
+    },
+    {
+      "line": 153,
+      "ok": true
+    },
+    {
+      "line": 154,
+      "ok": true
+    },
+    {
+      "line": 155,
+      "ok": true
+    },
+    {
+      "line": 156,
+      "ok": true
+    },
+    {
+      "line": 157,
+      "ok": true
+    },
+    {
+      "line": 158,
+      "ok": true
+    },
+    {
+      "line": 159,
+      "ok": true
+    },
+    {
+      "line": 160,
+      "ok": true
+    },
+    {
+      "line": 161,
+      "ok": true
+    },
+    {
+      "line": 162,
+      "ok": true
+    },
+    {
+      "line": 163,
+      "ok": true
+    },
+    {
+      "line": 164,
+      "ok": true
+    },
+    {
+      "line": 165,
+      "ok": true
+    },
+    {
+      "line": 166,
+      "ok": true
+    },
+    {
+      "line": 167,
+      "ok": false
+    },
+    {
+      "line": 168,
+      "ok": true
+    },
+    {
+      "line": 169,
+      "ok": true
+    },
+    {
+      "line": 170,
+      "ok": false
+    },
+    {
+      "line": 171,
+      "ok": true
+    },
+    {
+      "line": 172,
+      "ok": true
+    },
+    {
+      "line": 173,
+      "ok": true
+    },
+    {
+      "line": 174,
+      "ok": false
+    },
+    {
+      "line": 175,
+      "ok": true
+    },
+    {
+      "line": 176,
+      "ok": true
+    },
+    {
+      "line": 177,
+      "ok": true
+    },
+    {
+      "line": 178,
+      "ok": true
+    },
+    {
+      "line": 179,
+      "ok": true
+    },
+    {
+      "line": 180,
+      "ok": true
+    },
+    {
+      "line": 181,
+      "ok": true
+    },
+    {
+      "line": 182,
+      "ok": true
+    },
+    {
+      "line": 183,
+      "ok": true
+    },
+    {
+      "line": 184,
+      "ok": true
+    },
+    {
+      "line": 185,
+      "ok": true
+    },
+    {
+      "line": 186,
+      "ok": true
+    },
+    {
+      "line": 187,
+      "ok": true
+    },
+    {
+      "line": 188,
+      "ok": true
+    },
+    {
+      "line": 189,
+      "ok": true
+    },
+    {
+      "line": 190,
+      "ok": true
+    },
+    {
+      "line": 191,
+      "ok": true
+    },
+    {
+      "line": 192,
+      "ok": true
+    },
+    {
+      "line": 193,
+      "ok": true
+    },
+    {
+      "line": 194,
+      "ok": true
+    },
+    {
+      "line": 195,
+      "ok": true
+    },
+    {
+      "line": 196,
+      "ok": true
+    },
+    {
+      "line": 197,
+      "ok": true
+    },
+    {
+      "line": 198,
+      "ok": true
+    },
+    {
+      "line": 199,
+      "ok": true
+    },
+    {
+      "line": 200,
+      "ok": true
+    },
+    {
+      "line": 201,
+      "ok": true
+    },
+    {
+      "line": 202,
+      "ok": true
+    },
+    {
+      "line": 203,
+      "ok": true
+    },
+    {
+      "line": 204,
+      "ok": true
+    },
+    {
+      "line": 205,
+      "ok": true
+    },
+    {
+      "line": 206,
+      "ok": true
+    },
+    {
+      "line": 207,
+      "ok": true
+    },
+    {
+      "line": 208,
+      "ok": true
+    },
+    {
+      "line": 209,
+      "ok": true
+    },
+    {
+      "line": 210,
+      "ok": true
+    },
+    {
+      "line": 211,
+      "ok": true
+    },
+    {
+      "line": 212,
+      "ok": true
+    },
+    {
+      "line": 213,
+      "ok": true
+    },
+    {
+      "line": 214,
+      "ok": true
+    },
+    {
+      "line": 215,
+      "ok": true
+    },
+    {
+      "line": 216,
+      "ok": true
+    },
+    {
+      "line": 217,
+      "ok": true
+    },
+    {
+      "line": 218,
+      "ok": true
+    },
+    {
+      "line": 219,
+      "ok": true
+    },
+    {
+      "line": 220,
+      "ok": true
+    },
+    {
+      "line": 221,
+      "ok": true
+    },
+    {
+      "line": 222,
+      "ok": true
+    },
+    {
+      "line": 223,
+      "ok": true
+    },
+    {
+      "line": 224,
+      "ok": true
+    },
+    {
+      "line": 225,
+      "ok": true
+    },
+    {
+      "line": 226,
+      "ok": true
+    },
+    {
+      "line": 227,
+      "ok": true
+    },
+    {
+      "line": 228,
+      "ok": true
+    },
+    {
+      "line": 229,
+      "ok": true
+    },
+    {
+      "line": 230,
+      "ok": true
+    },
+    {
+      "line": 231,
+      "ok": true
+    },
+    {
+      "line": 232,
+      "ok": true
+    },
+    {
+      "line": 233,
+      "ok": true
+    },
+    {
+      "line": 234,
+      "ok": true
+    },
+    {
+      "line": 235,
+      "ok": true
+    },
+    {
+      "line": 236,
+      "ok": true
+    },
+    {
+      "line": 237,
+      "ok": true
+    },
+    {
+      "line": 238,
+      "ok": true
+    },
+    {
+      "line": 239,
+      "ok": true
+    },
+    {
+      "line": 240,
+      "ok": true
+    },
+    {
+      "line": 241,
+      "ok": true
+    },
+    {
+      "line": 242,
+      "ok": true
+    },
+    {
+      "line": 243,
+      "ok": true
+    },
+    {
+      "line": 244,
+      "ok": true
+    },
+    {
+      "line": 245,
+      "ok": true
+    },
+    {
+      "line": 246,
+      "ok": true
+    },
+    {
+      "line": 247,
+      "ok": true
+    },
+    {
+      "line": 248,
+      "ok": true
+    },
+    {
+      "line": 249,
+      "ok": true
+    },
+    {
+      "line": 250,
+      "ok": true
+    },
+    {
+      "line": 251,
+      "ok": true
+    },
+    {
+      "line": 252,
+      "ok": true
+    },
+    {
+      "line": 253,
+      "ok": true
+    },
+    {
+      "line": 254,
+      "ok": true
+    },
+    {
+      "line": 255,
+      "ok": true
+    },
+    {
+      "line": 256,
+      "ok": true
+    },
+    {
+      "line": 257,
+      "ok": true
+    },
+    {
+      "line": 258,
+      "ok": true
+    },
+    {
+      "line": 259,
+      "ok": true
+    },
+    {
+      "line": 260,
+      "ok": true
+    },
+    {
+      "line": 261,
+      "ok": true
+    },
+    {
+      "line": 262,
+      "ok": true
+    },
+    {
+      "line": 263,
+      "ok": true
+    },
+    {
+      "line": 264,
+      "ok": true
+    },
+    {
+      "line": 265,
+      "ok": true
+    },
+    {
+      "line": 266,
+      "ok": true
+    },
+    {
+      "line": 267,
+      "ok": true
+    },
+    {
+      "line": 268,
+      "ok": true
+    },
+    {
+      "line": 269,
+      "ok": true
+    },
+    {
+      "line": 270,
+      "ok": true
+    },
+    {
+      "line": 271,
+      "ok": true
+    },
+    {
+      "line": 272,
+      "ok": true
+    },
+    {
+      "line": 273,
+      "ok": true
+    },
+    {
+      "line": 274,
+      "ok": true
+    },
+    {
+      "line": 275,
+      "ok": true
+    },
+    {
+      "line": 276,
+      "ok": true
+    },
+    {
+      "line": 277,
+      "ok": true
+    },
+    {
+      "line": 278,
+      "ok": true
+    },
+    {
+      "line": 279,
+      "ok": true
+    },
+    {
+      "line": 280,
+      "ok": true
+    },
+    {
+      "line": 281,
+      "ok": true
+    },
+    {
+      "line": 282,
+      "ok": true
+    },
+    {
+      "line": 283,
+      "ok": true
+    },
+    {
+      "line": 284,
+      "ok": true
+    },
+    {
+      "line": 285,
+      "ok": true
+    },
+    {
+      "line": 286,
+      "ok": true
+    },
+    {
+      "line": 287,
+      "ok": true
+    },
+    {
+      "line": 288,
+      "ok": true
+    },
+    {
+      "line": 289,
+      "ok": true
+    },
+    {
+      "line": 290,
+      "ok": true
+    },
+    {
+      "line": 291,
+      "ok": true
+    },
+    {
+      "line": 292,
+      "ok": true
+    },
+    {
+      "line": 293,
+      "ok": true
+    },
+    {
+      "line": 294,
+      "ok": true
+    },
+    {
+      "line": 295,
+      "ok": true
+    },
+    {
+      "line": 296,
+      "ok": true
+    },
+    {
+      "line": 297,
+      "ok": true
+    },
+    {
+      "line": 298,
+      "ok": true
+    },
+    {
+      "line": 299,
+      "ok": true
+    },
+    {
+      "line": 300,
+      "ok": true
+    },
+    {
+      "line": 301,
+      "ok": true
+    },
+    {
+      "line": 302,
+      "ok": true
+    },
+    {
+      "line": 303,
+      "ok": true
+    },
+    {
+      "line": 304,
+      "ok": true
+    },
+    {
+      "line": 305,
+      "ok": true
+    },
+    {
+      "line": 306,
+      "ok": true
+    },
+    {
+      "line": 307,
+      "ok": true
+    },
+    {
+      "line": 308,
+      "ok": true
+    },
+    {
+      "line": 309,
+      "ok": true
+    },
+    {
+      "line": 310,
+      "ok": true
+    },
+    {
+      "line": 311,
+      "ok": true
+    },
+    {
+      "line": 312,
+      "ok": true
+    },
+    {
+      "line": 313,
+      "ok": true
+    },
+    {
+      "line": 314,
+      "ok": true
+    },
+    {
+      "line": 315,
+      "ok": true
+    },
+    {
+      "line": 316,
+      "ok": true
+    },
+    {
+      "line": 317,
+      "ok": true
+    },
+    {
+      "line": 318,
+      "ok": true
+    },
+    {
+      "line": 319,
+      "ok": true
+    },
+    {
+      "line": 320,
+      "ok": true
+    },
+    {
+      "line": 321,
+      "ok": true
+    },
+    {
+      "line": 322,
+      "ok": true
+    },
+    {
+      "line": 323,
+      "ok": true
+    },
+    {
+      "line": 324,
+      "ok": true
+    },
+    {
+      "line": 325,
+      "ok": true
+    },
+    {
+      "line": 326,
+      "ok": true
+    },
+    {
+      "line": 327,
+      "ok": true
+    },
+    {
+      "line": 328,
+      "ok": true
+    },
+    {
+      "line": 329,
+      "ok": true
+    },
+    {
+      "line": 330,
+      "ok": true
+    },
+    {
+      "line": 331,
+      "ok": true
+    },
+    {
+      "line": 332,
+      "ok": true
+    },
+    {
+      "line": 333,
+      "ok": true
+    },
+    {
+      "line": 334,
+      "ok": true
+    },
+    {
+      "line": 335,
+      "ok": true
+    },
+    {
+      "line": 336,
+      "ok": true
+    },
+    {
+      "line": 337,
+      "ok": true
+    },
+    {
+      "line": 338,
+      "ok": true
+    },
+    {
+      "line": 339,
+      "ok": true
+    },
+    {
+      "line": 340,
+      "ok": true
+    },
+    {
+      "line": 341,
+      "ok": true
+    },
+    {
+      "line": 342,
+      "ok": true
+    },
+    {
+      "line": 343,
+      "ok": true
+    },
+    {
+      "line": 344,
+      "ok": true
+    },
+    {
+      "line": 345,
+      "ok": true
+    },
+    {
+      "line": 346,
+      "ok": true
+    },
+    {
+      "line": 347,
+      "ok": true
+    },
+    {
+      "line": 348,
+      "ok": true
+    },
+    {
+      "line": 349,
+      "ok": true
+    },
+    {
+      "line": 350,
+      "ok": true
+    },
+    {
+      "line": 351,
+      "ok": true
+    },
+    {
+      "line": 352,
+      "ok": true
+    },
+    {
+      "line": 353,
+      "ok": true
+    },
+    {
+      "line": 354,
+      "ok": true
+    },
+    {
+      "line": 355,
+      "ok": true
+    },
+    {
+      "line": 356,
+      "ok": true
+    },
+    {
+      "line": 357,
+      "ok": true
+    },
+    {
+      "line": 358,
+      "ok": true
+    },
+    {
+      "line": 359,
+      "ok": true
+    },
+    {
+      "line": 360,
+      "ok": true
+    },
+    {
+      "line": 361,
+      "ok": true
+    },
+    {
+      "line": 362,
+      "ok": true
+    },
+    {
+      "line": 363,
+      "ok": true
+    },
+    {
+      "line": 364,
+      "ok": true
+    },
+    {
+      "line": 365,
+      "ok": true
+    },
+    {
+      "line": 366,
+      "ok": true
+    },
+    {
+      "line": 367,
+      "ok": true
+    },
+    {
+      "line": 368,
+      "ok": true
+    },
+    {
+      "line": 369,
+      "ok": true
+    },
+    {
+      "line": 370,
+      "ok": true
+    },
+    {
+      "line": 371,
+      "ok": true
+    },
+    {
+      "line": 372,
+      "ok": false
+    },
+    {
+      "line": 373,
+      "ok": true
+    },
+    {
+      "line": 374,
+      "ok": true
+    },
+    {
+      "line": 375,
+      "ok": true
+    },
+    {
+      "line": 376,
+      "ok": true
+    },
+    {
+      "line": 377,
+      "ok": true
+    },
+    {
+      "line": 378,
+      "ok": true
+    },
+    {
+      "line": 379,
+      "ok": true
+    },
+    {
+      "line": 380,
+      "ok": true
+    },
+    {
+      "line": 381,
+      "ok": true
+    },
+    {
+      "line": 382,
+      "ok": true
+    },
+    {
+      "line": 383,
+      "ok": true
+    },
+    {
+      "line": 384,
+      "ok": true
+    },
+    {
+      "line": 385,
+      "ok": true
+    },
+    {
+      "line": 386,
+      "ok": true
+    },
+    {
+      "line": 387,
+      "ok": true
+    },
+    {
+      "line": 388,
+      "ok": true
+    },
+    {
+      "line": 389,
+      "ok": true
+    },
+    {
+      "line": 390,
+      "ok": true
+    },
+    {
+      "line": 391,
+      "ok": true
+    },
+    {
+      "line": 392,
+      "ok": true
+    },
+    {
+      "line": 393,
+      "ok": true
+    },
+    {
+      "line": 394,
+      "ok": true
+    },
+    {
+      "line": 395,
+      "ok": true
+    },
+    {
+      "line": 396,
+      "ok": true
+    },
+    {
+      "line": 397,
+      "ok": true
+    },
+    {
+      "line": 398,
+      "ok": true
+    },
+    {
+      "line": 399,
+      "ok": true
+    },
+    {
+      "line": 400,
+      "ok": true
+    },
+    {
+      "line": 401,
+      "ok": true
+    },
+    {
+      "line": 402,
+      "ok": true
+    },
+    {
+      "line": 403,
+      "ok": true
+    },
+    {
+      "line": 404,
+      "ok": true
+    },
+    {
+      "line": 405,
+      "ok": true
+    },
+    {
+      "line": 406,
+      "ok": true
+    },
+    {
+      "line": 407,
+      "ok": true
+    },
+    {
+      "line": 408,
+      "ok": true
+    },
+    {
+      "line": 409,
+      "ok": true
+    },
+    {
+      "line": 410,
+      "ok": true
+    },
+    {
+      "line": 411,
+      "ok": false
+    },
+    {
+      "line": 412,
+      "ok": true
+    },
+    {
+      "line": 413,
+      "ok": true
+    },
+    {
+      "line": 414,
+      "ok": true
+    },
+    {
+      "line": 415,
+      "ok": true
+    },
+    {
+      "line": 416,
+      "ok": true
+    },
+    {
+      "line": 417,
+      "ok": true
+    },
+    {
+      "line": 418,
+      "ok": true
+    },
+    {
+      "line": 419,
+      "ok": true
+    },
+    {
+      "line": 420,
+      "ok": true
+    },
+    {
+      "line": 421,
+      "ok": true
+    },
+    {
+      "line": 422,
+      "ok": true
+    },
+    {
+      "line": 423,
+      "ok": true
+    },
+    {
+      "line": 424,
+      "ok": true
+    },
+    {
+      "line": 425,
+      "ok": true
+    },
+    {
+      "line": 426,
+      "ok": true
+    },
+    {
+      "line": 427,
+      "ok": true
+    },
+    {
+      "line": 428,
+      "ok": true
+    },
+    {
+      "line": 429,
+      "ok": true
+    },
+    {
+      "line": 430,
+      "ok": true
+    },
+    {
+      "line": 431,
+      "ok": true
+    },
+    {
+      "line": 432,
+      "ok": true
+    },
+    {
+      "line": 433,
+      "ok": true
+    },
+    {
+      "line": 434,
+      "ok": true
+    },
+    {
+      "line": 435,
+      "ok": true
+    },
+    {
+      "line": 436,
+      "ok": true
+    },
+    {
+      "line": 437,
+      "ok": true
+    },
+    {
+      "line": 438,
+      "ok": true
+    },
+    {
+      "line": 439,
+      "ok": true
+    },
+    {
+      "line": 440,
+      "ok": true
+    },
+    {
+      "line": 441,
+      "ok": true
+    },
+    {
+      "line": 442,
+      "ok": true
+    },
+    {
+      "line": 443,
+      "ok": true
+    },
+    {
+      "line": 444,
+      "ok": true
+    },
+    {
+      "line": 445,
+      "ok": true
+    },
+    {
+      "line": 446,
+      "ok": true
+    },
+    {
+      "line": 447,
+      "ok": true
+    },
+    {
+      "line": 448,
+      "ok": true
+    },
+    {
+      "line": 449,
+      "ok": true
+    },
+    {
+      "line": 450,
+      "ok": true
+    },
+    {
+      "line": 451,
+      "ok": true
+    },
+    {
+      "line": 452,
+      "ok": true
+    },
+    {
+      "line": 453,
+      "ok": true
+    },
+    {
+      "line": 454,
+      "ok": true
+    },
+    {
+      "line": 455,
+      "ok": true
+    },
+    {
+      "line": 456,
+      "ok": true
+    },
+    {
+      "line": 457,
+      "ok": true
+    },
+    {
+      "line": 458,
+      "ok": true
+    },
+    {
+      "line": 459,
+      "ok": true
+    },
+    {
+      "line": 460,
+      "ok": true
+    },
+    {
+      "line": 461,
+      "ok": true
+    },
+    {
+      "line": 462,
+      "ok": true
+    },
+    {
+      "line": 463,
+      "ok": true
+    },
+    {
+      "line": 464,
+      "ok": true
+    },
+    {
+      "line": 465,
+      "ok": true
+    },
+    {
+      "line": 466,
+      "ok": true
+    },
+    {
+      "line": 467,
+      "ok": true
+    },
+    {
+      "line": 468,
+      "ok": true
+    },
+    {
+      "line": 469,
+      "ok": true
+    },
+    {
+      "line": 470,
+      "ok": true
+    },
+    {
+      "line": 471,
+      "ok": true
+    },
+    {
+      "line": 472,
+      "ok": true
+    },
+    {
+      "line": 473,
+      "ok": true
+    },
+    {
+      "line": 474,
+      "ok": true
+    },
+    {
+      "line": 475,
+      "ok": true
+    },
+    {
+      "line": 476,
+      "ok": true
+    },
+    {
+      "line": 477,
+      "ok": true
+    },
+    {
+      "line": 478,
+      "ok": true
+    },
+    {
+      "line": 479,
+      "ok": true
+    },
+    {
+      "line": 480,
+      "ok": true
+    },
+    {
+      "line": 481,
+      "ok": true
+    },
+    {
+      "line": 482,
+      "ok": true
+    },
+    {
+      "line": 483,
+      "ok": true
+    },
+    {
+      "line": 484,
+      "ok": true
+    },
+    {
+      "line": 485,
+      "ok": true
+    },
+    {
+      "line": 486,
+      "ok": true
+    },
+    {
+      "line": 487,
+      "ok": true
+    },
+    {
+      "line": 488,
+      "ok": true
+    },
+    {
+      "line": 489,
+      "ok": true
+    },
+    {
+      "line": 490,
+      "ok": true
+    },
+    {
+      "line": 491,
+      "ok": true
+    },
+    {
+      "line": 492,
+      "ok": true
+    },
+    {
+      "line": 493,
+      "ok": true
+    },
+    {
+      "line": 494,
+      "ok": true
+    },
+    {
+      "line": 495,
+      "ok": true
+    },
+    {
+      "line": 496,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: No active Keying Set to use\n"
+    },
+    {
+      "line": 497,
+      "ok": true
+    },
+    {
+      "line": 498,
+      "ok": true
+    },
+    {
+      "line": 499,
+      "ok": true
+    },
+    {
+      "line": 500,
+      "ok": true
+    },
+    {
+      "line": 501,
+      "ok": true
+    },
+    {
+      "line": 502,
+      "ok": true
+    },
+    {
+      "line": 503,
+      "ok": true
+    },
+    {
+      "line": 504,
+      "ok": true
+    },
+    {
+      "line": 505,
+      "ok": true
+    },
+    {
+      "line": 506,
+      "ok": true
+    },
+    {
+      "line": 507,
+      "ok": true
+    },
+    {
+      "line": 508,
+      "ok": true
+    },
+    {
+      "line": 509,
+      "ok": true
+    },
+    {
+      "line": 510,
+      "ok": true
+    },
+    {
+      "line": 511,
+      "ok": true
+    },
+    {
+      "line": 512,
+      "ok": true
+    },
+    {
+      "line": 513,
+      "ok": true
+    },
+    {
+      "line": 514,
+      "ok": true
+    },
+    {
+      "line": 515,
+      "ok": true
+    },
+    {
+      "line": 516,
+      "ok": true
+    },
+    {
+      "line": 517,
+      "ok": true
+    },
+    {
+      "line": 518,
+      "ok": true
+    },
+    {
+      "line": 519,
+      "ok": true
+    },
+    {
+      "line": 520,
+      "ok": true
+    },
+    {
+      "line": 521,
+      "ok": true
+    },
+    {
+      "line": 522,
+      "ok": true
+    },
+    {
+      "line": 523,
+      "ok": true
+    },
+    {
+      "line": 524,
+      "ok": true
+    },
+    {
+      "line": 525,
+      "ok": true
+    },
+    {
+      "line": 526,
+      "ok": true
+    },
+    {
+      "line": 527,
+      "ok": true
+    },
+    {
+      "line": 528,
+      "ok": true
+    },
+    {
+      "line": 529,
+      "ok": true
+    },
+    {
+      "line": 530,
+      "ok": true
+    },
+    {
+      "line": 531,
+      "ok": true
+    },
+    {
+      "line": 532,
+      "ok": true
+    },
+    {
+      "line": 533,
+      "ok": true
+    },
+    {
+      "line": 534,
+      "ok": true
+    },
+    {
+      "line": 535,
+      "ok": true
+    },
+    {
+      "line": 536,
+      "ok": true
+    },
+    {
+      "line": 537,
+      "ok": true
+    },
+    {
+      "line": 538,
+      "ok": true
+    },
+    {
+      "line": 539,
+      "ok": true
+    },
+    {
+      "line": 540,
+      "ok": true
+    },
+    {
+      "line": 541,
+      "ok": true
+    },
+    {
+      "line": 542,
+      "ok": true
+    },
+    {
+      "line": 543,
+      "ok": true
+    },
+    {
+      "line": 544,
+      "ok": true
+    },
+    {
+      "line": 545,
+      "ok": true
+    },
+    {
+      "line": 546,
+      "ok": true
+    },
+    {
+      "line": 547,
+      "ok": true
+    },
+    {
+      "line": 548,
+      "ok": true
+    },
+    {
+      "line": 549,
+      "ok": true
+    },
+    {
+      "line": 550,
+      "ok": true
+    },
+    {
+      "line": 551,
+      "ok": true
+    },
+    {
+      "line": 552,
+      "ok": true
+    },
+    {
+      "line": 553,
+      "ok": true
+    },
+    {
+      "line": 554,
+      "ok": true
+    },
+    {
+      "line": 555,
+      "ok": true
+    },
+    {
+      "line": 556,
+      "ok": true
+    },
+    {
+      "line": 557,
+      "ok": true
+    },
+    {
+      "line": 558,
+      "ok": true
+    },
+    {
+      "line": 559,
+      "ok": true
+    },
+    {
+      "line": 560,
+      "ok": true
+    },
+    {
+      "line": 561,
+      "ok": true
+    },
+    {
+      "line": 562,
+      "ok": true
+    },
+    {
+      "line": 563,
+      "ok": true
+    },
+    {
+      "line": 564,
+      "ok": true
+    },
+    {
+      "line": 565,
+      "ok": true
+    },
+    {
+      "line": 566,
+      "ok": true
+    },
+    {
+      "line": 567,
+      "ok": true
+    },
+    {
+      "line": 568,
+      "ok": true
+    },
+    {
+      "line": 569,
+      "ok": true
+    },
+    {
+      "line": 570,
+      "ok": true
+    },
+    {
+      "line": 571,
+      "ok": true
+    },
+    {
+      "line": 572,
+      "ok": true
+    },
+    {
+      "line": 573,
+      "ok": true
+    },
+    {
+      "line": 574,
+      "ok": false
+    },
+    {
+      "line": 575,
+      "ok": true
+    },
+    {
+      "line": 576,
+      "ok": true
+    },
+    {
+      "line": 577,
+      "ok": true
+    },
+    {
+      "line": 578,
+      "ok": true
+    },
+    {
+      "line": 579,
+      "ok": true
+    },
+    {
+      "line": 580,
+      "ok": true
+    },
+    {
+      "line": 581,
+      "ok": true
+    },
+    {
+      "line": 582,
+      "ok": true
+    },
+    {
+      "line": 583,
+      "ok": true
+    },
+    {
+      "line": 584,
+      "ok": true
+    },
+    {
+      "line": 585,
+      "ok": true
+    },
+    {
+      "line": 586,
+      "ok": true
+    },
+    {
+      "line": 587,
+      "ok": true
+    },
+    {
+      "line": 588,
+      "ok": true
+    },
+    {
+      "line": 589,
+      "ok": true
+    },
+    {
+      "line": 590,
+      "ok": true
+    },
+    {
+      "line": 591,
+      "ok": true
+    },
+    {
+      "line": 592,
+      "ok": true
+    },
+    {
+      "line": 593,
+      "ok": true
+    },
+    {
+      "line": 594,
+      "ok": true
+    },
+    {
+      "line": 595,
+      "ok": true
+    },
+    {
+      "line": 596,
+      "ok": true
+    },
+    {
+      "line": 597,
+      "ok": true
+    },
+    {
+      "line": 598,
+      "ok": true
+    },
+    {
+      "line": 599,
+      "ok": true
+    },
+    {
+      "line": 600,
+      "ok": true
+    },
+    {
+      "line": 601,
+      "ok": true
+    },
+    {
+      "line": 602,
+      "ok": true
+    },
+    {
+      "line": 603,
+      "ok": false
+    },
+    {
+      "line": 604,
+      "ok": true
+    },
+    {
+      "line": 605,
+      "ok": true
+    },
+    {
+      "line": 606,
+      "ok": true
+    },
+    {
+      "line": 607,
+      "ok": true
+    },
+    {
+      "line": 608,
+      "ok": true
+    },
+    {
+      "line": 609,
+      "ok": true
+    },
+    {
+      "line": 610,
+      "ok": true
+    },
+    {
+      "line": 611,
+      "ok": true
+    },
+    {
+      "line": 612,
+      "ok": true
+    },
+    {
+      "line": 613,
+      "ok": true
+    },
+    {
+      "line": 614,
+      "ok": true
+    },
+    {
+      "line": 615,
+      "ok": true
+    },
+    {
+      "line": 616,
+      "ok": true
+    },
+    {
+      "line": 617,
+      "ok": true
+    },
+    {
+      "line": 618,
+      "ok": true
+    },
+    {
+      "line": 619,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.pose.select_parent.poll() failed, context is incorrect"
+    }
+  ],
+  "objects": {
+    "Armature": {
+      "type": "ARMATURE",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "H24": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.84147096, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "H26": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, -0.07207501, 0.95372117, 1.0],
+        [0.0, 0.8877498, -0.07207501, 1.0],
+        [0.0, 0.4546487, 0.2919266, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 1.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "H28": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "H30": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S0": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S1": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.4546487, 0.0],
+        [0.0, 0.0, 0.70807344, 1.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S10": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, -0.84147096, 0.0, 0.0],
+        [0.0, 0.5403023, 0.0, 1.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 1.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S11": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2919266, -0.84147096, 0.4546487, 0.0],
+        [0.4546487, 0.5403023, 0.70807344, 1.0],
+        [-0.84147096, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S12": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.84147096, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S13": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.84147096, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S14": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, -0.84147096, 0.0],
+        [0.0, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 0.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S15": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2919266, -0.07207501, 0.95372117, 1.0],
+        [0.4546487, 0.8877498, -0.07207501, 1.0],
+        [-0.84147096, 0.4546487, 0.2919266, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S16": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, -0.84147096, 0.4546487, 0.0],
+        [0.0, 0.5403023, 0.70807344, 1.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S17": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.84147096, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S18": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.5403023, -0.84147096, 0.0],
+        [0.0, 0.84147096, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 0.0, 0.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S19": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.4546487, 0.0],
+        [0.0, 0.0, 0.70807344, 1.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S2": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2919266, -0.07207501, 0.95372117, 0.0],
+        [0.4546487, 0.8877498, -0.07207501, 1.0],
+        [-0.84147096, 0.4546487, 0.2919266, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S20": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.5403023, 0.0, 0.84147096, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [-0.84147096, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S21": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, -0.84147096, 0.0],
+        [0.0, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S22": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S23": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2919266, -0.07207501, 0.95372117, 1.0],
+        [0.4546487, 0.8877498, -0.07207501, 0.0],
+        [-0.84147096, 0.4546487, 0.2919266, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S25": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S27": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S29": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S3": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.5403023, -0.84147096, 0.0],
+        [0.0, 0.84147096, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S31": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2919266, -0.84147096, 0.4546487, 1.0],
+        [0.4546487, 0.5403023, 0.70807344, 1.0],
+        [-0.84147096, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S32": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2919266, -0.84147096, 0.4546487, 1.0],
+        [0.4546487, 0.5403023, 0.70807344, 1.0],
+        [-0.84147096, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S4": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.5403023, 0.0, 0.84147096, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+        [-0.84147096, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S5": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 1.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S6": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S7": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S8": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.5403023, 0.0, 0.4546487, 0.0],
+        [0.0, 0.0, -0.84147096, 0.0],
+        [-0.84147096, 0.0, 0.2919266, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S9": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B1": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B1.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.002": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.003": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.004": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.005": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.006": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.007": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.008": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B2.009": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_B3": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_Bone": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_Bone.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_Bone.002": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.002": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.003": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.004": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.005": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.006": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.007": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.L.008": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.R": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.R.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_arm.R.002": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "act_hand.R": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Armature",
+    "selected": ["Armature"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

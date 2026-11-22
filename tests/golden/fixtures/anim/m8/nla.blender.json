@@ -1,0 +1,834 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 4 out of range, size 4"
+    },
+    {
+      "line": 76,
+      "ok": true
+    },
+    {
+      "line": 77,
+      "ok": true
+    },
+    {
+      "line": 78,
+      "ok": true
+    },
+    {
+      "line": 79,
+      "ok": true
+    },
+    {
+      "line": 80,
+      "ok": true
+    },
+    {
+      "line": 81,
+      "ok": true
+    },
+    {
+      "line": 82,
+      "ok": true
+    },
+    {
+      "line": 83,
+      "ok": true
+    },
+    {
+      "line": 84,
+      "ok": true
+    },
+    {
+      "line": 86,
+      "ok": true
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 90,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 2 out of range, size 2"
+    },
+    {
+      "line": 92,
+      "ok": true
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": true
+    },
+    {
+      "line": 96,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": true
+    },
+    {
+      "line": 99,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 0 out of range, size 0"
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [-0.12295952, -0.34960565, 0.0, 0.0],
+        [1.0488169, -0.040986508, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 1.6875],
+      "scale": [1.056, 0.352, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.31249994],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.31249994],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [0.95156795, -0.30743846, 0.0, 0.0],
+        [0.30743846, 0.95156795, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.31249994],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.31249994],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.31249994],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S0": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [10.0, 0.0, 0.0, 4.0],
+        [0.0, 20.0, 0.0, 8.0],
+        [0.0, 0.0, 30.0, 6.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0, 8.0, 6.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [10.0, 20.0, 30.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S1": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.70807344, 20.0],
+        [0.0, 0.0, -0.4546487, 21.0],
+        [0.0, 0.0, 0.5403023, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [20.0, 21.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 0.0, 1.0],
+      "scale": [0.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S2": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "S3": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_Aa": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_CubeAction": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_CubeAction.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_NlaTrack": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_NlaTrack.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_NlaTrack.002": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_Wave": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "t_Wave.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {
+    "CubeAction": {
+      "data": {
+        "fcurves": [
+          {
+            "array_index": 0,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [2.0, 0.0],
+                "BEZIER",
+                [-1.3333333, 0.0],
+                [5.333333, 0.0]
+              ],
+              [
+                [12.0, 3.0],
+                "BEZIER",
+                [8.666667, 3.0],
+                [15.333333, 3.0]
+              ]
+            ],
+            "samples": [
+              [-1.0, 0.0],
+              [-0.5, 0.0],
+              [0.0, 0.0],
+              [0.5, 0.0],
+              [1.0, 0.0],
+              [1.5, 0.0],
+              [2.0, 0.0],
+              [2.5, 0.021750005],
+              [3.0, 0.084000014],
+              [3.5, 0.18225001],
+              [4.0, 0.312],
+              [4.5, 0.46875],
+              [5.0, 0.64800006],
+              [5.5, 0.84524995],
+              [6.0, 1.056],
+              [6.5, 1.2757499],
+              [7.0, 1.5],
+              [7.5, 1.7242501],
+              [8.0, 1.9440001],
+              [8.5, 2.1547496],
+              [9.0, 2.3519998],
+              [9.5, 2.53125],
+              [10.0, 2.6880002],
+              [10.5, 2.81775],
+              [11.0, 2.916],
+              [11.5, 2.9782495],
+              [12.0, 3.0],
+              [12.5, 3.0],
+              [13.0, 3.0],
+              [13.5, 3.0],
+              [14.0, 3.0],
+              [14.5, 3.0],
+              [15.0, 3.0]
+            ]
+          },
+          {
+            "array_index": 1,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [2.0, 0.0],
+                "BEZIER",
+                [-1.3333333, 0.0],
+                [5.333333, 0.0]
+              ],
+              [
+                [12.0, 1.0],
+                "BEZIER",
+                [8.666667, 1.0],
+                [15.333333, 1.0]
+              ]
+            ],
+            "samples": [
+              [-1.0, 0.0],
+              [-0.5, 0.0],
+              [0.0, 0.0],
+              [0.5, 0.0],
+              [1.0, 0.0],
+              [1.5, 0.0],
+              [2.0, 0.0],
+              [2.5, 0.007250001],
+              [3.0, 0.028000005],
+              [3.5, 0.06075],
+              [4.0, 0.104],
+              [4.5, 0.15625],
+              [5.0, 0.216],
+              [5.5, 0.28174996],
+              [6.0, 0.352],
+              [6.5, 0.42525],
+              [7.0, 0.5],
+              [7.5, 0.57475],
+              [8.0, 0.648],
+              [8.5, 0.71825],
+              [9.0, 0.7839999],
+              [9.5, 0.84375],
+              [10.0, 0.896],
+              [10.5, 0.9392501],
+              [11.0, 0.972],
+              [11.5, 0.99275005],
+              [12.0, 1.0],
+              [12.5, 1.0],
+              [13.0, 1.0],
+              [13.5, 1.0],
+              [14.0, 1.0],
+              [14.5, 1.0],
+              [15.0, 1.0]
+            ]
+          },
+          {
+            "array_index": 2,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [2.0, 0.0],
+                "BEZIER",
+                [-1.3333333, 0.0],
+                [5.333333, 0.0]
+              ],
+              [
+                [12.0, 0.0],
+                "BEZIER",
+                [8.666667, 0.0],
+                [15.333333, 0.0]
+              ]
+            ],
+            "samples": [
+              [-1.0, 0.0],
+              [-0.5, 0.0],
+              [0.0, 0.0],
+              [0.5, 0.0],
+              [1.0, 0.0],
+              [1.5, 0.0],
+              [2.0, 0.0],
+              [2.5, 0.0],
+              [3.0, 0.0],
+              [3.5, 0.0],
+              [4.0, 0.0],
+              [4.5, 0.0],
+              [5.0, 0.0],
+              [5.5, 0.0],
+              [6.0, 0.0],
+              [6.5, 0.0],
+              [7.0, 0.0],
+              [7.5, 0.0],
+              [8.0, 0.0],
+              [8.5, 0.0],
+              [9.0, 0.0],
+              [9.5, 0.0],
+              [10.0, 0.0],
+              [10.5, 0.0],
+              [11.0, 0.0],
+              [11.5, 0.0],
+              [12.0, 0.0],
+              [12.5, 0.0],
+              [13.0, 0.0],
+              [13.5, 0.0],
+              [14.0, 0.0],
+              [14.5, 0.0],
+              [15.0, 0.0]
+            ]
+          }
+        ],
+        "slots": ["OBCube"]
+      }
+    },
+    "Wave": {
+      "data": {
+        "fcurves": [
+          {
+            "array_index": 2,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [1.0, 0.0],
+                "BEZIER",
+                [-0.33333337, 0.0],
+                [2.3333335, 0.0]
+              ],
+              [
+                [5.0, 2.0],
+                "BEZIER",
+                [3.6666665, 2.0],
+                [6.3333335, 2.0]
+              ]
+            ],
+            "samples": [
+              [-2.0, 0.0],
+              [-1.5, 0.0],
+              [-1.0, 0.0],
+              [-0.5, 0.0],
+              [0.0, 0.0],
+              [0.5, 0.0],
+              [1.0, 0.0],
+              [1.5, 0.085937485],
+              [2.0, 0.31249994],
+              [2.5, 0.6328125],
+              [3.0, 1.0],
+              [3.5, 1.3671875],
+              [4.0, 1.6875],
+              [4.5, 1.9140625],
+              [5.0, 2.0],
+              [5.5, 2.0],
+              [6.0, 2.0],
+              [6.5, 2.0],
+              [7.0, 2.0],
+              [7.5, 2.0],
+              [8.0, 2.0]
+            ]
+          }
+        ],
+        "slots": ["OBCube"]
+      }
+    }
+  },
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

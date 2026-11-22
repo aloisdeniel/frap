@@ -1,0 +1,12 @@
+# WP 8.3.11: what frap answers where Blender -b cannot be compared. The pose copy buffer lives
+# in the frap process (D-158), so a fresh process pastes nothing: `Internal clipboard is
+# empty`; after a copy the paste reports Blender's INFO. anim.channels_bake and the NLA
+# operators are headless-extended (D-160, deviations §2): their polls pass without an editor,
+# channels_bake without listed F-curves warns `No channels to operate on` and cancels,
+# nla.actionclip_add without any action fails with `No valid action to add` and names the
+# actions in the enum error otherwise; pose.select_grouped(type='COLOR') without an active pose
+# bone cancels (Blender dereferences the missing bone), KEYINGSET fails (no keying sets).
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

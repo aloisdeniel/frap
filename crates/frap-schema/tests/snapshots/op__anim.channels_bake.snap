@@ -1,0 +1,186 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "anim.channels_bake",
+  "bl_idname": "ANIM_OT_channels_bake",
+  "label": "Bake Channels",
+  "description": "Create keyframes following the current shape of F-Curves of selected channels",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "use_scene_range",
+      "name": "Use Scene Range",
+      "description": "If enabled, the scene start and end frame will be used to determine the bake range",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "range",
+      "name": "Frame Range",
+      "description": "The custom range in which to create new keys. Only used when not using the scene range",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": [
+        2
+      ],
+      "default": [
+        0,
+        0
+      ],
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "step",
+      "name": "Frame Step",
+      "description": "At which interval to add keys",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.01,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 1,
+      "soft_max": 16,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "remove_outside_range",
+      "name": "Remove Outside Range",
+      "description": "Removes keys outside the given range, leaving only the newly baked",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "interpolation_type",
+      "name": "Interpolation Type",
+      "description": "Choose the interpolation type with which new keys will be added",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BEZIER",
+      "enum_items": [
+        {
+          "identifier": "BEZIER",
+          "name": "Bézier",
+          "description": "New keys will be Bézier",
+          "value": 2
+        },
+        {
+          "identifier": "LIN",
+          "name": "Linear",
+          "description": "New keys will be linear",
+          "value": 1
+        },
+        {
+          "identifier": "CONST",
+          "name": "Constant",
+          "description": "New keys will be constant",
+          "value": 0
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "bake_modifiers",
+      "name": "Bake Modifiers",
+      "description": "Bake Modifiers into keyframes and delete them after",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": "bakes the F-curves the factory Graph Editor lists (selected objects)",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

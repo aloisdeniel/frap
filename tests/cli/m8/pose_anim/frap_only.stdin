@@ -1,0 +1,16 @@
+bpy.ops.anim.channels_bake.poll()
+bpy.ops.anim.channels_bake()
+bpy.ops.nla.actionclip_add()
+bpy.ops.nla.tracks_delete()
+bpy.data.objects['Cube'].keyframe_insert('location', frame=1)
+bpy.ops.nla.actionclip_add(action='Nope')
+bpy.ops.nla.actionclip_add()
+bpy.data.objects['Cube'].animation_data.nla_tracks[0].strips[0].name
+bpy.ops.object.armature_add()
+bpy.ops.object.mode_set(mode='POSE')
+bpy.ops.pose.paste()
+bpy.ops.pose.copy()
+bpy.ops.pose.paste(flipped=True)
+bpy.data.armatures['Armature'].bones.active = None
+bpy.ops.pose.select_grouped(type='COLOR')
+bpy.ops.pose.select_grouped(type='KEYINGSET')

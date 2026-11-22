@@ -1,0 +1,79 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "pose.autoside_names",
+  "bl_idname": "POSE_OT_autoside_names",
+  "label": "Auto-Name by Axis",
+  "description": "Automatically renames the selected bones according to which side of the target axis they fall on",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_POSE"
+    ],
+    "text": "requires Pose Mode (bpy.ops.object.mode_set(mode='POSE'))",
+    "matrix": {
+      "plain": "NNNYN",
+      "view3d": "NNNYN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "axis",
+      "name": "Axis",
+      "description": "Axis to tag names with",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "XAXIS",
+      "enum_items": [
+        {
+          "identifier": "XAXIS",
+          "name": "X-Axis",
+          "description": "Left/Right",
+          "value": 0
+        },
+        {
+          "identifier": "YAXIS",
+          "name": "Y-Axis",
+          "description": "Front/Back",
+          "value": 1
+        },
+        {
+          "identifier": "ZAXIS",
+          "name": "Z-Axis",
+          "description": "Top/Bottom",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

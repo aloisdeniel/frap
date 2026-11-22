@@ -1,0 +1,59 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "nla.actionclip_add",
+  "bl_idname": "NLA_OT_actionclip_add",
+  "label": "Add Action Strip",
+  "description": "Add an Action-Clip strip (i.e. an NLA Strip referencing an Action) to the active track",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "action",
+      "name": "Action",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "enum_items": [],
+      "is_enum_flag": false,
+      "dynamic_enum": "NLA_OT_actionclip_add.action",
+      "context_rule": "items depend on the context in Blender (NLA_OT_actionclip_add.action); frap narrows them to the live context, enum_items is the superset",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": "the active object's AnimData stands for the NLA editor's channel list",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}
