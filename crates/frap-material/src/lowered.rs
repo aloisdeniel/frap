@@ -12,6 +12,8 @@ use smol_str::SmolStr;
 // building for `raise`). They name no pattern; the patterns live in `patterns/`.
 pub mod build;
 pub mod graph;
+/// `InlineShaderNodes`' group inlining and muted-node bypass (WP 8.12).
+pub mod inline;
 
 /// A factor and an optional texture multiplying it.
 #[derive(Clone, Debug, PartialEq)]
@@ -409,11 +411,19 @@ impl LoweredMaterial {
 pub trait ImageLookup {
     /// The image datablock.
     fn image(&self, im: IdRef<ImageId>) -> Option<&Image>;
+    /// The node group a group node uses (`bpy.data.node_groups`; WP 8.12, for
+    /// [`inline::expand`]). `None` by default: groups are not inlined.
+    fn node_group(&self, _id: frap_rna::IdAny) -> Option<&NodeTree> {
+        None
+    }
 }
 
 impl ImageLookup for frap_scene::Main {
     fn image(&self, im: IdRef<ImageId>) -> Option<&Image> {
         self.images.get(im)
+    }
+    fn node_group(&self, id: frap_rna::IdAny) -> Option<&NodeTree> {
+        IdRef::<frap_rna::NodeTreeId>::from_any(id).and_then(|r| self.node_groups.get(r))
     }
 }
 
@@ -533,8 +543,18 @@ pub fn patterns_in_order() -> Vec<&'static MaterialPattern> {
 
 /// Lowers a material's node tree by running [`MATERIAL_PATTERNS`] in `order`, starting from
 /// [`LoweredMaterial::gltf_default`].
+///
+/// When the exporter would read the inlined tree (`LowerCx::uses_inline_tree`), node groups
+/// are inlined and links through muted nodes bypassed first ([`inline::expand`], WP 8.12).
 pub fn lower(tree: &NodeTree, mat: &Material, images: &dyn ImageLookup) -> LoweredMaterial {
-    lower_cx(&LowerCx::new(tree, mat, images))
+    let cx = LowerCx::new(tree, mat, images);
+    if cx.uses_inline_tree()
+        && !cx.inline_fails()
+        && let Some(t) = inline::expand(tree, mat, images)
+    {
+        return lower_cx(&LowerCx::new(&t, mat, images));
+    }
+    lower_cx(&cx)
 }
 
 /// [`lower`] from the original tree (`bmat.used == "ORIGINAL"`: no constant folding, see

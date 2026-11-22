@@ -250,6 +250,10 @@ pub(crate) fn scalar_member<'a>(
 /// group node (one whose `node_tree` is set, or the unbound settings node a raise created
 /// before the importer binds it).
 pub(crate) fn settings_input<'a>(cx: &LowerCx<'a>, name: &str) -> Option<(&'a Node, usize)> {
+    // The inlined tree has no group node (`LowerCx::gltf_output_input`, WP 8.12).
+    if cx.uses_inline_tree() {
+        return None;
+    }
     cx.tree
         .nodes
         .iter()
