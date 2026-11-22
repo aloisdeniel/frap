@@ -17,15 +17,15 @@
 //! attributes) and [`SubdivResult::identity`].
 //!
 //! Internals: `sdc` (Catmull-Clark masks and creasing rules), `vtr` (levels and
-//! uniform refinement), `fvar` (face-varying channels), `primvar` (interpolation and limit),
-//! all ported from OpenSubdiv as Blender links it.
+//! uniform refinement), `primvar` (position interpolation and limit), all ported from
+//! OpenSubdiv as Blender links it, and `far` (WP 8.11): OpenSubdiv's face-varying pipeline
+//! (adaptive refinement, stencil and patch tables, Gregory end caps, patch evaluation) ported
+//! bit for bit in `f32`, which evaluates every UV map.
 #![deny(unsafe_code)]
 
 pub mod catmull_clark;
-/// OpenSubdiv's `Far` layer for bit-exact face-varying evaluation (M8 W0 stub; WP 8.11).
-#[allow(dead_code)]
+/// OpenSubdiv's `Far` layer for bit-exact face-varying evaluation (WP 8.11).
 mod far;
-mod fvar;
 pub mod layout;
 #[cfg(feature = "osd")]
 pub mod osd;
