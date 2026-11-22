@@ -25,13 +25,17 @@
 //! cube without seams) or `Unwrap could not solve any island(s), …`. frap adds a WARNING when
 //! the solve produced non-finite UVs (huge coordinates), which Blender writes silently.
 //!
-//! **frap differences.** `ANGLE_BASED` is solved with LSCM, as Blender does when ABF++ fails
-//! (equal results on charts where both are exact, e.g. a seamed cube); the response carries the
-//! hint `UV_ANGLE_BASED_AS_CONFORMAL`. ABF++ is M8 (WP 8.1). `MINIMUM_STRETCH` takes Blender's
-//! own path of a build without SLIM: WARNING `Built without SLIM, falling back to conformal
-//! method`. `use_subsurf_data` with a Subdivision Surface modifier first in the stack and
-//! `use_original_bounds=True` (which stitches the selection first, `uv.stitch`) answer
-//! `OP_NOT_IMPLEMENTED` (M8).
+//! **Methods** (WP 8.1). `ANGLE_BASED` flattens each chart's angles with ABF++
+//! (`frap_uv::abf`, falling back to the 3D angles when ABF++ does not converge, as Blender) and
+//! builds the UVs with LSCM; `CONFORMAL` is LSCM alone; `MINIMUM_STRETCH` runs SLIM
+//! (`frap_uv::slim`: `iterations`, `no_flip`, and with `use_weights` the vertex group
+//! `weight_group` weighted by `weight_factor`; holes are always filled), as Blender's official
+//! builds, which ship SLIM. A chart SLIM cannot solve (an edge shorter than 1e-5) gets zero
+//! UVs and counts in the failure WARNING.
+//!
+//! **frap differences.** `use_subsurf_data` with a Subdivision Surface modifier first in the
+//! stack and `use_original_bounds=True` (which stitches the selection first, `uv.stitch`)
+//! answer `OP_NOT_IMPLEMENTED` (M8).
 
 pub(crate) mod uvedit;
 
@@ -40,15 +44,13 @@ use frap_op::prelude::*;
 use frap_spec_ops_uv::uv;
 use frap_spec_ops_uv::uv::unwrap::{MarginMethod, Method};
 use frap_uv::PackParams;
+use frap_uv::slim::SlimOptions;
 use smol_str::SmolStr;
 
 use uvedit::{
     Handle, PackTarget, UVCALC_FILLHOLES, UVCALC_NO_ASPECT_CORRECT, UVCALC_UNWRAP_NO_FLIP,
     UVCALC_UNWRAP_USE_WEIGHTS, UVCALC_USESUBSURF, UnwrapOptions, UvOb, UvTs,
 };
-
-/// Hint code: `ANGLE_BASED` was solved with LSCM.
-const UV_ANGLE_BASED_AS_CONFORMAL: &str = "UV_ANGLE_BASED_AS_CONFORMAL";
 
 /// The operator's properties after `unwrap_options_sync_toolsettings`.
 #[derive(Clone, Debug)]
@@ -59,6 +61,10 @@ struct Synced {
     correct_aspect: bool,
     use_subsurf: bool,
     weight_group: SmolStr,
+    iterations: i32,
+    weight_factor: f32,
+    no_flip: bool,
+    use_weights: bool,
 }
 
 /// `unwrap_options_sync_toolsettings`: unset properties come from the tool settings, set
@@ -95,12 +101,18 @@ fn sync_toolsettings(cx: &mut OpCtx, p: &uv::Unwrap) -> Synced {
     } else {
         ts.uvcalc_margin
     };
-    if p.iterations.is_set {
+    let iterations = if p.iterations.is_set {
         ts.uvcalc_iterations = p.iterations.value;
-    }
-    if p.weight_factor.is_set {
+        p.iterations.value
+    } else {
+        ts.uvcalc_iterations
+    };
+    let weight_factor = if p.weight_factor.is_set {
         ts.uvcalc_weight_factor = p.weight_factor.value;
-    }
+        p.weight_factor.value
+    } else {
+        ts.uvcalc_weight_factor
+    };
     let weight_group = if p.weight_group.is_set {
         // `char uvcalc_weight_group[64]`.
         let mut g = p.weight_group.value.to_string();
@@ -115,8 +127,8 @@ fn sync_toolsettings(cx: &mut OpCtx, p: &uv::Unwrap) -> Synced {
     let fill_holes = flag(&mut ts, &p.fill_holes, UVCALC_FILLHOLES, false);
     let correct_aspect = flag(&mut ts, &p.correct_aspect, UVCALC_NO_ASPECT_CORRECT, true);
     let use_subsurf = flag(&mut ts, &p.use_subsurf_data, UVCALC_USESUBSURF, false);
-    let _no_flip = flag(&mut ts, &p.no_flip, UVCALC_UNWRAP_NO_FLIP, false);
-    let _use_weights = flag(&mut ts, &p.use_weights, UVCALC_UNWRAP_USE_WEIGHTS, false);
+    let no_flip = flag(&mut ts, &p.no_flip, UVCALC_UNWRAP_NO_FLIP, false);
+    let use_weights = flag(&mut ts, &p.use_weights, UVCALC_UNWRAP_USE_WEIGHTS, false);
     if ts != before {
         let (main, log) = cx.main_mut();
         if let Some(s) = main.scenes.get_mut(scene, log) {
@@ -130,6 +142,10 @@ fn sync_toolsettings(cx: &mut OpCtx, p: &uv::Unwrap) -> Synced {
         correct_aspect,
         use_subsurf,
         weight_group,
+        iterations,
+        weight_factor,
+        no_flip,
+        use_weights,
     }
 }
 
@@ -167,9 +183,8 @@ fn have_selection(bm: &frap_bmesh::BMesh, ts: UvTs) -> bool {
     poll = poll::EDITMESH,
     tier = T2,
     support = Partial(
-        "ANGLE_BASED is solved with LSCM (ABF++ is M8); MINIMUM_STRETCH falls back to CONFORMAL \
-         with Blender's no-SLIM WARNING; use_subsurf_data with a Subdivision Surface modifier \
-         first and use_original_bounds=True answer OP_NOT_IMPLEMENTED"
+        "use_subsurf_data with a Subdivision Surface modifier first and \
+         use_original_bounds=True answer OP_NOT_IMPLEMENTED"
     )
 )]
 fn exec(cx: &mut OpCtx, p: uv::Unwrap) -> OpResult {
@@ -179,20 +194,21 @@ fn exec(cx: &mut OpCtx, p: uv::Unwrap) -> OpResult {
     let ts = UvTs::of(&cx.ctx());
 
     // `unwrap_options_get(op, nullptr, nullptr)` (no Image Editor: only selected faces).
-    let mut method = synced.method;
-    if method == Method::MinimumStretch {
-        method = Method::Conformal;
-        cx.report(
-            ReportType::Warning,
-            "Built without SLIM, falling back to conformal method",
-        );
-    }
+    let method = synced.method;
+    let use_slim = method == Method::MinimumStretch;
+    let weight_influence = if synced.weight_group.is_empty() || !synced.use_weights {
+        0.0
+    } else {
+        synced.weight_factor
+    };
+    let slim = SlimOptions::new(synced.iterations, synced.no_flip, weight_influence);
     let options = UnwrapOptions {
         topology_from_uvs: false,
         topology_from_uvs_use_seams: false,
         only_selected_faces: true,
         only_selected_uvs: false,
-        fill_holes: synced.fill_holes,
+        // SLIM requires hole filling.
+        fill_holes: synced.fill_holes || use_slim,
         correct_aspect: synced.correct_aspect,
         pin_unselected: false,
         use_abf: method == Method::AngleBased,
@@ -281,22 +297,20 @@ fn exec(cx: &mut OpCtx, p: uv::Unwrap) -> OpResult {
         let one = core::slice::from_mut(o);
         let mut h: Handle = uvedit::construct_param_handle(one, ts, aspect, &[weight], &options);
         count_failed += h.failed;
-        h.pm.lscm_begin(false, options.use_abf, options.use_original_bounds);
-        let c = h.pm.lscm_solve();
-        h.pm.lscm_end();
+        let c = if use_slim {
+            h.pm.slim_solve(&slim, options.use_original_bounds)
+        } else {
+            h.pm.lscm_begin(false, options.use_abf, options.use_original_bounds);
+            let c = h.pm.lscm_solve();
+            h.pm.lscm_end();
+            c
+        };
         count_changed += c.changed;
         count_failed += c.failed;
         h.pm.average(true, false, false);
         h.pm.flush(&mut h.uvs);
         non_finite += h.pm.non_finite_charts();
         h.scatter(one);
-    }
-    if options.use_abf && !obs.is_empty() {
-        cx.hint(
-            UV_ANGLE_BASED_AS_CONFORMAL,
-            "frap solves method='ANGLE_BASED' with LSCM (CONFORMAL) until ABF++ lands (M8); \
-             charts that are not developable flatten differently from Blender",
-        );
     }
 
     // Pack.

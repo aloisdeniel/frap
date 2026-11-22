@@ -3,7 +3,7 @@
 # `uv.pack_islands` on a mesh without a UV map fails `ED_operator_uvedit` with the fix as hint.
 # `uv.project_from_view` projects through `scene.camera` (frap extension; without a camera it
 # fails like its poll, naming the fix); `orthographic=True` projects along the virtual view.
-# `method='MINIMUM_STRETCH'` falls back to CONFORMAL with Blender's own no-SLIM WARNING;
+# `method='MINIMUM_STRETCH'` runs SLIM (WP 8.1; the closed cube fails as with every method);
 # `use_original_bounds=True` is `OP_NOT_IMPLEMENTED` (M8). `uv.follow_active_quads` without an
 # active face raises `No active face`; `mesh.loop_select(face_index=…)` makes one. Unwrapping a
 # plane of size 2e15 overflows the single-precision solver: Blender writes NaN UVs silently,

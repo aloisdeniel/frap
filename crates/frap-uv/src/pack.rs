@@ -23,7 +23,7 @@ use crate::param::beautify::polyfill_beautify;
 use crate::param::bli::{M2, V2, compare_ff_relative, isect_tri_tri_v2, mul_m2_v2};
 
 pub use boxpack::{BoxPack, box_pack_2d};
-pub(crate) use qsort::qsort_r as qsort_bsd;
+pub use qsort::qsort_libc;
 
 /// `eUVPackIsland_MarginMethod` (`pack_islands(margin_method=…)`).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]

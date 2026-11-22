@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `frap-uv` (layer L3): Blender's UV parametrizer on its own [`ParamMesh`] (the port of
 //! `ParamHandle`, `blender/source/blender/geometry/GEO_uv_parametrizer.hh`): chart construction
-//! from faces and seams, LSCM (CONFORMAL), ABF++ and SLIM (M8, WP 8.1), stretch minimisation,
+//! from faces and seams, LSCM (CONFORMAL), ABF++ ([`abf`]) and SLIM ([`slim`]), stretch minimisation,
 //! averaging of island scales, the island packer (`GEO_uv_pack.hh`), and the projection
 //! helpers of `uvedit_unwrap_ops.cc` (cube, cylinder, sphere, smart project) on plain arrays.
 //!

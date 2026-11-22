@@ -1,0 +1,79 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "object.track_set",
+  "bl_idname": "OBJECT_OT_track_set",
+  "label": "Make Track",
+  "description": "Make the object track another object, using various methods/constraints",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: A (Object Mode, the factory 'Cube' (a mesh) active and selected); B (Object Mode, nothing selected and no active object)",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "DAMPTRACK",
+      "enum_items": [
+        {
+          "identifier": "DAMPTRACK",
+          "name": "Damped Track Constraint",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "TRACKTO",
+          "name": "Track to Constraint",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "LOCKTRACK",
+          "name": "Lock Track Constraint",
+          "description": "",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M9",
+    "extension": false,
+    "notes": [
+      "object.track_set exists in Blender 5.2; frap implements it in M9 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}
