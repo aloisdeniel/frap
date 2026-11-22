@@ -35,7 +35,7 @@ def r(x):
     return x
 
 
-def mesh(m, keep_attrs=True):
+def mesh(m, keep_attrs=True, edges=False):
     o = {
         "positions": m["positions"],
         "faces": m["faces"],
@@ -45,6 +45,10 @@ def mesh(m, keep_attrs=True):
     }
     if "edges" in m:
         o["edges_num"] = len(m["edges"])
+        if edges:
+            # FLOAT inputs (WP 8.6): the edges and their vertex order (BM_mesh_intersect's
+            # island connection picks between equally distant vertices by edge order).
+            o["edges"] = m["edges"]
     return o
 
 
@@ -65,11 +69,11 @@ for k, c in d.items():
         "solver": c["solver"],
         "operation": c["operation"],
         "material_mode": c["material_mode"],
-        "base": exact({"matrix_world": c["base"]["matrix_world"], "slots": c["base"]["slots"], "mesh": mesh(c["base"]["mesh"])}),
-        "operands": exact([{"name": o["name"], "matrix_world": o["matrix_world"], "slots": o["slots"], "mesh": mesh(o["mesh"])} for o in c["operands"]]),
+        "base": exact({"matrix_world": c["base"]["matrix_world"], "slots": c["base"]["slots"], "mesh": mesh(c["base"]["mesh"], edges=c["solver"] == "FLOAT")}),
+        "operands": exact([{"name": o["name"], "matrix_world": o["matrix_world"], "slots": o["slots"], "mesh": mesh(o["mesh"], edges=c["solver"] == "FLOAT")} for o in c["operands"]]),
     }
     res = c["result"]
-    if c["solver"] == "MANIFOLD":
+    if c["solver"] in ("MANIFOLD", "FLOAT"):
         e["result"] = mesh(res)
         e["result"]["edges"] = res["edges"]
         # For the known gaps (tests.rs), checked at T3.

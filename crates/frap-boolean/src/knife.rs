@@ -3,8 +3,9 @@
 //! faces of the operands are cut along their intersections and nothing is removed.
 //!
 //! Blender computes it with its exact mesh arrangement (`trimesh_nary_intersect`, not ported:
-//! WP 8.6). frap uses manifold-rust's exact intersection graph
-//! (`robust::intersection_graph::build_graph`, exact rational arithmetic): every input triangle
+//! M9). frap uses manifold-rust's exact intersection graph
+//! (`robust::intersection_graph::build_graph_with_token`, exact rational arithmetic, on
+//! `manifold::imp::on_worker` for `--stmt-timeout`): every input triangle
 //! is subdivided along the segments where it meets triangles of the other operand. The pieces
 //! of one input face are merged back into polygons except across the cut lines
 //! (`crate::assemble::merge_out_faces_with`); where a face is cut into a ring, the bridges
@@ -55,13 +56,13 @@ pub fn knife(operands: &[BoolMesh<'_>], self_intersect: bool) -> Result<KnifeRes
 #[cfg(feature = "manifold")]
 mod imp {
     use manifold_rust::linalg::{Vec3, cross, dot};
-    use manifold_rust::robust::intersection_graph::{IntersectionGraph, build_graph};
+    use manifold_rust::robust::intersection_graph::{IntersectionGraph, build_graph_with_token};
     use rustc_hash::{FxHashMap, FxHashSet};
     use smallvec::SmallVec;
 
     use super::*;
     use crate::assemble::{OutFace, merge_out_faces_with, reroute_bridges};
-    use crate::manifold::imp::{Prepared, prepare};
+    use crate::manifold::imp::{Prepared, on_worker, prepare};
 
     type Key = [u64; 3];
 
@@ -184,6 +185,18 @@ mod imp {
         comps
     }
 
+    /// `build_graph` on [`on_worker`] (cancelled at the statement's deadline).
+    fn graph(ps: Vec<[Vec3; 3]>, qs: Vec<[Vec3; 3]>) -> Result<IntersectionGraph, BoolError> {
+        match on_worker(move |token| build_graph_with_token(&ps, &qs, Some(token)))? {
+            Some(g) => Ok(g),
+            None => {
+                // Cancelled: only at the deadline, so this unwinds.
+                frap_math::budget::check_now();
+                Err(BoolError::Unknown)
+            }
+        }
+    }
+
     /// Cuts the faces of `operands[0]` with those of `operands[1]`, or with
     /// `self_intersect`, the connected parts of `operands[0]` with each other.
     pub fn knife(
@@ -213,7 +226,7 @@ mod imp {
                         .collect();
                     let (ps, pm) = soup(p, c);
                     let (qs, _) = soup(p, &rest);
-                    let g = build_graph(&ps, &qs);
+                    let g = graph(ps, qs)?;
                     out.add(&g, &[(0, 0, &pm, p)]);
                 }
             }
@@ -224,7 +237,7 @@ mod imp {
             let all = |p: &Prepared| (0..p.tris.len()).collect::<Vec<usize>>();
             let (ps, pm) = soup(&prepared[0], &all(&prepared[0]));
             let (qs, qm) = soup(&prepared[1], &all(&prepared[1]));
-            let g = build_graph(&ps, &qs);
+            let g = graph(ps, qs)?;
             out.add(&g, &[(0, 0, &pm, &prepared[0]), (1, 1, &qm, &prepared[1])]);
         }
         Ok(finish(out, operands, &prepared))

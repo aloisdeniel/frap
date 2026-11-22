@@ -135,8 +135,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.vertices_smooth` | M2 | P1 | factor=0 default is a no-op |
 | [x] | `mesh.symmetrize` | M2 | P1 | partial: `use_mesh_automerge` not applied afterwards |
 | [x] | `mesh.decimate` | M4 | P2 | shares DECIMATE COLLAPSE (WP 4.5) |
-| [x] | `mesh.intersect` | M4 | P2 | shares Boolean solver |
-| [x] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST) |
+| [x] | `mesh.intersect` | M4 | P2 | shares Boolean solver; `solver='FLOAT'` is `BM_mesh_intersect` (T2) since WP 8.6, goldens `edit/intersect_float/knife_*` |
+| [x] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST); FLOAT is `BM_mesh_intersect` (T2) since WP 8.6, goldens `edit/intersect_float/boolean_*` |
 | [x] | `mesh.blend_from_shape` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
 | [x] | `mesh.shape_propagate_to_all` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
 | [ ] | `mesh.normals_tools` | M8 | P2 | WP 8.3.2 |

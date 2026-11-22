@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `frap-boolean` (layer L3): the [`BooleanSolver`] trait (CONTRACT, M4 W0) and its backends:
 //! `manifold-rust` for `solver='MANIFOLD'` (feature `manifold`, on by default through
-//! `boolean-manifold`, ARCHITECTURE §3.6) and, until M8 (WP 8.6), the same backend for
-//! `'EXACT'` (T3) and `'FLOAT'` (aliased to EXACT with a WARNING by the caller). Results carry
-//! the source of every face, corner and vertex so the BOOLEAN modifier and `mesh.intersect*`
-//! transfer UVs, materials and attributes as Blender's `mesh_boolean` does.
+//! `boolean-manifold`, ARCHITECTURE §3.6) and the same backend for `'EXACT'` (T3; Blender's
+//! exact mesh arrangement is M9). `'FLOAT'` is not a backend here: it is Blender's BMesh
+//! intersect, ported in `frap_bmesh::ops::intersect` (WP 8.6) and run by the BOOLEAN modifier
+//! and `mesh.intersect*` themselves. Results carry the source of every face, corner and vertex
+//! so the BOOLEAN modifier and `mesh.intersect*` transfer UVs, materials and attributes as
+//! Blender's `mesh_boolean` does. `--stmt-timeout` cancels both backends within milliseconds
+//! of the deadline (`manifold::imp::on_worker`).
 //!
 //! The crate sits below `frap-mesh` (L4): operands are plain arrays ([`BoolMesh`]).
 //!
@@ -31,7 +34,8 @@ pub enum BoolOperation {
 /// `BooleanModifier.solver` / `mesh.intersect*(solver=…)`.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub enum SolverKind {
-    /// `FLOAT` (Blender's BMesh intersect; aliased to EXACT until M8, WP 8.6).
+    /// `FLOAT` (Blender's BMesh intersect: `frap_bmesh::ops::intersect`, not a backend of
+    /// this crate).
     Float,
     /// `EXACT` (Blender's exact-arithmetic mesh_boolean; T3 through manifold-rust).
     #[default]

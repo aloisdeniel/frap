@@ -222,6 +222,30 @@ for solver in ("MANIFOLD", "EXACT"):
     run(f"{s}_torus_cube", torus_cube, solver)
 
 
+# FLOAT (WP 8.6, BM_mesh_intersect): the same setups, T2 (tests.rs `float_matches_blender_t2`).
+# A COLLECTION operand with INTERSECT is Blender's refusal (checked separately); results that
+# change between Blender runs (pointer-hash order inside BM_mesh_intersect) are listed in
+# tests.rs (`FLOAT_NONDETERMINISTIC`).
+run("float_ico_cyl", ico_cyl, "FLOAT")
+run("float_cyl_cyl_union", cyl_cyl, "FLOAT", "UNION")
+run("float_cyl_cyl_intersect", cyl_cyl, "FLOAT", "INTERSECT")
+run("float_mirrored", mirrored, "FLOAT")
+for op in ("DIFFERENCE", "UNION", "INTERSECT"):
+    run(f"float_cube_cube_{op.lower()}", cube_cube, "FLOAT", op)
+    run(f"float_cube_cube_rot_{op.lower()}", cube_cube_rot, "FLOAT", op)
+run("float_cube_cyl", cube_cyl, "FLOAT")
+run("float_cube_sphere", cube_sphere, "FLOAT")
+run("float_cube_sphere_union", cube_sphere, "FLOAT", "UNION")
+run("float_mats_index", mats, "FLOAT", "UNION", "INDEX")
+run("float_collection", two_cutters, "FLOAT", "DIFFERENCE", collection=True)
+run("float_collection_union", two_cutters, "FLOAT", "UNION", collection=True)
+run("float_plane_cut", plane_cut, "FLOAT")
+run("float_nonmanifold", nonmanifold, "FLOAT")
+run("float_disjoint_union", disjoint, "FLOAT", "UNION")
+run("float_disjoint_intersect", disjoint, "FLOAT", "INTERSECT")
+run("float_torus_cube", torus_cube, "FLOAT")
+
+
 # Wider MANIFOLD coverage (verifier probes): large offsets, coincident operands, n-gons,
 # subdivided faces, operand slots, nested collections, mixed scale, thin cutters, drills,
 # duplicate and empty slots. The ones frap does not match at T2 are the known gaps listed in

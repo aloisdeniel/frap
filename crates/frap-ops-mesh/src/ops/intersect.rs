@@ -1,26 +1,31 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.intersect(mode='SELECT_UNSELECT', separate_mode='CUT', threshold=1e-06,
-//! solver='EXACT')` (Intersect (Knife)), tier T3.
+//! solver='EXACT')` (Intersect (Knife)): EXACT at T3, FLOAT at T2.
 //!
 //! Port of `edbm_intersect_exec` and `edbm_intersect_select`
 //! (blender/source/blender/editors/mesh/editmesh_intersect.cc) over `BM_mesh_boolean_knife`
-//! (blender/source/blender/bmesh/tools/bmesh_boolean.cc) and `BM_mesh_separate_faces`
-//! (blender/source/blender/bmesh/tools/bmesh_separate.cc), Blender 5.2.4, GPL-2.0-or-later.
-//! For every mesh in Edit Mode with selected faces, the faces are cut where they intersect:
-//! the selected faces with the unselected visible ones (`SELECT_UNSELECT`), or the selected
-//! faces with each other (`SELECT`); nothing is removed. The cut lines are shared by the faces
-//! on both sides (`NONE`, "Merge"), split apart everywhere (`ALL`, `BM_mesh_edgesplit` on the
-//! cut edges), or, with `CUT` (`SELECT_UNSELECT` only; `SELECT` falls back to `ALL` as in
-//! Blender), the selected faces are detached from the unselected ones. The result is written
-//! back like `mesh.intersect_boolean` (new faces copy and interpolate their original face's
-//! data) and selected the same way; WARNING `No intersections found` when no mesh changed.
+//! (blender/source/blender/bmesh/tools/bmesh_boolean.cc), `BM_mesh_intersect`
+//! (blender/source/blender/bmesh/tools/bmesh_intersect.cc, `frap_bmesh::ops::intersect`) and
+//! `BM_mesh_separate_faces` (blender/source/blender/bmesh/tools/bmesh_separate.cc), Blender
+//! 5.2.4, GPL-2.0-or-later. For every mesh in Edit Mode with selected faces, the faces are cut
+//! where they intersect: the selected faces with the unselected visible ones
+//! (`SELECT_UNSELECT`), or the selected faces with each other (`SELECT`); nothing is removed.
+//! The cut lines are shared by the faces on both sides (`NONE`, "Merge"), split apart
+//! everywhere (`ALL`, `BM_mesh_edgesplit` on the cut edges), or, with `CUT`
+//! (`SELECT_UNSELECT` only; `SELECT` falls back to `ALL` as in Blender), the selected faces are
+//! detached from the unselected ones. The cut edges are selected (vertex and edge select
+//! mode); WARNING `No intersections found` when no mesh changed.
 //!
-//! The cuts come from `frap_boolean::knife` (manifold-rust's exact intersection graph):
-//! Blender's exact mesh arrangement is not ported (WP 8.6), so the cut faces have Blender's
-//! cut lines but not always its face layout (T3); a connected part of the selection is not
-//! cut by itself in `SELECT` mode. `solver='FLOAT'` (`BM_mesh_intersect`) runs the same knife
-//! and adds a WARNING until M8; `threshold` is FLOAT's and unused.
+//! `solver='FLOAT'` is `BM_mesh_intersect(em->looptris, use_dissolve, use_island_connect,
+//! use_partial_connect, use_edge_tag)` with `threshold` as its epsilon. `solver='EXACT'`'s cuts
+//! come from `frap_boolean::knife` (manifold-rust's exact intersection graph; Blender's exact
+//! mesh arrangement is M9, deviations D-101): Blender's cut lines but not always its face
+//! layout (T3); a connected part of the selection is not cut by itself in `SELECT` mode; the
+//! result is written back like `mesh.intersect_boolean` (new faces copy and interpolate their
+//! original face's data).
 
+use frap_bmesh::ops::intersect::tessellate::mesh_calc_tessellation;
+use frap_bmesh::ops::intersect::{BooleanMode, IntersectIn, intersect};
 use frap_bmesh::ops::split_edges::mesh_edgesplit;
 use frap_bmesh::{BMElem, BMesh, CreateFlag, EdgeId, ElemFlag, FaceId, VertId};
 use frap_op::operator;
@@ -35,10 +40,10 @@ use super::intersect_boolean::common;
     poll = poll::EDITMESH,
     tier = T3,
     support = Partial(
-        "the cuts come from manifold-rust's exact intersection graph (Blender's exact mesh \
-         arrangement is not ported, WP 8.6): Blender's cut lines, not always its face layout; \
-         mode='SELECT' does not cut a connected part of the selection with itself; FLOAT runs \
-         EXACT with a WARNING"
+        "solver='FLOAT' is Blender's BM_mesh_intersect (T2); EXACT's cuts come from \
+         manifold-rust's exact intersection graph (Blender's exact mesh arrangement is M9): \
+         Blender's cut lines, not always its face layout; EXACT mode='SELECT' does not cut a \
+         connected part of the selection with itself"
     ),
 )]
 fn exec(cx: &mut OpCtx, p: mesh::Intersect) -> OpResult {
@@ -51,9 +56,8 @@ fn exec(cx: &mut OpCtx, p: mesh::Intersect) -> OpResult {
         SeparateMode::Cut => (use_self, !use_self),
         SeparateMode::None => (false, false),
     };
-    if p.solver.value == Solver::Float {
-        cx.report(ReportType::Warning, common::FLOAT_WARNING);
-    }
+    let float = p.solver.value == Solver::Float;
+    let eps = p.threshold.value;
     let objects = helpers::iter_edit_meshes(cx);
     let mut isect_len = 0;
     for (_, me) in &objects {
@@ -61,7 +65,11 @@ fn exec(cx: &mut OpCtx, p: mesh::Intersect) -> OpResult {
         if bm.selected_counts().2 == 0 {
             continue;
         }
-        let has_isect = knife(bm, side, use_self, use_separate_all)?;
+        let has_isect = if float {
+            float_knife(bm, side, use_self, use_separate_all, eps)?
+        } else {
+            knife(bm, side, use_self, use_separate_all)?
+        };
         if use_separate_cut {
             separate_faces(bm);
         }
@@ -74,6 +82,38 @@ fn exec(cx: &mut OpCtx, p: mesh::Intersect) -> OpResult {
         cx.report(ReportType::Warning, "No intersections found");
     }
     Ok(OpStatus::Finished)
+}
+
+/// `BM_mesh_intersect(bm, em->looptris, test_fn, nullptr, use_self, use_separate_all,
+/// use_dissolve = true, use_island_connect = true, use_partial_connect = true,
+/// use_edge_tag = true, BMESH_ISECT_BOOLEAN_NONE, eps)`: returns whether the mesh changed.
+fn float_knife(
+    bm: &mut BMesh,
+    side: fn(&BMesh, FaceId) -> i32,
+    use_self: bool,
+    use_separate_all: bool,
+    eps: f32,
+) -> Result<bool, OpError> {
+    // `em->looptris` with valid face normals (`EDBM_update`).
+    bm.normals_update();
+    let looptris = mesh_calc_tessellation(bm);
+    let out = intersect(
+        bm,
+        &IntersectIn {
+            looptris: &looptris,
+            test_fn: &side,
+            use_self,
+            use_separate: use_separate_all,
+            use_dissolve: true,
+            use_island_connect: true,
+            use_partial_connect: true,
+            use_edge_tag: true,
+            boolean_mode: BooleanMode::None,
+            eps,
+        },
+    )
+    .map_err(|e| OpError::Runtime(e.to_string()))?;
+    Ok(out.changed)
 }
 
 /// `BM_mesh_boolean_knife(bm, looptris, test_fn, nullptr, nshapes, use_self,
@@ -201,5 +241,38 @@ mod tests {
         let (vol, b) = volume_bounds(&bm);
         assert!((vol - 8.75).abs() < 1e-5, "{vol}");
         assert_eq!(b, [[-1.5, -1.5, -1.0], [1.5, 1.5, 1.0]]);
+    }
+
+    #[test]
+    fn float_plane_cuts_the_cube_like_blender() {
+        // Blender 5.2.4, `mesh.intersect(solver='FLOAT')` with the plane above: NONE V16 E26
+        // F13 (4 vertices, 4 edges and the plane's inner face selected), ALL V28 E38 F13
+        // (16, 16, 1), CUT V20 E30 F13 (8, 8, 1); the volume stays 8.75.
+        for (sep_all, sep_cut, c, sel) in [
+            (false, false, (16, 26, 13), (4, 4, 1)),
+            (true, false, (28, 38, 13), (16, 16, 1)),
+            (false, true, (20, 30, 13), (8, 8, 1)),
+        ] {
+            let mut bm = BMesh::new();
+            bm.select_mode = SelectMode::VERT;
+            add_cube(&mut bm, 2.0, [0.0; 3], false);
+            let v: Vec<_> = [[-1.5, -1.5], [1.5, -1.5], [1.5, 1.5], [-1.5, 1.5]]
+                .iter()
+                .map(|p| bm.vert_create([p[0], p[1], 0.25], None, CreateFlag::empty()))
+                .collect();
+            let f = bm
+                .face_create_verts(&v, None, CreateFlag::empty(), true)
+                .unwrap();
+            bm.face_select_set(f, true);
+            let changed = float_knife(&mut bm, common::side_pair, false, sep_all, 1e-6).unwrap();
+            if sep_cut {
+                separate_faces(&mut bm);
+            }
+            common::intersect_select(&mut bm, changed);
+            assert_eq!(counts(&bm), c, "all {sep_all} cut {sep_cut}");
+            assert_eq!(bm.selected_counts(), sel, "all {sep_all} cut {sep_cut}");
+            let (vol, _) = volume_bounds(&bm);
+            assert!((vol - 8.75).abs() < 1e-5, "{vol}");
+        }
     }
 }

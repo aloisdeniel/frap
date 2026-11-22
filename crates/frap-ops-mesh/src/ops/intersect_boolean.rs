@@ -1,28 +1,33 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.intersect_boolean(operation='DIFFERENCE', use_swap=False, use_self=False,
-//! threshold=1e-06, solver='EXACT')` (Intersect (Boolean)), tier T3.
+//! threshold=1e-06, solver='EXACT')` (Intersect (Boolean)): EXACT at T3, FLOAT at T2.
 //!
 //! Port of `edbm_intersect_boolean_exec` and `edbm_intersect_select`
-//! (blender/source/blender/editors/mesh/editmesh_intersect.cc) and of the BMesh side of
-//! `BM_mesh_boolean` (blender/source/blender/bmesh/tools/bmesh_boolean.cc:
-//! `apply_mesh_output_to_bmesh`), Blender 5.2.4, GPL-2.0-or-later. For every mesh in Edit Mode
-//! with selected faces, the unselected visible faces (side A) and the selected ones (side B;
-//! swapped by `use_swap`) are combined by the boolean `operation`; hidden faces take no part
-//! and are kept. The result is written back into the BMesh as Blender does: vertices and
-//! faces that survive unchanged are kept, new faces copy the attributes and interpolate the
-//! corner data (UVs) of the face they come from, new edges those of the edge they lie on,
-//! and the edges along the intersection are tagged (`get_cdt_edge_orig`'s `is_intersect`:
-//! between the two sides, on no edge of its own input face nor of a coplanar one, so a cutter
-//! that only touches the mesh's faces tags nothing). When something changed, everything is
-//! deselected and, in vertex or edge select mode, the intersection edges are selected. When
-//! nothing changed on any mesh: WARNING `No intersections found`.
+//! (blender/source/blender/editors/mesh/editmesh_intersect.cc), of `BM_mesh_intersect`
+//! (blender/source/blender/bmesh/tools/bmesh_intersect.cc, `frap_bmesh::ops::intersect`) and
+//! of the BMesh side of `BM_mesh_boolean` (blender/source/blender/bmesh/tools/
+//! bmesh_boolean.cc: `apply_mesh_output_to_bmesh`), Blender 5.2.4, GPL-2.0-or-later. For every
+//! mesh in Edit Mode with selected faces, the unselected visible faces (side A) and the
+//! selected ones (side B; swapped by `use_swap`) are combined by the boolean `operation`;
+//! hidden faces take no part and are kept. When something changed, everything is deselected
+//! and, in vertex or edge select mode, the intersection edges are selected. When nothing
+//! changed on any mesh: WARNING `No intersections found`.
 //!
-//! The boolean is `frap_boolean`'s EXACT stand-in (manifold-rust's exact robust engine, see
-//! `frap_boolean::manifold`): Blender's exact mesh arrangement is not ported (WP 8.6), so the
-//! result has Blender's volume but not its face layout (T3), both sides must be closed
-//! (an open side is `OP_NOT_IMPLEMENTED`), and `use_self` does not change the result (each
-//! side is a solid by winding number). `solver='FLOAT'` (Blender's `BM_mesh_intersect`) runs
-//! the same solver and adds a WARNING until M8; `threshold` is FLOAT's and unused.
+//! `solver='FLOAT'` is `BM_mesh_intersect(em->looptris, use_self = false, use_dissolve,
+//! use_island_connect, use_edge_tag, operation, threshold)`: the faces are cut along the
+//! intersection, and each face island between cuts is kept, removed or flipped by the parity
+//! of a +X ray cast against the other side (`use_self` is not used, as in Blender).
+//!
+//! `solver='EXACT'` is `frap_boolean`'s stand-in (manifold-rust's exact robust engine, see
+//! `frap_boolean::manifold`; Blender's exact mesh arrangement is M9, deviations D-101): the
+//! result has Blender's volume but not its face layout (T3), both sides must be closed (an
+//! open side is `OP_NOT_IMPLEMENTED`), and `use_self` does not change the result (each side is
+//! a solid by winding number). It is written back into the BMesh as Blender does: vertices and
+//! faces that survive unchanged are kept, new faces copy the attributes and interpolate the
+//! corner data (UVs) of the face they come from, new edges those of the edge they lie on, and
+//! the edges along the intersection are tagged (`get_cdt_edge_orig`'s `is_intersect`: between
+//! the two sides, on no edge of its own input face nor of a coplanar one, so a cutter that
+//! only touches the mesh's faces tags nothing).
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -33,10 +38,10 @@ use frap_spec_ops_mesh::mesh::intersect_boolean::{Operation, Solver};
     poll = poll::EDITMESH,
     tier = T3,
     support = Partial(
-        "EXACT runs manifold-rust's exact robust boolean (Blender's exact mesh arrangement is \
-         not ported, WP 8.6): Blender's volume, not its face layout; the selected and \
-         unselected parts must each be closed (OP_NOT_IMPLEMENTED otherwise); use_self does \
-         not change the result; FLOAT runs EXACT with a WARNING"
+        "solver='FLOAT' is Blender's BM_mesh_intersect (T2); EXACT runs manifold-rust's exact \
+         robust boolean (Blender's exact mesh arrangement is M9): Blender's volume, not its \
+         face layout; the selected and unselected parts must each be closed \
+         (OP_NOT_IMPLEMENTED otherwise); use_self does not change the EXACT result"
     ),
 )]
 fn exec(cx: &mut OpCtx, p: mesh::IntersectBoolean) -> OpResult {
@@ -45,9 +50,8 @@ fn exec(cx: &mut OpCtx, p: mesh::IntersectBoolean) -> OpResult {
         Operation::Union => frap_boolean::BoolOperation::Union,
         Operation::Difference => frap_boolean::BoolOperation::Difference,
     };
-    if p.solver.value == Solver::Float {
-        cx.report(ReportType::Warning, common::FLOAT_WARNING);
-    }
+    let float = p.solver.value == Solver::Float;
+    let eps = p.threshold.value;
     let side = if p.use_swap.value {
         common::side_pair_swap
     } else {
@@ -60,7 +64,11 @@ fn exec(cx: &mut OpCtx, p: mesh::IntersectBoolean) -> OpResult {
         if bm.selected_counts().2 == 0 {
             continue;
         }
-        let has_isect = common::boolean(bm, side, op)?;
+        let has_isect = if float {
+            common::float_boolean(bm, side, op, eps)?
+        } else {
+            common::boolean(bm, side, op)?
+        };
         common::intersect_select(bm, has_isect);
         if !has_isect {
             isect_len += 1;
@@ -80,9 +88,44 @@ pub(crate) mod common {
     use rustc_hash::{FxHashMap, FxHashSet};
     use smallvec::SmallVec;
 
-    /// The WARNING of `solver='FLOAT'`.
-    pub(crate) const FLOAT_WARNING: &str = "frap: the FLOAT solver (BM_mesh_intersect) is not \
-        ported until M8; the EXACT solver was used";
+    /// `BM_mesh_intersect(bm, em->looptris, test_fn, nullptr, use_self = false,
+    /// use_separate = false, use_dissolve = true, use_island_connect = true,
+    /// use_partial_connect = false, use_edge_tag = true, operation, eps)`: returns whether the
+    /// mesh changed.
+    pub(crate) fn float_boolean(
+        bm: &mut BMesh,
+        side: fn(&BMesh, FaceId) -> i32,
+        op: BoolOperation,
+        eps: f32,
+    ) -> Result<bool, OpError> {
+        use frap_bmesh::ops::intersect::tessellate::mesh_calc_tessellation;
+        use frap_bmesh::ops::intersect::{BooleanMode, IntersectIn, intersect};
+        // `em->looptris` with valid face normals (`EDBM_update`).
+        bm.normals_update();
+        let looptris = mesh_calc_tessellation(bm);
+        let boolean_mode = match op {
+            BoolOperation::Intersect => BooleanMode::Intersect,
+            BoolOperation::Union => BooleanMode::Union,
+            BoolOperation::Difference => BooleanMode::Difference,
+        };
+        let out = intersect(
+            bm,
+            &IntersectIn {
+                looptris: &looptris,
+                test_fn: &side,
+                use_self: false,
+                use_separate: false,
+                use_dissolve: true,
+                use_island_connect: true,
+                use_partial_connect: false,
+                use_edge_tag: true,
+                boolean_mode,
+                eps,
+            },
+        )
+        .map_err(|e| OpError::Runtime(e.to_string()))?;
+        Ok(out.changed)
+    }
 
     /// `bm_face_isect_pair`: hidden faces take no part, selected ones are side 1, the others
     /// side 0.
@@ -407,7 +450,7 @@ pub(crate) mod common {
     pub(crate) fn open_side_error() -> OpError {
         OpError::NotImplemented(
             "frap: the selected and unselected parts must each be closed (Blender's exact mesh \
-             arrangement, which also cuts open surfaces, is not ported; WP 8.6)"
+             arrangement, which also cuts open surfaces, is M9; solver='FLOAT' cuts them)"
                 .into(),
         )
     }
@@ -734,6 +777,53 @@ pub(crate) mod tests {
                 assert!((0..3).all(|c| (b[1][c] - hi[c]).abs() < 1e-6), "{b:?}");
             }
         }
+    }
+
+    fn run_float(cutter: (f32, [f32; 3]), op: BoolOperation, mode: SelectMode) -> BMesh {
+        let mut bm = BMesh::new();
+        bm.select_mode = mode;
+        add_cube(&mut bm, 2.0, [0.0; 3], false);
+        add_cube(&mut bm, cutter.0, cutter.1, true);
+        bm.normals_update();
+        let changed = common::float_boolean(&mut bm, common::side_pair, op, 1e-6).unwrap();
+        common::intersect_select(&mut bm, changed);
+        bm
+    }
+
+    #[test]
+    fn float_poke_through_like_blender() {
+        // Blender 5.2.4, `solver='FLOAT'` (BM_mesh_intersect): V16 E26 F12 for DIFFERENCE and
+        // UNION (volumes 7.4 and 8.4), V8 E12 F6 for INTERSECT (0.6, the cutter's end face
+        // selected with the cut); the cut is selected in vertex and edge mode only.
+        for (op, want_counts, sel, vol) in [
+            (BoolOperation::Difference, (16, 26, 12), (4, 4, 0), 7.4),
+            (BoolOperation::Union, (16, 26, 12), (4, 4, 0), 8.4),
+            (BoolOperation::Intersect, (8, 12, 6), (4, 4, 1), 0.6),
+        ] {
+            for mode in [SelectMode::VERT, SelectMode::EDGE, SelectMode::FACE] {
+                let bm = run_float((1.0, [0.9, 0.2, 0.3]), op, mode);
+                assert_eq!(counts(&bm), want_counts, "{op:?} {mode:?}");
+                let want = if mode == SelectMode::FACE {
+                    (0, 0, 0)
+                } else {
+                    sel
+                };
+                assert_eq!(bm.selected_counts(), want, "{op:?} {mode:?}");
+                let (v, _) = volume_bounds(&bm);
+                assert!((v - vol).abs() < 1e-5, "{op:?}: {v}");
+            }
+        }
+    }
+
+    #[test]
+    fn float_coplanar_difference_like_blender() {
+        // Blender 5.2.4 FLOAT with three coplanar faces: V15 E24 F12, 6 vertices and 6 edges
+        // selected, signed volume 6 (the FLOAT solver keeps the coplanar faces of both sides).
+        let bm = run_float((1.0, [0.5; 3]), BoolOperation::Difference, SelectMode::VERT);
+        assert_eq!(counts(&bm), (15, 24, 12));
+        assert_eq!(bm.selected_counts(), (6, 6, 0));
+        let (v, _) = volume_bounds(&bm);
+        assert!((v - 6.0).abs() < 1e-5, "{v}");
     }
 
     #[test]
