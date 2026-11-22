@@ -194,7 +194,11 @@ pub(crate) mod tests {
 
     #[test]
     fn select_needs_selectable_and_deselect_all_skips_hidden() {
-        let (mut b, _) = bases(&[(true, true, true), (true, false, true), (false, true, false)]);
+        let (mut b, _) = bases(&[
+            (true, true, true),
+            (true, false, true),
+            (false, true, false),
+        ]);
         b.select(2, true);
         assert!(!b.list[2].selected);
         assert!(b.deselect_all());

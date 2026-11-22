@@ -24,12 +24,12 @@
 //!   (`OP_NOT_IMPLEMENTED`) naming the type, before anything changes; so does
 //!   `enter_editmode=True` with a point cloud (frap has no point-cloud Edit Mode).
 
+use frap_mesh::Mesh;
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_mesh::Mesh;
 use frap_rna::IdAny;
 use frap_scene::ObjectMode;
-use frap_scene::id::{Armature, Camera, Light, Pose, PointCloud};
+use frap_scene::id::{Armature, Camera, Light, PointCloud, Pose};
 use frap_spec_ops_object::object::{self, add::Type};
 
 /// The datablock `BKE_object_obdata_add_from_type` creates, or `None` for an empty; `Err` for
@@ -105,11 +105,7 @@ fn exec(cx: &mut OpCtx, p: object::Add) -> OpResult {
                 l.fields.size_y *= radius;
                 Some(main.lights.insert(name, l, log).any())
             }
-            NewData::Armature => Some(
-                main.armatures
-                    .insert(name, Armature::new(name), log)
-                    .any(),
-            ),
+            NewData::Armature => Some(main.armatures.insert(name, Armature::new(name), log).any()),
             NewData::PointCloud => Some(
                 main.pointclouds
                     .insert(name, PointCloud::new(name), log)

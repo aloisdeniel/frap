@@ -53,7 +53,12 @@ fn exec(cx: &mut OpCtx, p: object::SelectCamera) -> OpResult {
         b.deselect_all();
     }
     let Some(i) = b.find(camera) else {
-        let name = cx.main().objects.name_of(camera).unwrap_or_default().to_owned();
+        let name = cx
+            .main()
+            .objects
+            .name_of(camera)
+            .unwrap_or_default()
+            .to_owned();
         return Err(OpError::Runtime(format!(
             "ViewLayer '{vl_name}' does not contain object '{name}'"
         )));

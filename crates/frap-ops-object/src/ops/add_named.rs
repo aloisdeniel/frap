@@ -75,7 +75,8 @@ pub(crate) mod lookup {
 /// `ED_operator_objectmode_poll_msg`.
 fn objectmode_msg(c: &Context) -> Result<(), PollFail> {
     poll::objectmode(c).map_err(|mut f| {
-        f.message = Some("Operator bpy.ops.object.add_named.poll() Only supported in object mode".into());
+        f.message =
+            Some("Operator bpy.ops.object.add_named.poll() Only supported in object mode".into());
         f
     })
 }
@@ -109,12 +110,7 @@ fn exec(cx: &mut OpCtx, p: object::AddNamed) -> OpResult {
             && c.base_visibility()
                 .get(&src)
                 .is_some_and(|v| v.enabled_viewport);
-        (
-            c.win.scene,
-            enabled,
-            c.collection(),
-            Worlds::of(c.main),
-        )
+        (c.win.scene, enabled, c.collection(), Worlds::of(c.main))
     };
     if cx
         .main()

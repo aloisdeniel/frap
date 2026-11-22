@@ -22,9 +22,9 @@
 //! - `drop_x` / `drop_y` (placement under the mouse, used only for a collection found by name
 //!   or `session_uid` with `location` unset) answer `NotImplementedError` (deviations §2).
 
+use frap_op::EnumItemOwned;
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_op::EnumItemOwned;
 use frap_rna::{CollectionId, IdRef, SceneId};
 use frap_scene::{Context, Main};
 use frap_spec_ops_object::object;

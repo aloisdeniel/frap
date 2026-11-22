@@ -18,12 +18,14 @@
 //!   the RGB `color` within 0.005; `LIGHT_TYPE`: lights of the same light type (an active
 //!   object that is no light is `RuntimeError: Error: Active object must be a light`); `HOOK`:
 //!   the objects of the active object's Hook modifiers;
-//! - `COLLECTION`: the objects of the one collection of `bpy.data.collections` (name order,
-//!   at most 24 looked at) holding the active object directly; with several, Blender opens a
-//!   menu of `select_same_collection` entries: frap only deselects (as Blender) and adds a
-//!   WARNING that names them; the master collection does not count;
-//! - `KEYINGSET`: frap binds no keying sets (deviations §2, M9), so there is never an active
-//!   one: `RuntimeError: Error: No active Keying Set to use`;
+//! - `COLLECTION`: the objects of the one collection of `bpy.data.collections` holding the
+//!   active object directly (every collection is walked, in name order; the search stops at
+//!   the 24th holding one, `COLLECTION_MENU_MAX`); with several, Blender opens a menu of
+//!   `select_same_collection` entries: frap only deselects (as Blender) and adds a WARNING that
+//!   names them (at most 24); the master collection does not count;
+//! - `KEYINGSET`: frap scenes have no keying sets (`Scene.keying_sets` is not bound; the
+//!   "Keying, frames, NLA" row of deviations §2, WP 6.4), so there is never an active one:
+//!   `RuntimeError: Error: No active Keying Set to use`;
 //! - `FINISHED` when anything changed (the deselect included), else `CANCELLED`. A statement
 //!   that ends in an error or `CANCELLED` is rolled back (Blender keeps the deselect, D-150).
 
@@ -110,13 +112,14 @@ fn select_where(b: &mut Bases, f: impl Fn(IdRef<ObjectId>) -> bool) -> bool {
 }
 
 /// `select_grouped_collection`: `Ok(changed)`, or the names of the collections Blender would
-/// offer in its menu.
+/// offer in its menu. All of `bpy.data.collections` is walked; `COLLECTION_MENU_MAX` caps the
+/// number of *holding* collections collected (`collection_count < COLLECTION_MENU_MAX`).
 fn collection(main: &Main, b: &mut Bases, ob: IdRef<ObjectId>) -> Result<bool, Vec<String>> {
     let holding: Vec<_> = main
         .collections
         .iter()
-        .take(COLLECTION_MENU_MAX)
         .filter(|(_, c)| c.objects.contains(&ob))
+        .take(COLLECTION_MENU_MAX)
         .collect();
     match holding.as_slice() {
         [] => Ok(false),
@@ -289,10 +292,56 @@ fn exec(cx: &mut OpCtx, p: object::SelectGrouped) -> OpResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use frap_scene::ChangeLog;
+    use frap_scene::id::Collection;
 
     #[test]
     fn color_tolerance_is_per_channel() {
-        assert!(same_color(&[1.0, 0.5, 0.0, 1.0], &[1.004, 0.496, 0.005, 0.0]));
+        assert!(same_color(
+            &[1.0, 0.5, 0.0, 1.0],
+            &[1.004, 0.496, 0.005, 0.0]
+        ));
         assert!(!same_color(&[1.0, 0.5, 0.0, 1.0], &[1.0, 0.5, 0.0051, 1.0]));
+    }
+
+    /// `COLLECTION_MENU_MAX` caps the holding collections, not the collections walked: with 30
+    /// collections `C00`..`C29`, the one holding the active object (`C27`) is still found
+    /// (checked in GUI Blender 5.2.4: Cube and Light in `C27` are selected, `FINISHED`).
+    #[test]
+    fn collection_walks_every_collection() {
+        let mut main = Main::default();
+        let mut log = ChangeLog::default();
+        let (mut b, obs) = bases::tests::bases(&[(false, true, true); 3]);
+        for i in 0..30 {
+            let name = format!("C{i:02}");
+            let mut col = Collection::new(&name);
+            if i == 27 {
+                col.objects = vec![obs[0], obs[1]];
+            }
+            main.collections.insert(&name, col, &mut log);
+        }
+        assert_eq!(collection(&main, &mut b, obs[0]), Ok(true));
+        let sel: Vec<bool> = b.list.iter().map(|x| x.selected).collect();
+        assert_eq!(sel, [true, true, false]);
+    }
+
+    /// With more than `COLLECTION_MENU_MAX` holding collections, the menu lists the first 24.
+    #[test]
+    fn collection_menu_lists_at_most_24_holders() {
+        let mut main = Main::default();
+        let mut log = ChangeLog::default();
+        let (mut b, obs) = bases::tests::bases(&[(false, true, true)]);
+        for i in 0..30 {
+            let name = format!("C{i:02}");
+            let mut col = Collection::new(&name);
+            if i >= 3 {
+                col.objects = vec![obs[0]];
+            }
+            main.collections.insert(&name, col, &mut log);
+        }
+        let menu = collection(&main, &mut b, obs[0]).unwrap_err();
+        assert_eq!(menu.len(), COLLECTION_MENU_MAX);
+        assert_eq!(menu.first().map(String::as_str), Some("C03"));
+        assert_eq!(menu.last().map(String::as_str), Some("C26"));
     }
 }

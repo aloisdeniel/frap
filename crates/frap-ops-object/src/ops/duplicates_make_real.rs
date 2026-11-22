@@ -410,8 +410,8 @@ fn exec(cx: &mut OpCtx, p: object::DuplicatesMakeReal) -> OpResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use frap_scene::id::{Collection, Object};
     use frap_scene::ChangeLog;
+    use frap_scene::id::{Collection, Object};
 
     #[test]
     fn cache_lists_each_object_once_and_ors_the_restriction() {

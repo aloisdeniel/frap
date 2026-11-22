@@ -205,9 +205,8 @@ fn exec(cx: &mut OpCtx, p: object::HideCollection) -> OpResult {
     // `BKE_layer_collection_sync`: "Always set a valid active collection".
     let fixed = main.scenes.get(scene).and_then(|s| {
         let vl = &s.view_layers[layer];
-        hidden(vl, &main.collections, &vl.active_layer_collection).then(|| {
-            layer::activate_parent(vl, &main.collections, &vl.active_layer_collection)
-        })
+        hidden(vl, &main.collections, &vl.active_layer_collection)
+            .then(|| layer::activate_parent(vl, &main.collections, &vl.active_layer_collection))
     });
     if let Some(path) = fixed
         && let Some(s) = main.scenes.get_mut(scene, log)
@@ -237,7 +236,11 @@ mod tests {
             name: "ViewLayer".into(),
             bases: Vec::new(),
             active: None,
-            layer_collection: lc(vec![lc(vec![]), lc(vec![lc(vec![]), lc(vec![])]), lc(vec![])]),
+            layer_collection: lc(vec![
+                lc(vec![]),
+                lc(vec![lc(vec![]), lc(vec![])]),
+                lc(vec![]),
+            ]),
             active_layer_collection: LayerCollectionPath::default(),
         };
         let path = |i| layer_index_path(&vl, i).map(|p| p.0.to_vec());

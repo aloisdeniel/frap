@@ -20,7 +20,10 @@ fn exec(cx: &mut OpCtx, _p: object::HideRenderClearAll) -> OpResult {
         let scene = c.win.scene;
         let mut v: Vec<IdRef<ObjectId>> = Vec::new();
         for col in all_scene_collections(c.main, scene) {
-            for &ob in get(c.main, scene, col).map(|x| &x.objects[..]).unwrap_or(&[]) {
+            for &ob in get(c.main, scene, col)
+                .map(|x| &x.objects[..])
+                .unwrap_or(&[])
+            {
                 if !v.contains(&ob) {
                     v.push(ob);
                 }
