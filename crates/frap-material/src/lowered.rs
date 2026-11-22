@@ -284,6 +284,9 @@ pub struct GrayscaleAnisotropy {
     pub strength: Option<TexRef>,
     /// The texture behind `Anisotropic Rotation`.
     pub rotation: Option<TexRef>,
+    /// `anisotropyRotation` as the add-on computes it, in Python floats (the factor × 2π in
+    /// double precision; [`Anisotropy::rotation`] is that value rounded to `f32`).
+    pub rotation_f64: f64,
 }
 
 /// An alpha texture packed into the base colour image (`__get_image_data_mapping` with the
@@ -577,26 +580,32 @@ pub fn patterns_in_order() -> Vec<&'static MaterialPattern> {
 /// [`LoweredMaterial::gltf_default`].
 ///
 /// When the exporter would read the inlined tree (`LowerCx::uses_inline_tree`), node groups
-/// are inlined and links through muted nodes bypassed first ([`inline::expand`], WP 8.12).
+/// are inlined and links through muted nodes bypassed first ([`inline::expand`], WP 8.12);
+/// otherwise (a glTF Material Output with `Occlusion`) the add-on's original-tree traversal
+/// still goes through groups ([`inline::expand_original`]).
 pub fn lower(tree: &NodeTree, mat: &Material, images: &dyn ImageLookup) -> LoweredMaterial {
     let cx = LowerCx::new(tree, mat, images);
-    if cx.uses_inline_tree()
-        && !cx.inline_fails()
-        && let Some(t) = inline::expand(tree, mat, images)
-    {
+    if cx.uses_inline_tree() {
+        if !cx.inline_fails()
+            && let Some(t) = inline::expand(tree, mat, images)
+        {
+            return lower_cx(&LowerCx::new(&t, mat, images));
+        }
+    } else if let Some(t) = inline::expand_original(tree, images) {
         return lower_cx(&LowerCx::new(&t, mat, images));
     }
     lower_cx(&cx)
 }
 
-/// [`lower`] from the original tree (`bmat.used == "ORIGINAL"`: no constant folding, see
-/// [`LowerCx::original`]).
+/// [`lower`] from the original tree (`bmat.used == "ORIGINAL"`: no constant folding and no
+/// muted-node bypass, see [`LowerCx::original`]; textures behind node groups are found, as
+/// the add-on's `NodeNav` and `from_socket` go through groups, [`inline::expand_original`]).
 pub fn lower_original(
     tree: &NodeTree,
     mat: &Material,
     images: &dyn ImageLookup,
 ) -> LoweredMaterial {
-    lower_cx(&LowerCx::new(tree, mat, images).with_original(true))
+    lower_original_used(tree, mat, images).0
 }
 
 /// [`lower_original`], also returning the names of the Image Texture nodes its textures were
@@ -606,7 +615,8 @@ pub fn lower_original_used(
     mat: &Material,
     images: &dyn ImageLookup,
 ) -> (LoweredMaterial, Vec<SmolStr>) {
-    let cx = LowerCx::new(tree, mat, images).with_original(true);
+    let expanded = inline::expand_original(tree, images);
+    let cx = LowerCx::new(expanded.as_ref().unwrap_or(tree), mat, images).with_original(true);
     let lm = lower_cx(&cx);
     (lm, cx.used_nodes.into_inner())
 }

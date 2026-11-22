@@ -31,7 +31,13 @@ fn run(
         e.anisotropy_strength = Some(num(a.strength));
     }
     if a.rotation != 0.0 {
-        e.anisotropy_rotation = Some(num(a.rotation));
+        // The grayscale bake keeps the add-on's double-precision `factor * 2 * pi`.
+        e.anisotropy_rotation = Some(
+            lm.ext
+                .anisotropy_grayscale
+                .as_ref()
+                .map_or(num(a.rotation), |gs| gs.rotation_f64),
+        );
     }
     match (&a.texture, &lm.ext.anisotropy_grayscale) {
         // The baked grayscale texture (WP 8.12, `grayscale_anisotropy_calculation`).

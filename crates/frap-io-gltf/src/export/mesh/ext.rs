@@ -253,6 +253,17 @@ pub struct PrimitiveEncoding {
     /// accessors keep theirs, and the index accessor is shared by content only with other
     /// view-less ones (the add-on's behaviour, verified on 5.2.4).
     pub without_buffer_views: bool,
+    /// The indices as gathered, before a post-processor replaced `indices` with stand-ins of
+    /// the encoded count (Draco): the add-on's `gather_accessor` cache shares index accessors
+    /// by this content, not by the encoded one (WP 8.12). `None` when `indices` are the
+    /// gathered ones.
+    pub gathered_indices: Option<Vec<u32>>,
+    /// `export_shared_accessors` under Draco (WP 8.12): the vertex count the shared accessors
+    /// had when this primitive was encoded. `io/exp/draco.py` sets the shared accessors'
+    /// `count` to each primitive's encoded vertex count, and the next primitive's encoder is
+    /// created with that count (`encoderCreate(positions.count)`), so it reads only the first
+    /// `count` vertices of the shared set. Set by the mesh gatherer, read by `post/draco.rs`.
+    pub shared_vertex_count: Option<usize>,
     /// Extensions of the glTF primitive (`KHR_draco_mesh_compression`).
     pub extensions: frap_gltf::Extensions,
     /// Extensions to list in `extensionsUsed`, with whether each is also required

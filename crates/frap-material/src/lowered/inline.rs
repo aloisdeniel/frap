@@ -107,25 +107,42 @@ fn connect(
     }
 }
 
+/// How a group is spliced.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum Mode {
+    /// `InlineShaderNodes`: inner nodes renamed `group/node`, an unlinked Group Output input
+    /// is a constant for the group's consumers.
+    Inline,
+    /// The add-on's traversal of the original tree (`NodeNav.descend`/`ascend`,
+    /// `from_socket`'s GROUP and GROUP_INPUT cases): inner nodes keep their names (the
+    /// add-on's `nodes_used` holds `node.name`), the group node stays in the tree, and an
+    /// unlinked Group Output input is a dead end, no constant (`get_constant` stops on the
+    /// Group Output node).
+    Original,
+}
+
 /// Every group of `tree` inlined, recursively (`depth` levels left).
-fn flatten(tree: &NodeTree, images: &dyn ImageLookup, depth: usize) -> NodeTree {
+fn flatten(tree: &NodeTree, images: &dyn ImageLookup, depth: usize, mode: Mode) -> NodeTree {
     let mut t = tree.clone();
     if depth == 0 {
         return t;
     }
-    while let Some((uid, inner)) = t
+    // The group nodes of this level (the inner trees are flattened first, so the nodes a
+    // splice adds need no second pass; in `Original` mode the group nodes stay in the tree).
+    let groups: Vec<(u32, &NodeTree)> = tree
         .nodes
         .iter()
-        .find_map(|n| group_of(n, images).map(|g| (n.uid, g)))
-    {
-        let inner = flatten(inner, images, depth - 1);
-        splice(&mut t, uid, &inner);
+        .filter_map(|n| group_of(n, images).map(|g| (n.uid, g)))
+        .collect();
+    for (uid, inner) in groups {
+        let inner = flatten(inner, images, depth - 1, mode);
+        splice(&mut t, uid, &inner, mode);
     }
     t
 }
 
 /// Replaces group node `g` of `t` by the nodes of its (flattened) group tree `inner`.
-fn splice(t: &mut NodeTree, g: u32, inner: &NodeTree) {
+fn splice(t: &mut NodeTree, g: u32, inner: &NodeTree, mode: Mode) {
     let Some(group) = t.node(g).cloned() else {
         return;
     };
@@ -142,7 +159,9 @@ fn splice(t: &mut NodeTree, g: u32, inner: &NodeTree) {
     for n in inner.nodes.iter().filter(|n| !is_io(n)) {
         let mut c = n.clone();
         c.uid = next;
-        c.name = SmolStr::new(format!("{}/{}", group.name, n.name));
+        if mode == Mode::Inline {
+            c.name = SmolStr::new(format!("{}/{}", group.name, n.name));
+        }
         c.parent = None;
         map.insert(n.uid, next);
         next += 1;
@@ -196,13 +215,34 @@ fn splice(t: &mut NodeTree, g: u32, inner: &NodeTree) {
         }
     }
     // Links leaving the group node.
+    let mut dead_ends: Vec<Link> = Vec::new();
     for l in t.links.iter().filter(|l| l.from_node == g) {
-        if let Some(src) = group_output(&l.from_socket) {
-            consts.push((src, l.to_node, l.to_socket.clone()));
+        match group_output(&l.from_socket) {
+            // The add-on's navigation stops on the Group Output: the consumer stays linked to
+            // the group node, which is no constant and holds no texture for the patterns.
+            Some(Source::Const(..))
+                if mode == Mode::Original
+                    && inner
+                        .link_into(output.unwrap_or(u32::MAX), &l.from_socket)
+                        .is_none() =>
+            {
+                dead_ends.push(l.clone());
+            }
+            Some(src) => consts.push((src, l.to_node, l.to_socket.clone())),
+            None => {}
         }
     }
-    t.links.retain(|l| l.from_node != g && l.to_node != g);
-    t.nodes.retain(|n| n.uid != g);
+    match mode {
+        Mode::Inline => {
+            t.links.retain(|l| l.from_node != g && l.to_node != g);
+            t.nodes.retain(|n| n.uid != g);
+        }
+        // The group node stays (the add-on lists group nodes, `get_material_nodes`: the glTF
+        // Material Output is found among them), with its inputs' links and its dead ends.
+        Mode::Original => t
+            .links
+            .retain(|l| l.from_node != g || dead_ends.contains(l)),
+    }
     t.nodes.extend(added);
     t.next_node_uid = t.next_node_uid.max(next);
     for (src, to, socket) in consts {
@@ -260,7 +300,7 @@ pub fn expand(
 ) -> Option<NodeTree> {
     let has_group = tree.nodes.iter().any(|n| group_of(n, images).is_some());
     let mut t = if has_group {
-        flatten(tree, images, MAX_DEPTH)
+        flatten(tree, images, MAX_DEPTH, Mode::Inline)
     } else {
         tree.clone()
     };
@@ -273,6 +313,21 @@ pub fn expand(
     }
     bypass_muted(&mut t, mat, images);
     Some(t)
+}
+
+/// The tree the add-on's original-tree readers walk in place of `tree`
+/// (`BlenderMaterialIndentifier.__can_use_inline` false: a glTF Material Output with
+/// `Occlusion`, `export_unused_textures`, pointer animation): the same group traversal as
+/// [`expand`] (`NodeNav.move_back` descends into a group node through its Group Output and
+/// ascends from a Group Input, `from_socket` likewise), but no muted-node bypass and no
+/// constant folding (the patterns do not fold when [`LowerCx::uses_inline_tree`] is false),
+/// inner nodes keeping their names, and an unlinked Group Output input a dead end. `None`
+/// when `tree` has no group to expand.
+pub fn expand_original(tree: &NodeTree, images: &dyn ImageLookup) -> Option<NodeTree> {
+    tree.nodes
+        .iter()
+        .any(|n| group_of(n, images).is_some())
+        .then(|| flatten(tree, images, MAX_DEPTH, Mode::Original))
 }
 
 #[cfg(test)]

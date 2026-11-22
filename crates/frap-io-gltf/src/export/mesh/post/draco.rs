@@ -161,6 +161,11 @@ pub fn columns(d: &PrimitiveDraft) -> Vec<(String, AttrColumn)> {
         values,
         normalized: false,
     };
+    // `export_attributes` first, as the gatherer writes them.
+    let custom = crate::export::mesh::writers::custom_attributes::is_custom;
+    for (name, col) in d.attributes.iter().filter(|(n, _)| custom(n)) {
+        out.push((name.to_string(), col.clone()));
+    }
     out.push((
         "POSITION".into(),
         own(AttrValues::F32x3(d.positions.clone())),
@@ -171,7 +176,7 @@ pub fn columns(d: &PrimitiveDraft) -> Vec<(String, AttrColumn)> {
     for (k, tc) in d.texcoords.iter().enumerate() {
         out.push((format!("TEXCOORD_{k}"), own(AttrValues::F32x2(tc.clone()))));
     }
-    for (name, col) in &d.attributes {
+    for (name, col) in d.attributes.iter().filter(|(n, _)| !custom(n)) {
         out.push((name.to_string(), col.clone()));
     }
     for (name, col) in &mut out {
@@ -212,7 +217,10 @@ pub fn encode(
 ) -> Result<(Vec<String>, DracoEncoded), ExportError> {
     let codec = draco::codec(s.backend)
         .ok_or_else(|| ExportError::NotImplemented(s.backend.unavailable().to_string()))?;
-    let (names, mesh) = mesh_data(d);
+    let (names, mut mesh) = mesh_data(d);
+    if let Some(limit) = d.encoding.shared_vertex_count {
+        truncate_shared(&mut mesh, limit);
+    }
     let encoded = if d.targets.is_empty() {
         codec.encode(&mesh, &s.quantization, s.level)
     } else {
@@ -221,6 +229,30 @@ pub fn encode(
     encoded
         .map(|e| (names, e))
         .map_err(|e| ExportError::Invalid(format!("Draco encoder: {e}")))
+}
+
+/// `export_shared_accessors`: the encoder of a primitive after the first is created with the
+/// shared accessors' count as the previous encode left it (`encoderCreate(positions.count)`),
+/// and `encoderSetAttribute` copies that many values of each shared buffer view, so only the
+/// first `limit` vertices of the shared set are the encoder's points (their values decide the
+/// quantization ranges). When an index reaches past `limit` the bridge reads past its
+/// attribute buffers (undefined behaviour in Blender); frap then keeps the whole set.
+fn truncate_shared(mesh: &mut MeshData, limit: usize) {
+    if limit >= mesh.vertex_count() || mesh.indices.iter().any(|&i| i as usize >= limit) {
+        return;
+    }
+    for a in &mut mesh.attributes {
+        let n = limit * usize::from(a.components);
+        match &mut a.data {
+            AttrData::F32(v) => v.truncate(n),
+            AttrData::I8(v) => v.truncate(n),
+            AttrData::U8(v) => v.truncate(n),
+            AttrData::I16(v) => v.truncate(n),
+            AttrData::U16(v) => v.truncate(n),
+            AttrData::U32(v) => v.truncate(n),
+            _ => {}
+        }
+    }
 }
 
 /// `count` elements standing for `v` in an accessor without a buffer view: the same first
@@ -281,12 +313,16 @@ fn stand_in_values(v: &AttrValues, count: usize) -> AttrValues {
 
 /// The add-on's `attributes[attr_name].count = encoded_vertices` and `indices.count =
 /// encoded index count`: when the encode changed a count (EdgeBreaker splits non-manifold
-/// vertices and drops degenerate faces), the draft's columns become stand-ins of the encoded
-/// counts. Only counts, component types and POSITION's bounds reach the file, since the
-/// accessors have no buffer view. The index stand-in keeps the largest index the count
-/// allows, so the index component type stays the one of the original indices.
+/// vertices and drops degenerate faces; a primitive of a shared vertex set,
+/// `export_shared_accessors`, encodes only the vertices its indices use), the draft's columns
+/// become stand-ins of the encoded counts. Only counts, component types and POSITION's bounds
+/// reach the file, since the accessors have no buffer view. The index stand-in keeps the
+/// largest gathered index, so the index component type stays the one the add-on chose before
+/// the encode; the gathered indices stay in `encoding.gathered_indices`, the key of the
+/// index accessor cache.
 fn apply_counts(d: &mut PrimitiveDraft, points: usize, indices: usize) {
-    if points != d.positions.len() {
+    let points_changed = points != d.positions.len();
+    if points_changed {
         d.positions = stand_in(&d.positions, points, true);
         d.normals = if d.normals.is_empty() {
             Vec::new()
@@ -306,14 +342,14 @@ fn apply_counts(d: &mut PrimitiveDraft, points: usize, indices: usize) {
         d.corners = vec![u32::MAX; points];
         d.vertices = vec![0; points];
     }
-    if indices != d.indices.len() || points != d.positions.len() {
-        let max = d.indices.iter().copied().max().unwrap_or(0);
-        let top = max.min(points.saturating_sub(1) as u32);
+    if indices != d.indices.len() || points_changed {
+        let top = d.indices.iter().copied().max().unwrap_or(0);
         let mut v = vec![0; indices];
         if let Some(x) = v.first_mut() {
             *x = top;
         }
-        d.indices = v;
+        let gathered = std::mem::replace(&mut d.indices, v);
+        d.encoding.gathered_indices.get_or_insert(gathered);
     }
 }
 
@@ -692,13 +728,14 @@ mod tests {
     fn changed_counts_keep_the_bounds_and_the_index_type() {
         let mut d = strip(8);
         let before: Vec<[f32; 3]> = d.positions.clone();
+        let strip_len = d.indices.len();
         apply_counts(&mut d, 11, 15);
         assert_eq!(d.positions.len(), 11);
         assert_eq!(d.normals.len(), 11);
         assert_eq!(d.texcoords[0].len(), 11);
         assert_eq!(d.indices.len(), 15);
-        assert_eq!(d.indices[0], 7, "the largest index the count allows");
-        assert!(d.indices.iter().all(|&i| (i as usize) < 11));
+        assert_eq!(d.indices[0], 7, "the largest gathered index");
+        assert_eq!(d.encoding.gathered_indices.as_ref().map(Vec::len), Some(strip_len));
         for c in 0..3 {
             let lo = before.iter().map(|p| p[c]).fold(f32::MAX, f32::min);
             let hi = before.iter().map(|p| p[c]).fold(f32::MIN, f32::max);
@@ -710,6 +747,22 @@ mod tests {
             panic!()
         };
         assert_eq!(c.len(), 11);
+    }
+
+    /// `export_shared_accessors`: a later primitive's encoder sees the first `limit` shared
+    /// vertices, unless its indices reach past them (then the whole set).
+    #[test]
+    fn shared_vertex_count_truncates_the_encoder_input() {
+        let mut d = strip(8);
+        d.indices = vec![0, 1, 2, 2, 1, 3];
+        let (_, mut mesh) = mesh_data(&d);
+        truncate_shared(&mut mesh, 4);
+        assert_eq!(mesh.vertex_count(), 4);
+        assert!(mesh.attributes.iter().all(|a| a.vertex_count() == 4));
+        d.indices = vec![0, 1, 6, 6, 1, 7];
+        let (_, mut mesh) = mesh_data(&d);
+        truncate_shared(&mut mesh, 4);
+        assert_eq!(mesh.vertex_count(), 8);
     }
 
     #[test]

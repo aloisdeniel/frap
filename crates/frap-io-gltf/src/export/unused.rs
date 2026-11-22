@@ -145,7 +145,7 @@ fn additional_textures(g: &mut Gather) -> Result<(), ExportError> {
 
 /// `__get_mime_type_of_image`: 4-channel images are PNG (WebP for a WebP file); others follow
 /// `export_image_format` (`AUTO`: JPEG and WebP files keep their format).
-fn image_mime(g: &Gather, im: &Image) -> &'static str {
+fn image_mime(g: &Gather, im: &Image) -> Option<&'static str> {
     images::whole_image_mime(g.settings, im, images::image_channels(g, im) == 4)
 }
 

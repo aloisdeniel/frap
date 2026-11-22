@@ -29,6 +29,14 @@ use crate::export::mesh::ext::{
 /// This writer's split-key column.
 pub const NAME: &str = "custom_attributes";
 
+/// Whether a glTF attribute of a draft is one of this writer's (`_…`, `KHR_…`). The add-on's
+/// `primitive.attributes` dict starts with them (the dots' fields come first), so their
+/// accessors are written before POSITION, NORMAL and TEXCOORD_n, and they come first among
+/// a Draco primitive's attribute ids (verified on 5.2.4).
+pub fn is_custom(semantic: &str) -> bool {
+    semantic.starts_with('_') || semantic.starts_with("KHR_")
+}
+
 /// glTF shape of a kept attribute.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum Shape {

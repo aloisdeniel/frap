@@ -172,7 +172,8 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     let rotation_tex = rh.and_then(|h| cx.tex_ref(h.node, ChannelSel::Rgb, &mut out.diagnostics));
     let primary = strength_tex.clone().or_else(|| rotation_tex.clone());
     let strength = factor_f32(cx, cx.src_at(p, ai)).unwrap_or(1.0);
-    let rotation = factor_f32(cx, cx.src_at(p, ri)).map_or(0.0, |f| (f64::from(f) * TAU) as f32);
+    let rotation_f64 = factor_f32(cx, cx.src_at(p, ri)).map_or(0.0, |f| f64::from(f) * TAU);
+    let rotation = rotation_f64 as f32;
     out.ext.anisotropy = Some(Anisotropy {
         strength,
         rotation,
@@ -181,6 +182,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.ext.anisotropy_grayscale = Some(GrayscaleAnisotropy {
         strength: strength_tex,
         rotation: rotation_tex,
+        rotation_f64,
     });
 }
 

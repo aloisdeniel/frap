@@ -304,17 +304,23 @@ impl ImageCache {
 
 /// `__get_mime_type_of_image` for an image written whole (`export_unused_images`, WP 8.12):
 /// a 4-channel image is PNG, WebP for a WebP file; otherwise `export_image_format` decides
-/// (`AUTO`: JPEG and WebP files keep their format).
-pub(crate) fn whole_image_mime(settings: &ExportSettings, im: &Image, four: bool) -> &'static str {
+/// (`AUTO`: JPEG and WebP files keep their format, `JPEG`: JPEG), and `WEBP` and `NONE` fall
+/// off the end of the add-on's function: no MIME type (the data is encoded as PNG). Only an
+/// image without a buffer (a missing file, 0 channels) has fewer than 4 channels in frap.
+pub(crate) fn whole_image_mime(
+    settings: &ExportSettings,
+    im: &Image,
+    four: bool,
+) -> Option<&'static str> {
     if four {
-        return if is_webp_image(im) { WEBP } else { PNG };
+        return Some(if is_webp_image(im) { WEBP } else { PNG });
     }
     match settings.export_image_format {
-        ExportImageFormat::Jpeg => JPEG,
-        ExportImageFormat::Webp => WEBP,
-        _ if is_jpeg_image(im) => JPEG,
-        _ if is_webp_image(im) => WEBP,
-        _ => PNG,
+        ExportImageFormat::Auto if is_jpeg_image(im) => Some(JPEG),
+        ExportImageFormat::Auto if is_webp_image(im) => Some(WEBP),
+        ExportImageFormat::Auto => Some(PNG),
+        ExportImageFormat::Jpeg => Some(JPEG),
+        _ => None,
     }
 }
 
@@ -327,27 +333,39 @@ pub(crate) fn image_channels(g: &Gather, im: &Image) -> u8 {
 }
 
 /// `get_gltf_image_from_blender_image` + `__traverse` (WP 8.12): image `r` written whole as
-/// `mime`, named as the add-on names it; nothing when it cannot be encoded.
+/// `mime` (`None`: encoded as PNG, no `mimeType`), named as the add-on names it; nothing when
+/// it cannot be encoded. An image without a buffer (a missing file: `Image.channels` 0) gives
+/// `ExportImage.from_blender_image` no fill, so the add-on writes its fill-less encode, a 1×1
+/// white pixel, named `Image` (`__gather_name` of no image; verified on 5.2.4).
 pub(crate) fn write_whole_image(
     g: &mut Gather,
     r: IdRef<ImageId>,
-    mime: &'static str,
+    mime: Option<&'static str>,
 ) -> Result<Option<Index>, ExportError> {
     let main = g.main;
     let Some(im) = main.images.get(r) else {
         return Ok(None);
     };
-    let ex = ExportImage::from_image(r);
-    let name = image_name(im);
-    g.images.exported.insert(im.header.name.to_string());
-    let Some(bytes) = encode(g, &ex, Target::from_mime(mime))? else {
+    let (ex, name) = if image_channels(g, im) == 0 {
+        (ExportImage::default(), "Image".to_owned())
+    } else {
+        g.images.exported.insert(im.header.name.to_string());
+        (ExportImage::from_image(r), image_name(im))
+    };
+    let Some(bytes) = encode(g, &ex, Target::from_mime(mime.unwrap_or(PNG)))? else {
         g.warn(format!(
             "image '{name}': Image data is empty, not exporting image"
         ));
         return Ok(None);
     };
-    let p = make_image(g, bytes, mime, name);
-    Ok(Some(push_image(g, p)))
+    let p = make_image(g, bytes, mime.unwrap_or(PNG), name);
+    let i = push_image_unshared(g, p);
+    if mime.is_none()
+        && let Some(img) = g.doc.images.get_mut(i as usize)
+    {
+        img.mime_type = None;
+    }
+    Ok(Some(i))
 }
 
 /// `tex_coord` moved to its own file (M7 W0, decision log M7W0-4: WP 7.7's Attribute-node
@@ -1581,6 +1599,16 @@ fn push_image(g: &mut Gather, p: PendingImage) -> Index {
     if let Some(i) = g.images.images.get(&key) {
         return *i;
     }
+    let i = push_image_unshared(g, p);
+    g.images.images.insert(key, i);
+    i
+}
+
+/// A new glTF image, never shared: `traverse_additional_images` gathers each `bpy.data`
+/// image on its own, and its `Image` (its own file or buffer view) equals no other in
+/// `__append_unique_and_get_index` (verified on 5.2.4: two images with the same pixels and
+/// name are written twice, `paint.png` and `paint-1.png`).
+fn push_image_unshared(g: &mut Gather, p: PendingImage) -> Index {
     let mut img = GImage {
         mime_type: Some(p.mime.to_owned()),
         name: Some(p.name),
@@ -1594,9 +1622,7 @@ fn push_image(g: &mut Gather, p: PendingImage) -> Index {
         None => img.buffer_view = Some(g.buf.push_view(&p.bytes, 4, None, None)),
     }
     g.doc.images.push(img);
-    let i = (g.doc.images.len() - 1) as Index;
-    g.images.images.insert(key, i);
-    i
+    (g.doc.images.len() - 1) as Index
 }
 
 /// `KHR_texture_transform` of a texture (identity members omitted; `None` when all are).

@@ -77,10 +77,13 @@ pub fn evaluated(g: &Gather, ob: IdRef<ObjectId>) -> Option<Arc<Mesh>> {
 /// - enabled: in a non-excluded layer collection whose collection (and every ancestor
 ///   collection) is not `hide_viewport`, and the object not `hide_viewport`; one such path is
 ///   enough. `LayerCollection.hide_viewport` and `hide_set(True)` do not matter.
-/// - pulled in: the objects a viewport-enabled modifier references ([`geometry_dependencies`]:
-///   a Boolean operand, the caps and the offset object of an Array, a Shrinkwrap target, a
-///   Geometry Nodes Object Info object, …), recursively (WP 8.12). A modifier disabled in the
-///   viewport and a hidden parent (in a freshly loaded file) do not pull the object in.
+/// - pulled in: the objects any modifier references ([`geometry_dependencies`]: both Boolean
+///   operands, the caps and the offset object of an Array, a Shrinkwrap target, a Geometry
+///   Nodes Object Info object, …), recursively (WP 8.12). `build_object` walks every modifier
+///   with `BKE_modifiers_foreach_ID_link` (`modifier_walk`), enabled or not, so a modifier
+///   disabled in the viewport pulls its objects in too (verified on 5.2.4: a hidden Boolean
+///   operand and a hidden Array offset object of disabled modifiers export subdivided). A
+///   hidden parent (in a freshly loaded file) does not pull the object in.
 pub fn viewport_evaluated_objects(main: &Main, ctx: &Context) -> BTreeSet<IdRef<ObjectId>> {
     fn walk(main: &Main, ctx: &Context, lc: &LayerCollection, out: &mut BTreeSet<IdRef<ObjectId>>) {
         if lc.exclude {
@@ -110,13 +113,13 @@ pub fn viewport_evaluated_objects(main: &Main, ctx: &Context) -> BTreeSet<IdRef<
     let mut out = BTreeSet::new();
     walk(main, ctx, &vl.layer_collection, &mut out);
     out.retain(|o| vl.bases.iter().any(|b| b.object == *o));
-    // Geometry dependencies of the evaluated objects' enabled modifiers.
+    // The objects every modifier of an evaluated object references (`modifier_walk`).
     let mut stack: Vec<IdRef<ObjectId>> = out.iter().copied().collect();
     while let Some(o) = stack.pop() {
         let Some(ob) = main.objects.get(o) else {
             continue;
         };
-        for md in ob.modifiers.iter().filter(|m| m.show_viewport) {
+        for md in &ob.modifiers {
             for dep in geometry_dependencies(main, o, &md.settings) {
                 if out.insert(dep) {
                     stack.push(dep);
@@ -127,12 +130,14 @@ pub fn viewport_evaluated_objects(main: &Main, ctx: &Context) -> BTreeSet<IdRef<
     out
 }
 
-/// The objects a modifier of `owner` pulls into the depsgraph (the relations of the types'
-/// `update_depsgraph`, blender/source/blender/modifiers/intern/MOD_*.cc, Blender 5.2.4,
-/// GPL-2.0-or-later): the Boolean operand object or collection (`all_objects`), the objects a
-/// Geometry Nodes tree references ([`node_tree_dependencies`], WP 8.12), and every other object
-/// (or collection) pointer of the modifier's settings (Array caps, curve and offset object,
-/// Shrinkwrap targets, Lattice, Curve, Hook, Cast, Warp, Data Transfer source, …).
+/// The objects a modifier of `owner` pulls into the depsgraph (the IDs the types'
+/// `foreach_ID_link` walk, blender/source/blender/modifiers/intern/MOD_*.cc, which
+/// `DepsgraphNodeBuilder::modifier_walk` builds, Blender 5.2.4, GPL-2.0-or-later): both
+/// Boolean pointers, the object and the collection (`all_objects`), whatever `operand_type`
+/// (verified on 5.2.4), the objects a Geometry Nodes tree references
+/// ([`node_tree_dependencies`], WP 8.12), and every other object (or collection) pointer of
+/// the modifier's settings (Array caps, curve and offset object, Shrinkwrap targets, Lattice,
+/// Curve, Hook, Cast, Warp, Data Transfer source, …).
 ///
 /// An object in the depsgraph exports its evaluated mesh even when only its transform is read:
 /// the add-on's `to_mesh(preserve_all_data_layers=True, depsgraph=…)` evaluates the modifier
@@ -147,8 +152,7 @@ fn geometry_dependencies(
     s: &ModifierSettings,
 ) -> Vec<IdRef<ObjectId>> {
     let ids: Vec<Option<IdAny>> = match s {
-        ModifierSettings::Boolean(b) if b.operand_type == "OBJECT" => vec![b.object],
-        ModifierSettings::Boolean(b) => vec![b.collection],
+        ModifierSettings::Boolean(b) => vec![b.collection, b.object],
         ModifierSettings::Nodes(n) => {
             return node_tree_dependencies(main, owner, n.node_group);
         }
