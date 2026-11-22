@@ -1,0 +1,126 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.average_normals",
+  "bl_idname": "MESH_OT_average_normals",
+  "label": "Average Normals",
+  "description": "Average custom normals of selected vertices",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "average_type",
+      "name": "Type",
+      "description": "Averaging method",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CUSTOM_NORMAL",
+      "enum_items": [
+        {
+          "identifier": "CUSTOM_NORMAL",
+          "name": "Custom Normal",
+          "description": "Take average of vertex normals",
+          "value": 1
+        },
+        {
+          "identifier": "FACE_AREA",
+          "name": "Face Area",
+          "description": "Set all vertex normals by face area",
+          "value": 2
+        },
+        {
+          "identifier": "CORNER_ANGLE",
+          "name": "Corner Angle",
+          "description": "Set all vertex normals by corner angle",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "weight",
+      "name": "Weight",
+      "description": "Weight applied per face",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 50,
+      "hard_min": 1,
+      "hard_max": 100,
+      "soft_min": 1,
+      "soft_max": 100,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "threshold",
+      "name": "Threshold",
+      "description": "Threshold value for different weights to be considered equal",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.01,
+      "hard_min": 0,
+      "hard_max": 10,
+      "soft_min": 0,
+      "soft_max": 5,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

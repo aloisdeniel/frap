@@ -139,17 +139,17 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST); FLOAT is `BM_mesh_intersect` (T2) since WP 8.6, goldens `edit/intersect_float/boolean_*` |
 | [x] | `mesh.blend_from_shape` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
 | [x] | `mesh.shape_propagate_to_all` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
-| [ ] | `mesh.normals_tools` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.smooth_normals` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.average_normals` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.point_normals` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.merge_normals` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.split_normals` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.mod_weighted_strength` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.colors_rotate` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.colors_reverse` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.uvs_rotate` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.uvs_reverse` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.normals_tools` | M8 | P2 | copy buffer `tool_settings.normal_vector`; COPY partial-failure rollback D-150; WP 8.3.2 |
+| [x] | `mesh.smooth_normals` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.average_normals` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.point_normals` | M8 | P2 | headless-extended: points at `target_location` only (no mouse; `mode` ignored, as Blender's exec); WP 8.3.2 |
+| [x] | `mesh.merge_normals` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.split_normals` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.mod_weighted_strength` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.colors_rotate` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.colors_reverse` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.uvs_rotate` | M8 | P2 | WP 8.3.2 |
+| [x] | `mesh.uvs_reverse` | M8 | P2 | WP 8.3.2 |
 | [ ] | `mesh.sort_elements` | M8 | P2 | WP 8.3.3 |
 | [ ] | `mesh.reorder_vertices_spatial` | M8 | P2 | WP 8.3.3 |
 | [ ] | `mesh.rip` | M8 | P2 | headless-extended: explicit direction; WP 8.3.3 |

@@ -28,7 +28,9 @@
 //!
 //! Moved from `frap-ops-mesh/src/ops/flip_normals/clnor.rs` (WP 2.x) by the M5+M6 W0 integrator
 //! so that `bmesh.ops.bevel(harden_normals=True)` (`ops/bevel`, `bevel_harden_normals`) uses the
-//! same spaces as the custom-normal tools; `frap-ops-mesh` re-exports it.
+//! same spaces as the custom-normal tools; `frap-ops-mesh` re-exports it. WP 8.3.2 (the M8 normal
+//! tools) added the edit data's `niloc`/`loc`, `BM_normals_loops_edges_tag` and the selected
+//! vertices' fan walk of `mesh.average_normals` / `mesh.split_normals`.
 
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
@@ -253,7 +255,9 @@ fn ltag(bm: &BMesh, l: LoopId) -> bool {
 
 // Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
 // (BM_loop_check_cyclic_smooth_fan).
-fn check_cyclic_smooth_fan(bm: &mut BMesh, l_curr: LoopId) -> bool {
+/// `BM_loop_check_cyclic_smooth_fan`: whether the fan of `l_curr` is a closed cycle of
+/// smooth (`TAG`ged) edges; tags the loops it walks over.
+pub fn check_cyclic_smooth_fan(bm: &mut BMesh, l_curr: LoopId) -> bool {
     let mut pivot = l_curr;
     let mut e_next = bm.lp(l_curr).e;
     bm.lp_mut(pivot).flag.insert(ElemFlag::TAG);
@@ -484,15 +488,129 @@ pub fn rebuild(bm: &mut BMesh) -> Arc<Spaces> {
     update(bm)
 }
 
-/// One entry of `BMLoopNorEditDataArray`.
+/// `CLNORS_VALID_VEC_LEN` (`editmesh_tools.cc`): an edited normal shorter than this is
+/// invalid.
+pub const CLNORS_VALID_VEC_LEN: f32 = 1e-4;
+
+// Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
+// (BM_normals_loops_edges_tag).
+/// `BM_normals_loops_edges_tag`: clears the `TAG` of every loop and, with `do_edges`, tags
+/// the edges that are smooth and manifold with both faces winding the same way (the faces'
+/// smoothness is *not* checked, unlike the space array's tagging).
+pub fn loops_edges_tag(bm: &mut BMesh, do_edges: bool) {
+    if do_edges {
+        for e in bm.edge_ids() {
+            let mut tag = false;
+            if let Some(l_a) = bm.edge(e).l {
+                let l_b = bm.lp(l_a).radial_next;
+                // `BM_edge_loop_pair`: exactly two loops.
+                if l_b != l_a && bm.lp(l_b).radial_next == l_a {
+                    tag =
+                        bm.edge(e).flag.contains(ElemFlag::SMOOTH) && bm.lp(l_a).v != bm.lp(l_b).v;
+                }
+            }
+            bm.edge_mut(e).flag.set(ElemFlag::TAG, tag);
+        }
+    }
+    for f in bm.face_ids() {
+        for l in bm.face_loops(f) {
+            bm.lp_mut(l).flag.remove(ElemFlag::TAG);
+        }
+    }
+}
+
+/// One smooth fan of a selected vertex, as `edbm_average_normals_exec` and `normals_split`
+/// walk it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum VertFan {
+    /// A corner between two sharp edges (`l_curr->e` and `l_curr->prev->e` untagged).
+    Single(LoopId),
+    /// The loops of a fan, in walking order (`BM_vert_step_fan_loop` from `l_curr`).
+    Fan(Vec<LoopId>),
+}
+
+// Ported from blender/source/blender/editors/mesh/editmesh_tools.cc (the loop shared by
+// edbm_average_normals_exec and normals_split).
+/// The smooth fans of the selected vertices, after `BM_normals_loops_edges_tag(bm, true)`: every
+/// face corner (faces in order, loops from the first) at a selected vertex starting a fan (its
+/// edge is sharp, or it lies on a cyclic fan not walked yet) gives one entry. Uses and leaves the
+/// edge and loop `TAG` flags.
+pub fn selected_vert_fans(bm: &mut BMesh) -> Vec<VertFan> {
+    loops_edges_tag(bm, true);
+    let mut out = Vec::new();
+    for f in bm.face_ids() {
+        for l_curr in bm.face_loops(f) {
+            let lc = bm.lp(l_curr).clone();
+            if !bm.vert(lc.v).flag.contains(ElemFlag::SELECT) {
+                continue;
+            }
+            if etag(bm, lc.e) && (ltag(bm, l_curr) || !check_cyclic_smooth_fan(bm, l_curr)) {
+                continue;
+            }
+            if !etag(bm, lc.e) && !etag(bm, bm.lp(lc.prev).e) {
+                out.push(VertFan::Single(l_curr));
+                continue;
+            }
+            let e_org = lc.e;
+            let mut pivot = l_curr;
+            let mut e_next = e_org;
+            let mut fan = Vec::new();
+            loop {
+                frap_math::budget::check();
+                let next = bm.vert_step_fan_loop(pivot, &mut e_next);
+                if next.is_none() {
+                    let lp = bm.lp(pivot);
+                    e_next = if lp.e == e_next {
+                        bm.lp(lp.prev).e
+                    } else {
+                        lp.e
+                    };
+                }
+                fan.push(pivot);
+                if !etag(bm, e_next) || e_next == e_org {
+                    break;
+                }
+                let Some(n) = next else {
+                    break;
+                };
+                pivot = n;
+            }
+            out.push(VertFan::Fan(fan));
+        }
+    }
+    out
+}
+
+// Ported from blender/source/blender/bmesh/intern/bmesh_polygon.cc (BM_face_calc_area).
+/// `BM_face_calc_area`.
+pub fn face_calc_area(bm: &BMesh, f: FaceId) -> f32 {
+    crate::ops::contextual_create::construct::face_calc_area(bm, f)
+}
+
+// Ported from blender/source/blender/bmesh/intern/bmesh_query.cc (BM_loop_calc_face_angle).
+/// `BM_loop_calc_face_angle`: the angle of the face at `l`.
+pub fn loop_calc_face_angle(bm: &BMesh, l: LoopId) -> f32 {
+    let ll = bm.lp(l);
+    crate::ops::contextual_create::bli::angle_v3v3v3(
+        bm.vert(bm.lp(ll.prev).v).co,
+        bm.vert(ll.v).co,
+        bm.vert(bm.lp(ll.next).v).co,
+    )
+}
+
+/// One entry of `BMLoopNorEditDataArray` (`BMLoopNorEditData`).
 #[derive(Clone, Debug)]
 pub struct EditData {
     /// The loop.
     pub loop_: LoopId,
     /// Its index (face iteration order) when the array was made.
     pub loop_index: usize,
-    /// The custom normal (`nloc`).
+    /// The custom normal (`nloc`), edited by the tools.
     pub nloc: V3,
+    /// The custom normal when the array was made (`niloc`).
+    pub niloc: V3,
+    /// The position of the loop's vertex when the array was made (`loc`).
+    pub loc: V3,
 }
 
 /// `BMLoopNorEditDataArray`: the edit data in vertex order, and by loop index.
@@ -661,10 +779,13 @@ pub fn editdata_array(bm: &mut BMesh, sp: &Spaces, all_of_vert: bool, mark: Mark
             let i = sp.index(l);
             if marked[i] {
                 out.by_index[i] = Some(out.data.len());
+                let n = sp.decode(bm, l);
                 out.data.push(EditData {
                     loop_: l,
                     loop_index: i,
-                    nloc: sp.decode(bm, l),
+                    nloc: n,
+                    niloc: n,
+                    loc: bm.vert(v).co,
                 });
             }
         }
@@ -797,5 +918,80 @@ mod tests {
         let c = update(&mut bm);
         assert!(has_layer(&bm));
         assert!(!Arc::ptr_eq(&b, &c));
+    }
+
+    fn select_only(bm: &mut BMesh, v: VertId) {
+        for x in bm.vert_ids() {
+            bm.vert_mut(x).flag.set(ElemFlag::SELECT, x == v);
+        }
+    }
+
+    #[test]
+    fn fans_of_selected_vertices_follow_the_smooth_edges() {
+        let mut bm = cube();
+        let v = bm.vert_ids()[0];
+        select_only(&mut bm, v);
+        // Every edge smooth: one cyclic fan of the three corners, each sharing an edge with the
+        // next.
+        let fans = selected_vert_fans(&mut bm);
+        let [VertFan::Fan(fan)] = fans.as_slice() else {
+            panic!("one cyclic fan expected, got {fans:?}");
+        };
+        assert_eq!(fan.len(), 3);
+        for w in fan.windows(2) {
+            let (a, b) = (bm.lp(w[0]), bm.lp(w[1]));
+            assert!(a.v == v && b.v == v);
+            assert!(bm.lp(a.prev).e == b.e || a.e == bm.lp(b.prev).e);
+        }
+        // Face smoothness is not looked at (BM_normals_loops_edges_tag).
+        for f in bm.face_ids() {
+            bm.face_mut(f).flag.remove(ElemFlag::SMOOTH);
+        }
+        assert_eq!(selected_vert_fans(&mut bm).len(), 1);
+        // One sharp edge at the vertex: an open fan of three corners starting at the corner
+        // whose edge is that one.
+        let e = bm
+            .vert_loops(v)
+            .into_iter()
+            .map(|l| bm.lp(l).e)
+            .next()
+            .unwrap();
+        bm.edge_mut(e).flag.remove(ElemFlag::SMOOTH);
+        let fans = selected_vert_fans(&mut bm);
+        let [VertFan::Fan(fan)] = fans.as_slice() else {
+            panic!("one open fan expected, got {fans:?}");
+        };
+        assert_eq!(fan.len(), 3);
+        assert_eq!(bm.lp(fan[0]).e, e);
+        // Every edge at the vertex sharp: three single corners, in face order.
+        for l in bm.vert_loops(v) {
+            let e = bm.lp(l).e;
+            bm.edge_mut(e).flag.remove(ElemFlag::SMOOTH);
+        }
+        let fans = selected_vert_fans(&mut bm);
+        assert_eq!(fans.len(), 3);
+        assert!(fans.iter().all(|f| matches!(f, VertFan::Single(_))));
+        // Nothing selected: no fans.
+        bm.vert_mut(v).flag.remove(ElemFlag::SELECT);
+        assert!(selected_vert_fans(&mut bm).is_empty());
+    }
+
+    #[test]
+    fn edit_data_keeps_the_initial_normal_and_position() {
+        let mut bm = cube();
+        let v = bm.vert_ids()[3];
+        select_only(&mut bm, v);
+        let sp = update(&mut bm);
+        let arr = editdata_array(&mut bm, &sp, false, Mark::Indiv);
+        assert_eq!(arr.data.len(), 3, "the vertex's smooth fan");
+        for d in &arr.data {
+            assert_eq!(d.loc, bm.vert(v).co);
+            assert_eq!(d.nloc, d.niloc);
+            assert!((frap_geom::normals::dot(d.nloc, d.nloc) - 1.0).abs() < 1e-6);
+            assert_eq!(
+                arr.by_index[d.loop_index].map(|i| arr.data[i].loop_),
+                Some(d.loop_)
+            );
+        }
     }
 }

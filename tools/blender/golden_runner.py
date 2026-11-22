@@ -203,6 +203,7 @@ NORMALISE = {
     "D-147": ("cases", "cases mirror one mesh per run or meshes with different element counts"),
     "D-148": ("cases", "vertex_group_copy_to_selected only fails where Blender changes nothing"),
     "D-149": ("cases", "undo cases push the steps frap pushes implicitly with #@blender bpy.ops.ed.undo_push(...) lines"),
+    "D-150": ("cases", "normals_tools COPY only fails where the state after it is the same in both tools"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
