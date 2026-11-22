@@ -61,7 +61,7 @@ fn manifest_selected_operators() {
     for idname in [
         "uv.minimize_stretch",
         "armature.extrude_forked",
-        "object.vertex_group_mirror",
+        "object.voxel_remesh",
         "mesh.select_similar",
     ] {
         let e = find_op(idname).unwrap();

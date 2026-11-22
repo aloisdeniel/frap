@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "object.voxel_remesh",
+  "bl_idname": "OBJECT_OT_voxel_remesh",
+  "label": "Voxel Remesh",
+  "description": "Calculates a new manifold mesh based on the volume of the current mesh. All data layers will be lost",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: A (Object Mode, the factory 'Cube' (a mesh) active and selected)",
+    "matrix": {
+      "plain": "YNNNN",
+      "view3d": "YNNNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M9",
+    "extension": false,
+    "notes": [
+      "object.voxel_remesh exists in Blender 5.2; frap implements it in M9 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}
