@@ -17,8 +17,8 @@
 //! caller's values (flushes write both).
 //!
 //! Ported from blender/source/blender/geometry/intern/uv_parametrizer.cc (Blender 5.2.4).
-//! ABF++ (`abf=true`) and SLIM are M8 (WP 8.1): until then `lscm_begin(abf=true)` solves with
-//! the LSCM angles, which is what Blender itself does when ABF fails.
+//! ABF++ (`lscm_begin(abf=true)`, [`crate::abf`]) and SLIM ([`crate::slim`]) are implemented
+//! (WP 8.1); when ABF++ fails, `lscm_begin` solves with the LSCM angles, as Blender does.
 
 pub(crate) mod beautify;
 pub mod bli;

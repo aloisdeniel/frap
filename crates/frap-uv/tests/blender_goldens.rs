@@ -141,8 +141,8 @@ fn cube_unwrap_seams_margin0() {
 }
 
 #[test]
-fn cube_unwrap_seams_angle_based_falls_back_to_lscm() {
-    // ABF++ is M8 (WP 8.1); on the seamed cube Blender's ABF and LSCM agree (App. B.5).
+fn cube_unwrap_seams_angle_based() {
+    // ABF++ (`frap_uv::abf`); on the seamed cube Blender's ABF and LSCM agree (App. B.5).
     let (mesh, mut uvs, want) = case("cube_unwrap_seams_angle");
     unwrap(&mesh, &mut uvs, true, false, 0.001);
     check("cube_unwrap_seams_angle", &uvs, &want, LSCM_TOL);

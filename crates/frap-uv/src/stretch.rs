@@ -8,6 +8,12 @@
 //!
 //! Ported from blender/source/blender/geometry/intern/uv_parametrizer.cc and
 //! blender/source/blender/blenlib/BLI_rand.hh (Blender 5.2.4).
+//!
+//! Known source of ulp divergence: the random direction uses `libm::cosf`/`sinf` (rule
+//! 2.2.12, portable transcendentals), while Blender's macOS build calls Apple's libm, whose
+//! `cosf` differs in the last bit on about 1.3% of the RNG's angles. A one-ulp different
+//! direction can change a later binary-search step of `p_chart_stretch_minimize` on some
+//! inputs; no golden or probe has shown a difference above the 1e-4 tolerance so far.
 
 use crate::param::bli;
 use crate::param::{NIL, PFACE_FILLED, PVERT_PIN, PVERT_SELECT, ParamMesh, PhState};
