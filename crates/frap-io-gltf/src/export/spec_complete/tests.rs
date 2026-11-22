@@ -697,9 +697,8 @@ fn spec_pointer_times_follow_blenders_clock() {
     ];
     let pointer_times = |o: &ExportOutput| {
         let (doc, bufs) = parse(o);
-        let is_pointer = |c: &frap_gltf::json::Channel| {
-            c.target.path == frap_gltf::json::AnimationPath::Pointer
-        };
+        let is_pointer =
+            |c: &frap_gltf::json::Channel| c.target.path == frap_gltf::json::AnimationPath::Pointer;
         let anim = doc
             .animations
             .iter()

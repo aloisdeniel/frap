@@ -78,7 +78,13 @@ fn input_type(tree: &NodeTree, uid: u32, identifier: &str) -> Option<SocketType>
 
 /// Connects `src` to input `(uid, identifier)` of `tree`: a link, or the converted constant as
 /// the input's own value (left as is when the types do not convert).
-fn connect(tree: &mut NodeTree, src: &Source, uid: u32, identifier: &SmolStr, links: &mut Vec<Link>) {
+fn connect(
+    tree: &mut NodeTree,
+    src: &Source,
+    uid: u32,
+    identifier: &SmolStr,
+    links: &mut Vec<Link>,
+) {
     match src {
         Source::Link(from, socket) => links.push(Link {
             from_node: *from,
