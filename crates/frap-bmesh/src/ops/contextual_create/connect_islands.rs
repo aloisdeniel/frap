@@ -281,6 +281,7 @@ impl Ctx<'_> {
         let mut v_other: Option<VertId> = None;
         let mut v_other_fallback;
         loop {
+            frap_math::budget::check();
             let [e1, e2] = bm.edge(e_hit).v;
             let pair = if len_sq2(o, self.c(e1)) > len_sq2(o, self.c(e2)) {
                 [e1, e2]
@@ -368,6 +369,7 @@ fn partial_connect(
             vert_stack.push(v_other);
         }
         while let Some(vo) = search.pop() {
+            frap_math::budget::check();
             v_other = vo;
             for e_iter in bm.vert_edges(v_other) {
                 let v_step = bm.edge_other_vert(e_iter, v_other);
@@ -423,6 +425,7 @@ pub fn edge_find_double(bm: &BMesh, e: EdgeId) -> Option<EdgeId> {
     let [v, v_other] = bm.edge(e).v;
     let mut e_iter = e;
     loop {
+        frap_math::budget::check();
         e_iter = bm.disk_edge_next(e_iter, v);
         if e_iter == e {
             return None;
@@ -433,33 +436,13 @@ pub fn edge_find_double(bm: &BMesh, e: EdgeId) -> Option<EdgeId> {
     }
 }
 
-/// `BM_vert_splice_check_double_face`, for vertices of which one has no face (the only case
-/// the island connection reaches: temporary vertices only carry wire edges).
+/// `BM_vert_splice_check_double_face`. Between the partial-connect split and this splice the
+/// edges moved onto the temporary vertex keep loops whose `v` is still the original vertex
+/// (`BM_vert_separate_tested_edges` only swaps the disk cycles, as in Blender), so this must
+/// walk the disk and radial cycles the way Blender does, never `BM_LOOPS_OF_VERT` (whose
+/// face-edge walk does not terminate on such a vertex).
 fn splice_check_double_face(bm: &BMesh, v_a: VertId, v_b: VertId) -> bool {
-    let has_loops = |v: VertId| !bm.vert_loops(v).is_empty();
-    if bm.vert(v_a).e.is_none() || bm.vert(v_b).e.is_none() || !has_loops(v_a) || !has_loops(v_b) {
-        return false;
-    }
-    // Two faced vertices: would splicing give two faces over the same vertices?
-    let faces_a = bm.vert_faces(v_a);
-    let faces_b = bm.vert_faces(v_b);
-    faces_a.iter().any(|&fa| {
-        let mut va: Vec<VertId> = bm
-            .face_verts(fa)
-            .into_iter()
-            .map(|x| if x == v_b { v_a } else { x })
-            .collect();
-        va.sort();
-        faces_b.iter().any(|&fb| {
-            let mut vb: Vec<VertId> = bm
-                .face_verts(fb)
-                .into_iter()
-                .map(|x| if x == v_b { v_a } else { x })
-                .collect();
-            vb.sort();
-            fa != fb && va == vb
-        })
-    })
+    crate::ops::intersect::query::vert_splice_check_double_face(bm, v_a, v_b)
 }
 
 // Ported from blender/source/blender/bmesh/intern/bmesh_polygon_edgenet.cc
@@ -527,6 +510,7 @@ pub fn face_split_edgenet_connect_islands(
             vstack.push(v0);
             vert_in.remove(&v0);
             while let Some(v_iter) = vstack.pop() {
+                frap_math::budget::check();
                 unique_verts += 1;
                 for e_iter in bm.vert_edges(v_iter) {
                     if edge_in.remove(&e_iter) {
@@ -578,6 +562,7 @@ pub fn face_split_edgenet_connect_islands(
             let mut len = net_new.len();
             let mut i = edge_net_init_len;
             while i < len {
+                frap_math::budget::check();
                 while edge_find_double(bm, net_new[i]).is_some() {
                     if is_new.contains(&net_new[i]) {
                         bm.edge_kill(net_new[i]);
@@ -705,6 +690,7 @@ pub fn face_split_edgenet_connect_islands(
     let mut has_prev: Vec<bool> = vec![false; group_arr.len()];
     let mut vert_range = [0usize, group_arr[0].vert_len];
     for g_index in 1..group_arr.len() {
+        frap_math::budget::check();
         vert_range[0] = vert_range[1];
         vert_range[1] += group_arr[g_index].vert_len;
         for (positive, v_origin) in [

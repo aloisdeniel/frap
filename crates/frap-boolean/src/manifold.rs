@@ -21,7 +21,7 @@
 //! coincident vertices Manifold 3.5.2 keeps apart can be one. Those results have Blender's
 //! volume but not its vertex count (known T2 gaps, listed in the BOOLEAN modifier's tests).
 //!
-//! EXACT (Blender's exact-arithmetic mesh arrangement, not ported: WP 8.6) runs on the same
+//! EXACT (Blender's exact-arithmetic mesh arrangement, not ported: M9) runs on the same
 //! pipeline with manifold-rust's robust engine (`BooleanEngine::Robust`: exact rational
 //! arithmetic and winding numbers, so closed non-manifold soup is accepted and an inside-out
 //! operand is empty space, as in Blender), as a left fold; the bridges merging leaves at new
@@ -32,6 +32,13 @@
 //! [`BoolError::NonManifold`] (Blender's exact solver accepts them). Results have Blender's
 //! volume but the MANIFOLD face layout (T3). `use_self` and `use_hole_tolerant` do not change
 //! the result.
+//!
+//! `--stmt-timeout` (WP 8.6): the manifold-rust part (imports, kernel, export) runs on a
+//! worker thread when the statement has a deadline (`imp::on_worker`); the statement's thread
+//! answers `TIMEOUT` at the deadline even while the worker is in a step manifold-rust cannot
+//! cancel (`Manifold::from_mesh_gl*`, `trim_by_plane`, `get_mesh_gl`), and the abandoned
+//! worker stops at its next cancellation point. Two 130k-triangle spheres answer within about
+//! 20 ms of the deadline in a debug build (`tests/cancel.rs`).
 
 use crate::{BoolError, BoolOptions, BooleanSolver, SolverKind};
 #[cfg(feature = "manifold")]
@@ -215,51 +222,7 @@ pub(crate) mod imp {
         }
     }
 
-    /// Cancels `token` when the statement's deadline passes (`--stmt-timeout`, ARCHITECTURE
-    /// §12): manifold-rust's kernels poll the token, not frap's thread-local budget. Dropping the
-    /// watchdog stops its thread.
-    struct Watchdog {
-        stop: Option<std::sync::mpsc::Sender<()>>,
-        thread: Option<std::thread::JoinHandle<()>>,
-    }
-
-    impl Watchdog {
-        fn new(token: &CancelToken) -> Watchdog {
-            let Some(deadline) = frap_math::budget::deadline() else {
-                return Watchdog {
-                    stop: None,
-                    thread: None,
-                };
-            };
-            let (stop, wait) = std::sync::mpsc::channel::<()>();
-            let token = token.clone();
-            let thread = std::thread::Builder::new()
-                .name("frap-boolean-deadline".into())
-                .spawn(move || {
-                    let left = deadline.saturating_duration_since(std::time::Instant::now());
-                    if let Err(std::sync::mpsc::RecvTimeoutError::Timeout) = wait.recv_timeout(left)
-                    {
-                        token.cancel();
-                    }
-                })
-                .ok();
-            Watchdog {
-                stop: Some(stop),
-                thread,
-            }
-        }
-    }
-
-    impl Drop for Watchdog {
-        fn drop(&mut self) {
-            drop(self.stop.take());
-            if let Some(t) = self.thread.take() {
-                let _ = t.join();
-            }
-        }
-    }
-
-    /// A kernel result cancelled by the [`Watchdog`]: the deadline has passed, so the budget
+    /// A kernel result cancelled through its token: the deadline has passed, so the budget
     /// check unwinds with `Interrupted` (the statement answers `TIMEOUT`).
     fn check_cancelled(status: Error) {
         if status == Error::Cancelled {
@@ -267,49 +230,165 @@ pub(crate) mod imp {
         }
     }
 
-    pub(super) fn run(
-        operands: &[BoolMesh<'_>],
-        opts: &BoolOptions,
-    ) -> Result<BoolResult, BoolError> {
-        if operands.is_empty() {
-            return Ok(BoolResult::default());
+    /// The part of a boolean that runs inside manifold-rust: the imports
+    /// (`Manifold::from_mesh_gl*`), the kernel and the export of the result (`get_mesh_gl`),
+    /// on owned data so that it can run on a worker thread.
+    struct Job {
+        gls: Vec<MeshGL>,
+        exact: bool,
+        op: BoolOperation,
+        /// `is_plane` of the second operand of a two-operand DIFFERENCE.
+        plane: Option<([f32; 3], f32)>,
+        /// The first face of the second operand (the plane's face).
+        plane_face: u32,
+    }
+
+    /// What [`compute`] returns: the result mesh, or the cancellation that [`run`] turns into
+    /// the `Interrupted` unwind on the calling thread (the budget is thread-local).
+    enum Computed {
+        /// The result, and whether it came from the kernel (not `trim_by_plane`).
+        Mesh(MeshGL, bool),
+        Cancelled,
+    }
+
+    /// The most deadline-bound boolean workers running at once per process (running or
+    /// abandoned after a timeout: a worker holds its slot until its work ends), as the WebP
+    /// encoder's `MAX_WORKERS` (M7W0-10). An abandoned worker ends at its next cancellation
+    /// point, at most one uncancellable manifold-rust step later (about 60 ms per
+    /// 130k-triangle import in a release build), but an agent resending a timed-out boolean
+    /// in a `serve`/`mcp` session must not pile them up.
+    pub(crate) const MAX_WORKERS: usize = 4;
+
+    /// The `TIMEOUT` reason of a boolean that never got a worker slot.
+    pub(crate) const SLOTS_BUSY: &str = "the boolean waited for a worker slot: earlier booleans \
+        that timed out are still finishing their current step in the background (at most 4 at \
+        once per process); retry once they finish";
+
+    static WORKERS: std::sync::Mutex<usize> = std::sync::Mutex::new(0);
+    static WORKER_FREED: std::sync::Condvar = std::sync::Condvar::new();
+
+    fn workers() -> std::sync::MutexGuard<'static, usize> {
+        WORKERS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    /// A worker slot, released when the worker's work ends (also by a panic).
+    struct Slot;
+
+    impl Drop for Slot {
+        fn drop(&mut self) {
+            let mut n = workers();
+            *n = n.saturating_sub(1);
+            WORKER_FREED.notify_all();
         }
-        let offsets = Offsets::new(operands);
-        let prepared: Vec<Prepared> = operands.iter().map(prepare).collect();
-        let exact = opts.solver != SolverKind::Manifold;
-        if exact {
-            let max = prepared
-                .iter()
-                .flat_map(|p| p.positions.iter().flatten())
-                .fold(0.0f32, |m, c| m.max(c.abs()));
-            if max > EXACT_RANGE {
-                return Err(BoolError::Input(format!(
-                    "frap: the EXACT solver handles coordinates up to {EXACT_RANGE:e} (found \
-                     {max:e}); Blender's exact mesh arrangement is not ported (WP 8.6)"
-                )));
+    }
+
+    /// Waits for a worker slot until `deadline`, then unwinds with `Interrupted`
+    /// ([`SLOTS_BUSY`]).
+    fn acquire_slot(deadline: std::time::Instant) -> Slot {
+        let mut n = workers();
+        while *n >= MAX_WORKERS {
+            let left = deadline.saturating_duration_since(std::time::Instant::now());
+            if left.is_zero() {
+                drop(n);
+                frap_math::budget::check_now_because(SLOTS_BUSY);
+                n = workers();
+                continue;
+            }
+            n = WORKER_FREED
+                .wait_timeout(n, left)
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .0;
+        }
+        *n += 1;
+        Slot
+    }
+
+    /// The deadline-bound boolean workers running now (tests).
+    #[cfg(test)]
+    pub(crate) fn running_workers() -> usize {
+        *workers()
+    }
+
+    /// Runs `work` with a cancellation token (`--stmt-timeout`, ARCHITECTURE §12). Without a
+    /// deadline it runs here. With one it runs on a worker thread while this thread waits for
+    /// its result until the deadline: then the token is cancelled (manifold-rust's kernels
+    /// poll it) and this thread unwinds at once with `Interrupted`, so the statement answers
+    /// `TIMEOUT` right at the deadline even while the worker is in a step manifold-rust cannot
+    /// cancel (the import of an operand, `Manifold::from_mesh_gl*`, `trim_by_plane`, the export,
+    /// `get_mesh_gl`). The abandoned worker stops at its next cancellation point (after at most
+    /// that step) and its result is dropped. A worker that panics (a manifold-rust bug) is
+    /// Blender's unknown error. At most [`MAX_WORKERS`] such workers run at once: a further
+    /// boolean waits for a slot within its own deadline (then `TIMEOUT`, [`SLOTS_BUSY`]).
+    pub(crate) fn on_worker<T: Send + 'static>(
+        work: impl FnOnce(&CancelToken) -> T + Send + 'static,
+    ) -> Result<T, BoolError> {
+        let Some(deadline) = frap_math::budget::deadline() else {
+            return Ok(work(&CancelToken::new()));
+        };
+        frap_math::budget::check_now();
+        let slot = acquire_slot(deadline);
+        let token = CancelToken::new();
+        let (tx, rx) = std::sync::mpsc::channel();
+        let worker_token = token.clone();
+        let spawned = std::thread::Builder::new()
+            .name("frap-boolean".into())
+            .spawn(move || {
+                let _slot = slot;
+                let r = work(&worker_token);
+                let _ = tx.send(r);
+            });
+        if let Err(e) = spawned {
+            return Err(BoolError::Input(format!(
+                "frap: cannot start the boolean worker thread: {e}"
+            )));
+        }
+        loop {
+            let left = deadline.saturating_duration_since(std::time::Instant::now());
+            match rx.recv_timeout(left) {
+                Ok(r) => return Ok(r),
+                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                    if std::time::Instant::now() >= deadline {
+                        token.cancel();
+                        frap_math::budget::check_now();
+                    }
+                }
+                Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                    return Err(BoolError::Unknown);
+                }
             }
         }
-        let manifolds: Vec<Manifold> = prepared
-            .iter()
-            .enumerate()
-            .map(|(i, p)| {
-                let gl = mesh_gl(p, i, offsets.face_start[i]);
-                if exact {
-                    Manifold::from_mesh_gl_robust(&gl)
-                } else {
-                    Manifold::from_mesh_gl(&gl)
-                }
-            })
-            .collect();
+    }
 
-        let token = CancelToken::new();
-        let _watchdog = Watchdog::new(&token);
+    /// [`compute`] on [`on_worker`].
+    fn run_job(job: Job) -> Result<Computed, BoolError> {
+        on_worker(move |token| compute(job, token))?
+    }
+
+    /// The manifold-rust part of [`run`] (see [`Job`]).
+    fn compute(job: Job, token: &CancelToken) -> Result<Computed, BoolError> {
+        let mut manifolds: Vec<Manifold> = Vec::with_capacity(job.gls.len());
+        for gl in &job.gls {
+            if token.is_cancelled() {
+                return Ok(Computed::Cancelled);
+            }
+            manifolds.push(if job.exact {
+                Manifold::from_mesh_gl_robust(gl)
+            } else {
+                Manifold::from_mesh_gl(gl)
+            });
+        }
+        if token.is_cancelled() {
+            return Ok(Computed::Cancelled);
+        }
         let mut gl_result: MeshGL;
+        let mut from_kernel = false;
         if manifolds.iter().any(|m| m.status() != Error::NoError) {
-            let plane = (operands.len() == 2
-                && opts.operation == BoolOperation::Difference
+            let plane = (manifolds.len() == 2
+                && job.op == BoolOperation::Difference
                 && manifolds[0].status() == Error::NoError)
-                .then(|| is_plane(&operands[1]))
+                .then_some(job.plane)
                 .flatten();
             if let Some((normal, offset)) = plane {
                 // `mesh_trim_manifold`.
@@ -333,7 +412,7 @@ pub(crate) mod imp {
                     let start = gl_result.run_index[1] as usize / 3;
                     let end = gl_result.run_index[2] as usize / 3;
                     for id in &mut gl_result.face_id[start..end] {
-                        *id = offsets.face_start[1];
+                        *id = job.plane_face;
                     }
                 }
             } else {
@@ -343,7 +422,8 @@ pub(crate) mod imp {
                     .iter()
                     .enumerate()
                     .filter(|(_, m)| {
-                        m.status() == Error::NotManifold || (exact && m.status() != Error::NoError)
+                        m.status() == Error::NotManifold
+                            || (job.exact && m.status() != Error::NoError)
                     })
                     .map(|(i, _)| i as u32)
                     .collect();
@@ -353,8 +433,8 @@ pub(crate) mod imp {
                 return Err(BoolError::NonManifold(bad));
             }
         } else {
-            let op = op_type(opts.operation);
-            let result = if exact {
+            let op = op_type(job.op);
+            let result = if job.exact {
                 // The robust engine (winding numbers, like Blender's exact solver: an
                 // inside-out operand counts as empty space), as a left fold.
                 let mut acc = manifolds[0].clone();
@@ -363,9 +443,11 @@ pub(crate) mod imp {
                         m,
                         op,
                         BooleanEngine::Robust,
-                        Some(&token),
+                        Some(token),
                     );
-                    check_cancelled(acc.status());
+                    if acc.status() == Error::Cancelled {
+                        return Ok(Computed::Cancelled);
+                    }
                 }
                 acc
             } else if manifolds.len() == 1 {
@@ -375,21 +457,77 @@ pub(crate) mod imp {
                     .into_iter()
                     .map(|m| CsgNode::leaf(m.into_impl()))
                     .collect();
-                Manifold::from_impl(CsgNode::op_n(op, children).evaluate_with_token(Some(&token)))
+                Manifold::from_impl(CsgNode::op_n(op, children).evaluate_with_token(Some(token)))
             };
-            check_cancelled(result.status());
+            if result.status() == Error::Cancelled {
+                return Ok(Computed::Cancelled);
+            }
             gl_result = result.get_mesh_gl(-1);
+            from_kernel = true;
             if result.status() != Error::NoError {
                 return Err(result_error(result.status()));
             }
-            if exact && gl_result.tri_verts.is_empty() && cannot_be_empty(&prepared, opts.operation)
-            {
-                return Err(BoolError::Input(
-                    "frap: the EXACT solver returned nothing for operands whose result cannot be \
-                     empty (Blender's exact mesh arrangement is not ported, WP 8.6)"
-                        .into(),
-                ));
+        }
+        Ok(Computed::Mesh(gl_result, from_kernel))
+    }
+
+    pub(super) fn run(
+        operands: &[BoolMesh<'_>],
+        opts: &BoolOptions,
+    ) -> Result<BoolResult, BoolError> {
+        if operands.is_empty() {
+            return Ok(BoolResult::default());
+        }
+        let offsets = Offsets::new(operands);
+        let prepared: Vec<Prepared> = operands.iter().map(prepare).collect();
+        let exact = opts.solver != SolverKind::Manifold;
+        if exact {
+            let max = prepared
+                .iter()
+                .flat_map(|p| p.positions.iter().flatten())
+                .fold(0.0f32, |m, c| m.max(c.abs()));
+            if max > EXACT_RANGE {
+                return Err(BoolError::Input(format!(
+                    "frap: the EXACT solver handles coordinates up to {EXACT_RANGE:e} (found \
+                     {max:e}); Blender's exact mesh arrangement is not ported (M9)"
+                )));
             }
+        }
+        let gls: Vec<MeshGL> = prepared
+            .iter()
+            .enumerate()
+            .map(|(i, p)| {
+                frap_math::budget::check_now();
+                mesh_gl(p, i, offsets.face_start[i])
+            })
+            .collect();
+        let plane = (operands.len() == 2 && opts.operation == BoolOperation::Difference)
+            .then(|| is_plane(&operands[1]))
+            .flatten();
+        let job = Job {
+            gls,
+            exact,
+            op: opts.operation,
+            plane,
+            plane_face: offsets.face_start.get(1).copied().unwrap_or(0),
+        };
+        let (gl_result, from_kernel) = match run_job(job)? {
+            Computed::Mesh(gl, k) => (gl, k),
+            Computed::Cancelled => {
+                check_cancelled(Error::Cancelled);
+                return Err(BoolError::Unknown);
+            }
+        };
+        if exact
+            && from_kernel
+            && gl_result.tri_verts.is_empty()
+            && cannot_be_empty(&prepared, opts.operation)
+        {
+            return Err(BoolError::Input(
+                "frap: the EXACT solver returned nothing for operands whose result cannot be \
+                 empty (Blender's exact mesh arrangement is not ported, M9)"
+                    .into(),
+            ));
         }
         Ok(to_result(gl_result, operands, &prepared, &offsets, exact))
     }
@@ -726,6 +864,39 @@ mod tests {
         assert_eq!(
             ManifoldSolver.run(&ops, &opts),
             Err(BoolError::NonManifold(vec![1]))
+        );
+    }
+
+    /// Timed-out workers keep running until their current uncancellable step ends, but at most
+    /// `MAX_WORKERS` at once: with every slot taken, a further boolean waits for one within its
+    /// own deadline and answers TIMEOUT (`SLOTS_BUSY`) without starting another worker.
+    #[test]
+    fn abandoned_workers_are_bounded() {
+        use std::time::{Duration, Instant};
+        let timed_out = |sleep: Duration| {
+            std::panic::catch_unwind(|| {
+                let _scope = frap_math::budget::scope(frap_math::budget::Budget {
+                    timeout: Some(Duration::from_millis(50)),
+                    ..Default::default()
+                });
+                imp::on_worker(move |_token| std::thread::sleep(sleep))
+            })
+            .err()
+            .and_then(|p| frap_math::budget::interrupted(&*p))
+        };
+        for _ in 0..imp::MAX_WORKERS {
+            let i = timed_out(Duration::from_secs(3)).expect("TIMEOUT");
+            assert_eq!(i.reason, None, "a slot was free: its own work timed out");
+        }
+        assert_eq!(imp::running_workers(), imp::MAX_WORKERS);
+        let waited = Instant::now();
+        let i = timed_out(Duration::from_secs(10)).expect("TIMEOUT");
+        assert_eq!(i.reason, Some(imp::SLOTS_BUSY));
+        assert!(imp::running_workers() <= imp::MAX_WORKERS);
+        assert!(
+            waited.elapsed() < Duration::from_secs(1),
+            "{:?}",
+            waited.elapsed()
         );
     }
 }

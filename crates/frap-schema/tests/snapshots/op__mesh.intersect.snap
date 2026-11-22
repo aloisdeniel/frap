@@ -166,7 +166,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T3",
     "support": "partial",
-    "support_note": "the cuts come from manifold-rust's exact intersection graph (Blender's exact mesh arrangement is not ported, WP 8.6): Blender's cut lines, not always its face layout; mode='SELECT' does not cut a connected part of the selection with itself; FLOAT runs EXACT with a WARNING",
+    "support_note": "solver='FLOAT' is Blender's BM_mesh_intersect (T2); EXACT's cuts come from manifold-rust's exact intersection graph (Blender's exact mesh arrangement is M9): Blender's cut lines, not always its face layout; EXACT mode='SELECT' does not cut a connected part of the selection with itself",
     "headless": "native",
     "planned": "M4",
     "extension": false,

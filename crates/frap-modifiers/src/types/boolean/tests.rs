@@ -60,8 +60,21 @@ fn mesh_from(j: &Value, name: &str, main: &mut Main, log: &mut ChangeLog) -> Mes
                 .collect()
         })
         .collect();
+    // FLOAT inputs carry their edges (`compact.py`), the others get `from_pydata`'s.
+    let edges: Vec<[i32; 2]> = j
+        .get("edges")
+        .and_then(Value::as_array)
+        .map(|es| {
+            es.iter()
+                .map(|e| {
+                    let e = e.as_array().unwrap();
+                    [e[0].as_i64().unwrap() as i32, e[1].as_i64().unwrap() as i32]
+                })
+                .collect()
+        })
+        .unwrap_or_default();
     let mut m = Mesh::new(name);
-    m.from_pydata(&positions, &[], &faces, true);
+    m.from_pydata(&positions, &edges, &faces, true);
     for (uv_name, data) in j["uv"].as_object().unwrap() {
         let uv: Vec<[f32; 2]> = data
             .as_array()
@@ -524,7 +537,7 @@ fn manifold_non_manifold_operand_is_blenders_error() {
 
 #[test]
 fn exact_open_operand_is_a_frap_error() {
-    // Blender's exact mesh arrangement cuts with open sheets; frap's stand-in cannot (WP 8.6).
+    // Blender's exact mesh arrangement cuts with open sheets; frap's stand-in cannot (M9).
     let case = &cases()["exact_nonmanifold"];
     let s = scene(case);
     let (r, _) = evaluate(&s);
@@ -534,21 +547,36 @@ fn exact_open_operand_is_a_frap_error() {
     assert!(msg.starts_with("frap: the EXACT solver needs closed operands; object(s) 'Grid'"));
 }
 
+/// FLOAT (`BM_mesh_intersect`, WP 8.6) at T2 on every FLOAT case of the dump: cube-cube for
+/// every operation (coplanar faces), rotated and mirrored cutters, cylinders and spheres
+/// (n-gon caps, triangle fans), material slots, COLLECTION operands, an open operand (a plane,
+/// a grid), disjoint operands and a torus. Each result was the same in four Blender runs (the
+/// solver's pointer-keyed hash order can make degenerate inputs vary between runs).
 #[test]
-fn float_runs_exact_with_a_warning() {
-    let mut case = cases()["exact_cube_cube_difference"].clone();
-    case["solver"] = "FLOAT".into();
-    let s = scene(&case);
+fn float_matches_blender_t2() {
+    let mut n = 0;
+    for (name, case) in cases() {
+        if case["solver"] != "FLOAT" {
+            continue;
+        }
+        let s = scene(&case);
+        let (r, reports) = evaluate(&s);
+        let out = r.unwrap_or_else(|e| panic!("{name}: {e}"));
+        assert!(reports.is_empty(), "{name}: {reports:?}");
+        compare_t2(&name, &s, &out, &case["result"]);
+        n += 1;
+    }
+    assert!(n >= 20, "{n} FLOAT cases");
+}
+
+#[test]
+fn float_open_operand_is_cut() {
+    // The EXACT stand-in refuses an open operand; FLOAT cuts with it, as Blender does.
+    let case = &cases()["float_nonmanifold"];
+    let s = scene(case);
     let (r, reports) = evaluate(&s);
-    let out = r.unwrap();
-    assert_eq!(reports.len(), 1);
-    assert!(reports[0].message.contains("FLOAT solver runs as EXACT"));
-    compare_t3(
-        "float",
-        &s,
-        &out,
-        &cases()["exact_cube_cube_difference"]["result"],
-    );
+    assert!(reports.is_empty());
+    compare_t2("float_nonmanifold", &s, &r.unwrap(), &case["result"]);
 }
 
 #[test]

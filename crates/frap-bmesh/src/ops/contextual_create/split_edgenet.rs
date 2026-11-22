@@ -220,6 +220,7 @@ fn find_loop(
     }
     let mut v = bm.edge_other_vert(pair[1], v_init);
     loop {
+        frap_math::budget::check();
         let e = bm.vert(v).e.expect("walk edge");
         verts.push(v);
         edges.push(e);
@@ -293,6 +294,7 @@ pub fn face_split_edgenet(bm: &mut BMesh, f: FaceId, edge_net: &[EdgeId]) -> Vec
     in_queue.insert(bm.lp(l_first).v);
     let mut face_arr: Vec<FaceId> = Vec::new();
     while let Some(v) = queue.pop() {
+        frap_math::budget::check();
         in_queue.remove(&v);
         let Some((verts, edges, check)) = find_loop(bm, &mut net, v, fno, &m) else {
             continue;

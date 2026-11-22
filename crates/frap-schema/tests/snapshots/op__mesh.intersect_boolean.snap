@@ -168,7 +168,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T3",
     "support": "partial",
-    "support_note": "EXACT runs manifold-rust's exact robust boolean (Blender's exact mesh arrangement is not ported, WP 8.6): Blender's volume, not its face layout; the selected and unselected parts must each be closed (OP_NOT_IMPLEMENTED otherwise); use_self does not change the result; FLOAT runs EXACT with a WARNING",
+    "support_note": "solver='FLOAT' is Blender's BM_mesh_intersect (T2); EXACT runs manifold-rust's exact robust boolean (Blender's exact mesh arrangement is M9): Blender's volume, not its face layout; the selected and unselected parts must each be closed (OP_NOT_IMPLEMENTED otherwise); use_self does not change the EXACT result",
     "headless": "native",
     "planned": "M4",
     "extension": false,

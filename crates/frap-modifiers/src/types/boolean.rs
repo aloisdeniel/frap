@@ -15,10 +15,9 @@
 //! coincident vertices Manifold 3.5.2 keeps apart, e.g. three cylinders meeting at a cube's
 //! centre, are one vertex): those results keep Blender's volume and slots (T3, `KNOWN_GAPS` in
 //! `boolean/tests.rs`); EXACT at T3 (manifold-rust stands in for Blender's exact mesh
-//! arrangement, see `frap_boolean::manifold`); FLOAT runs EXACT and reports a WARNING
-//! (`Boolean: the FLOAT solver runs as EXACT …`) until M8 (WP 8.6). The FLOAT-only refusals
-//! (`Cannot execute, intersect only available using exact solver`, the empty collection) are
-//! Blender's and kept.
+//! arrangement, see `frap_boolean::manifold`); FLOAT at T2 through the port of
+//! `BM_mesh_intersect` (`boolean/float.rs`, WP 8.6). The FLOAT-only refusals (`Cannot
+//! execute, intersect only available using exact solver`, the empty collection) are Blender's.
 //!
 //! Attributes follow Blender's mesh boolean: point, edge and face attributes are copied from
 //! the input element each output element maps to (default value when none), corner attributes
@@ -33,7 +32,7 @@ use std::sync::Arc;
 
 use frap_boolean::{BoolError, BoolMesh, BoolOperation, BoolOptions, BooleanSolver, SolverKind};
 use frap_mesh::{AttrData, Attribute, Domain, Mesh};
-use frap_rna::{CollectionId, IdAny, IdRef, MaterialId, ObjectId, Report, ReportType};
+use frap_rna::{CollectionId, IdAny, IdRef, MaterialId, ObjectId};
 use frap_scene::Main;
 use frap_scene::generated::modifier_settings::BooleanSettings;
 use frap_scene::id::slots;
@@ -90,14 +89,7 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
         return Err(ModError::Error(e.into()));
     }
     if s.solver == "FLOAT" {
-        cx.report(Report::new(
-            ReportType::Warning,
-            format!(
-                "Modifier '{}': the FLOAT solver runs as EXACT in frap (Blender's BMesh \
-                 intersect is not ported until M8)",
-                md.name
-            ),
-        ));
+        return float::float_boolean(&s, mesh, cx);
     }
     non_float_boolean_mesh(&s, mesh, cx)
 }
@@ -320,7 +312,7 @@ fn non_float_boolean_mesh(
                 // frap deviation: Blender's exact solver accepts open operands.
                 return Err(ModError::Error(format!(
                     "frap: the EXACT solver needs closed operands; object(s) {} are open \
-                     (Blender's exact mesh arrangement is not ported, WP 8.6)",
+                     (Blender's exact mesh arrangement is not ported, M9)",
                     list.join(", ")
                 )));
             }
@@ -1167,6 +1159,8 @@ impl MaterialIndices for Mesh {
         }
     }
 }
+
+mod float;
 
 #[cfg(test)]
 mod tests;
