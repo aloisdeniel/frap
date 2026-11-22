@@ -213,10 +213,27 @@ def is_id_struct(srna):
     return False
 
 
-def func_to_json(f):
+# Function parameters flagged PROP_DYNAMIC in C with a non-zero declared length: bpy reports
+# `is_array` with `array_dimensions` [1, 0, 0] for them, indistinguishable from a fixed 1-element
+# array, so `array_shape` cannot see the flag. (struct, function, parameter) -> source.
+# Only the parameters frap binds are listed (WP 6.3 recorded these two by hand; WP 8.9 moved
+# them here so a re-dump is byte-identical). Adding an entry changes the dump: run
+# `cargo xtask spec-refresh` and `cargo xtask codegen` after it.
+DYNAMIC_PARAMS = {
+    # rna_object.cc rna_def_vertex_group: RNA_def_int_array(func, "index", 1, ...) +
+    # RNA_def_parameter_flags(parm, PROP_DYNAMIC, PARM_REQUIRED) ("List of indices").
+    ("VertexGroup", "add", "index"): "rna_object.cc rna_def_vertex_group",
+    ("VertexGroup", "remove", "index"): "rna_object.cc rna_def_vertex_group",
+}
+
+
+def func_to_json(f, owner=None):
     params, returns = [], []
     for p in f.parameters:
-        (returns if p.is_output else params).append(prop_to_json(p))
+        d = prop_to_json(p)
+        if (owner, f.identifier, p.identifier) in DYNAMIC_PARAMS:
+            d["array"] = ["dynamic"]
+        (returns if p.is_output else params).append(d)
     return {
         "identifier": f.identifier,
         "description": f.description,
@@ -249,7 +266,7 @@ def struct_to_json(srna):
         "nested": srna.nested.identifier if srna.nested else None,
         "is_id": is_id_struct(srna),
         "props": [prop_to_json(p) for p in own_props(srna)],
-        "funcs": [func_to_json(f) for f in own_funcs(srna)],
+        "funcs": [func_to_json(f, srna.identifier) for f in own_funcs(srna)],
     }
 
 
