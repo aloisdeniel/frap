@@ -80,6 +80,8 @@ pub struct ToolSettings {
     pub uvcalc_weight_group: SmolStr,
     /// DNA `select_thresh`: the `threshold` a `select_similar` call without one uses; a call with one stores it (no RNA property)
     pub select_thresh: f32,
+    /// `SpaceImage.cursor` of frap's virtual Image Editor in UV mode: written by `uv.snap_cursor`, read by `uv.snap_selected` and `uv.arrange_islands` (headless-extended; no RNA property, starts at the origin like a new Image Editor)
+    pub uv_cursor: [f32; 2],
 }
 
 impl Default for ToolSettings {
@@ -117,6 +119,7 @@ impl Default for ToolSettings {
             uvcalc_weight_factor: 1.0,
             uvcalc_weight_group: SmolStr::new_static("uv_importance"),
             select_thresh: 0.01,
+            uv_cursor: Default::default(),
         }
     }
 }

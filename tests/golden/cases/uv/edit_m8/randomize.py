@@ -1,0 +1,38 @@
+# WP 8.3.9: uv.randomize_uv_transform (Python operator, CPython's Mersenne Twister seeded with
+# random_seed plus the island's lowest face index) on Suzanne's UV islands: the identity
+# defaults, location / rotation / scale, scale_even, use_* off, a partial selection, no sync.
+# golden: startup=empty compare=mesh:Suzanne tier=T1
+import bpy
+bpy.ops.mesh.primitive_monkey_add()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.uv.randomize_uv_transform()
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Suzanne'].uv_layers.new(name='identity')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.randomize_uv_transform(random_seed=5, loc=(0.3, 0.2), rot=1.2, scale=(1.5, 0.8))
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Suzanne'].uv_layers.new(name='all')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.randomize_uv_transform(random_seed=77, loc=(-0.1, 0.4), rot=-2.5, scale=(0.5, 2.0), scale_even=True)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Suzanne'].uv_layers.new(name='even')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.randomize_uv_transform(random_seed=9999, use_loc=False, rot=3.0, use_rot=False, scale=(3.0, 3.0))
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Suzanne'].uv_layers.new(name='scale_only')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='FACE', indices=[0, 1, 2, 3])
+bpy.ops.uv.randomize_uv_transform(random_seed=2, loc=(0.5, 0.5), rot=0.4, use_scale=False)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Suzanne'].uv_layers.new(name='partial')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.context.scene.tool_settings.use_uv_select_sync = False
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.uv.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='FACE', indices=[100, 200, 300])
+bpy.ops.uv.select_all(action='SELECT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.uv.randomize_uv_transform(random_seed=10000, loc=(1.0, -1.0), rot=6.0, scale=(-0.5, 1.2))
+bpy.ops.object.mode_set(mode='OBJECT')

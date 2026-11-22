@@ -176,6 +176,13 @@ const PLAIN: &[PlainSpec] = &[
                 default: "0.01",
                 ty: Some("f32"),
             },
+            // M8 (WP 8.3.9): the 2D cursor of frap's virtual Image Editor (headless-extended).
+            Extra {
+                name: "uv_cursor",
+                doc: "`SpaceImage.cursor` of frap's virtual Image Editor in UV mode: written by `uv.snap_cursor`, read by `uv.snap_selected` and `uv.arrange_islands` (headless-extended; no RNA property, starts at the origin like a new Image Editor)",
+                default: "",
+                ty: Some("[f32; 2]"),
+            },
         ],
         doc: "`bpy.types.ToolSettings` (`scene.tool_settings`; the OPERATORS.md §D subset).",
     },
