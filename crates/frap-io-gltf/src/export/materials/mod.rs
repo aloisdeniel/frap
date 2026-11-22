@@ -349,7 +349,14 @@ fn build(
         m.double_sided = Some(false);
     }
     core_normal::apply(g, r, lm, mesh, &mut m)?;
-    let orm = core_occlusion::orm_inputs(g, lm);
+    // `__gather_orm_texture`'s double check (WP 8.12): an ORM image that cannot be written
+    // gives separate occlusion and metallic-roughness textures.
+    let mut orm = core_occlusion::orm_inputs(g, lm);
+    if let Some(o) = &orm
+        && !crate::export::images::texture_writable(g, o)?
+    {
+        orm = None;
+    }
     core_occlusion::apply(g, r, lm, orm.as_deref(), mesh, &mut m)?;
     core_pbr::apply(g, r, lm, orm.as_deref(), mesh, &mut m)?;
     Ok(m)

@@ -15,7 +15,8 @@
 //!   Color output names the channel) and behind `Specular Tint` (copied whole).
 //!
 //! The add-on also writes `specularColorFactor: [1, 1, 1]` for a linked tint whose constant
-//! factor is exactly white (a list compared with a tuple); frap omits it like any default.
+//! factor is exactly white (a list compared with a tuple): `MaterialExts::specular_color_set`
+//! tells the exporter (WP 8.12).
 //!
 //! Raising ports `specular()` (`imp/pbrMetallicRoughness.py`): `Specular IOR Level` = half the
 //! factor through `scalar_factor_and_texture` ("Specular", Alpha), then
@@ -61,6 +62,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         Some(f) => c.map(|x| (f64::from(x) * f) as f32),
         None => c,
     };
+    out.ext.specular_color_set = false;
     let color = match cx.src_at(p, ti) {
         src if konst_rgb(cx, src).is_some() => Channel {
             factor: scale(konst_rgb(cx, src).unwrap_or([1.0; 3])),
@@ -68,6 +70,13 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         },
         src => Channel {
             factor: match (factor_rgb(cx, src), over) {
+                // `get_factor_from_socket` returns a list: `[1, 1, 1] != (1.0, 1.0, 1.0)`, so
+                // the add-on writes the found factor whatever its value (WP 8.12); scaled by
+                // `fac` it becomes a tuple again.
+                (Some(c), None) => {
+                    out.ext.specular_color_set = true;
+                    c
+                }
                 (Some(c), _) => scale(c),
                 (None, Some(f)) => [f as f32; 3],
                 (None, None) => [1.0; 3],

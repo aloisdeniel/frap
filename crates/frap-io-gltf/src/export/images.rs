@@ -1098,6 +1098,22 @@ pub fn slot_inputs(slot: TextureSlot, t: &TexRef) -> Vec<TexInput<'_>> {
     }
 }
 
+/// Whether a texture of `inputs` gets an image (`gather_texture_info(...) is not None`, the
+/// ORM double check of `__gather_orm_texture`, WP 8.12): its fills are not empty and encode.
+pub fn texture_writable(g: &mut Gather, inputs: &[TexInput]) -> Result<bool, ExportError> {
+    if g.settings.props.export_keep_originals.value {
+        return Ok(true);
+    }
+    let ex = compose(g, inputs);
+    if ex.fills.is_empty() {
+        return Ok(false);
+    }
+    let happy = ex.happy().and_then(|r| g.main.images.get(r));
+    let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
+    let mime = mime_for(g.settings, happy, alpha);
+    Ok(encode(g, &ex, Target::from_mime(mime))?.is_some())
+}
+
 /// The WARNING of a texture gathered from more than one socket (`__gather_sampler`).
 pub const SAMPLER_OF_FIRST_NODE: &str = "More than one shader node tex image used for a texture. \
      The resulting glTF sampler will behave like the first shader node tex image.";

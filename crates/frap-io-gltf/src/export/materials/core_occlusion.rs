@@ -12,7 +12,9 @@
 //!   `texCoord` and transform). Otherwise they are written separately (the add-on logs an
 //!   info message, no warning).
 //! - `__gather_occlusion_texture`: `strength` from the Mix with white in front of the
-//!   socket (`occlusion.rs`), omitted when 1.
+//!   socket (`occlusion.rs`), written whenever that Mix exists (`1` included), omitted
+//!   otherwise; the ORM sockets are used only when their texture can be written
+//!   (`__gather_orm_texture`'s double check, `images::texture_writable`, WP 8.12).
 
 use frap_gltf::json::{Material, OcclusionTextureInfo};
 use frap_material::LoweredMaterial;
@@ -86,7 +88,9 @@ pub fn apply(
     if let Some(info) = gather_texture_info_from(g, occ, inputs, (r, slot), mesh)? {
         m.occlusion_texture = Some(OcclusionTextureInfo {
             index: info.index,
-            strength: (lm.occlusion_strength != 1.0).then(|| num(lm.occlusion_strength)),
+            // Written whenever a Mix gave it, 1 included (WP 8.12).
+            strength: (lm.ext.occlusion_strength_set || lm.occlusion_strength != 1.0)
+                .then(|| num(lm.occlusion_strength)),
             tex_coord: info.tex_coord,
             extensions: info.extensions,
             extras: None,

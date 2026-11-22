@@ -293,6 +293,9 @@ fn lowering_the_imported_graph_gives_the_gltf_values() {
     active(&mut ir.factor.texture);
     active(&mut ir.thickness_max.texture);
     ir.ior = 1.33;
+    // The raised tint is a factor × texture: its found factor is written even when white
+    // (WP 8.12).
+    want.specular_color_set = true;
     assert_eq!(got.ext, want);
     // The law on the imported graph.
     let again = raised(&got);

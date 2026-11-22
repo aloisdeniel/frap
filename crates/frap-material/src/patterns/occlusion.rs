@@ -60,7 +60,9 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     };
     out.occlusion = scalar_texture(cx, Some(socket), &mut out.diagnostics);
     if out.occlusion.is_some() {
-        out.occlusion_strength = strength(cx, socket).unwrap_or(1.0);
+        let found = strength(cx, socket);
+        out.ext.occlusion_strength_set = found.is_some();
+        out.occlusion_strength = found.unwrap_or(1.0);
     }
 }
 

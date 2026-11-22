@@ -254,6 +254,14 @@ pub struct MaterialExts {
     /// the diffuse colour is [`LoweredMaterial::base_color`], and the importer sets no other
     /// extension (the add-on ignores them).
     pub pbr_specular_glossiness: Option<SpecularGlossiness>,
+    /// `occlusionTexture.strength` was read from a Mix with white in front of the occlusion
+    /// socket (`__gather_occlusion_strength` found one), so the exporter writes it even when
+    /// it is 1, as the add-on does (WP 8.12).
+    pub occlusion_strength_set: bool,
+    /// `Specular Tint` is linked and its colour factor was found (a Mix whose factor folds to
+    /// white, or a constant behind the link), so the exporter writes `specularColorFactor`
+    /// even when it is `[1, 1, 1]`, as the add-on does (WP 8.12).
+    pub specular_color_set: bool,
 }
 
 /// `KHR_materials_pbrSpecularGlossiness` as the glTF importer raises it

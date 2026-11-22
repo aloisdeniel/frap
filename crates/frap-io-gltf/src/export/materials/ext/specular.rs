@@ -33,7 +33,8 @@ fn run(
     if let Some(t) = &s.factor.texture {
         e.specular_texture = cx.texture_info(t, "specularTexture")?;
     }
-    if s.color.factor != [1.0; 3] {
+    // A linked tint's found factor is written even when white (WP 8.12).
+    if s.color.factor != [1.0; 3] || lm.ext.specular_color_set {
         e.specular_color_factor = Some(s.color.factor.map(num));
     }
     if let Some(t) = &s.color.texture {
