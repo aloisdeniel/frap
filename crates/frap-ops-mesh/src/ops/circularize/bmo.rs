@@ -115,7 +115,8 @@ fn invert_m3(m: &M3) -> Option<M3> {
     };
     let c0 = [cof(0, 0), cof(1, 0), cof(2, 0)];
     let det = c0[0] * at(0, 0) + (c0[1] * at(1, 0) + c0[2] * at(2, 0));
-    if !(det.abs() > 0.0) {
+    // `abs(determinant) > 0`: a NaN determinant is not invertible either.
+    if det.abs().partial_cmp(&0.0) != Some(std::cmp::Ordering::Greater) {
         return None;
     }
     let invdet = 1.0 / det;
@@ -155,7 +156,8 @@ fn isect_line_tri_v3(p1: V3, p2: V3, v0: V3, v1: V3, v2: V3) -> Option<f32> {
     let f = 1.0 / a;
     let s = sub3(p1, v0);
     let u = f * dot3(s, p);
-    // NaN passes, as in C.
+    // NaN passes, as in C (`(u < 0) || (u > 1)`).
+    #[allow(clippy::manual_range_contains)]
     if u < 0.0 || u > 1.0 {
         return None;
     }
@@ -280,14 +282,15 @@ fn walk_boundary_chain(
             e != exclude && !visited[e.slot()] && is_valid_boundary_edge(bm, e, check_axis)
         })
     };
-    let walk = |mut curr_v: VertId, mut curr_e: EdgeId, list: &mut Vec<VertId>, visited: &mut [bool]| {
-        while let Some(next_e) = next_edge(curr_v, curr_e, visited) {
-            curr_v = bm.edge_other_vert(next_e, curr_v);
-            curr_e = next_e;
-            list.push(curr_v);
-            visited[curr_e.slot()] = true;
-        }
-    };
+    let walk =
+        |mut curr_v: VertId, mut curr_e: EdgeId, list: &mut Vec<VertId>, visited: &mut [bool]| {
+            while let Some(next_e) = next_edge(curr_v, curr_e, visited) {
+                curr_v = bm.edge_other_vert(next_e, curr_v);
+                curr_e = next_e;
+                list.push(curr_v);
+                visited[curr_e.slot()] = true;
+            }
+        };
     let [v1, v2] = bm.edge(start).v;
     let mut verts = vec![v1, v2];
     visited[start.slot()] = true;
@@ -442,10 +445,8 @@ fn calculate_target_locations(
         if !is_closed && divisions > 1 {
             total_angle = 0.0;
             divisions = verts.len() - 1;
-            let mut vec_prev = normalize2([
-                verts[0].co_2d[0] - center[0],
-                verts[0].co_2d[1] - center[1],
-            ]);
+            let mut vec_prev =
+                normalize2([verts[0].co_2d[0] - center[0], verts[0].co_2d[1] - center[1]]);
             for cv in verts.iter().skip(1) {
                 let vec_curr = normalize2([cv.co_2d[0] - center[0], cv.co_2d[1] - center[1]]);
                 total_angle -= angle_signed_v2v2(vec_prev, vec_curr);
@@ -648,7 +649,10 @@ pub(crate) fn circularize(bm: &mut BMesh, i: &CircularizeIn) {
         }
         let mut mirror_axis = None;
         if !chain_data.is_closed {
-            let (s, e) = (bm.vert(chain[0]).co, bm.vert(*chain.last().expect("chain")).co);
+            let (s, e) = (
+                bm.vert(chain[0]).co,
+                bm.vert(*chain.last().expect("chain")).co,
+            );
             for k in 0..3 {
                 if check_axis[k] && s[k].abs() < MIRROR_LIMIT && e[k].abs() < MIRROR_LIMIT {
                     mirror_axis = Some(k);
@@ -728,30 +732,34 @@ mod tests {
         let m: M3 = [[2.0, 0.0, 1.0], [1.0, 3.0, 0.0], [0.0, 1.0, 4.0]];
         let inv = invert_m3(&m).expect("invertible");
         // inv * m = I.
-        for c in 0..3 {
-            let col = mul_m3_v3(&inv, m[c]);
-            for r in 0..3 {
+        for (c, mc) in m.iter().enumerate() {
+            let col = mul_m3_v3(&inv, *mc);
+            for (r, v) in col.iter().enumerate() {
                 let want = if r == c { 1.0 } else { 0.0 };
-                assert!((col[r] - want).abs() < 1e-6, "{col:?}");
+                assert!((v - want).abs() < 1e-6, "{col:?}");
             }
         }
         assert!(invert_m3(&[[1.0, 2.0, 3.0], [2.0, 4.0, 6.0], [0.0, 1.0, 1.0]]).is_none());
     }
 
     #[test]
-    fn best_fit_finds_the_unit_circle() {
+    fn best_fit_finds_the_circle() {
         let verts: Vec<CircleVert> = (0..8)
             .map(|k| {
                 let a = k as f32 * std::f32::consts::FRAC_PI_4;
                 CircleVert {
                     v: VertId(0),
-                    co_2d: [2.0 + a.cos(), -1.0 + a.sin()],
+                    co_2d: [0.05 + 1.5 * a.cos(), -0.02 + 1.5 * a.sin()],
                     target_2d: [0.0; 2],
                 }
             })
             .collect();
         let (c, r) = circle_best_fit(&verts, None);
-        assert!((c[0] - 2.0).abs() < 1e-4 && (c[1] + 1.0).abs() < 1e-4, "{c:?}");
-        assert!((r - 1.0).abs() < 1e-4);
+        // The chain is centred on its centroid, so the start (0, 0, 1) is close.
+        assert!(
+            (c[0] - 0.05).abs() < 1e-4 && (c[1] + 0.02).abs() < 1e-4,
+            "{c:?}"
+        );
+        assert!((r - 1.5).abs() < 1e-4);
     }
 }

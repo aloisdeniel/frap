@@ -99,18 +99,17 @@ fn walk_edges(bm: &BMesh, start: EdgeId, visited: &mut [bool]) -> Option<Chain> 
     visited_verts[sv2.slot()] = true;
     visited[start.slot()] = true;
 
-    let mut walk = |mut v_curr: VertId, result: &mut Vec<VertId>, visited: &mut [bool]| loop {
-        let Some(e_next) = vert_next_walk_edge(bm, v_curr, visited) else {
-            break;
-        };
-        let v_next = bm.edge_other_vert(e_next, v_curr);
-        if visited_verts[v_next.slot()] {
-            break;
+    let mut walk = |mut v_curr: VertId, result: &mut Vec<VertId>, visited: &mut [bool]| {
+        while let Some(e_next) = vert_next_walk_edge(bm, v_curr, visited) {
+            let v_next = bm.edge_other_vert(e_next, v_curr);
+            if visited_verts[v_next.slot()] {
+                break;
+            }
+            v_curr = v_next;
+            visited_verts[v_curr.slot()] = true;
+            result.push(v_curr);
+            visited[e_next.slot()] = true;
         }
-        v_curr = v_next;
-        visited_verts[v_curr.slot()] = true;
-        result.push(v_curr);
-        visited[e_next.slot()] = true;
     };
     // The initial edge direction (v1 -> v2) is arbitrary: walk from v2 first.
     walk(sv2, &mut verts, visited);
@@ -242,7 +241,8 @@ fn tridiagonal_solve_cyclic(a: &[f32], b: &[f32], c: &[f32], d: &[f32], x: &mut 
     // Solve for the partial solution and the adjustment vector (`tmp` is both the right-hand
     // side and the result).
     let rhs = tmp.clone();
-    let success = tridiagonal_solve(a, &b2, c, &rhs, &mut tmp) && tridiagonal_solve(a, &b2, c, d, x);
+    let success =
+        tridiagonal_solve(a, &b2, c, &rhs, &mut tmp) && tridiagonal_solve(a, &b2, c, d, x);
     if success {
         let coeff = (x[0] + x[count - 1]) / (1.0 + tmp[0] + tmp[count - 1]);
         for i in 0..count {
@@ -260,10 +260,11 @@ fn calculate_splines_axis(distances: &[f32], coords: &[f32], is_closed: bool) ->
     }
     let num_segments = if is_closed { n } else { n - 1 };
     let mut segment_length = vec![0.0f32; num_segments];
-    for i in 0..num_segments {
-        segment_length[i] = distances[i + 1] - distances[i];
-        if !(segment_length[i] > 0.0) {
-            segment_length[i] = SPACE_EPSILON;
+    for (i, sl) in segment_length.iter_mut().enumerate() {
+        *sl = distances[i + 1] - distances[i];
+        // `!(segment_length[i] > 0.0f)`: NaN too.
+        if (*sl).partial_cmp(&0.0) != Some(std::cmp::Ordering::Greater) {
+            *sl = SPACE_EPSILON;
         }
     }
     // Second derivative coefficients; zero at the ends of a natural spline.
@@ -308,7 +309,8 @@ fn calculate_splines_axis(distances: &[f32], coords: &[f32], is_closed: bool) ->
             let sl = segment_length[i];
             SplineCoeffs {
                 a: coords[i],
-                b: ((coords[i_next] - coords[i]) / sl) - (sl * (c_vals[i_next] + 2.0 * c_vals[i])) / 3.0,
+                b: ((coords[i_next] - coords[i]) / sl)
+                    - (sl * (c_vals[i_next] + 2.0 * c_vals[i])) / 3.0,
                 c: c_vals[i],
                 d: (c_vals[i_next] - c_vals[i]) / (3.0 * sl),
                 x: distances[i],

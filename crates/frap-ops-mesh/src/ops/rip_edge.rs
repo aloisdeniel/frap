@@ -23,7 +23,7 @@ use frap_spec_ops_mesh::mesh;
 pub(crate) mod math;
 
 use math::{
-    add3, angle_normalized_v3v3, closest_to_line_v3, normalize3, normalize_v3, sub3,
+    add3, angle_normalized_v3v3, closest_to_line_v3, normalize_v3, normalize3, sub3,
     transform_point,
 };
 

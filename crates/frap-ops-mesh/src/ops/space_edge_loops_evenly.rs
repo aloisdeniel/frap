@@ -32,7 +32,8 @@ fn has_connected_selected_edges(bm: &BMesh) -> bool {
             .count()
     };
     bm.edges.iter().any(|(_, e)| {
-        e.flag.contains(ElemFlag::SELECT) && (sel_edges_at(e.v[0]) >= 2 || sel_edges_at(e.v[1]) >= 2)
+        e.flag.contains(ElemFlag::SELECT)
+            && (sel_edges_at(e.v[0]) >= 2 || sel_edges_at(e.v[1]) >= 2)
     })
 }
 

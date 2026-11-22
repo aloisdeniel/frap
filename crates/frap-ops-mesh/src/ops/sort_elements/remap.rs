@@ -47,9 +47,7 @@ fn permute_cd(cd: &mut CustomData, src: &[usize]) {
     cd.ensure_slots(src.len());
     for l in &mut cd.layers {
         let len = l.data.len();
-        let idx: Vec<usize> = (0..len)
-            .map(|d| src.get(d).copied().unwrap_or(d))
-            .collect();
+        let idx: Vec<usize> = (0..len).map(|d| src.get(d).copied().unwrap_or(d)).collect();
         l.data = l.data.gather_with_default(&idx, len);
     }
     if let Some(dv) = &mut cd.deform {

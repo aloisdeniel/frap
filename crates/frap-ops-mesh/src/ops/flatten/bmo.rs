@@ -14,7 +14,9 @@
 //! faces are grouped by shared vertices and flattened the same way. Locked axes keep their
 //! coordinate; `factor` blends between the original and the projected position.
 
-use frap_bmesh::ops::contextual_create::construct::{face_calc_area, verts_calc_normal_from_cloud_ex};
+use frap_bmesh::ops::contextual_create::construct::{
+    face_calc_area, verts_calc_normal_from_cloud_ex,
+};
 use frap_bmesh::{BMElem, BMesh, EdgeId, ElemFlag, FaceId, VertId};
 
 /// `FlattenMethod`.

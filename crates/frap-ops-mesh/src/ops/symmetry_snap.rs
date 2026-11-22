@@ -12,7 +12,8 @@
 //! mirror of that; a vertex that is its own mirror is put on the axis with `use_center`.
 //! Reports `N already symmetrical, M pairs mirrored` (INFO), with `, K failed` (WARNING) when
 //! a selected vertex had no mirror. A mesh whose active shape key is locked is skipped with
-//! an ERROR. `CANCELLED` when no mesh was processed.
+//! an ERROR (a `RuntimeError` when no other mesh was processed). `CANCELLED` when no mesh was
+//! processed.
 
 use frap_bmesh::{ElemFlag, ElemTypes, VertId};
 use frap_op::operator;
@@ -44,16 +45,15 @@ fn exec(cx: &mut OpCtx, p: mesh::SymmetrySnap) -> OpResult {
     let axis_sign = axis != axis_dir;
 
     let (mut totvertfound, mut totvertmirr, mut totvertfail, mut totobjects) = (0, 0, 0, 0);
+    let mut locked_msg = String::new();
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         if edbm::read(cx, me, edbm::sel_counts).unwrap_or_default().0 == 0 {
             continue;
         }
         if active_block_locked(cx, ob) {
             let name = cx.main().objects.name_of(ob).unwrap_or_default().to_owned();
-            cx.report(
-                ReportType::Error,
-                format!("The active shape key of {name} is locked"),
-            );
+            locked_msg = format!("The active shape key of {name} is locked");
+            cx.report(ReportType::Error, locked_msg.clone());
             continue;
         }
         totobjects += 1;
@@ -148,6 +148,10 @@ fn exec(cx: &mut OpCtx, p: mesh::SymmetrySnap) -> OpResult {
                 totvertmirr
             ),
         );
+    }
+    if totobjects == 0 && !locked_msg.is_empty() {
+        // Blender's error report makes the call raise.
+        return Err(OpError::Runtime(locked_msg));
     }
     Ok(if totobjects > 0 {
         OpStatus::Finished

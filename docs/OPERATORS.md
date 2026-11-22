@@ -150,18 +150,18 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `mesh.colors_reverse` | M8 | P2 | WP 8.3.2 |
 | [ ] | `mesh.uvs_rotate` | M8 | P2 | WP 8.3.2 |
 | [ ] | `mesh.uvs_reverse` | M8 | P2 | WP 8.3.2 |
-| [ ] | `mesh.sort_elements` | M8 | P2 | WP 8.3.3 |
-| [ ] | `mesh.reorder_vertices_spatial` | M8 | P2 | WP 8.3.3 |
-| [ ] | `mesh.rip` | M8 | P2 | headless-extended: explicit direction; WP 8.3.3 |
-| [ ] | `mesh.rip_move` | M8 | P2 | macro; WP 8.3.3 |
-| [ ] | `mesh.rip_edge` | M8 | P2 | WP 8.3.3 |
-| [ ] | `mesh.rip_edge_move` | M8 | P2 | macro; WP 8.3.3 |
-| [ ] | `mesh.vertices_smooth_laplacian` | M8 | P2 | WP 8.3.3 |
-| [ ] | `mesh.symmetry_snap` | M8 | P2 | WP 8.3.3 |
-| [ ] | `mesh.face_make_planar` | M8 | P2 | WP 8.3.3 |
-| [ ] | `mesh.circularize` | M8 | P2 | new in 5.x; WP 8.3.3 |
-| [ ] | `mesh.flatten` | M8 | P2 | new in 5.x; WP 8.3.3 |
-| [ ] | `mesh.space_edge_loops_evenly` | M8 | P2 | new in 5.x; WP 8.3.3 |
+| [x] | `mesh.sort_elements` | M8 | P2 | every type incl. RANDOMIZE per seed and `reverse`, libc `qsort` tie order; WP 8.3.3 (goldens `edit/tools_m8/sort_elements*`) |
+| [x] | `mesh.reorder_vertices_spatial` | M8 | P2 | sculpt-BVH face partition (libc++ `std::partition`), material split; WP 8.3.3 (golden `edit/tools_m8/reorder_vertices_spatial`) |
+| [x] | `mesh.rip` | M8 | P2 | headless-extended (D-150): the mouse is the 3D cursor in the factory Layout 3D View; WP 8.3.3 (goldens `edit/tools_m8/rip_edges`, `rip_verts`) |
+| [x] | `mesh.rip_move` | M8 | P2 | macro; headless-extended (D-150); WP 8.3.3 |
+| [x] | `mesh.rip_edge` | M8 | P2 | `location`/`direction` ray (exec); WP 8.3.3 (golden `edit/tools_m8/rip_edge`) |
+| [x] | `mesh.rip_edge_move` | M8 | P2 | macro; WP 8.3.3 |
+| [x] | `mesh.vertices_smooth_laplacian` | M8 | P2 | T2 (sparse least squares, faer LU); WP 8.3.3 (golden `edit/tools_m8/vertices_smooth_laplacian`) |
+| [x] | `mesh.symmetry_snap` | M8 | P2 | KD-tree / topology mirror cache; WP 8.3.3 (golden `edit/tools_m8/symmetry_snap`) |
+| [x] | `mesh.face_make_planar` | M8 | P2 | T2 (iterative); WP 8.3.3 (golden `edit/tools_m8/face_make_planar`) |
+| [x] | `mesh.circularize` | M8 | P2 | new in 5.x; WP 8.3.3 (golden `edit/tools_m8/circularize`) |
+| [x] | `mesh.flatten` | M8 | P2 | new in 5.x; WP 8.3.3 (golden `edit/tools_m8/flatten`) |
+| [x] | `mesh.space_edge_loops_evenly` | M8 | P2 | new in 5.x; WP 8.3.3 (golden `edit/tools_m8/space_edge_loops_evenly`) |
 | — | `mesh.knife_project` | OUT | — | view-dependent |
 | — | `mesh.knife_tool` | OUT | — | interactive |
 | — | `mesh.dupli_extrude_cursor` | OUT | — | interactive |

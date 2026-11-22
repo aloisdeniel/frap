@@ -38,10 +38,8 @@ fn mirror_axes(cx: &OpCtx, ob: frap_rna::IdRef<frap_rna::ObjectId>) -> [bool; 3]
             if m.mirror_object.is_some() || !m.use_mirror_merge {
                 continue;
             }
-            for k in 0..3 {
-                if m.use_axis[k] {
-                    axis[k] = true;
-                }
+            for (a, on) in axis.iter_mut().zip(m.use_axis) {
+                *a |= on;
             }
         }
     }

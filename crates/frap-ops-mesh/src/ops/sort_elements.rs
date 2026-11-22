@@ -58,7 +58,8 @@ pub(crate) fn mul_m4_m4m4(a: &[[f32; 4]; 4], b: &[[f32; 4]; 4]) -> [[f32; 4]; 4]
     let mut r = [[0.0f32; 4]; 4];
     for i in 0..4 {
         for k in 0..4 {
-            r[i][k] = (b[i][0] * a[0][k] + b[i][1] * a[1][k]) + (b[i][2] * a[2][k] + b[i][3] * a[3][k]);
+            r[i][k] =
+                (b[i][0] * a[0][k] + b[i][1] * a[1][k]) + (b[i][2] * a[2][k] + b[i][3] * a[3][k]);
         }
     }
     r
@@ -144,14 +145,14 @@ fn sort_maps(
             return;
         }
         let mut pb = vec![false; tot[j]];
-        for i in 0..tot[j] {
+        for (i, p) in pb.iter_mut().enumerate() {
             if e.sel[j][i] {
                 sblock[j].push(ElemSort {
                     srt: key(i),
                     org_idx: i as u32,
                 });
             } else {
-                pb[i] = true;
+                *p = true;
             }
         }
         pblock[j] = Some(pb);
@@ -168,7 +169,9 @@ fn sort_maps(
         }
         Type::CursorDistance => {
             for j in 0..3 {
-                keyed(j, &mut |i| len_squared_v3v3(cursor_local, e.co[j][i]) * fact);
+                keyed(j, &mut |i| {
+                    len_squared_v3v3(cursor_local, e.co[j][i]) * fact
+                });
             }
         }
         Type::Material => {
@@ -279,8 +282,8 @@ fn exec(cx: &mut OpCtx, p: mesh::SortElements) -> OpResult {
         }
         t
     } else {
-        let Some(me) = poll::edit_object(&cx.ctx())
-            .and_then(|(_, o)| o.data?.typed::<frap_rna::MeshId>())
+        let Some(me) =
+            poll::edit_object(&cx.ctx()).and_then(|(_, o)| o.data?.typed::<frap_rna::MeshId>())
         else {
             return Ok(OpStatus::Cancelled);
         };
@@ -330,8 +333,8 @@ fn exec(cx: &mut OpCtx, p: mesh::SortElements) -> OpResult {
         let cursor_local = mul_v3_m4v3(&obmat.inverse().to_cols_array_2d(), cursor);
         let obmat = obmat.to_cols_array_2d();
         let maps = {
-            let elems = super::split::edbm::read(cx, me, |bm| gather(bm, elem_types))
-                .expect("edit mesh");
+            let elems =
+                super::split::edbm::read(cx, me, |bm| gather(bm, elem_types)).expect("edit mesh");
             sort_maps(
                 &elems,
                 action,
@@ -346,7 +349,12 @@ fn exec(cx: &mut OpCtx, p: mesh::SortElements) -> OpResult {
             continue;
         }
         let bm = cx.bmesh_mut(me)?;
-        remap::mesh_remap(bm, maps[0].as_deref(), maps[1].as_deref(), maps[2].as_deref());
+        remap::mesh_remap(
+            bm,
+            maps[0].as_deref(),
+            maps[1].as_deref(),
+            maps[2].as_deref(),
+        );
     }
     Ok(OpStatus::Finished)
 }

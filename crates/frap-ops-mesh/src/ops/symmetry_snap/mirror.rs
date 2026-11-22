@@ -97,10 +97,7 @@ impl SpatialTable {
             })
             .collect();
         let root = kd_balance(&mut nodes, 0, 0);
-        SpatialTable {
-            nodes,
-            root,
-        }
+        SpatialTable { nodes, root }
     }
 
     /// `kdtree_find_nearest`: the vertex nearest to `co` and its distance. A node replaces the
@@ -266,7 +263,12 @@ mod tests {
 
     #[test]
     fn spatial_cache_pairs_mirrored_vertices_on_any_axis() {
-        let p = [[0.0, 1.0, 0.0], [0.0, -1.0, 0.0], [0.5, 0.0, 0.0], [0.0, 0.01, 0.0]];
+        let p = [
+            [0.0, 1.0, 0.0],
+            [0.0, -1.0, 0.0],
+            [0.5, 0.0, 0.0],
+            [0.0, 0.01, 0.0],
+        ];
         let sel = [true; 4];
         let m = mirror_cache(&p, &[], &sel, 1, false, 0.05);
         assert_eq!(m[0], Some(1));

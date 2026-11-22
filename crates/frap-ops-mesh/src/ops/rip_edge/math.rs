@@ -14,9 +14,6 @@ pub(crate) fn sub3(a: V3, b: V3) -> V3 {
 pub(crate) fn add3(a: V3, b: V3) -> V3 {
     [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
 }
-pub(crate) fn scale3(a: V3, f: f32) -> V3 {
-    [a[0] * f, a[1] * f, a[2] * f]
-}
 pub(crate) fn dot3(a: V3, b: V3) -> f32 {
     a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }
@@ -63,15 +60,6 @@ pub(crate) fn interp_v3_v3v3(a: V3, b: V3, t: f32) -> V3 {
         s * a[2] + t * b[2],
     ]
 }
-/// `math::interpolate(a, b, t)` for `float3`: `a * (1 - t) + b * t`.
-pub(crate) fn interpolate3(a: V3, b: V3, t: f32) -> V3 {
-    [
-        a[0] * (1.0 - t) + b[0] * t,
-        a[1] * (1.0 - t) + b[1] * t,
-        a[2] * (1.0 - t) + b[2] * t,
-    ]
-}
-
 /// `normalize_v3(v)` (`normalize_v3_v3_length`: `v * (1 / |v|)`, zero below 1e-35 squared
 /// length); returns the vector and its length.
 pub(crate) fn normalize_v3(a: V3) -> (V3, f32) {

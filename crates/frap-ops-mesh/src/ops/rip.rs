@@ -18,9 +18,10 @@
 //! - **edges** selected: the selected edges are split (`BM_mesh_edgesplit`, extended by one
 //!   edge at the ends of a selection), and of each contiguous run of edges the side facing
 //!   away from the mouse is deselected.
+//!
 //! With `use_fill` the opened gap is closed with new faces (triangles and quads copying the
 //! neighbouring corners). Custom normals are kept as vectors and re-encoded in the new corner
-//! spaces. Errors (`CANCELLED`): `Cannot rip faces` (faces selected), `Cannot rip multiple
+//! spaces. Errors (`RuntimeError`, as Blender's ERROR report raises): `Cannot rip faces` (faces selected), `Cannot rip multiple
 //! disconnected vertices` (several vertices without edges), `Cannot rip non-manifold vertices
 //! or edges` (nothing ripped); nothing selected cancels without a report.
 
@@ -38,7 +39,11 @@ pub(crate) mod view;
 use core::{ClnorKeep, RipView};
 use view::{Projection, mouse_from_cursor};
 
-#[operator(poll = poll::EDITMESH_VIEW3D, tier = T1)]
+#[operator(
+    poll = poll::EDITMESH_VIEW3D,
+    tier = T1,
+    support = HeadlessExtended("headless-extended (deviations D-150): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over the 3D cursor in the factory Layout 3D View (scene.cursor.location projected into the 1574x954 WINDOW region): put the cursor on the side to rip towards")
+)]
 fn exec(cx: &mut OpCtx, p: mesh::Rip) -> OpResult {
     let do_fill = p.use_fill.value;
     let (viewmat, cursor) = {
@@ -95,7 +100,7 @@ fn exec(cx: &mut OpCtx, p: mesh::Rip) -> OpResult {
         if !finished {
             continue;
         }
-        normals.from_vector_layer(bm);
+        normals.restore(bm);
         if bm.selected_counts().0 == 0 {
             continue;
         }
@@ -115,6 +120,6 @@ fn exec(cx: &mut OpCtx, p: mesh::Rip) -> OpResult {
     } else {
         return Ok(OpStatus::Finished);
     };
-    cx.report(ReportType::Error, error);
-    Ok(OpStatus::Cancelled)
+    // Blender's ERROR report makes the call raise (nothing observable was changed).
+    Err(OpError::Runtime(error.into()))
 }

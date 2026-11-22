@@ -1,7 +1,8 @@
 # WP 8.3.3: mesh.reorder_vertices_spatial: the default cube with three materials (the leaf
-# is split by material index), a 60x60 grid stretched along X (3600 faces: split along the dominant axis of
-# the face centres, then by material) with its UV map and a vertex group, and the call in
-# Edit Mode (the mesh is rewritten from the edit BMesh when Edit Mode is left).
+# is split by material index), a 60x60 grid stretched along X (3600 faces: split along the
+# dominant axis of the face centres, then by material) with its UV map and a vertex group,
+# and the call in Edit Mode (the mesh is rewritten from the edit BMesh when Edit Mode is
+# left); without an active mesh the poll fails.
 # golden: startup=factory compare=objects,context,mesh:Cube,mesh:Grid tier=T1
 import bpy
 bpy.ops.object.material_slot_add()

@@ -62,9 +62,9 @@ fn negative_bounds() -> Bounds {
 }
 
 fn min_max(p: [f32; 3], b: &mut Bounds) {
-    for k in 0..3 {
-        b.0[k] = b.0[k].min(p[k]);
-        b.1[k] = b.1[k].max(p[k]);
+    for (k, &c) in p.iter().enumerate() {
+        b.0[k] = b.0[k].min(c);
+        b.1[k] = b.1[k].max(c);
     }
 }
 
@@ -162,7 +162,15 @@ fn partition_faces_recursively(
         std_partition(faces, |&f| material[f as usize] == first)
     };
     let (front, back) = faces.split_at_mut(split);
-    partition_faces_recursively(centers, front, groups, children_start, depth + 1, None, material);
+    partition_faces_recursively(
+        centers,
+        front,
+        groups,
+        children_start,
+        depth + 1,
+        None,
+        material,
+    );
     partition_faces_recursively(
         centers,
         back,
@@ -234,7 +242,15 @@ fn compute_local_mesh_groups(mesh: &Mesh) -> Vec<Group> {
     };
     let mut prim: Vec<i32> = (0..faces_num as i32).collect();
     let mut groups = vec![Group::default()];
-    partition_faces_recursively(&centers, &mut prim, &mut groups, 0, 0, Some(total), &material);
+    partition_faces_recursively(
+        &centers,
+        &mut prim,
+        &mut groups,
+        0,
+        0,
+        Some(total),
+        &material,
+    );
     build_vertex_groups_for_leaves(mesh, &mut groups);
     groups
 }
@@ -277,7 +293,12 @@ pub(crate) fn apply_spatial_organization(mesh: &mut Mesh) {
     let edges: Vec<[i32; 2]> = mesh
         .edges()
         .iter()
-        .map(|e| [vert_reverse_map[e[0] as usize], vert_reverse_map[e[1] as usize]])
+        .map(|e| {
+            [
+                vert_reverse_map[e[0] as usize],
+                vert_reverse_map[e[1] as usize],
+            ]
+        })
         .collect();
     let old_offsets = mesh.face_offsets().to_vec();
     let corner_verts = mesh.corner_verts().to_vec();
@@ -302,12 +323,12 @@ pub(crate) fn apply_spatial_organization(mesh: &mut Mesh) {
         let dverts = mesh.deform_verts_mut();
         for g in 0..groups_num as u32 {
             let weight_of = |dv: &frap_mesh::DeformVert| {
-                dv.weights
-                    .iter()
-                    .find(|w| w.0 == g)
-                    .map_or(0.0, |w| w.1)
+                dv.weights.iter().find(|w| w.0 == g).map_or(0.0, |w| w.1)
             };
-            let values: Vec<f32> = new_vert_order.iter().map(|&o| weight_of(&dverts[o])).collect();
+            let values: Vec<f32> = new_vert_order
+                .iter()
+                .map(|&o| weight_of(&dverts[o]))
+                .collect();
             for (dv, value) in dverts.iter_mut().zip(values) {
                 if let Some(w) = dv.weights.iter_mut().find(|w| w.0 == g) {
                     w.1 = value;

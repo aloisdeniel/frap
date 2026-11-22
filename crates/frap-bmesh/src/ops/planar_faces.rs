@@ -141,8 +141,8 @@ fn run(bm: &mut BMesh, i: &PlanarFacesIn) {
                 // `interp_v3_v3v3(va.co, va.co, co, 1.0f / float(va.co_tot))`.
                 let t = 1.0 / va.1 as f32;
                 let s = 1.0 - t;
-                for k in 0..3 {
-                    va.0[k] = s * va.0[k] + t * co[k];
+                for (a, c) in va.0.iter_mut().zip(co) {
+                    *a = s * *a + t * c;
                 }
             }
         }
@@ -183,10 +183,15 @@ mod tests {
     #[test]
     fn weighted_centre_of_a_square_is_its_middle() {
         let mut bm = BMesh::new();
-        let vs: Vec<VertId> = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.0, 2.0, 0.0], [0.0, 2.0, 0.0]]
-            .into_iter()
-            .map(|co| bm.vert_create(co, None, crate::CreateFlag::empty()))
-            .collect();
+        let vs: Vec<VertId> = [
+            [0.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+            [2.0, 2.0, 0.0],
+            [0.0, 2.0, 0.0],
+        ]
+        .into_iter()
+        .map(|co| bm.vert_create(co, None, crate::CreateFlag::empty()))
+        .collect();
         let f = bm
             .face_create_verts(&vs, None, crate::CreateFlag::empty(), true)
             .expect("face");

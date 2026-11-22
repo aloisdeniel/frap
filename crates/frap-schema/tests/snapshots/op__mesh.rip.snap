@@ -1,0 +1,273 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.rip",
+  "bl_idname": "MESH_OT_rip",
+  "label": "Rip",
+  "description": "Disconnect vertices or edges from connected geometry",
+  "bl_options": [
+    "DEPENDS_ON_CURSOR",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "mirror",
+      "name": "Mirror Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_edit",
+      "name": "Proportional Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "proportional_edit_falloff",
+      "name": "Proportional Falloff",
+      "description": "Falloff type for proportional editing mode",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SMOOTH",
+      "enum_items": [
+        {
+          "identifier": "SMOOTH",
+          "name": "Smooth",
+          "description": "Smooth falloff",
+          "value": 0
+        },
+        {
+          "identifier": "SPHERE",
+          "name": "Sphere",
+          "description": "Spherical falloff",
+          "value": 1
+        },
+        {
+          "identifier": "ROOT",
+          "name": "Root",
+          "description": "Root falloff",
+          "value": 2
+        },
+        {
+          "identifier": "INVERSE_SQUARE",
+          "name": "Inverse Square",
+          "description": "Inverse Square falloff",
+          "value": 7
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Sharp falloff",
+          "value": 3
+        },
+        {
+          "identifier": "LINEAR",
+          "name": "Linear",
+          "description": "Linear falloff",
+          "value": 4
+        },
+        {
+          "identifier": "CONSTANT",
+          "name": "Constant",
+          "description": "Constant falloff",
+          "value": 5
+        },
+        {
+          "identifier": "RANDOM",
+          "name": "Random",
+          "description": "Random falloff",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "proportional_size",
+      "name": "Proportional Size",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.000001,
+      "hard_max": 1000000000000,
+      "soft_min": 0.001,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_connected",
+      "name": "Connected",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_projected",
+      "name": "Projected (2D)",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "release_confirm",
+      "name": "Confirm on Release",
+      "description": "Always confirm operation when releasing button",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_accurate",
+      "name": "Accurate",
+      "description": "Use accurate transformation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_fill",
+      "name": "Fill",
+      "description": "Fill the ripped region",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": "headless-extended (deviations D-150): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over the 3D cursor in the factory Layout 3D View (scene.cursor.location projected into the 1574x954 WINDOW region): put the cursor on the side to rip towards",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

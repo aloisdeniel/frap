@@ -16,7 +16,7 @@ use frap_bmesh::{BMElem, BMesh, CreateFlag, EdgeId, ElemFlag, LoopId, VertId};
 
 use super::super::rip_edge::math::{
     V2, V3, add3, cross3, dist_squared_to_line_segment_v2, dot3, interp_v2_v2v2, len_v2v2,
-    len_v3v3, midpoint3, mid_v3_v3v3, normalize_v2_length, normalize_v3, sub2, sub3,
+    len_v3v3, mid_v3_v3v3, midpoint3, normalize_v2_length, normalize_v3, sub2, sub3,
 };
 use super::kernel::{face_loop_separate_multi, face_loop_separate_multi_isolated};
 use super::view::Projection;
@@ -343,7 +343,12 @@ fn tagged_loop_pairs_do_fill_faces(bm: &mut BMesh, pairs: &[LoopPair], normals: 
         let verts: Vec<VertId> = match v_shared {
             None => {
                 // Quad.
-                let mut fv = [bm.edge(e0).v[0], bm.edge(e1).v[0], bm.edge(e1).v[1], bm.edge(e0).v[1]];
+                let mut fv = [
+                    bm.edge(e0).v[0],
+                    bm.edge(e1).v[0],
+                    bm.edge(e1).v[1],
+                    bm.edge(e0).v[1],
+                ];
                 if ulp.flip0 {
                     fv.swap(0, 3);
                 }
@@ -411,7 +416,7 @@ impl ClnorKeep {
             v[dst.slot()] = v.get(src.slot()).copied().flatten();
         }
     }
-    pub(crate) fn from_vector_layer(self, bm: &mut BMesh) {
+    pub(crate) fn restore(self, bm: &mut BMesh) {
         let Some(vecs) = self.vecs else {
             return;
         };
@@ -431,7 +436,12 @@ impl ClnorKeep {
 // ------------------------------------------------------------------------- vertex rip
 
 /// `edbm_rip_invoke__vert`: rip when one vertex is selected.
-pub(crate) fn rip_vert(bm: &mut BMesh, rv: &RipView, do_fill: bool, normals: &mut ClnorKeep) -> Finished {
+pub(crate) fn rip_vert(
+    bm: &mut BMesh,
+    rv: &RipView,
+    do_fill: bool,
+    normals: &mut ClnorKeep,
+) -> Finished {
     let totvert_orig = bm.verts_num();
     // Find the selected vertex: the active history entry first.
     let ese = match bm.select_history_active() {
@@ -702,14 +712,11 @@ fn ripsel_looptag_helper(bm: &BMesh) -> (LoopUid, Vec<(LoopId, LoopId)>) {
     let mut uid = LoopUid(vec![INVALID_UID; bm.loops.capacity()]);
     let mut id = totedge;
     let mut pairs = Vec::new();
-    loop {
-        let Some(e_first) = bm
-            .edge_ids()
-            .into_iter()
-            .find(|&e| visit_possible(bm, e) && !visit_done(bm, &uid, e))
-        else {
-            break;
-        };
+    while let Some(e_first) = bm
+        .edge_ids()
+        .into_iter()
+        .find(|&e| visit_possible(bm, e) && !visit_done(bm, &uid, e))
+    {
         let mut v_step = bm.edge(e_first).v[0];
         let mut e_step = None;
         let uid_start = id;
@@ -806,7 +813,12 @@ fn select_mode_clean_edge(bm: &mut BMesh) {
 }
 
 /// `edbm_rip_invoke__edge`: the main edge ripping function.
-pub(crate) fn rip_edge(bm: &mut BMesh, rv: &RipView, do_fill: bool, normals: &mut ClnorKeep) -> Finished {
+pub(crate) fn rip_edge(
+    bm: &mut BMesh,
+    rv: &RipView,
+    do_fill: bool,
+    normals: &mut ClnorKeep,
+) -> Finished {
     let (totvert_orig, totedge_orig) = (bm.verts_num(), bm.edges_num());
     // Runs on the original selection, before the tags are changed.
     let (uid, eloop_pairs) = ripsel_looptag_helper(bm);
@@ -847,8 +859,7 @@ pub(crate) fn rip_edge(bm: &mut BMesh, rv: &RipView, do_fill: bool, normals: &mu
             let l_b = bm.lp(l_a).radial_next;
             // The face to follow: the shortest fan, so the edge does not point away from the
             // mouse with more than 4 edges.
-            let mut l = if edge_side_measure(bm, eb, l_a, rv) < edge_side_measure(bm, eb, l_b, rv)
-            {
+            let mut l = if edge_side_measure(bm, eb, l_a, rv) < edge_side_measure(bm, eb, l_b, rv) {
                 l_a
             } else {
                 l_b

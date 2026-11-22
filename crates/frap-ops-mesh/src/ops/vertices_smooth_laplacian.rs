@@ -8,8 +8,8 @@
 //! For every mesh in Edit Mode with a selected vertex, `repeat` times (0 counts as 1):
 //! `bmesh.ops.smooth_laplacian_vert` on the selected visible vertices
 //! (`frap_bmesh::ops::smooth_laplacian`). A mesh whose active shape key is locked is skipped
-//! with the ERROR `The active shape key of <object> is locked`. Nothing selected anywhere (and
-//! nothing locked): WARNING `No selected vertex`; `CANCELLED` when no mesh was smoothed. frap
+//! with the ERROR `The active shape key of <object> is locked` (a `RuntimeError` when no mesh
+//! was smoothed). Nothing selected anywhere: WARNING `No selected vertex` and `CANCELLED`. frap
 //! meshes have no X-mirror editing (`use_mirror_x`), so Blender's mirror step never runs.
 //! The linear solve is `faer`'s sparse LU instead of Eigen's `SparseLU` (same normal
 //! equations in double precision), hence tier T2.
@@ -30,16 +30,15 @@ fn exec(cx: &mut OpCtx, p: mesh::VerticesSmoothLaplacian) -> OpResult {
         p.repeat.value
     };
     let (mut tot_selected, mut tot_locked) = (0, 0);
+    let mut locked_msg = String::new();
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         if edbm::read(cx, me, edbm::sel_counts).unwrap_or_default().0 == 0 {
             continue;
         }
         if active_block_locked(cx, ob) {
             let name = cx.main().objects.name_of(ob).unwrap_or_default().to_owned();
-            cx.report(
-                ReportType::Error,
-                format!("The active shape key of {name} is locked"),
-            );
+            locked_msg = format!("The active shape key of {name} is locked");
+            cx.report(ReportType::Error, locked_msg.clone());
             tot_locked += 1;
             continue;
         }
@@ -66,6 +65,10 @@ fn exec(cx: &mut OpCtx, p: mesh::VerticesSmoothLaplacian) -> OpResult {
     }
     if tot_selected == 0 && tot_locked == 0 {
         cx.report(ReportType::Warning, "No selected vertex");
+    }
+    if tot_selected == 0 && tot_locked > 0 {
+        // Blender's error report makes the call raise.
+        return Err(OpError::Runtime(locked_msg));
     }
     Ok(if tot_selected > 0 {
         OpStatus::Finished
