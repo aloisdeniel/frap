@@ -93,16 +93,7 @@ jobs:
         env:
           FRAP_WGPU_BACKEND: ${{ matrix.backend }}
           FRAP_DIAG: "1"
-        run: cargo test --locked -p frap-render --lib diag_ -- --nocapture
-      - name: DIAG kept renders
-        continue-on-error: true
-        env:
-          FRAP_WGPU_BACKEND: ${{ matrix.backend }}
-          FRAP_RENDER_KEEP: ${{ github.workspace }}/keep
-        run: |
-          FRAP_RENDER_CASE=alpha_dithered cargo test --locked -p frap-ops-render-tests --test eevee_features -- --nocapture || true
-          FRAP_RENDER_CASE=alpha_blended cargo test --locked -p frap-ops-render-tests --test eevee_features -- --nocapture || true
-          FRAP_RENDER_FILTER=alpha_dithered_blended cargo test --locked -p frap-ops-render-tests --test eevee_scenes -- --nocapture || true
+        run: cargo test --locked -p frap-render --lib diag_shadow_lookup -- --nocapture --test-threads=1
       - name: DIAG upload
         if: always()
         uses: actions/upload-artifact@v4

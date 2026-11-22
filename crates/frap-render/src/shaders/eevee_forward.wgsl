@@ -1258,6 +1258,39 @@ struct FragOut {
     @location(0) color: vec4<f32>,
 };
 
+// DIAG (temporary): the first light's cube-face lookup as a colour.
+const DIAG_SHADOW: bool = false;
+fn diag_shadow(P: vec3<f32>, Ng: vec3<f32>) -> vec4<f32> {
+    let l = lights[0];
+    let lv = light_vector_get(l, false, P);
+    let L = lv.L;
+    let first = l.ints.z;
+    let radius = max(l.shadow_params.x, 0.5);
+    let n_off = select(-Ng, Ng, dot(Ng, L) >= 0.0);
+    let d = P - l.shadow_origin.xyz;
+    let dist = length(d);
+    let Po = P + n_off * l.shadow_origin.w * dist * 1.5 * radius;
+    let dd = Po - l.shadow_origin.xyz;
+    let a = abs(dd);
+    var face = 0u;
+    if (a.x >= a.y && a.x >= a.z) {
+        face = select(1u, 0u, dd.x >= 0.0);
+    } else if (a.y >= a.z) {
+        face = select(3u, 2u, dd.y >= 0.0);
+    } else {
+        face = select(5u, 4u, dd.z >= 0.0);
+    }
+    let layer = first + face;
+    let c = shadow_mats[layer] * vec4<f32>(Po, 1.0);
+    let n = c.xyz / c.w;
+    let uv = vec2<f32>(n.x * 0.5 + 0.5, 0.5 - n.y * 0.5);
+    let size = textureDimensions(shadow_tx).x;
+    let texel = vec2<i32>(clamp(uv, vec2<f32>(0.0), vec2<f32>(0.9999)) * f32(size));
+    let stored = textureLoad(shadow_tx, texel, i32(layer), 0);
+    let pcf = shadow_eval(l, P, Ng, L);
+    return vec4<f32>(f32(face) * 10.0 + pcf, n.z * 1e4, stored * 1e4, uv.x * 10.0 + uv.y);
+}
+
 // Set by `shade` for a fragment to discard; `fs_forward` discards at its very end (WP 5.5).
 // A `discard` before the shading lets Metal's compiler sink the position derivatives past it,
 // where the quad's discarded lanes no longer contribute: `Ng` (and everything lit with it)
@@ -1325,6 +1358,9 @@ fn shade(vin: VertexOut, front_facing: bool) -> vec4<f32> {
         return vec4<f32>(s.base_color * alpha, alpha);
     }
 
+    if (DIAG_SHADOW) {
+        return diag_shadow(v.P, Ng);
+    }
     let V = v.V;
     let c = principled(s, V, (m.ints.w & MAT_MULTISCATTER) != 0u);
     let direct = eval_lights(v.P, Ng, V, c);

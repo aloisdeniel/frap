@@ -818,3 +818,32 @@ fn diag_shadow_faces() {
         }
     }
 }
+
+#[test]
+fn diag_shadow_lookup() {
+    if std::env::var("FRAP_DIAG").is_err() {
+        return;
+    }
+    let Some(gpu) = gpu() else { return };
+    DIAG_SHADER.store(true, std::sync::atomic::Ordering::Relaxed);
+    for off in [[0.0f32, 0.0], [0.1, 0.03]] {
+        let mut e = crate::eevee::Eevee::new();
+        let mut l = light(RLightKind::Point, 100.0, Vec3::new(off[0], off[1], 2.0));
+        l.radius = 0.0;
+        let mut sc = plane_scene(l);
+        sc.settings.taa_render_samples = 1;
+        let f = render(&gpu, &mut e, &sc);
+        eprintln!("DIAG lookup off={off:?} (face*10+pcf, ref*1e4, stored*1e4, uv.x*10+uv.y)");
+        for (label, pts) in [
+            ("+X", [(40u32, 32u32), (48, 32), (56, 32), (62, 30)]),
+            ("-X", [(24, 32), (16, 32), (8, 32), (2, 30)]),
+            ("+Y", [(32, 24), (32, 16), (32, 8), (30, 2)]),
+        ] {
+            for (x, y) in pts {
+                let p = px(&f, x, y);
+                eprintln!("  {label} ({x},{y}): {:.4} {:.5} {:.5} {:.4}", p[0], p[1], p[2], p[3]);
+            }
+        }
+    }
+    DIAG_SHADER.store(false, std::sync::atomic::Ordering::Relaxed);
+}

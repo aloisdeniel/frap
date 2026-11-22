@@ -29,7 +29,8 @@
 //! --nocapture` rewrites the `.frap.png` files from this machine's renders and, when Blender
 //! 5.2 is found, the `.blender.png` files through the golden runner (`=frap` or `=blender`
 //! blesses one side only). `FRAP_RENDER_FILTER=<substring>` restricts the run to the cases
-//! whose name contains it; `FRAP_RENDER_KEEP=<dir>` copies every frap render there.
+//! whose name contains it; `FRAP_RENDER_KEEP=<dir>` copies every frap render there;
+//! `FRAP_SKIP_EEVEE_SCENES=1` skips the renders (ci.yml: gpu.yml runs them).
 
 mod common;
 
@@ -426,6 +427,13 @@ fn scenes_cases_and_fixtures() {
 
 #[test]
 fn eevee_scene_goldens() {
+    // The scene renders are the costliest GPU tests (about 35 minutes on WARP): gpu.yml runs
+    // them on every CI adapter, ci.yml's test job sets `FRAP_SKIP_EEVEE_SCENES=1` so as not to
+    // render them twice (ARCHITECTURE Decision log, M56CI-4).
+    if std::env::var("FRAP_SKIP_EEVEE_SCENES").is_ok_and(|v| v == "1") {
+        eprintln!("SKIP (FRAP_SKIP_EEVEE_SCENES=1): the EEVEE scene goldens run in gpu.yml");
+        return;
+    }
     let repo = Repo::locate();
     let bless = std::env::var("FRAP_RENDER_BLESS").unwrap_or_default();
     let (bless_frap, bless_blender_side) = match bless.as_str() {

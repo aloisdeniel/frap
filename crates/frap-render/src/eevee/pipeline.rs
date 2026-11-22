@@ -537,8 +537,18 @@ pub fn forward_source() -> String {
         ));
     }
     s.push_str("}\n");
+    if DIAG_SHADER.load(std::sync::atomic::Ordering::Relaxed) {
+        s = s.replace(
+            "const DIAG_SHADOW: bool = false;",
+            "const DIAG_SHADOW: bool = true;",
+        );
+    }
     s
 }
+
+/// DIAG (temporary): forward shader outputs the first light's shadow lookup.
+pub(crate) static DIAG_SHADER: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 
 /// Mesh attributes beyond position and normal (the [`GpuCache`] keeps those), per mesh.
 struct MeshAttrs {
