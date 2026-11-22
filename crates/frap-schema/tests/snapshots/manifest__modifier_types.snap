@@ -13,7 +13,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "DATA_TRANSFER",
     "name": "Data Transfer",
     "struct": "DataTransferModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
@@ -62,21 +62,21 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "VERTEX_WEIGHT_EDIT",
     "name": "Vertex Weight Edit",
     "struct": "VertexWeightEditModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
     "identifier": "VERTEX_WEIGHT_MIX",
     "name": "Vertex Weight Mix",
     "struct": "VertexWeightMixModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {
     "identifier": "VERTEX_WEIGHT_PROXIMITY",
     "name": "Vertex Weight Proximity",
     "struct": "VertexWeightProximityModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M8"
   },
   {

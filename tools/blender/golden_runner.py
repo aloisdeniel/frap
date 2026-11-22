@@ -211,6 +211,7 @@ NORMALISE = {
     "D-155": ("cases", "cases only cancel or fail the object selection operators with nothing selected or with extend=True"),
     "D-156": ("cases", "cases do not read users after duplicates_make_real"),
     "D-157": ("cases", "armature/edit_m8/collections keeps its failing assign_to_collection last"),
+    "D-158": ("cases", "op_data_transfer raises transfer errors only from calls that transfer nothing"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -1,0 +1,737 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.data_transfer",
+  "bl_idname": "OBJECT_OT_data_transfer",
+  "label": "Transfer Mesh Data",
+  "description": "Transfer data layer(s) (weights, edge sharp, etc.) from active to selected meshes",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_TYPE(MESH)"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is of type MESH",
+    "matrix": {
+      "plain": "YNYNN",
+      "view3d": "YNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "use_reverse_transfer",
+      "name": "Reverse Transfer",
+      "description": "Transfer from selected objects to active one",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_freeze",
+      "name": "Freeze Operator",
+      "description": "Prevent changes to settings to re-run the operator, handy to change several things at once with heavy geometry",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "data_type",
+      "name": "Data Type",
+      "description": "Which data to transfer",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VGROUP_WEIGHTS",
+      "enum_items": [
+        {
+          "identifier": "VGROUP_WEIGHTS",
+          "name": "Vertex Group(s)",
+          "description": "Transfer active or all vertex groups",
+          "value": 1
+        },
+        {
+          "identifier": "BEVEL_WEIGHT_VERT",
+          "name": "Bevel Weight",
+          "description": "Transfer bevel weights",
+          "value": 8
+        },
+        {
+          "identifier": "COLOR_VERTEX",
+          "name": "Colors",
+          "description": "Color Attributes",
+          "value": 134283264
+        },
+        {
+          "identifier": "SHARP_EDGE",
+          "name": "Sharp",
+          "description": "Transfer sharp mark",
+          "value": 256
+        },
+        {
+          "identifier": "SEAM",
+          "name": "UV Seam",
+          "description": "Transfer UV seam mark",
+          "value": 512
+        },
+        {
+          "identifier": "CREASE",
+          "name": "Subdivision Crease",
+          "description": "Transfer crease values",
+          "value": 1024
+        },
+        {
+          "identifier": "BEVEL_WEIGHT_EDGE",
+          "name": "Bevel Weight",
+          "description": "Transfer bevel weights",
+          "value": 2048
+        },
+        {
+          "identifier": "FREESTYLE_EDGE",
+          "name": "Freestyle Mark",
+          "description": "Transfer Freestyle edge mark",
+          "value": 4096
+        },
+        {
+          "identifier": "CUSTOM_NORMAL",
+          "name": "Custom Normals",
+          "description": "Transfer custom normals",
+          "value": 131072
+        },
+        {
+          "identifier": "COLOR_CORNER",
+          "name": "Colors",
+          "description": "Color Attributes",
+          "value": 805306368
+        },
+        {
+          "identifier": "UV",
+          "name": "UVs",
+          "description": "Transfer UV layers",
+          "value": 16777216
+        },
+        {
+          "identifier": "SMOOTH",
+          "name": "Smooth",
+          "description": "Transfer flat/smooth mark",
+          "value": 33554432
+        },
+        {
+          "identifier": "FREESTYLE_FACE",
+          "name": "Freestyle Mark",
+          "description": "Transfer Freestyle face mark",
+          "value": 67108864
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_create",
+      "name": "Create Data",
+      "description": "Add data layers on destination meshes if needed",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "vert_mapping",
+      "name": "Vertex Mapping",
+      "description": "Method used to map source vertices to destination ones",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NEAREST",
+      "enum_items": [
+        {
+          "identifier": "TOPOLOGY",
+          "name": "Topology",
+          "description": "Copy from identical topology meshes",
+          "value": 251658240
+        },
+        {
+          "identifier": "NEAREST",
+          "name": "Nearest Vertex",
+          "description": "Copy from closest vertex",
+          "value": 16777488
+        },
+        {
+          "identifier": "EDGE_NEAREST",
+          "name": "Nearest Edge Vertex",
+          "description": "Copy from closest vertex of closest edge",
+          "value": 16777504
+        },
+        {
+          "identifier": "EDGEINTERP_NEAREST",
+          "name": "Nearest Edge Interpolated",
+          "description": "Copy from interpolated values of vertices from closest point on closest edge",
+          "value": 16778528
+        },
+        {
+          "identifier": "POLY_NEAREST",
+          "name": "Nearest Face Vertex",
+          "description": "Copy from closest vertex of closest face",
+          "value": 16777600
+        },
+        {
+          "identifier": "POLYINTERP_NEAREST",
+          "name": "Nearest Face Interpolated",
+          "description": "Copy from interpolated values of vertices from closest point on closest face",
+          "value": 16778624
+        },
+        {
+          "identifier": "POLYINTERP_VNORPROJ",
+          "name": "Projected Face Interpolated",
+          "description": "Copy from interpolated values of vertices from point on closest face hit by normal-projection",
+          "value": 16778880
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "edge_mapping",
+      "name": "Edge Mapping",
+      "description": "Method used to map source edges to destination ones",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NEAREST",
+      "enum_items": [
+        {
+          "identifier": "TOPOLOGY",
+          "name": "Topology",
+          "description": "Copy from identical topology meshes",
+          "value": 251658240
+        },
+        {
+          "identifier": "VERT_NEAREST",
+          "name": "Nearest Vertices",
+          "description": "Copy from most similar edge (edge which vertices are the closest of destination edge's ones)",
+          "value": 33554704
+        },
+        {
+          "identifier": "NEAREST",
+          "name": "Nearest Edge",
+          "description": "Copy from closest edge (using midpoints)",
+          "value": 33554720
+        },
+        {
+          "identifier": "POLY_NEAREST",
+          "name": "Nearest Face Edge",
+          "description": "Copy from closest edge of closest face (using midpoints)",
+          "value": 33554816
+        },
+        {
+          "identifier": "EDGEINTERP_VNORPROJ",
+          "name": "Projected Edge Interpolated",
+          "description": "Interpolate all source edges hit by the projection of destination one along its own normal (from vertices)",
+          "value": 33555984
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "loop_mapping",
+      "name": "Face Corner Mapping",
+      "description": "Method used to map source faces' corners to destination ones",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NEAREST_POLYNOR",
+      "enum_items": [
+        {
+          "identifier": "TOPOLOGY",
+          "name": "Topology",
+          "description": "Copy from identical topology meshes",
+          "value": 251658240
+        },
+        {
+          "identifier": "NEAREST_NORMAL",
+          "name": "Nearest Corner and Best Matching Normal",
+          "description": "Copy from nearest corner which has the best matching normal",
+          "value": 67111248
+        },
+        {
+          "identifier": "NEAREST_POLYNOR",
+          "name": "Nearest Corner and Best Matching Face Normal",
+          "description": "Copy from nearest corner which has the face with the best matching normal to destination corner's face one",
+          "value": 67111312
+        },
+        {
+          "identifier": "NEAREST_POLY",
+          "name": "Nearest Corner of Nearest Face",
+          "description": "Copy from nearest corner of nearest face",
+          "value": 67109248
+        },
+        {
+          "identifier": "POLYINTERP_NEAREST",
+          "name": "Nearest Face Interpolated",
+          "description": "Copy from interpolated corners of the nearest source face",
+          "value": 67110272
+        },
+        {
+          "identifier": "POLYINTERP_LNORPROJ",
+          "name": "Projected Face Interpolated",
+          "description": "Copy from interpolated corners of the source face hit by corner normal projection",
+          "value": 67110528
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "poly_mapping",
+      "name": "Face Mapping",
+      "description": "Method used to map source faces to destination ones",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NEAREST",
+      "enum_items": [
+        {
+          "identifier": "TOPOLOGY",
+          "name": "Topology",
+          "description": "Copy from identical topology meshes",
+          "value": 251658240
+        },
+        {
+          "identifier": "NEAREST",
+          "name": "Nearest Face",
+          "description": "Copy from nearest face (using center points)",
+          "value": 134218112
+        },
+        {
+          "identifier": "NORMAL",
+          "name": "Best Normal-Matching",
+          "description": "Copy from source face which normal is the closest to destination one",
+          "value": 134219904
+        },
+        {
+          "identifier": "POLYINTERP_PNORPROJ",
+          "name": "Projected Face Interpolated",
+          "description": "Interpolate all source polygons intersected by the projection of destination one along its own normal",
+          "value": 134219392
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_auto_transform",
+      "name": "Auto Transform",
+      "description": "Automatically compute transformation to get the best possible match between source and destination meshes.\nWarning: Results will never be as good as manual matching of objects",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_object_transform",
+      "name": "Object Transform",
+      "description": "Evaluate source and destination meshes in global space",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_max_distance",
+      "name": "Only Neighbor Geometry",
+      "description": "Source elements must be closer than given distance from destination one",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "max_distance",
+      "name": "Max Distance",
+      "description": "Maximum allowed distance between source and destination element, for non-topology mappings",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1,
+      "hard_min": 0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "ray_radius",
+      "name": "Ray Radius",
+      "description": "'Width' of rays (especially useful when raycasting against vertices or edges)",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 10,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "islands_precision",
+      "name": "Islands Precision",
+      "description": "Factor controlling precision of islands handling (the higher, the better the results)",
+      "type": "FLOAT",
+      "subtype": "FACTOR",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.1,
+      "hard_min": 0,
+      "hard_max": 10,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "layers_select_src",
+      "name": "Source Layers Selection",
+      "description": "Which layers to transfer, in case of multi-layers types",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "ACTIVE",
+      "enum_items": [
+        {
+          "identifier": "ACTIVE",
+          "name": "Active Layer",
+          "description": "Only transfer active data layer",
+          "value": -1
+        },
+        {
+          "identifier": "ALL",
+          "name": "All Layers",
+          "description": "Transfer all data layers",
+          "value": -2
+        },
+        {
+          "identifier": "BONE_SELECT",
+          "name": "Selected Pose Bones",
+          "description": "Transfer all vertex groups used by selected pose bones",
+          "value": -257
+        },
+        {
+          "identifier": "BONE_DEFORM",
+          "name": "Deform Pose Bones",
+          "description": "Transfer all vertex groups used by deform bones",
+          "value": -258
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "layers_select_dst",
+      "name": "Destination Layers Matching",
+      "description": "How to match source and destination layers",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "ACTIVE",
+      "enum_items": [
+        {
+          "identifier": "ACTIVE",
+          "name": "Active Layer",
+          "description": "Affect active data layer of all targets",
+          "value": -1
+        },
+        {
+          "identifier": "NAME",
+          "name": "By Name",
+          "description": "Match target data layers to affect by name",
+          "value": -2
+        },
+        {
+          "identifier": "INDEX",
+          "name": "By Order",
+          "description": "Match target data layers to affect by order (indices)",
+          "value": -3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mix_mode",
+      "name": "Mix Mode",
+      "description": "How to affect destination elements with source values",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "REPLACE",
+      "enum_items": [
+        {
+          "identifier": "REPLACE",
+          "name": "Replace",
+          "description": "Overwrite all elements' data",
+          "value": 0
+        },
+        {
+          "identifier": "ABOVE_THRESHOLD",
+          "name": "Above Threshold",
+          "description": "Only replace destination elements where data is above given threshold (exact behavior depends on data type)",
+          "value": 1
+        },
+        {
+          "identifier": "BELOW_THRESHOLD",
+          "name": "Below Threshold",
+          "description": "Only replace destination elements where data is below given threshold (exact behavior depends on data type)",
+          "value": 2
+        },
+        {
+          "identifier": "MIX",
+          "name": "Mix",
+          "description": "Mix source value into destination one, using given threshold as factor",
+          "value": 16
+        },
+        {
+          "identifier": "ADD",
+          "name": "Add",
+          "description": "Add source value to destination one, using given threshold as factor",
+          "value": 17
+        },
+        {
+          "identifier": "SUB",
+          "name": "Subtract",
+          "description": "Subtract source value to destination one, using given threshold as factor",
+          "value": 18
+        },
+        {
+          "identifier": "MUL",
+          "name": "Multiply",
+          "description": "Multiply source value to destination one, using given threshold as factor",
+          "value": 19
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mix_factor",
+      "name": "Mix Factor",
+      "description": "Factor to use when applying data to destination (exact behavior depends on mix mode)",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}
