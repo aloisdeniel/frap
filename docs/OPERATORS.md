@@ -223,7 +223,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [x] | `object.join_shapes` | M6 | P2 | WP 6.3 (M5+M6 W0) |
 | [ ] | `object.duplicates_make_real` | M8 | P2 | WP 8.3.4 |
-| [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE, ARMATURE_NAME, ARMATURE_ENVELOPE, BONE, BONE_RELATIVE M6 (WP 6.5); ARMATURE_AUTO M8 |
+| [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE, ARMATURE_NAME, ARMATURE_ENVELOPE, BONE, BONE_RELATIVE M6 (WP 6.5); ARMATURE_AUTO (bone heat) and SUBSURF limit-surface weights M8 (WP 8.5) |
 | [x] | `object.parent_clear` | M1 | P0 |  |
 | [x] | `object.parent_no_inverse_set` | M1 | P1 |  |
 | [ ] | `object.parent_inverse_apply` | M8 | P2 | WP 8.3.5 |

@@ -32,6 +32,8 @@ smallvec.workspace = true
 # BVH of its visibility rays (`frap_geom::bvh`).
 faer.workspace = true
 frap-geom.workspace = true
+# WP 8.5: the limit-surface vertices of ARMATURE_ENVELOPE/AUTO on a mesh with SUBSURF.
+frap-subdiv.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

@@ -169,13 +169,13 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T0",
     "support": "partial",
-    "support_note": "type='VERTEX'/'VERTEX_TRI' (Edit Mode) and 'ARMATURE_AUTO' (bone heat, M8) answer NotImplementedError",
+    "support_note": "type='VERTEX'/'VERTEX_TRI' (Edit Mode) answer NotImplementedError",
     "headless": "native",
     "planned": "M1",
     "extension": false,
     "notes": [
       "A parent loop (Error: Loop in parents) rolls the whole operator back; Blender keeps the children parented before the loop.",
-      "ARMATURE_ENVELOPE on a mesh with a Subdivision Surface modifier answers NotImplementedError (Blender weights the limit surface)."
+      "ARMATURE_AUTO treats B-Bone segments (bbone_segments > 1) as one heat source, with a WARNING (Blender heats each segment)."
     ]
   }
 }

@@ -1579,6 +1579,7 @@ dependencies = [
  "frap-scene",
  "frap-spec-ops-object",
  "frap-spec-rna",
+ "frap-subdiv",
  "glam",
  "indexmap",
  "insta",
