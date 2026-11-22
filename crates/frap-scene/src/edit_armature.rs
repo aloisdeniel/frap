@@ -7,6 +7,10 @@
 //! the edit-bone tools the `armature.*` operators run ([`tools`]) and Blender's bone naming
 //! rules ([`names`]).
 //!
+//! WP 8.3.10 (M8) adds the selection and visibility tools ([`select`]), the chain tools
+//! ([`chains`]: dissolve, split, fill, align), bone collection management in Blender's array
+//! layout ([`bone_collections`]) and `armature.separate` ([`separate`]).
+//!
 //! Ported from blender/source/blender/editors/armature/armature_utils.cc (`make_boneList`,
 //! `ED_armature_from_edit`, `ED_armature_edit_sync_selection`,
 //! `ED_armature_ebone_selectflag_set`, `ED_armature_ebone_remove_ex`,
@@ -14,6 +18,8 @@
 //! blender/source/blender/editors/armature/armature_add.cc (`ED_armature_ebone_add`), Blender
 //! 5.2.4, GPL-2.0-or-later.
 
+pub mod bone_collections;
+pub mod chains;
 pub mod ctx;
 pub mod family;
 pub mod math;
@@ -22,6 +28,8 @@ pub mod paths;
 pub mod posing;
 pub mod rename;
 pub mod rest;
+pub mod select;
+pub mod separate;
 pub mod tools;
 
 use glam::{Mat3, Mat4, Vec3};

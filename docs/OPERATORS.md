@@ -487,29 +487,29 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `armature.roll_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [x] | `armature.switch_direction` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [x] | `armature.symmetrize` | M6 | P1 | WP 6.2 (M5+M6 W0) |
-| [ ] | `armature.extrude_forked` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.dissolve` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.split` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.separate` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.fill` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.align` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.select_more` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.select_less` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.select_hierarchy` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.select_linked` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.select_mirror` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.select_similar` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.hide` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.reveal` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.flip_names` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.autoside_names` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.duplicate_rename` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.collection_add` | M8 | P2 | bone collections; WP 8.3.10 |
-| [ ] | `armature.collection_remove` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.collection_assign` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.collection_unassign` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.assign_to_collection` | M8 | P2 | WP 8.3.10 |
-| [ ] | `armature.move_to_collection` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.extrude_forked` | M8 | P2 | macro; the extrude step is forced `forked=True`; WP 8.3.10 |
+| [x] | `armature.dissolve` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.split` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.separate` | M8 | P2 | new object as Blender (`add_duplicate`: object, data and actions copied, base selection kept); WP 8.3.10 |
+| [x] | `armature.fill` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.align` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.select_more` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.select_less` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.select_hierarchy` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.select_linked` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.select_mirror` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.select_similar` | M8 | P2 | `COLOR`: bone colours are not modelled, every bone matches; WP 8.3.10 |
+| [x] | `armature.hide` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.reveal` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.flip_names` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.autoside_names` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.duplicate_rename` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.collection_add` | M8 | P2 | bone collections; WP 8.3.10 |
+| [x] | `armature.collection_remove` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.collection_assign` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.collection_unassign` | M8 | P2 | WP 8.3.10 |
+| [x] | `armature.assign_to_collection` | M8 | P2 | a failed call keeps no new collection (D-157); WP 8.3.10 |
+| [x] | `armature.move_to_collection` | M8 | P2 | a failed call keeps no new collection (D-157); WP 8.3.10 |
 | — | `armature.click_extrude` | OUT | — | interactive |
 | — | `armature.select_linked_pick` | OUT | — |  |
 | — | `armature.shortest_path_pick` | OUT | — |  |

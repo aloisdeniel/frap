@@ -430,6 +430,21 @@ impl EditArmature {
         arm: &Armature,
         do_flip_names: bool,
     ) -> Vec<(usize, usize)> {
+        self.duplicate_selected_ex(arm, do_flip_names, "", "")
+    }
+
+    /// `armature_duplicate_selected(C, do_flip_names, search, replace)`: like
+    /// [`EditArmature::duplicate_selected`]; with a non-empty `search`
+    /// (`armature.duplicate_rename`, WP 8.3.10) every occurrence of it in a copy's name (after
+    /// the optional side flip) is replaced (`BLI_string_replace`) before the name is made
+    /// unique.
+    pub fn duplicate_selected_ex(
+        &mut self,
+        arm: &Armature,
+        do_flip_names: bool,
+        search: &str,
+        replace: &str,
+    ) -> Vec<(usize, usize)> {
         self.sync_selection();
         if arm.use_mirror_x {
             for i in 0..self.edit_bones.len() {
@@ -454,6 +469,9 @@ impl EditArmature {
                 if self.find(&flip).is_none() {
                     name = flip;
                 }
+            }
+            if !search.is_empty() {
+                name = name.replace(search, replace);
             }
             let mut copy = src;
             copy.name = self.unique_name(&name, None);
@@ -1008,16 +1026,18 @@ impl EditArmature {
                     continue;
                 }
                 if !collections.iter().any(|x| x.name == f) {
-                    let parent = collections
-                        .iter()
-                        .position(|x| x.name == *c)
-                        .and_then(|ci| collections[ci].parent);
-                    collections.push(crate::id::BoneCollection {
-                        name: f.as_str().into(),
-                        parent,
-                        is_visible: true,
-                        is_solo: false,
-                    });
+                    // `ANIM_armature_bonecoll_new(name_flip, parent_index)` next to the source
+                    // collection, in Blender's array layout (WP 8.3.10).
+                    let mut tmp = Armature::new("");
+                    tmp.collections = std::mem::take(collections);
+                    tmp.active_collection = arm.active_collection;
+                    let mut arr = super::bone_collections::CollArray::from_armature(&tmp);
+                    let parent = arr
+                        .index_by_name(c)
+                        .map_or(-1, |ci| arr.find_parent_index(ci as i64));
+                    arr.new_collection(&f, parent);
+                    arr.store(&mut tmp);
+                    *collections = tmp.collections;
                 }
                 unassign.push(c.clone());
                 assign.push(f.into());

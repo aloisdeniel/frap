@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Bone names (WP 6.2): the byte limit (`MAXBONENAME - 1`) and `BLI_string_flip_side_name`,
-//! which mirror editing, `armature.symmetrize` and `armature.duplicate(do_flip_names=True)`
-//! use to pair `.L`/`.R`, `L_`/`R_`, `Left`/`Right` names.
+//! which mirror editing, `armature.symmetrize`, `armature.duplicate(do_flip_names=True)` and
+//! `armature.flip_names` use to pair `.L`/`.R`, `L_`/`R_`, `Left`/`Right` names;
+//! `bone_autoside_name` (`armature.autoside_names`, WP 8.3.10).
 //!
 //! Ported from blender/source/blender/blenlib/intern/string_utils.cc
-//! (`BLI_string_flip_side_name`), Blender 5.2.4, GPL-2.0-or-later.
+//! (`BLI_string_flip_side_name`) and blender/source/blender/blenkernel/intern/armature.cc
+//! (`bone_autoside_name`), Blender 5.2.4, GPL-2.0-or-later.
 
 /// Bytes a bone name may hold (`MAXBONENAME` is 64 with the terminator).
 pub const MAX_BONE_NAME: usize = 63;
@@ -102,9 +104,114 @@ pub fn flip_side_name(name: &str, strip_number: bool) -> String {
     frap_rna::naming::truncate_utf8(&s, MAX_BONE_NAME).to_owned()
 }
 
+/// `bone_autoside_name(name, …, axis, head, tail)`: the name with its side extension for
+/// `axis` (0 = X `L`/`R`, 1 = Y `Fr`/`Bk`, 2 = Z `Top`/`Bot`) from the side of `head` (of
+/// `tail` when the head is on the axis plane), after stripping existing `.L`/`.R`, `.Fr`/`.Bk`
+/// and `.Top`/`.Bot` extensions; `None` when there is no extension to add (an empty name, a bone
+/// on the plane).
+pub fn bone_autoside_name(name: &str, axis: usize, head: f32, tail: f32) -> Option<String> {
+    let base = frap_rna::naming::truncate_utf8(name, MAX_BONE_NAME);
+    if base.is_empty() {
+        return None;
+    }
+    // `IS_EQF(head, 0.0f)`: within FLT_EPSILON.
+    let on_plane = head.abs() < f32::EPSILON;
+    let (neg, pos) = match axis {
+        2 => ("Bot", "Top"),
+        1 => ("Fr", "Bk"),
+        _ => ("R", "L"),
+    };
+    let extension = if on_plane {
+        if tail < 0.0 {
+            Some(neg)
+        } else if tail > 0.0 {
+            Some(pos)
+        } else {
+            None
+        }
+    } else if axis == 0 {
+        // X: `head > 0` (not a plain else, unlike Y and Z).
+        if head < 0.0 {
+            Some(neg)
+        } else if head > 0.0 {
+            Some(pos)
+        } else {
+            None
+        }
+    } else if head < 0.0 {
+        Some(neg)
+    } else {
+        Some(pos)
+    };
+    let extension = extension?;
+    let mut b = base.as_bytes().to_vec();
+    loop {
+        let len = b.len();
+        if len > 2 && b[len - 2] == b'.' {
+            if matches!(b[len - 1], b'L' | b'R') {
+                b.truncate(len - 2);
+                continue;
+            }
+        } else if len > 3 && b[len - 3] == b'.' {
+            if &b[len - 2..] == b"Fr" || &b[len - 2..] == b"Bk" {
+                b.truncate(len - 3);
+                continue;
+            }
+        } else if len > 4
+            && b[len - 4] == b'.'
+            && (&b[len - 3..] == b"Top" || &b[len - 3..] == b"Bot")
+        {
+            b.truncate(len - 4);
+            continue;
+        }
+        break;
+    }
+    // `BLI_str_utf8_truncate_at_size(basename, (MAXBONENAME - 1) - (1 + strlen(ext)))`.
+    let max = MAX_BONE_NAME - (1 + extension.len()) - 1;
+    let basename = String::from_utf8_lossy(&b).into_owned();
+    let basename = frap_rna::naming::truncate_utf8(&basename, max);
+    Some(format!("{basename}.{extension}"))
+}
+
 #[cfg(test)]
 mod tests {
-    use super::flip_side_name;
+    use super::{bone_autoside_name, flip_side_name};
+
+    #[test]
+    fn autoside_like_blender() {
+        assert_eq!(
+            bone_autoside_name("arm", 0, 0.5, 1.0).as_deref(),
+            Some("arm.L")
+        );
+        assert_eq!(
+            bone_autoside_name("arm.L", 0, -0.5, 1.0).as_deref(),
+            Some("arm.R")
+        );
+        assert_eq!(
+            bone_autoside_name("arm.R.L", 0, 0.0, -1.0).as_deref(),
+            Some("arm.R")
+        );
+        assert_eq!(bone_autoside_name("arm", 0, 0.0, 0.0), None);
+        assert_eq!(
+            bone_autoside_name("spine", 2, 0.0, 1.0).as_deref(),
+            Some("spine.Top")
+        );
+        assert_eq!(
+            bone_autoside_name("spine.Top", 2, -1.0, 1.0).as_deref(),
+            Some("spine.Bot")
+        );
+        assert_eq!(bone_autoside_name("x.Fr", 1, 0.0, 0.0), None);
+        assert_eq!(
+            bone_autoside_name("x.Fr", 1, 2.0, 0.0).as_deref(),
+            Some("x.Bk")
+        );
+        assert_eq!(bone_autoside_name("", 0, 1.0, 1.0), None);
+        let long = "a".repeat(70);
+        assert_eq!(
+            bone_autoside_name(&long, 2, 1.0, 1.0).map(|s| s.len()),
+            Some(58 + 4)
+        );
+    }
 
     #[test]
     fn flips_like_blender() {

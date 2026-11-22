@@ -210,6 +210,7 @@ NORMALISE = {
     "D-154": ("cases", "Blender runs a #@blender transcription of select_grouped, and collection_objects_select in a #@blender temp_override(collection=...)"),
     "D-155": ("cases", "cases only cancel or fail the object selection operators with nothing selected or with extend=True"),
     "D-156": ("cases", "cases do not read users after duplicates_make_real"),
+    "D-157": ("cases", "armature/edit_m8/collections keeps its failing assign_to_collection last"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
