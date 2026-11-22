@@ -13,8 +13,8 @@ pub const LUA_ERROR: ErrorCode = ErrorCode("LUA_ERROR");
 pub const LUA_VALUE: ErrorCode = ErrorCode("LUA_VALUE");
 /// A Lua syntax error: `SyntaxError`, the code frap-lang uses for Python syntax errors.
 pub const SYNTAX: ErrorCode = ErrorCode("SYNTAX");
-/// The Lua heap passed `LuaConfig::memory_limit`: `RuntimeError`, the code of
-/// `--max-elements`.
+/// The Lua heap passed `LuaConfig::memory_limit`, or a string-building library call would
+/// pass 64 MiB: `RuntimeError`, the code of `--max-elements`.
 pub const LIMIT_EXCEEDED: ErrorCode = ErrorCode("LIMIT_EXCEEDED");
 
 /// The exception and code of an error the prelude raises by name (`P.fail(code, msg)`).
@@ -28,6 +28,7 @@ pub(crate) fn prelude_code(name: &str) -> (PyExc, ErrorCode) {
         "RNA_NO_ATTRIBUTE" => (PyExc::AttributeError, frap_rna::codes::RNA_NO_ATTRIBUTE),
         "RNA_TYPE" => (PyExc::TypeError, frap_rna::codes::RNA_TYPE),
         "TIMEOUT" => (PyExc::RuntimeError, frap_session::errors::TIMEOUT),
+        "LIMIT_EXCEEDED" => (PyExc::RuntimeError, LIMIT_EXCEEDED),
         _ => (PyExc::RuntimeError, LUA_ERROR),
     }
 }

@@ -2,9 +2,11 @@
 //! The Lua 5.4 front-end (feature `lua`): a sandboxed state whose `bpy` proxies call
 //! [`Session::invoke`], [`Session::get`], [`Session::set`] and [`Session::call`] (§11.6).
 //!
-//! Rust side: six primitives (`invoke`, `get`, `set`, `call`, `poll`, `fail`) plus `print`
-//! and `timed_out`, handed to `prelude.lua` as one table that never becomes a global, and
-//! the value conversions (Lua → [`Input`], response JSON → Lua). Lua side (`prelude.lua`):
+//! Rust side: the primitives (`invoke`, `get`, `set`, `call`, `poll`, `fail`, and `anchor`/
+//! `base`, which tie a proxy to its datablock's identity rather than its name) plus `print`
+//! and `timed_out`, handed to `prelude.lua` as one table that never becomes a global, with
+//! the Lua pattern matcher (`lpattern.lua`); the value conversions (Lua → [`Input`],
+//! response JSON → Lua, FLOAT values as floats); the deadline hook. Lua side (`prelude.lua`):
 //! the proxies, the sandbox wrappers and the `frap` helpers.
 //!
 //! A primitive never raises: it returns `true, …` or `false, err`, where `err` is a table
@@ -14,11 +16,13 @@
 //! all), plus where in the chunk it was raised.
 
 use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
-use frap_rna::{ErrorCode, FrapError, Input, PyExc};
-use frap_session::resolve::{self, Target};
+use frap_rna::ptr::{IdNames, Root};
+use frap_rna::{ErrorCode, FrapError, IdAny, Input, PyExc};
+use frap_session::resolve::{self, FuncTarget, Target};
 use frap_session::{Response, Session, Status};
 use indexmap::IndexMap;
 use mlua::chunk::ChunkMode;
@@ -30,8 +34,11 @@ use serde_json::Value as J;
 use crate::errors::{LUA_ERROR, LUA_VALUE, SYNTAX};
 
 const PRELUDE: &str = include_str!("prelude.lua");
+/// The Lua port of the C pattern matcher (interruptible; RFC 0002 §3).
+const LPATTERN: &str = include_str!("lpattern.lua");
 
-/// Instructions between two deadline checks of the `--stmt-timeout` hook.
+/// Instructions between two deadline checks of the `--stmt-timeout` hook (which also runs
+/// before every function call, C functions included).
 const HOOK_EVERY: u32 = 1000;
 
 /// Default `memory_limit` of [`LuaConfig`]: 256 MiB for the Lua heap.
@@ -80,6 +87,9 @@ struct Inner {
     output: Vec<String>,
     /// Errors raised during the current chunk, by `__frap_error` index.
     errors: Vec<FrapError>,
+    /// The datablocks proxies are anchored to, by handle (see `prelude.lua` `proxy`).
+    anchors: Vec<IdAny>,
+    anchor_ix: HashMap<IdAny, usize>,
 }
 
 type Shared = Rc<RefCell<Inner>>;
@@ -129,6 +139,8 @@ impl LuaFrontend {
             responses: Vec::new(),
             output: Vec::new(),
             errors: Vec::new(),
+            anchors: Vec::new(),
+            anchor_ix: HashMap::new(),
         }));
         let clock = Rc::new(Clock::default());
         let prims = primitives(&lua, &inner, &clock).map_err(internal)?;
@@ -147,7 +159,9 @@ impl LuaFrontend {
         lua.set_app_data(marks);
         let hook_clock = clock.clone();
         lua.set_global_hook(
-            HookTriggers::new().every_nth_instruction(HOOK_EVERY),
+            HookTriggers::new()
+                .on_calls()
+                .every_nth_instruction(HOOK_EVERY),
             move |_, _| {
                 if hook_clock.check() {
                     Err(mlua::Error::runtime("frap: limit exceeded (stmt_timeout)"))
@@ -360,7 +374,7 @@ fn primitives(lua: &Lua, inner: &Shared, clock: &Rc<Clock>) -> mlua::Result<Tabl
         lua.create_function(move |lua, (idname, kw): (String, Option<Table>)| {
             let marks = marks(lua)?;
             let mut inner = borrow(&s)?;
-            let kwargs = match kw.map(|t| kwargs(&inner.session, &marks, &t)).transpose() {
+            let kwargs = match kw.map(|t| kwargs(&inner, &marks, &t)).transpose() {
                 Ok(k) => k.unwrap_or_default(),
                 Err(e) => return failed(lua, &mut inner, e),
             };
@@ -382,10 +396,12 @@ fn primitives(lua: &Lua, inner: &Shared, clock: &Rc<Clock>) -> mlua::Result<Tabl
             let mut inner = borrow(&s)?;
             let r = inner.session.get(&path);
             reply(lua, &mut inner, r, false, |lua, r| {
+                // FLOAT values come back as floats even when integral (the JSON says `5`).
+                let float = r.rna.as_ref().is_some_and(is_float_tag);
                 Ok(vec![
                     r.value
                         .as_ref()
-                        .map_or(Ok(Value::Nil), |v| json_to_lua(lua, v, true))?,
+                        .map_or(Ok(Value::Nil), |v| json_to_lua_as(lua, v, true, float))?,
                     r.rna
                         .as_ref()
                         .map_or(Ok(Value::Nil), |v| json_to_lua(lua, v, true))?,
@@ -403,7 +419,7 @@ fn primitives(lua: &Lua, inner: &Shared, clock: &Rc<Clock>) -> mlua::Result<Tabl
         lua.create_function(move |lua, (path, v): (String, Value)| {
             let marks = marks(lua)?;
             let mut inner = borrow(&s)?;
-            let value = match to_input(&inner.session, &marks, &v, 0) {
+            let value = match to_input(&inner, &marks, &v, 0) {
                 Ok(v) => v,
                 Err(e) => return failed(lua, &mut inner, e),
             };
@@ -423,14 +439,14 @@ fn primitives(lua: &Lua, inner: &Shared, clock: &Rc<Clock>) -> mlua::Result<Tabl
                 let converted = (1..=n)
                     .map(|i| {
                         let v: Value = args.raw_get(i)?;
-                        Ok(to_input(&inner.session, &marks, &v, 0))
+                        Ok(to_input(&inner, &marks, &v, 0))
                     })
                     .collect::<mlua::Result<Vec<_>>>()?
                     .into_iter()
                     .collect::<Result<Vec<_>, _>>()
                     .and_then(|pos| {
                         let kw = kw
-                            .map(|t| kwargs(&inner.session, &marks, &t))
+                            .map(|t| kwargs(&inner, &marks, &t))
                             .transpose()?
                             .unwrap_or_default();
                         Ok((pos, kw))
@@ -439,13 +455,12 @@ fn primitives(lua: &Lua, inner: &Shared, clock: &Rc<Clock>) -> mlua::Result<Tabl
                     Ok(x) => x,
                     Err(e) => return failed(lua, &mut inner, e),
                 };
+                let floats = float_returns(&inner.session, &path);
                 let r = inner.session.call(&path, pos, kw);
                 respond(lua, &mut inner, r, |lua, r| {
-                    Ok(vec![
-                        r.value
-                            .as_ref()
-                            .map_or(Ok(Value::Nil), |v| json_to_lua(lua, v, true))?,
-                    ])
+                    Ok(vec![r.value.as_ref().map_or(Ok(Value::Nil), |v| {
+                        returns_to_lua(lua, v, &floats)
+                    })?])
                 })
             },
         )?,
@@ -497,12 +512,157 @@ fn primitives(lua: &Lua, inner: &Shared, clock: &Rc<Clock>) -> mlua::Result<Tabl
         })?,
     )?;
 
+    let s = inner.clone();
+    p.set(
+        "anchor",
+        lua.create_function(move |lua, path: String| {
+            let mut inner = borrow(&s)?;
+            let Some((id, suffix, stype)) = anchor_of(&inner.session, &path) else {
+                return Ok(MultiValue::new());
+            };
+            let next = inner.anchors.len();
+            let handle = *inner.anchor_ix.entry(id).or_insert(next);
+            if handle == next {
+                inner.anchors.push(id);
+            }
+            Ok(MultiValue::from_vec(vec![
+                Value::Integer(handle as i64),
+                Value::String(lua.create_string(&suffix)?),
+                Value::String(lua.create_string(stype)?),
+            ]))
+        })?,
+    )?;
+
+    let s = inner.clone();
+    p.set(
+        "base",
+        lua.create_function(move |lua, (handle, stype): (usize, String)| {
+            let mut inner = borrow(&s)?;
+            match anchor_base(&inner, handle, &stype) {
+                Ok(base) => Ok(MultiValue::from_vec(vec![
+                    Value::Boolean(true),
+                    Value::String(lua.create_string(&base)?),
+                ])),
+                Err(e) => failed(lua, &mut inner, e),
+            }
+        })?,
+    )?;
+
     let c = clock.clone();
     p.set(
         "timed_out",
         lua.create_function(move |_, ()| Ok(c.check()))?,
     )?;
+
+    let lpattern: Table = lua
+        .load(LPATTERN)
+        .set_name("=frap.lpattern")
+        .set_mode(ChunkMode::Text)
+        .call(())?;
+    p.set("lpattern", lpattern)?;
     Ok(p)
+}
+
+// ------------------------------------------------------------------ anchors
+
+/// The datablock a repr path is rooted at, the rest of the path, and the struct type a
+/// `ReferenceError` names (`None`: the path is not inside a datablock, or does not resolve).
+fn anchor_of(session: &Session, path: &str) -> Option<(IdAny, String, &'static str)> {
+    let target = parse_path(path).ok()?;
+    let t = match resolve::resolve(session.host(), &target).ok()? {
+        // A pointer property (`material.node_tree`) stands for the struct it points to.
+        Target::Prop(p) if matches!(p.prop.kind, frap_rna::PropKind::Pointer { .. }) => {
+            resolve::deref(session.host(), &p).ok()?
+        }
+        t => t,
+    };
+    let ptr = match &t {
+        Target::Struct(p) => p,
+        Target::Prop(p) => &p.ptr,
+        Target::Coll(c) => &c.ptr,
+        Target::Func(FuncTarget::Rna { this, .. }) => this,
+        Target::Func(FuncTarget::Coll { coll, .. }) => &coll.ptr,
+        _ => return None,
+    };
+    let id = match ptr.root {
+        Root::Id(id) => id,
+        Root::Embedded { owner, .. } => owner,
+        _ => return None,
+    };
+    let prefix = resolve::id_repr(session.main(), id);
+    let suffix = path.strip_prefix(prefix.as_str())?;
+    if !(suffix.is_empty() || suffix.starts_with('.') || suffix.starts_with('[')) {
+        return None;
+    }
+    Some((id, suffix.to_owned(), ptr.srna.identifier))
+}
+
+/// The current path of anchored datablock `handle`, or Blender's `ReferenceError` once it is
+/// removed (frap's exception set has no `ReferenceError`: `RuntimeError`, as the session
+/// raises it for stale pointers).
+fn anchor_base(inner: &Inner, handle: usize, stype: &str) -> Result<String, FrapError> {
+    let main = inner.session.main();
+    match inner.anchors.get(handle) {
+        Some(&id) if main.id_name(id).is_some() => Ok(resolve::id_repr(main, id)),
+        _ => Err(FrapError::new(
+            PyExc::RuntimeError,
+            frap_rna::codes::RNA_RUNTIME,
+            format!("StructRNA of type {stype} has been removed"),
+        )
+        .with_detail("python_exception", "ReferenceError")
+        .with_hint("the datablock this Lua value refers to was removed")),
+    }
+}
+
+/// The current path of a proxy (its `info` table): the anchored datablock's path and the
+/// suffix, or the path it was made with.
+fn info_path(inner: &Inner, info: &Table) -> Result<String, FrapError> {
+    let lua_err = |e: mlua::Error| value_error(format!("frap: {e}"));
+    let anchor: Option<usize> = info.raw_get("anchor").map_err(lua_err)?;
+    match anchor {
+        Some(h) => {
+            let stype: String = info.raw_get("stype").map_err(lua_err)?;
+            let suffix: String = info.raw_get("suffix").map_err(lua_err)?;
+            Ok(anchor_base(inner, h, &stype)? + &suffix)
+        }
+        None => info.raw_get("path").map_err(lua_err),
+    }
+}
+
+// ------------------------------------------------------------------ float values
+
+fn is_float_tag(rna: &J) -> bool {
+    rna.get("type").and_then(J::as_str) == Some("FLOAT")
+}
+
+/// For each return value of the RNA function at `path`, whether it is a FLOAT.
+fn float_returns(session: &Session, path: &str) -> Vec<bool> {
+    let Ok(target) = parse_path(path) else {
+        return Vec::new();
+    };
+    match resolve::resolve(session.host(), &target) {
+        Ok(Target::Func(FuncTarget::Rna { def, .. })) => def
+            .returns
+            .iter()
+            .map(|p| p.type_str() == "FLOAT")
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
+/// A call's value: one return value as a whole, several as a tuple, each FLOAT one as floats.
+fn returns_to_lua(lua: &Lua, v: &J, floats: &[bool]) -> mlua::Result<Value> {
+    match (floats, v) {
+        ([one], _) => json_to_lua_as(lua, v, true, *one),
+        (many, J::Array(items)) if many.len() == items.len() && many.iter().any(|f| *f) => {
+            let t = lua.create_table_with_capacity(items.len(), 0)?;
+            for (i, (x, f)) in items.iter().zip(many).enumerate() {
+                t.raw_set(i + 1, json_to_lua_as(lua, x, false, *f)?)?;
+            }
+            Ok(Value::Table(t))
+        }
+        _ => json_to_lua(lua, v, true),
+    }
 }
 
 fn borrow(s: &Shared) -> mlua::Result<std::cell::RefMut<'_, Inner>> {
@@ -603,10 +763,17 @@ fn is_idname(s: &str) -> bool {
 /// `nil` at the top and `None` inside containers (a sequence cannot hold `nil`),
 /// `{"$float": "nan"}` the float itself.
 fn json_to_lua(lua: &Lua, v: &J, top: bool) -> mlua::Result<Value> {
+    json_to_lua_as(lua, v, top, false)
+}
+
+/// [`json_to_lua`]; with `float`, every number is a Lua float (the value of a FLOAT
+/// property, whose integral values the JSON writes as integers).
+fn json_to_lua_as(lua: &Lua, v: &J, top: bool, float: bool) -> mlua::Result<Value> {
     Ok(match v {
         J::Null if top => Value::Nil,
         J::Null => Value::Table(marks(lua)?.none.clone()),
         J::Bool(b) => Value::Boolean(*b),
+        J::Number(n) if float => Value::Number(n.as_f64().unwrap_or(f64::NAN)),
         J::Number(n) => match n.as_i64() {
             Some(i) => Value::Integer(i),
             None => Value::Number(n.as_f64().unwrap_or(f64::NAN)),
@@ -615,7 +782,7 @@ fn json_to_lua(lua: &Lua, v: &J, top: bool) -> mlua::Result<Value> {
         J::Array(items) => {
             let t = lua.create_table_with_capacity(items.len(), 0)?;
             for (i, x) in items.iter().enumerate() {
-                t.raw_set(i + 1, json_to_lua(lua, x, false)?)?;
+                t.raw_set(i + 1, json_to_lua_as(lua, x, false, float)?)?;
             }
             Value::Table(t)
         }
@@ -647,11 +814,7 @@ fn value_error(msg: impl Into<String>) -> FrapError {
     FrapError::new(PyExc::TypeError, LUA_VALUE, msg)
 }
 
-fn kwargs(
-    session: &Session,
-    marks: &Marks,
-    t: &Table,
-) -> Result<IndexMap<String, Input>, FrapError> {
+fn kwargs(inner: &Inner, marks: &Marks, t: &Table) -> Result<IndexMap<String, Input>, FrapError> {
     let mut out = Vec::new();
     for pair in t.pairs::<Value, Value>() {
         let (k, v) = pair.map_err(|e| value_error(format!("frap: {e}")))?;
@@ -665,7 +828,7 @@ fn kwargs(
             .to_str()
             .map_err(|_| value_error("frap: keyword names must be UTF-8"))?
             .to_owned();
-        out.push((k, to_input(session, marks, &v, 0)?));
+        out.push((k, to_input(inner, marks, &v, 0)?));
     }
     // Lua tables have no order: keywords go in name order, so the same table always gives
     // the same call (and the same first-error) whatever its hash layout.
@@ -676,7 +839,7 @@ fn kwargs(
 /// A Lua value as an [`Input`]: proxies become the struct they stand for ([`Input::Ptr`]) or
 /// the array they read, `None` is Python's `None`, a `Set` a set, a sequence a tuple, a table
 /// with string keys a dict.
-fn to_input(session: &Session, marks: &Marks, v: &Value, depth: usize) -> Result<Input, FrapError> {
+fn to_input(inner: &Inner, marks: &Marks, v: &Value, depth: usize) -> Result<Input, FrapError> {
     if depth > MAX_DEPTH {
         return Err(value_error(format!(
             "frap: value nested deeper than {MAX_DEPTH} tables (a cycle?)"
@@ -692,7 +855,7 @@ fn to_input(session: &Session, marks: &Marks, v: &Value, depth: usize) -> Result
                 .map_err(|_| value_error("frap: strings passed to bpy must be UTF-8"))?
                 .to_owned(),
         ),
-        Value::Table(t) => table_input(session, marks, t, depth)?,
+        Value::Table(t) => table_input(inner, marks, t, depth)?,
         other => {
             return Err(value_error(format!(
                 "frap: a Lua {} cannot be passed to bpy",
@@ -702,12 +865,7 @@ fn to_input(session: &Session, marks: &Marks, v: &Value, depth: usize) -> Result
     })
 }
 
-fn table_input(
-    session: &Session,
-    marks: &Marks,
-    t: &Table,
-    depth: usize,
-) -> Result<Input, FrapError> {
+fn table_input(inner: &Inner, marks: &Marks, t: &Table, depth: usize) -> Result<Input, FrapError> {
     let lua_err = |e: mlua::Error| value_error(format!("frap: {e}"));
     if t.to_pointer() == marks.none.to_pointer() {
         return Ok(Input::None);
@@ -718,14 +876,14 @@ fn table_input(
         .map_err(lua_err)?
     {
         let kind: String = info.raw_get("kind").map_err(lua_err)?;
-        let path: String = info.raw_get("path").map_err(lua_err)?;
-        return proxy_input(session, &kind, &path);
+        let path = info_path(inner, &info)?;
+        return proxy_input(&inner.session, &kind, &path);
     }
     if let Some(mt) = t.metatable() {
         if mt.to_pointer() == marks.set_meta.to_pointer() {
             let items = t
                 .sequence_values::<Value>()
-                .map(|v| to_input(session, marks, &v.map_err(lua_err)?, depth + 1))
+                .map(|v| to_input(inner, marks, &v.map_err(lua_err)?, depth + 1))
                 .collect::<Result<_, _>>()?;
             return Ok(Input::Set(items));
         }
@@ -745,7 +903,7 @@ fn table_input(
                     .to_str()
                     .map_err(|_| value_error("frap: dict keys must be UTF-8"))?
                     .to_owned();
-                dict.push((k, to_input(session, marks, &v, depth + 1)?));
+                dict.push((k, to_input(inner, marks, &v, depth + 1)?));
             }
             other => {
                 return Err(value_error(format!(
@@ -769,7 +927,7 @@ fn table_input(
     }
     for i in 1..=n {
         let v: Value = t.raw_get(i).map_err(lua_err)?;
-        seq.push(to_input(session, marks, &v, depth + 1)?);
+        seq.push(to_input(inner, marks, &v, depth + 1)?);
     }
     Ok(Input::Tuple(seq))
 }
@@ -790,8 +948,8 @@ fn proxy_input(session: &Session, kind: &str, path: &str) -> Result<Input, FrapE
                 max_items: usize::MAX,
                 max_array: usize::MAX,
             };
-            let (j, _) = resolve::encode(session.host(), &t, caps)?;
-            Ok(json_input(&j))
+            let (j, rna) = resolve::encode(session.host(), &t, caps)?;
+            Ok(json_input(&j, rna.as_ref().is_some_and(is_float_tag)))
         }
         _ => Err(value_error(format!(
             "frap: {path} ({kind}) cannot be passed as a value"
@@ -818,21 +976,26 @@ fn target_input(session: &Session, t: Target, path: &str) -> Result<Input, FrapE
     }
 }
 
-fn json_input(j: &J) -> Input {
+fn json_input(j: &J, float: bool) -> Input {
     match j {
         J::Null => Input::None,
         J::Bool(b) => Input::Bool(*b),
+        J::Number(n) if float => Input::Float(n.as_f64().unwrap_or(f64::NAN)),
         J::Number(n) => match n.as_i64() {
             Some(i) => Input::Int(i),
             None => Input::Float(n.as_f64().unwrap_or(f64::NAN)),
         },
         J::String(s) => Input::Str(s.clone()),
-        J::Array(a) => Input::Tuple(a.iter().map(json_input).collect()),
+        J::Array(a) => Input::Tuple(a.iter().map(|x| json_input(x, float)).collect()),
         J::Object(m) => match m.get("$float").and_then(J::as_str) {
             Some("inf") => Input::Float(f64::INFINITY),
             Some("-inf") => Input::Float(f64::NEG_INFINITY),
             Some(_) => Input::Float(f64::NAN),
-            None => Input::Dict(m.iter().map(|(k, v)| (k.clone(), json_input(v))).collect()),
+            None => Input::Dict(
+                m.iter()
+                    .map(|(k, v)| (k.clone(), json_input(v, float)))
+                    .collect(),
+            ),
         },
     }
 }
@@ -861,6 +1024,24 @@ mod tests {
         assert_eq!(lua_line("lua:12: attempt to call a nil value"), Some(12));
         assert_eq!(lua_line("lua:3"), Some(3));
         assert_eq!(lua_line("frap.prelude:3: x"), None);
+    }
+
+    /// The Lua port of the pattern matcher gives the C functions' answers and errors.
+    #[test]
+    fn the_lua_matcher_answers_like_the_c_one() {
+        let lua = Lua::new();
+        let lp: Table = lua
+            .load(LPATTERN)
+            .set_name("=frap.lpattern")
+            .call(())
+            .unwrap();
+        lua.globals().set("LP", lp).unwrap();
+        let diff: String = lua
+            .load(include_str!("lpattern_check.lua"))
+            .set_name("=check")
+            .eval()
+            .unwrap();
+        assert_eq!(diff, "");
     }
 
     #[test]

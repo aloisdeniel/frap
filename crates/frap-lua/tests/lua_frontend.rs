@@ -92,9 +92,10 @@ fn ops_data_and_context_map_onto_the_session() {
     let expect = [
         "FINISHED",
         "Cube.001\tMESH\tbpy.data.objects['Cube.001']",
-        "1\t2\t3",
-        "5",
-        "0,0,0.5",
+        // FLOAT properties read as Lua floats, integral or not (Blender prints `5.0`).
+        "1.0\t2.0\t3.0",
+        "5.0",
+        "0.0,0.0,0.5",
         "4\t8",
         "true\ttrue",
         "false",
@@ -105,7 +106,7 @@ fn ops_data_and_context_map_onto_the_session() {
         "true\tfalse",
         "MESH_OT_primitive_cube_add\tmesh.primitive_cube_add",
         "0=Camera 1=Cube 2=Cube.001 3=Empty 4=Light",
-        "2",
+        "2.0",
         "1",
         "FINISHED",
     ];
@@ -125,7 +126,7 @@ fn globals_persist_between_chunks_and_responses_are_ordered() {
     let mut f = front();
     run(&mut f, "cube = bpy.data.objects['Cube']");
     let out = run(&mut f, "cube.location = {1, 1, 1}; print(cube.location.y)");
-    assert_eq!(out, ["1"]);
+    assert_eq!(out, ["1.0"]);
     let rs = f.take_responses();
     assert_eq!(rs.len(), 1);
     assert_eq!(rs[0].kind, "set");
@@ -322,9 +323,172 @@ fn the_sandbox_has_no_os_io_or_module_loading() {
     assert!(out[3].starts_with("false\t"), "{}", out[3]);
     assert_eq!(out[4], "string\tfrap.proxy");
     assert_eq!(out[5], "nil");
-    // The proxies' metatables are locked.
+    // The proxies' metatables are locked, and `rawset` cannot shadow their attributes.
     let e = f.exec("setmetatable(bpy.data, {})").unwrap_err();
     assert!(e.message.contains("protected metatable"), "{}", e.message);
+    for src in ["rawset(bpy.data, 'objects', 5)", "rawset(None, 'x', 1)"] {
+        let e = f.exec(src).unwrap_err();
+        assert_eq!(
+            (e.exception.as_str(), e.code.0),
+            ("TypeError", "LUA_VALUE"),
+            "{src}"
+        );
+    }
+    assert_eq!(
+        run(
+            &mut f,
+            "local t = {} rawset(t, 'a', 1) print(#bpy.data.objects, t.a)"
+        ),
+        ["3\t1"]
+    );
+}
+
+/// The wrapped C functions (RFC 0002 §3) answer like the originals, errors included.
+#[test]
+fn wrapped_library_functions_answer_like_lua() {
+    let mut f = front();
+    let out = run(
+        &mut f,
+        r#"
+        print(string.rep('ab', 3, '-'), ('x'):rep(0), table.concat({1, 'b', 3}, ','))
+        print(string.format('%d %q %5.1f', 3, 'a"b', 2.25), #string.pack('i4c3', 7, 'abc'))
+        print(string.find('hello world', 'o w'), string.find('a.b', '.', 1, true), string.find('abc', 'b', 9))
+        print(string.match('key = value', '(%w+)%s*=%s*(%w+)'), string.match('  x', '()x'))
+        print(string.gsub('hello world', '(%w+)', '<%1>'), string.gsub('abc', '', '-'))
+        local t = {} for k, v in string.gmatch('a=1, b=2', '(%w+)=(%w+)') do t[#t + 1] = k .. v end
+        print(table.concat(t, ' '))
+        local big = string.rep('a', 5000) .. 'b'
+        -- over the cost bound: the Lua matcher, same answers
+        print(string.find(big, 'a*b'), string.match(big, '(a+)(b)'):len(), select(2, string.gsub(big, 'a-b', 'x')))
+        local n = 0 for w in string.gmatch(big, '%a+') do n = n + #w end
+        print(n, string.find(big, string.rep('a', 4000) .. 'b', 1, true))
+        local s = {} for i = 1, 60000 do s[i] = (i * 7919) % 60000 end
+        table.sort(s) print(s[1], s[60000])
+        local m = table.move({1, 2, 3}, 1, 3, 2) print(table.concat(m, ','))
+        local mv = table.move({}, 1, 2000000, 1, {}) print(#mv)
+        "#,
+    );
+    assert_eq!(
+        out,
+        [
+            "ab-ab-ab\t\t1,b,3",
+            "3 \"a\\\"b\"   2.2\t7",
+            "5\t2\tnil",
+            "key\t3",
+            "<hello> <world>\t-a-b-c-\t4",
+            "a1 b2",
+            "1\t5000\t1",
+            "5001\t1001\t5001",
+            "0\t59999",
+            "1,1,2,3",
+            "0",
+        ]
+    );
+    // Errors keep the user's line and the function's name.
+    for (src, want) in [
+        (
+            "\nstring.rep()",
+            "lua:2: bad argument #1 to 'rep' (string expected, got no value)",
+        ),
+        (
+            "string.find('a', '%')",
+            "lua:1: malformed pattern (ends with '%')",
+        ),
+        (
+            "string.find(string.rep('a', 3000), '(a*')",
+            "lua:1: unfinished capture",
+        ),
+        (
+            "table.concat({1, {}})",
+            "lua:1: invalid value (table) at index 2 in table for 'concat'",
+        ),
+        (
+            "string.gsub('abc', '(b)', '%2')",
+            "lua:1: invalid capture index %2",
+        ),
+        // the same errors from the Lua matcher (over the cost bound)
+        (
+            "local s = string.rep('a', 5000)\nstring.gsub(s, '(a*)', '%2')",
+            "lua:2: invalid capture index %2",
+        ),
+        (
+            "string.find(string.rep('a', 5000), 'a*[a')",
+            "lua:1: malformed pattern (missing ']')",
+        ),
+    ] {
+        let e = f.exec(src).unwrap_err();
+        assert_eq!((e.code.0, e.message.as_str()), ("LUA_ERROR", want), "{src}");
+    }
+    // Results over 64 MiB are refused before they are built.
+    for src in [
+        "local s = string.rep('x', 1e8)",
+        "local s = ('xy'):rep(4e7, ',')",
+        "local s = string.pack('c100000000', '')",
+    ] {
+        let e = f.exec(src).unwrap_err();
+        assert_eq!(
+            (e.exception.as_str(), e.code.0),
+            ("RuntimeError", "LIMIT_EXCEEDED"),
+            "{src}: {}",
+            e.message
+        );
+    }
+}
+
+/// A proxy follows its datablock through a rename and raises once it is removed, as a Python
+/// reference does in Blender 5.2.4 (`tests/blender/references.py`); FLOAT reads are floats.
+#[test]
+fn proxies_follow_their_datablock_like_blender_references() {
+    let mut f = front();
+    let lua = std::fs::read_to_string(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data/references.lua"),
+    )
+    .unwrap();
+    let got = run(&mut f, &lua);
+    let want = std::fs::read_to_string(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data/references_blender.txt"),
+    )
+    .unwrap();
+    assert_eq!(got, want.lines().collect::<Vec<_>>());
+
+    // Uncaught, the removal is the session's stale-pointer error (frap has no
+    // `ReferenceError`), at the user's line; the float read gives the Python front-end's error.
+    let mut f = front();
+    let e = f
+        .exec("local ob = bpy.data.objects['Cube']\nbpy.data.objects:remove(ob)\nob.location.x = 1")
+        .unwrap_err();
+    assert_eq!(
+        (e.exception.as_str(), e.code.0, e.message.as_str()),
+        (
+            "RuntimeError",
+            "RNA_RUNTIME",
+            "StructRNA of type Object has been removed"
+        )
+    );
+    assert_eq!(e.detail.get("lua_line"), Some(&J::from(3)));
+    assert_eq!(
+        e.detail.get("python_exception"),
+        Some(&J::from("ReferenceError"))
+    );
+    let e = f
+        .exec("bpy.data.objects['Camera'].pass_index = bpy.data.objects['Camera'].scale.x")
+        .unwrap_err();
+    let mut s = session(&std::env::temp_dir());
+    let want = s
+        .exec_source("bpy.data.objects['Camera'].pass_index = 1.0")
+        .pop()
+        .unwrap()
+        .error
+        .unwrap();
+    assert_eq!(
+        (e.exception, e.code, e.message.as_str()),
+        (want.exception, want.code, want.message.as_str())
+    );
+    // Passing a removed datablock is the same error.
+    let e = f
+        .exec("local l = bpy.data.objects['Light']\nbpy.data.objects:remove(l)\nbpy.data.objects:remove(l)")
+        .unwrap_err();
+    assert_eq!(e.message, "StructRNA of type Object has been removed");
 }
 
 fn timeout_front(ms: u64) -> LuaFrontend {
@@ -344,6 +508,17 @@ fn stmt_timeout_stops_a_chunk() {
         "while true do coroutine.resume(coroutine.create(function() while true do end end)) end",
         // session calls in the loop
         "while true do local _ = bpy.data.objects['Cube'].location.x end",
+        // C library functions in the loop: the hook runs before every call
+        "while true do local s = string.rep('x', 5e7) end",
+        "local t = {} for i = 1, 2e6 do t[i] = 'x' end while true do local s = table.concat(t) end",
+        // backtracking patterns run in the Lua matcher, which the hook stops
+        "local s = string.find(string.rep('a', 3000), 'a-a-a-b')",
+        "while true do local s = string.match(string.rep('a', 3000), '(a*)*b') end",
+        "local n = string.gsub(string.rep('a', 3000), 'a-a-a-b', '')",
+        "for x in string.gmatch(string.rep('a', 3000), 'a-a-a-b') do end",
+        "local i = string.find(string.rep('a', 1e6), string.rep('a', 5e5) .. 'b', 1, true)",
+        "local t = {} for i = 1, 3e6 do t[i] = -i end table.sort(t)",
+        "local t = table.move({}, 1, 1e12, 1)",
     ] {
         let mut f = timeout_front(200);
         let t = Instant::now();
@@ -357,7 +532,8 @@ fn stmt_timeout_stops_a_chunk() {
         );
         assert_eq!(e.message, "Error: frap: limit exceeded (stmt_timeout)");
         assert_eq!(e.detail.get("stmt_timeout_ms"), Some(&J::from(200)));
-        assert!(took < Duration::from_secs(5), "{src}: {took:?}");
+        // 200 ms, the session call or the C call running at the deadline, and debug builds.
+        assert!(took < Duration::from_millis(1500), "{src}: {took:?}");
         // The front-end is usable afterwards; the deadline is per chunk.
         assert_eq!(run(&mut f, "print(1 + 1)"), ["2"]);
     }
@@ -425,7 +601,7 @@ fn the_m1_exit_transcript_in_lua_reaches_the_same_state() {
         &mut f,
         "print(imported_metallic, table.concat(cylinder_location, ','))",
     );
-    assert_eq!(out, ["1\t0,0,1"]);
+    assert_eq!(out, ["1.0\t0.0,0.0,1.0"]);
     // One response per session call of the transcript (16 operators and assignments, the
     // render, the append), all FINISHED but a render without an adapter.
     let rs = f.take_responses();
@@ -558,28 +734,37 @@ fn the_blender_reference_is_current() {
         eprintln!("skipped: Blender 5.2 not found (set BLENDER_BIN)");
         return;
     };
-    let dir = tmpdir("blender");
-    let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/blender/m1_transcript_state.py");
-    let out_file = dir.join("state.txt");
-    let st = std::process::Command::new(blender)
-        .args(["-b", "--factory-startup", "--python"])
-        .arg(&script)
-        .arg("--")
-        .arg(&out_file)
-        .current_dir(&dir)
-        .output()
+    for (script, committed) in [
+        ("m1_transcript_state.py", "m1_transcript_blender.txt"),
+        ("references.py", "references_blender.txt"),
+    ] {
+        let dir = tmpdir("blender");
+        let script = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/blender")
+            .join(script);
+        let out_file = dir.join("state.txt");
+        let st = std::process::Command::new(&blender)
+            .args(["-b", "--factory-startup", "--python"])
+            .arg(&script)
+            .arg("--")
+            .arg(&out_file)
+            .current_dir(&dir)
+            .output()
+            .unwrap();
+        assert!(
+            st.status.success(),
+            "{}",
+            String::from_utf8_lossy(&st.stderr)
+        );
+        let live = std::fs::read_to_string(&out_file).unwrap();
+        let committed = std::fs::read_to_string(
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/data")
+                .join(committed),
+        )
         .unwrap();
-    assert!(
-        st.status.success(),
-        "{}",
-        String::from_utf8_lossy(&st.stderr)
-    );
-    let live = std::fs::read_to_string(&out_file).unwrap();
-    let committed = std::fs::read_to_string(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data/m1_transcript_blender.txt"),
-    )
-    .unwrap();
-    assert_eq!(live, committed);
+        assert_eq!(live, committed, "{}", script.display());
+    }
 }
 
 /// Cost of the proxy walk against the statement form (RFC 0002 §5; `--ignored --nocapture`,
