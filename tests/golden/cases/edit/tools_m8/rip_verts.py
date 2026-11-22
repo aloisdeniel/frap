@@ -1,4 +1,4 @@
-# WP 8.3.3: mesh.rip / mesh.rip_move of one selected vertex, headless-extended (D-150): the
+# WP 8.3.3: mesh.rip / mesh.rip_move of one selected vertex, headless-extended (D-153): the
 # mouse is the 3D cursor seen in the factory Layout 3D View. A cube corner ripped towards
 # two sides (on the cube and a duplicate), a grid's inner vertex (the two faces at the edge
 # nearest to the cursor get the new vertex), a boundary vertex, a bowtie vertex (the fan

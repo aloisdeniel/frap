@@ -203,7 +203,7 @@ NORMALISE = {
     "D-147": ("cases", "cases mirror one mesh per run or meshes with different element counts"),
     "D-148": ("cases", "vertex_group_copy_to_selected only fails where Blender changes nothing"),
     "D-149": ("cases", "undo cases push the steps frap pushes implicitly with #@blender bpy.ops.ed.undo_push(...) lines"),
-    "D-150": ("cases", "rip cases run mesh.rip only in frap (#@frap) and rebuild the interactive Blender result with #@blender bmesh lines (split_edges / vert_separate and the recorded selection)"),
+    "D-153": ("cases", "rip cases run mesh.rip only in frap (#@frap) and rebuild the interactive Blender result with #@blender bmesh lines (split_edges / vert_separate and the recorded selection)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

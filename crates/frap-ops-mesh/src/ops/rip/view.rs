@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The region projection `mesh.rip` measures in, and the "mouse" (headless-extended,
-//! deviations D-150):
+//! deviations D-153):
 //! - by default the WINDOW region of the factory Layout 3D View, as `blender -b` loads it
 //!   (1574 × 954 pixels, perspective lens 50 mm, clip 0.01–1000: the `window_matrix` of
 //!   `spec/blender-5.2/startup.json`), looking through frap's virtual view matrix (D-10);

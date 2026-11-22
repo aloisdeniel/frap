@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.rip(use_fill=False, …, frap_location=…, frap_direction=…)`, tier T1,
-//! *headless-extended* (deviation D-150; `tests/golden/cases/edit/tools_m8/rip*.py`, the
+//! *headless-extended* (deviation D-153; `tests/golden/cases/edit/tools_m8/rip*.py`, the
 //! interactive recordings of `tests/golden/cases/edit/tools_m8/rip_recordings/`). Port of
 //! `edbm_rip_invoke` and its helpers (`editors/mesh/editmesh_rip.cc`, [`core`]), Blender 5.2.4,
 //! GPL-2.0-or-later.
@@ -158,7 +158,7 @@ pub(crate) fn rip_report(outcomes: &[MeshRip]) -> Option<Result<(), &'static str
 #[operator(
     poll = poll::EDITMESH_VIEW3D,
     tier = T1,
-    support = HeadlessExtended("headless-extended (deviations D-150): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over frap_location (unset: the 3D cursor), seen in the factory Layout 3D View (1574x954 WINDOW region) or, with a non-zero frap_direction, in an orthographic view looking along frap_direction: put the point on the side to rip towards")
+    support = HeadlessExtended("headless-extended (deviations D-153): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over frap_location (unset: the 3D cursor), seen in the factory Layout 3D View (1574x954 WINDOW region) or, with a non-zero frap_direction, in an orthographic view looking along frap_direction: put the point on the side to rip towards")
 )]
 fn exec(cx: &mut OpCtx, p: mesh::Rip) -> OpResult {
     let do_fill = p.use_fill.value;

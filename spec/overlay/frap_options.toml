@@ -133,7 +133,7 @@ type = "FLOAT"
 array = [3]
 subtype = "XYZ"
 default = [0.0, 0.0, 0.0]
-description = "World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-150)"
+description = "World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-153)"
 
 [[option]]
 op = "mesh.rip"
@@ -145,4 +145,4 @@ type = "FLOAT"
 array = [3]
 subtype = "XYZ"
 default = [0.0, 0.0, 0.0]
-description = "World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-150)"
+description = "World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-153)"

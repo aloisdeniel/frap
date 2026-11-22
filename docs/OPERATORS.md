@@ -152,8 +152,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `mesh.uvs_reverse` | M8 | P2 | WP 8.3.2 |
 | [x] | `mesh.sort_elements` | M8 | P2 | every type incl. RANDOMIZE per seed and `reverse`, libc `qsort` tie order; WP 8.3.3 (goldens `edit/tools_m8/sort_elements*`) |
 | [x] | `mesh.reorder_vertices_spatial` | M8 | P2 | sculpt-BVH face partition (libc++ `std::partition`), material split; WP 8.3.3 (golden `edit/tools_m8/reorder_vertices_spatial`) |
-| [x] | `mesh.rip` | M8 | P2 | headless-extended (D-150): explicit side and view, `frap_location` (the point the mouse is over; unset: the 3D cursor) and `frap_direction` (non-zero: an orthographic view looking along it, the mouse ray `frap_location` + t·`frap_direction`; zero: the factory Layout 3D View); WP 8.3.3 (goldens `edit/tools_m8/rip_edges`, `rip_verts`; 25 interactive recordings `edit/tools_m8/rip_recordings`; transcript `tests/cli/m8/tools_m8/rip_direction`) |
-| [x] | `mesh.rip_move` | M8 | P2 | macro; headless-extended (D-150): `MESH_OT_rip={'frap_location': …, 'frap_direction': …}`; WP 8.3.3 |
+| [x] | `mesh.rip` | M8 | P2 | headless-extended (D-153): explicit side and view, `frap_location` (the point the mouse is over; unset: the 3D cursor) and `frap_direction` (non-zero: an orthographic view looking along it, the mouse ray `frap_location` + t·`frap_direction`; zero: the factory Layout 3D View); WP 8.3.3 (goldens `edit/tools_m8/rip_edges`, `rip_verts`; 25 interactive recordings `edit/tools_m8/rip_recordings`; transcript `tests/cli/m8/tools_m8/rip_direction`) |
+| [x] | `mesh.rip_move` | M8 | P2 | macro; headless-extended (D-153): `MESH_OT_rip={'frap_location': …, 'frap_direction': …}`; WP 8.3.3 |
 | [x] | `mesh.rip_edge` | M8 | P2 | `location`/`direction` ray (exec); WP 8.3.3 (golden `edit/tools_m8/rip_edge`) |
 | [x] | `mesh.rip_edge_move` | M8 | P2 | macro; WP 8.3.3 |
 | [x] | `mesh.vertices_smooth_laplacian` | M8 | P2 | T2 (sparse least squares, faer LU; ill-conditioned, diverging runs only T3); WP 8.3.3 (goldens `edit/tools_m8/vertices_smooth_laplacian`, `vertices_smooth_laplacian_closed`) |

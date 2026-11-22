@@ -1,4 +1,4 @@
-# WP 8.3.3: mesh.rip / mesh.rip_move on selected edges, headless-extended (D-150): the mouse
+# WP 8.3.3: mesh.rip / mesh.rip_move on selected edges, headless-extended (D-153): the mouse
 # is the 3D cursor seen in the factory Layout 3D View. Rows of a grid ripped towards the cursor
 # above and below (the selection's ends extend by one edge), a single edge, a boundary column
 # (no extension at the boundary) and rip_move with a translation. `blender -b` cannot run

@@ -262,7 +262,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     {
       "identifier": "frap_location",
       "name": "Location",
-      "description": "World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-150)",
+      "description": "World-space point the mouse is over, the side to rip towards (unset: the 3D cursor) (frap extension, deviations D-153)",
       "type": "FLOAT",
       "subtype": "XYZ",
       "unit": "NONE",
@@ -290,7 +290,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     {
       "identifier": "frap_direction",
       "name": "Direction",
-      "description": "World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-150)",
+      "description": "World-space view direction: when not zero, rip in an orthographic view looking along it, the mouse ray frap_location + t*frap_direction (zero: the factory Layout 3D View) (frap extension, deviations D-153)",
       "type": "FLOAT",
       "subtype": "XYZ",
       "unit": "NONE",
@@ -320,7 +320,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T1",
     "support": "full",
-    "support_note": "headless-extended (deviations D-150): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over frap_location (unset: the 3D cursor), seen in the factory Layout 3D View (1574x954 WINDOW region) or, with a non-zero frap_direction, in an orthographic view looking along frap_direction: put the point on the side to rip towards",
+    "support_note": "headless-extended (deviations D-153): blender -b cannot run mesh.rip (invoke only, no window event); frap runs Blender's algorithm with the mouse over frap_location (unset: the 3D cursor), seen in the factory Layout 3D View (1574x954 WINDOW region) or, with a non-zero frap_direction, in an orthographic view looking along frap_direction: put the point on the side to rip towards",
     "headless": "extended",
     "planned": "M8",
     "extension": false,

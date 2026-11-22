@@ -11,7 +11,7 @@
 //! - the recordings made in an orthographic view along a direction replay exactly with frap's
 //!   own region for `frap_direction`/`frap_location` ([`RegionView::ortho_along`]);
 //! - the cursor recordings replay exactly in frap's default region (the factory Layout 3D View
-//!   of `blender -b`, D-150).
+//!   of `blender -b`, D-153).
 
 use std::path::PathBuf;
 

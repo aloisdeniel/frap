@@ -9,7 +9,7 @@ Goldens of `mesh.sort_elements`, `reorder_vertices_spatial`, `rip`, `rip_move`, 
 `mesh.rip` has no `exec` and `blender -b` has no window event state, so Blender cannot run it
 headless. frap runs it with the mouse over `frap_location` (unset: the 3D cursor), in the
 factory Layout 3D View or, with a non-zero `frap_direction`, in an orthographic view looking
-along it (deviation D-150). The Blender side of `rip_edges.py` and `rip_verts.py` rebuilds the result an
+along it (deviation D-153). The Blender side of `rip_edges.py` and `rip_verts.py` rebuilds the result an
 interactive Blender 5.2.4 produces with the mouse there, recorded like this (one Blender
 process per case; the case's setup statements run first, `emulations.select_elements` stands
 in for `bpy.ops.frap.select_elements`):
