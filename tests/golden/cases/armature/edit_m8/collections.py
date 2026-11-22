@@ -7,7 +7,7 @@
 # bones), collection_remove (children lifted into its place, next / previous sibling or parent
 # made active, bones unassigned), and the polls. The Object Mode error of
 # assign_to_collection comes last: Blender keeps the collection it created before failing,
-# frap rolls the failed statement back (deviation D-150).
+# frap rolls the failed statement back (deviation D-157).
 # golden: startup=factory compare=objects,context tier=T0 tol=1e-5
 import bpy
 bpy.data.objects.new('C0', None)

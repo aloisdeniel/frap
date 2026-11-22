@@ -508,8 +508,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `armature.collection_remove` | M8 | P2 | WP 8.3.10 |
 | [x] | `armature.collection_assign` | M8 | P2 | WP 8.3.10 |
 | [x] | `armature.collection_unassign` | M8 | P2 | WP 8.3.10 |
-| [x] | `armature.assign_to_collection` | M8 | P2 | a failed call keeps no new collection (D-150); WP 8.3.10 |
-| [x] | `armature.move_to_collection` | M8 | P2 | a failed call keeps no new collection (D-150); WP 8.3.10 |
+| [x] | `armature.assign_to_collection` | M8 | P2 | a failed call keeps no new collection (D-157); WP 8.3.10 |
+| [x] | `armature.move_to_collection` | M8 | P2 | a failed call keeps no new collection (D-157); WP 8.3.10 |
 | — | `armature.click_extrude` | OUT | — | interactive |
 | — | `armature.select_linked_pick` | OUT | — |  |
 | — | `armature.shortest_path_pick` | OUT | — |  |
