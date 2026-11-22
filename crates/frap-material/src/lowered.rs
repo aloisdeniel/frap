@@ -430,6 +430,10 @@ pub struct LowerCx<'a> {
     /// a material whose node tree is animated when pointer animation is exported, and with
     /// `export_unused_textures` (`BlenderMaterialIndentifier.__can_use_inline`).
     pub original: bool,
+    /// Names of the Image Texture nodes a texture was read from while lowering (the add-on's
+    /// `export_settings['nodes_used']`, set by `__gather_texture_transform_and_tex_coord`;
+    /// WP 8.12: `export_unused_textures` exports the others).
+    pub used_nodes: std::cell::RefCell<Vec<SmolStr>>,
 }
 
 impl<'a> LowerCx<'a> {
@@ -440,6 +444,7 @@ impl<'a> LowerCx<'a> {
             mat,
             images,
             original: false,
+            used_nodes: std::cell::RefCell::new(Vec::new()),
         }
     }
 
@@ -532,6 +537,18 @@ pub fn lower_original(
     images: &dyn ImageLookup,
 ) -> LoweredMaterial {
     lower_cx(&LowerCx::new(tree, mat, images).with_original(true))
+}
+
+/// [`lower_original`], also returning the names of the Image Texture nodes its textures were
+/// read from (the add-on's `nodes_used`, in first-use order; WP 8.12).
+pub fn lower_original_used(
+    tree: &NodeTree,
+    mat: &Material,
+    images: &dyn ImageLookup,
+) -> (LoweredMaterial, Vec<SmolStr>) {
+    let cx = LowerCx::new(tree, mat, images).with_original(true);
+    let lm = lower_cx(&cx);
+    (lm, cx.used_nodes.into_inner())
 }
 
 /// Runs every pattern over `cx`.

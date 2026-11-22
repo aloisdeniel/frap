@@ -40,8 +40,8 @@ pub fn lowered(main: &Main, mat: &Material) -> LoweredMaterial {
 /// which frap does not do anyway), so a factor fed by a node it cannot read keeps the glTF
 /// default (a Math node computing 0.3 x 2 into Roughness exports `roughnessFactor` 1). Its
 /// other reasons are the glTF Material Output's `Occlusion` (handled by the patterns,
-/// `LowerCx::uses_inline_tree`) and `export_unused_textures` (not supported: frap warns and
-/// exports as if it were off).
+/// `LowerCx::uses_inline_tree`) and `export_unused_textures` with `export_materials='EXPORT'`
+/// (WP 8.12).
 pub fn reads_original(settings: &ExportSettings, mat: &Material) -> bool {
     let p = &settings.props;
     let pointer = p.export_animations.value
@@ -50,7 +50,8 @@ pub fn reads_original(settings: &ExportSettings, mat: &Material) -> bool {
             p.export_animation_mode.value,
             ExportAnimationMode::Scene | ExportAnimationMode::NlaTracks
         );
-    pointer && mat.node_tree.animation_data.is_some()
+    (pointer && mat.node_tree.animation_data.is_some())
+        || crate::export::unused::unused_textures(settings)
 }
 
 /// The lowered material the exporter writes for `mat` with `settings` (the original tree

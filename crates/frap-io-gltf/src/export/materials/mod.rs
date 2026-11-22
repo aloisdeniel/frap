@@ -268,6 +268,7 @@ fn gather_as(
                 .entry(r)
                 .or_insert_with(|| lower::lowered_for(main, mat, settings))
                 .clone();
+            crate::export::unused::material_gathered(g, r, &lm);
             crate::export::tex_coord::resolve_attributes(&mut lm, mat, mesh, settings);
             if settings.export_image_format == crate::export::settings::ExportImageFormat::None {
                 image_none_factors(main, mat, settings, &mut lm);

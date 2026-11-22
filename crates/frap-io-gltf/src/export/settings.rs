@@ -135,6 +135,9 @@ pub struct ExportSettings {
     /// frap: the session's working directory, against which relative image paths (and `//`
     /// in an unsaved file) resolve, as `Image::acquire` does (WP 3.5); `None`: the process's.
     pub cwd: Option<PathBuf>,
+    /// frap: the directory the main file is written to (`gltf_filedirectory`), against which
+    /// `export_keep_originals` makes image URIs relative (WP 8.12); `None`: the cwd.
+    pub out_dir: Option<PathBuf>,
     /// Every operator prop as given (M3+M4 W0); defaults when built with `Default`.
     pub props: Arc<ExportSceneGltf>,
     /// frap: `export_apply=True`: the viewport-evaluated mesh of every MESH object of each
@@ -180,6 +183,7 @@ impl Default for ExportSettings {
             file_stem: "scene".to_owned(),
             blend_dir: None,
             cwd: None,
+            out_dir: None,
             props: Arc::new(default_props()),
             evaluated_meshes: None,
         }
@@ -224,6 +228,13 @@ pub const SUPPORTED_PROPS: &[&str] = &[
     "export_shared_accessors",
     // `mesh/writers/custom_attributes.rs`.
     "export_attributes",
+    // `unused.rs`.
+    "export_unused_textures",
+    "export_unused_images",
+    // `images.rs` (`gather_original_texture`).
+    "export_keep_originals",
+    // `vtree.rs` (collection nodes) and `nodes.rs`.
+    "export_hierarchy_full_collections",
 ];
 
 /// Props honoured by a feature file of a later milestone: each file registers the props it

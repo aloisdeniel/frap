@@ -915,6 +915,12 @@ impl<'a> LowerCx<'a> {
         diags: &mut Vec<Report>,
     ) -> Option<TexRef> {
         let image = self.image_of(tex)?;
+        {
+            let mut used = self.used_nodes.borrow_mut();
+            if !used.contains(&tex.name) {
+                used.push(tex.name.clone());
+            }
+        }
         let colorspace_is_data = self.images.image(image).is_some_and(|im| {
             im.colorspace_settings.is_data || im.colorspace_settings.name == "Non-Color"
         });

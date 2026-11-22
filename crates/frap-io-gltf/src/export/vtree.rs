@@ -64,6 +64,9 @@ pub enum VType {
     Camera,
     /// `LIGHT`
     Light,
+    /// `COLLECTION` (`export_hierarchy_full_collections`, WP 8.12): a collection of the
+    /// hierarchy; [`VNode::object`] is a key of no object, [`VNode::collection`] says which.
+    Collection,
 }
 
 /// One node of the export tree.
@@ -104,6 +107,9 @@ pub struct VNode {
     pub all_bones: Option<Vec<usize>>,
     /// `root_bones_uuid` of an armature (`get_root_bones_uuid`).
     pub root_bones: Option<Vec<usize>>,
+    /// A collection node's collection (WP 8.12): its name, and the datablock (`None` for a
+    /// scene's master collection).
+    pub collection: Option<(SmolStr, Option<IdRef<CollectionId>>)>,
 }
 
 impl VNode {
@@ -125,6 +131,7 @@ impl VNode {
             arma_exported: false,
             all_bones: None,
             root_bones: None,
+            collection: None,
         }
     }
 }
@@ -671,6 +678,8 @@ pub fn armature_modifier_object(ob: &Object) -> Option<Option<IdRef<ObjectId>>> 
 
 /// A node to create (`recursive_node_traverse`'s arguments).
 enum Item<'m> {
+    /// A collection (`is_collection=True`; `None`: the scene's master collection).
+    Collection(Option<IdRef<CollectionId>>, &'m Collection),
     Object(IdRef<ObjectId>, &'m Object),
     Bone {
         arm_ob: IdRef<ObjectId>,
@@ -717,6 +726,13 @@ pub fn build_ex(
         v.sort_by(|a, b| natural_cmp(&a.1.header.name, &b.1.header.name));
         v
     }
+    let full = s.props.export_hierarchy_full_collections.value;
+    // `users_collection[0].name` (WP 8.12, full collection hierarchy).
+    let first_collection = |r: IdRef<ObjectId>| -> Option<SmolStr> {
+        users_collection(main, r)
+            .first()
+            .map(|c| c.header.name.clone())
+    };
 
     let mut tree = VTree {
         armature_object_remove: bs.armature_object_remove,
@@ -727,17 +743,78 @@ pub fn build_ex(
     // `armature_needed`: skinned objects not parented to their armature (searched by name).
     let mut armature_needed: Vec<(usize, SmolStr)> = Vec::new();
     // Construction (`recursive_node_traverse`), pre-order.
-    let mut stack: Vec<(Item, Option<usize>, bool)> = roots
-        .iter()
-        .rev()
-        .map(|(r, o)| (Item::Object(*r, o), None, false))
-        .collect();
+    let mut stack: Vec<(Item, Option<usize>, bool)> = if full {
+        // `construct` with `gltf_hierarchy_full_collections`: from the exported collection, or
+        // the scene's master collection.
+        let root = if s.collection.is_empty() {
+            Some((None, &ctx.scene().collection))
+        } else {
+            main.collections
+                .find_in(&s.collection, None)
+                .and_then(|c| main.collections.get(c).map(|cc| (Some(c), cc)))
+        };
+        root.map(|(r, c)| (Item::Collection(r, c), None, false))
+            .into_iter()
+            .collect()
+    } else {
+        roots
+            .iter()
+            .rev()
+            .map(|(r, o)| (Item::Object(*r, o), None, false))
+            .collect()
+    };
     while let Some((item, parent, delta)) = stack.pop() {
         let i = tree.nodes.len();
         let mut new_delta = false;
         let node = match item {
+            Item::Collection(cr, coll) => {
+                let mut n = VNode::new(
+                    IdRef::from_key(frap_rna::IdKey::next()),
+                    VType::Collection,
+                    parent,
+                );
+                n.collection = Some((coll.header.name.clone(), cr));
+                // Objects without a parent in their own (first) collection, then the child
+                // collections, each in natural name order.
+                let mut objs: Vec<(IdRef<ObjectId>, &Object)> = Vec::new();
+                for &o in &coll.objects {
+                    if objs.iter().any(|(r, _)| *r == o) {
+                        continue;
+                    }
+                    let Some(ob) = main.objects.get(o) else {
+                        continue;
+                    };
+                    if let Some(p) = ob.parent.filter(|p| main.objects.get(*p).is_some())
+                        && let (Some(pc), Some(cc)) = (first_collection(p), first_collection(o))
+                        && pc == cc
+                    {
+                        continue;
+                    }
+                    objs.push((o, ob));
+                }
+                let mut items: Vec<Item> = sorted(objs)
+                    .into_iter()
+                    .map(|(r, o)| Item::Object(r, o))
+                    .collect();
+                let mut kids: Vec<(IdRef<CollectionId>, &Collection)> = coll
+                    .children
+                    .iter()
+                    .filter_map(|c| main.collections.get(*c).map(|cc| (*c, cc)))
+                    .collect();
+                kids.sort_by(|a, b| natural_cmp(&a.1.header.name, &b.1.header.name));
+                items.extend(kids.into_iter().map(|(r, c)| Item::Collection(Some(r), c)));
+                // A collection cycle (frap refuses them, Blender too) cannot loop forever.
+                if tree.nodes.len() < 1 << 20 {
+                    for it in items.into_iter().rev() {
+                        stack.push((it, Some(i), delta));
+                    }
+                }
+                n
+            }
             Item::Object(r, ob) => {
-                if !visited.insert(r) {
+                // The full collection hierarchy exports an object once per collection that
+                // holds it (`recursive_node_traverse` has no visited set); otherwise once.
+                if !full && !visited.insert(r) {
                     continue;
                 }
                 let kind = match ob.object_type() {
@@ -791,6 +868,7 @@ pub fn build_ex(
                 // Cameras and lights get the add-on's Y-up correction (WP 3.4, `cameras.rs`).
                 n.matrix_world = crate::export::cameras::correct_matrix_world(s, ob, mw);
                 // Children: objects (not parented to a bone), then the root bones.
+                let own = if full { first_collection(r) } else { None };
                 let kids: Vec<(IdRef<ObjectId>, &Object)> = children_of
                     .get(&r)
                     .map(|v| {
@@ -798,6 +876,15 @@ pub fn build_ex(
                             .filter(|(_, c)| {
                                 !(matches!(c.parent_type.as_str(), "BONE" | "BONE_RELATIVE")
                                     && !c.parent_bone.is_empty())
+                            })
+                            // Full collection hierarchy: a child of another (first) collection
+                            // is exported under its own collection.
+                            .filter(|(cr, _)| {
+                                !full
+                                    || match (&own, first_collection(*cr)) {
+                                        (Some(a), Some(b)) => *a == b,
+                                        _ => true,
+                                    }
                             })
                             .copied()
                             .collect()
@@ -937,6 +1024,11 @@ pub fn build_ex(
     // `filter_tag`.
     let filters = Filters::new(main, ctx, s);
     for i in 0..tree.nodes.len() {
+        if tree.nodes[i].kind == VType::Collection {
+            // `node_filter_inheritable_is_kept`: collections are always kept.
+            tree.nodes[i].keep = true;
+            continue;
+        }
         let keep = filters.not_inheritable_node(&tree, i, &bs) && {
             let r = tree.nodes[i].object;
             match main.objects.get(r) {
@@ -954,6 +1046,7 @@ pub fn build_ex(
         tree.nodes[i].keep = keep;
     }
     filter(&mut tree);
+    remove_empty_collections(&mut tree);
     if bs.flatten_bones {
         tree.break_bone_hierarchy();
     }
@@ -1017,6 +1110,35 @@ fn filter(tree: &mut VTree) {
     }
     for r in tree.roots.clone() {
         rec(tree, r, None);
+    }
+}
+
+/// `remove_empty_collections` (WP 8.12): from each root, a collection node without children
+/// is dropped; one with children recurses into them. The recursion walks the children list it
+/// may shrink the way a Python `for` loop does (an index that keeps counting), so the sibling
+/// right after a removed collection is not visited, and a collection emptied by the removal of
+/// its last child collections stays (verified on 5.2.4).
+fn remove_empty_collections(tree: &mut VTree) {
+    fn rec(tree: &mut VTree, i: usize, depth: usize) {
+        if tree.nodes[i].kind != VType::Collection || depth > tree.nodes.len() {
+            return;
+        }
+        if tree.nodes[i].children.is_empty() {
+            match tree.nodes[i].parent {
+                Some(p) => tree.nodes[p].children.retain(|c| *c != i),
+                None => tree.roots.retain(|c| *c != i),
+            }
+            tree.nodes[i].keep = false;
+            return;
+        }
+        let mut k = 0;
+        while let Some(&c) = tree.nodes[i].children.get(k) {
+            rec(tree, c, depth + 1);
+            k += 1;
+        }
+    }
+    for r in tree.roots.clone() {
+        rec(tree, r, 0);
     }
 }
 

@@ -299,6 +299,7 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         .unwrap_or_else(|| "scene".into());
     settings.blend_dir = common::blend_dir(cx);
     settings.cwd = Some(cx.services().paths().cwd.clone());
+    settings.out_dir = path.parent().map(std::path::Path::to_path_buf);
     // `VExportTree.variants_reset_to_original` (KHR_materials_variants, M7 WP 7.5): with the
     // add-on preference on, the exported mesh objects get the default material of each slot
     // back, on the Blender data itself (the add-on leaves them there).

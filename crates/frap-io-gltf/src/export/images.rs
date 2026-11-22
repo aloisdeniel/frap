@@ -154,6 +154,9 @@ pub enum TextureSlot {
     /// A `KHR_materials_*` texture by its glTF member name (`"clearcoatTexture"`; M3 W0,
     /// `crate::material_ext`).
     Ext(&'static str),
+    /// The `k`-th unused Image Texture of a material (`export_unused_textures`, WP 8.12,
+    /// `unused.rs`).
+    Additional(usize),
 }
 
 /// A texture's identity: the material and the feature using it.
@@ -261,6 +264,66 @@ pub struct ImageCache {
     images: HashMap<(Arc<[u8]>, &'static str, String), Index>,
     textures: HashMap<TextureUse, Option<Index>>,
     file_names: Vec<String>,
+    /// Names of the images a texture's image was made from (the add-on's
+    /// `export_settings['exported_images']`, WP 8.12: `export_unused_images` skips them).
+    exported: std::collections::HashSet<String>,
+}
+
+impl ImageCache {
+    /// Whether a texture already wrote (part of) image `r` (`img.name in exported_images`).
+    pub(crate) fn was_exported(&self, main: &frap_scene::Main, r: IdRef<ImageId>) -> bool {
+        main.images
+            .get(r)
+            .is_some_and(|im| self.exported.contains(im.header.name.as_str()))
+    }
+}
+
+/// `__get_mime_type_of_image` for an image written whole (`export_unused_images`, WP 8.12):
+/// a 4-channel image is PNG, WebP for a WebP file; otherwise `export_image_format` decides
+/// (`AUTO`: JPEG and WebP files keep their format).
+pub(crate) fn whole_image_mime(settings: &ExportSettings, im: &Image, four: bool) -> &'static str {
+    if four {
+        return if is_webp_image(im) { WEBP } else { PNG };
+    }
+    match settings.export_image_format {
+        ExportImageFormat::Jpeg => JPEG,
+        ExportImageFormat::Webp => WEBP,
+        _ if is_jpeg_image(im) => JPEG,
+        _ if is_webp_image(im) => WEBP,
+        _ => PNG,
+    }
+}
+
+/// `Image.channels` (`ibuf->channels`): 4 for every byte buffer Blender allocates (generated,
+/// PNG, JPEG, …) and for frap's float buffers, which are RGBA; 0 when the image has no
+/// buffer (a missing file).
+pub(crate) fn image_channels(g: &Gather, im: &Image) -> u8 {
+    let (w, h) = image_size(g, im);
+    if w == 0 || h == 0 { 0 } else { 4 }
+}
+
+/// `get_gltf_image_from_blender_image` + `__traverse` (WP 8.12): image `r` written whole as
+/// `mime`, named as the add-on names it; nothing when it cannot be encoded.
+pub(crate) fn write_whole_image(
+    g: &mut Gather,
+    r: IdRef<ImageId>,
+    mime: &'static str,
+) -> Result<Option<Index>, ExportError> {
+    let main = g.main;
+    let Some(im) = main.images.get(r) else {
+        return Ok(None);
+    };
+    let ex = ExportImage::from_image(r);
+    let name = image_name(im);
+    g.images.exported.insert(im.header.name.to_string());
+    let Some(bytes) = encode(g, &ex, Target::from_mime(mime))? else {
+        g.warn(format!(
+            "image '{name}': Image data is empty, not exporting image"
+        ));
+        return Ok(None);
+    };
+    let p = make_image(g, bytes, mime, name);
+    Ok(Some(push_image(g, p)))
 }
 
 /// `tex_coord` moved to its own file (M7 W0, decision log M7W0-4: WP 7.7's Attribute-node
@@ -1054,9 +1117,18 @@ fn gather_new_texture(
     if inputs.len() > 1 {
         g.warn(SAMPLER_OF_FIRST_NODE);
     }
+    if g.settings.props.export_keep_originals.value {
+        return gather_original_texture(g, inputs);
+    }
     let ex = compose(g, inputs);
     if ex.fills.is_empty() {
         return Ok(None);
+    }
+    // `exported_images[name] = 1 / 2` (`encode_image.py`): fully or partly used.
+    for r in ex.images() {
+        if let Some(im) = main.images.get(r) {
+            g.images.exported.insert(im.header.name.to_string());
+        }
     }
     let happy = ex.happy().and_then(|r| main.images.get(r));
     let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
@@ -1152,6 +1224,155 @@ fn gather_new_texture(
         }
     }
     texture.source = source.map(|s| push_image(g, s));
+    g.doc.textures.push(texture);
+    Ok(Some((g.doc.textures.len() - 1) as Index))
+}
+
+/// `os.path.relpath(path, start)` on absolute, lexically normalised paths (`None` without a
+/// common root, as on Windows across drives), with `/` separators.
+fn relpath(path: &std::path::Path, start: &std::path::Path) -> Option<String> {
+    use std::path::Component;
+    fn norm(p: &std::path::Path) -> Vec<Component<'_>> {
+        let mut out: Vec<Component> = Vec::new();
+        for c in p.components() {
+            match c {
+                Component::CurDir => {}
+                Component::ParentDir => {
+                    if matches!(out.last(), Some(Component::Normal(_))) {
+                        out.pop();
+                    }
+                }
+                c => out.push(c),
+            }
+        }
+        out
+    }
+    let (p, s) = (norm(path), norm(start));
+    if p.first() != s.first() {
+        return None;
+    }
+    let common = p.iter().zip(&s).take_while(|(a, b)| a == b).count();
+    let mut parts: Vec<String> = vec!["..".to_owned(); s.len() - common];
+    parts.extend(
+        p[common..]
+            .iter()
+            .map(|c| c.as_os_str().to_string_lossy().into_owned()),
+    );
+    Some(if parts.is_empty() {
+        ".".to_owned()
+    } else {
+        parts.join("/")
+    })
+}
+
+/// `export_keep_originals` (WP 8.12), ported from blender/scripts/addons_core/io_scene_gltf2/
+/// blender/exp/material/image.py (`__get_image_data_mapping`: `ExportImage.from_original` of
+/// each socket's image, the last one kept; `__gather_mime_type`: PNG (WebP) for an Alpha
+/// socket, else the original file's format with `AUTO`; `__gather_name`: the image's name;
+/// `__gather_original_uri`: the file's path relative to the exported file's directory, the
+/// image dropped when the file does not exist; `__gather_buffer_view`: outside
+/// `GLTF_SEPARATE`, the encode of the fill-less `ExportImage`, a 1×1 white pixel (written next
+/// to the URI)) and texture.py (`__gather_extensions`: a WebP original goes into
+/// `EXT_texture_webp`, required, without a core `source`), io_scene_gltf2 5.2.41, Apache-2.0,
+/// The glTF-Blender-IO authors. A texture without an image is not written.
+fn gather_original_texture(
+    g: &mut Gather,
+    inputs: &[TexInput],
+) -> Result<Option<Index>, ExportError> {
+    let main = g.main;
+    let (Some(first), Some(last)) = (inputs.first(), inputs.last()) else {
+        return Ok(None);
+    };
+    let Some(orig) = main.images.get(last.tex.image) else {
+        return Ok(None);
+    };
+    let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
+    let mime = if alpha {
+        if g.settings.export_image_format == ExportImageFormat::Webp {
+            WEBP
+        } else {
+            PNG
+        }
+    } else {
+        match g.settings.export_image_format {
+            ExportImageFormat::Webp => WEBP,
+            ExportImageFormat::Jpeg => JPEG,
+            _ if is_jpeg_image(orig) => JPEG,
+            _ if is_webp_image(orig) => WEBP,
+            _ => PNG,
+        }
+    };
+    let file = (!orig.filepath.is_empty()).then(|| resolve(g, &orig.filepath));
+    let start = match (&g.settings.out_dir, &g.settings.cwd) {
+        (Some(d), _) => d.clone(),
+        (None, Some(c)) => c.clone(),
+        (None, None) => std::env::current_dir().unwrap_or_default(),
+    };
+    let uri = file
+        .filter(|f| f.exists())
+        .and_then(|f| relpath(&f, &start))
+        .map(|r| path_to_uri(&r));
+    let Some(uri) = uri else {
+        return Ok(None);
+    };
+    let name = orig.header.name.to_string();
+    let bytes = if g.settings.export_format == ExportFormat::GltfSeparate {
+        None
+    } else {
+        encode(g, &ExportImage::default(), Target::from_mime(mime))?
+    };
+    let key = (
+        bytes.clone().unwrap_or_else(|| Arc::from(Vec::new())),
+        mime,
+        format!("{name}\u{0}{uri}"),
+    );
+    let image = match g.images.images.get(&key) {
+        Some(i) => *i,
+        None => {
+            let img = GImage {
+                mime_type: Some(mime.to_owned()),
+                name: Some(name),
+                uri: Some(uri),
+                buffer_view: bytes.map(|b| g.buf.push_view(&b, 4, None, None)),
+                ..GImage::default()
+            };
+            g.doc.images.push(img);
+            let i = (g.doc.images.len() - 1) as Index;
+            g.images.images.insert(key, i);
+            i
+        }
+    };
+    let s = sampler(first.tex);
+    let skey = (
+        s.mag_filter.map_or(0, u32::from),
+        s.min_filter.map_or(0, u32::from),
+        s.wrap_s.map(u32::from),
+        s.wrap_t.map(u32::from),
+    );
+    let sampler_index = match g.images.samplers.get(&skey) {
+        Some(i) => *i,
+        None => {
+            g.doc.samplers.push(s);
+            let i = (g.doc.samplers.len() - 1) as Index;
+            g.images.samplers.insert(skey, i);
+            i
+        }
+    };
+    let mut texture = Texture {
+        sampler: Some(sampler_index),
+        ..Texture::default()
+    };
+    if mime == WEBP {
+        texture
+            .extensions
+            .set(Some(frap_gltf::ext::ext_texture_webp::ExtTextureWebp {
+                source: Some(image),
+                ..Default::default()
+            }));
+        g.use_extension(frap_gltf::ext::ext_texture_webp::ExtTextureWebp::NAME, true);
+    } else {
+        texture.source = Some(image);
+    }
     g.doc.textures.push(texture);
     Ok(Some((g.doc.textures.len() - 1) as Index))
 }

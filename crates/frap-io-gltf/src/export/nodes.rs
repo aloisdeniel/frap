@@ -156,6 +156,9 @@ pub fn gather_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, Expo
     if tree.nodes[i].kind == VType::Bone {
         return skins::gather_joint(g, tree, i);
     }
+    if tree.nodes[i].kind == VType::Collection {
+        return gather_collection_node(g, tree, i);
+    }
     let r = tree.nodes[i].object;
     let main = g.main;
     let ob = main
@@ -235,6 +238,44 @@ pub fn gather_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, Expo
         .objects
         .insert((scene, r), index);
     Ok(index)
+}
+
+/// A collection node of `export_hierarchy_full_collections` (WP 8.12, `gather_node` with
+/// `blender_type == COLLECTION`): no camera, mesh, skin or light, the collection's name and
+/// `extras`, its children in order, and its transform (the identity, moved by
+/// `at_collection_center` at the root).
+fn gather_collection_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, ExportError> {
+    let mut children = Vec::with_capacity(tree.nodes[i].children.len());
+    for &c in &tree.nodes[i].children {
+        match tree.nodes[c].kind {
+            VType::Bone if tree.armature_object_remove => {
+                children.push(skins::gather_joint(g, tree, c)?)
+            }
+            VType::Bone => {}
+            _ => children.push(gather_node(g, tree, c)?),
+        }
+    }
+    let main = g.main;
+    let (name, coll) = tree.nodes[i]
+        .collection
+        .clone()
+        .ok_or_else(|| ExportError::Invalid("collection node without a collection".into()))?;
+    let header = match coll {
+        Some(c) => main.collections.get(c).map(|c| &c.header),
+        None => main.scenes.get(g.scene).map(|s| &s.collection.header),
+    };
+    let extras = header.and_then(|h| extras::id(g, h));
+    let (translation, rotation, scale) = trs(&node_local_matrix(g, tree, i), g.settings.export_yup);
+    g.doc.nodes.push(Node {
+        children,
+        name: Some(name.to_string()),
+        extras,
+        translation,
+        rotation,
+        scale,
+        ..Node::default()
+    });
+    Ok((g.doc.nodes.len() - 1) as Index)
 }
 
 /// End of a scene's gather (`__gather_scene` after its roots, then `get_unused_skins` of the
