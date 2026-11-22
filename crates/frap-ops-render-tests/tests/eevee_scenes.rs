@@ -20,7 +20,9 @@
 //!     swatches seen through each view transform and look); at every probe (mean of the 3 x 3
 //!     pixels around `x, y`, top row 0) the colour is within CIE76 ΔE < 1 of Blender's;
 //! - `tests/golden/fixtures/render_eevee/scenes/<stem>.frap.png`, the frap-blessed
-//!   self-golden: SSIM ≥ 0.995 and mean ΔE ≤ 2 (strict; gating on every CI adapter).
+//!   self-golden: SSIM ≥ 0.995 and mean ΔE ≤ 2 (strict; gating on every CI adapter), 8-bit
+//!   channels within one level of the golden's counted as equal (the drivers' float rounding
+//!   moves the rounding contours of smooth gradients).
 //!
 //! Without an adapter the test fails, or prints a notice and passes under
 //! `FRAP_GPU_OPTIONAL=1`.
@@ -518,8 +520,9 @@ fn eevee_scene_goldens() {
             }
             match image_ssim::load_png(&fixture(&repo, image, "frap")) {
                 Ok(golden) => {
+                    // One-level differences are the drivers' float rounding (M56CI-6).
                     failures.extend(
-                        image_ssim::compare(
+                        image_ssim::compare_within_one_level(
                             &format!("{id} vs self-golden"),
                             &ours,
                             &golden,

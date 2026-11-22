@@ -244,6 +244,44 @@ pub fn compare(
     }
 }
 
+/// `frap` with every 8-bit channel within one level of `reference`'s taken from `reference`
+/// (`None` when the sizes differ). For self-goldens across GPU adapters: float evaluation
+/// differs in its last bits between drivers (transcendental functions, FMA contraction), which
+/// moves the 8-bit rounding contours of smooth gradients by one pixel; on a flat region an
+/// 8 × 8 SSIM window with such a contour scores about 0.9, so a handful of contours fails the
+/// 0.995 gate although no pixel moved by more than 1/255 (decision log M56CI-6).
+pub fn snap_one_level(frap: &DecodedImage, reference: &DecodedImage) -> Option<DecodedImage> {
+    if (frap.width, frap.height) != (reference.width, reference.height) {
+        return None;
+    }
+    let (mut a, b) = (to_rgba8(frap), to_rgba8(reference));
+    for (x, y) in a.iter_mut().zip(&b) {
+        if x.abs_diff(*y) <= 1 {
+            *x = *y;
+        }
+    }
+    Some(DecodedImage {
+        width: frap.width,
+        height: frap.height,
+        channels: 4,
+        pixels: PixelData::U8(a),
+    })
+}
+
+/// [`compare`] after [`snap_one_level`]: differences of one 8-bit level are not counted.
+pub fn compare_within_one_level(
+    what: &str,
+    frap: &DecodedImage,
+    reference: &DecodedImage,
+    min_ssim: f64,
+    max_delta_e: f64,
+) -> Vec<Mismatch> {
+    match snap_one_level(frap, reference) {
+        Some(snapped) => compare(what, &snapped, reference, min_ssim, max_delta_e),
+        None => compare(what, frap, reference, min_ssim, max_delta_e),
+    }
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -381,5 +419,44 @@ pub(crate) mod tests {
         assert_eq!(delta_e([10, 20, 30], [10, 20, 30]), 0.0);
         // Black to white is L* 0 → 100.
         assert!((delta_e([0, 0, 0], [255, 255, 255]) - 100.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn one_level_contours_are_not_counted() {
+        let a = picture();
+        let PixelData::U8(px) = &a.pixels else {
+            unreachable!()
+        };
+        // A one-level contour over a flat region fails the self-golden gate...
+        let mut flat = vec![100u8; 32 * 32 * 3];
+        let mut contour = flat.clone();
+        for y in 0..32 {
+            for x in 0..32 {
+                if x + y == 31 || x + y == 32 {
+                    contour[(y * 32 + x) * 3] = 101;
+                }
+            }
+        }
+        let img = |p: Vec<u8>| DecodedImage {
+            width: 32,
+            height: 32,
+            channels: 3,
+            pixels: PixelData::U8(p),
+        };
+        assert!(!compare("c", &img(contour.clone()), &img(flat.clone()), SELF_MIN_SSIM, 2.0).is_empty());
+        // ...but not the one-level comparison; a two-level difference still does.
+        assert!(compare_within_one_level("c", &img(contour), &img(flat.clone()), SELF_MIN_SSIM, 2.0).is_empty());
+        for y in 0..32 {
+            for x in 0..32 {
+                if x + y == 31 || x + y == 32 {
+                    flat[(y * 32 + x) * 3] = 102;
+                }
+            }
+        }
+        assert!(!compare_within_one_level("c", &img(flat), &img(vec![100u8; 32 * 32 * 3]), SELF_MIN_SSIM, 2.0).is_empty());
+        // The picture itself is unchanged by snapping onto itself.
+        let s = snap_one_level(&a, &a).unwrap();
+        assert_eq!(score(&s, &a).unwrap().ssim, 1.0);
+        assert_eq!(px.len(), 32 * 32 * 3);
     }
 }
