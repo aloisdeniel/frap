@@ -22,6 +22,8 @@ pub struct Collection {
     pub hide_render: bool,
     /// `collection.color_tag` ("NONE", "COLOR_01" … "COLOR_08")
     pub color_tag: SmolStr,
+    /// `collection.instance_offset` (subtracted before the instancer's matrix; WP 8.3.4).
+    pub instance_offset: [f32; 3],
 }
 
 impl Collection {
@@ -42,6 +44,7 @@ impl Collection {
             hide_viewport: false,
             hide_render: false,
             color_tag: "NONE".into(),
+            instance_offset: [0.0; 3],
         }
     }
 }
@@ -54,6 +57,7 @@ crate::id::id_rna! { Collection as frap_spec_rna::COLLECTION, "COLLECTION" {
     hide_viewport => hide_viewport (set = hook),
     hide_render => hide_render,
     color_tag => color_tag,
+    instance_offset => instance_offset,
 }}
 
 impl IdType for Collection {

@@ -203,6 +203,9 @@ NORMALISE = {
     "D-147": ("cases", "cases mirror one mesh per run or meshes with different element counts"),
     "D-148": ("cases", "vertex_group_copy_to_selected only fails where Blender changes nothing"),
     "D-149": ("cases", "undo cases push the steps frap pushes implicitly with #@blender bpy.ops.ed.undo_push(...) lines"),
+    "D-150": ("cases", "Blender runs a #@blender transcription of select_grouped, and collection_objects_select in a #@blender temp_override(collection=...)"),
+    "D-151": ("cases", "cases only cancel or fail the object selection operators with nothing selected or with extend=True"),
+    "D-152": ("cases", "cases do not read users after duplicates_make_real"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -68,7 +68,7 @@ fn adt_mut<'m>(main: &'m mut Main, log: &mut ChangeLog, a: IdAny) -> Option<&'m 
 
 /// The datablocks copied in this call and their copies (`ID.newid`, `ID_TAG_NEW`).
 #[derive(Default)]
-struct NewIds {
+pub(crate) struct NewIds {
     /// Original -> copy. An action copied more than once maps to its last copy, as
     /// `ID_NEW_SET` overwrites `newid`.
     map: HashMap<IdAny, IdAny>,
@@ -81,7 +81,7 @@ impl NewIds {
     /// is copied once), with its shape keys (`BKE_key_from_id`), and, when `dup_act`
     /// (`USER_DUP_ACT`), a copy of the active action of the copy and of its shape keys
     /// (`BKE_animdata_duplicate_id_action`).
-    fn duplicate(
+    pub(crate) fn duplicate(
         &mut self,
         main: &mut Main,
         log: &mut ChangeLog,
@@ -152,7 +152,7 @@ impl NewIds {
     /// modifier operands, object data, active and NLA strip actions (verified on 5.2.4: a
     /// strip of a duplicated object uses the copy of its action when the object's or its
     /// data's active action was copied, the original otherwise).
-    fn relink(&self, main: &mut Main, log: &mut ChangeLog) {
+    pub(crate) fn relink(&self, main: &mut Main, log: &mut ChangeLog) {
         fn go<T: IdType>(
             m: &mut IdMap<T>,
             a: IdAny,

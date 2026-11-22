@@ -195,26 +195,26 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.mode_set` | M1 | P0 | prereq (WP 1.19); dispatcher + `modes/object.rs` M1; `modes/edit_mesh.rs` M2 (WP 2.2); `modes/{edit_armature,pose}.rs` M6 (WP 6.2) |
 | [x] | `object.editmode_toggle` | M2 | P1 |  |
 | [x] | `object.posemode_toggle` | M6 | P1 | WP 6.2 (M5+M6 W0) |
-| [ ] | `object.mode_set_with_submode` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.mode_set_with_submode` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
 | [x] | `object.select_by_type` | M1 | P1 |  |
 | [x] | `object.select_pattern` | M1 | P1 |  |
-| [ ] | `object.select_grouped` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_hierarchy` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_linked` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_random` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_camera` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_mirror` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_more` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_less` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.select_same_collection` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_grouped` | M8 | P2 | headless-extended (D-150): Blender's poll refuses background mode, frap runs the exec; KEYINGSET always fails (keying sets are not bound); WP 8.3.4 |
+| [x] | `object.select_hierarchy` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_linked` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_random` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_camera` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_mirror` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_more` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_less` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.select_same_collection` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.camera_add` | M1 | P0 | sets scene.camera when None (virtual 3D View); object and data uniquified independently |
 | [x] | `object.light_add` | M1 | P0 | 10 W (factory Light is 1000 W) |
 | [x] | `object.empty_add` | M1 | P0 |  |
 | [x] | `object.armature_add` | M6 | P0 | WP 6.2 (M5+M6 W0) |
-| [ ] | `object.add` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.add_named` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.collection_instance_add` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.add` | M8 | P2 | types with data in frap (MESH, CAMERA, LIGHT, ARMATURE, EMPTY, POINTCLOUD), the others OP_NOT_IMPLEMENTED naming the type; WP 8.3.4 |
+| [x] | `object.add_named` | M8 | P2 | by name or session_uid; drop_x/drop_y OP_NOT_IMPLEMENTED (deviations §2); WP 8.3.4 |
+| [x] | `object.collection_instance_add` | M8 | P2 | by name, session_uid or the collection enum; drop_x/drop_y OP_NOT_IMPLEMENTED (deviations §2); WP 8.3.4 |
 | [x] | `object.delete` | M1 | P0 | prereq (WP 1.19); leaves orphan data; re-adding then names data `.001` (T0) |
 | [x] | `object.duplicate` | M1 | P0 | materials shared (factory prefs) |
 | [x] | `object.duplicate_move` | M1 | P0 | macro |
@@ -222,7 +222,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
 | [x] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [x] | `object.join_shapes` | M6 | P2 | WP 6.3 (M5+M6 W0) |
-| [ ] | `object.duplicates_make_real` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.duplicates_make_real` | M8 | P2 | collection instances (nested ones included); vertex/face instancing OP_NOT_IMPLEMENTED; WP 8.3.4 |
 | [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE, ARMATURE_NAME, ARMATURE_ENVELOPE, BONE, BONE_RELATIVE M6 (WP 6.5); ARMATURE_AUTO (bone heat) and SUBSURF limit-surface weights M8 (WP 8.5) |
 | [x] | `object.parent_clear` | M1 | P0 |  |
 | [x] | `object.parent_no_inverse_set` | M1 | P1 |  |
@@ -310,11 +310,11 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.hide_view_clear` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
 | [x] | `object.make_single_user` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
 | [x] | `object.make_links_data` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
-| [ ] | `object.hide_render_clear_all` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.hide_render_clear_all` | M8 | P2 | WP 8.3.4 |
 | [ ] | `object.track_set` | M9 | P2 | post-M8 (M8 W0, M8W0-3): adds a Track To / Damped Track / Locked Track constraint, and constraints are OUT (rule 3) |
 | [ ] | `object.track_clear` | M9 | P2 | post-M8 (M8 W0, M8W0-3): removes tracking constraints (constraints OUT) |
-| [ ] | `object.hide_collection` | M8 | P2 | WP 8.3.4 |
-| [ ] | `object.collection_objects_select` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.hide_collection` | M8 | P2 | WP 8.3.4 |
+| [x] | `object.collection_objects_select` | M8 | P2 | headless-extended (D-150): runs on the active collection, as from the Outliner; WP 8.3.4 |
 | [ ] | `object.data_transfer` | M8 | P2 | WP 8.3.13 |
 | [ ] | `object.datalayout_transfer` | M8 | P2 | WP 8.3.13 |
 | [ ] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |

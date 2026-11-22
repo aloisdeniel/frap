@@ -1,0 +1,116 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.select_linked",
+  "bl_idname": "OBJECT_OT_select_linked",
+  "label": "Select Linked",
+  "description": "Select all visible objects that are linked",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_OBJECT"
+    ],
+    "text": "requires Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "extend",
+      "name": "Extend",
+      "description": "Extend selection instead of deselecting everything first",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "OBDATA",
+      "enum_items": [
+        {
+          "identifier": "OBDATA",
+          "name": "Object Data",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "",
+          "value": 3
+        },
+        {
+          "identifier": "DUPGROUP",
+          "name": "Instanced Collection",
+          "description": "",
+          "value": 4
+        },
+        {
+          "identifier": "PARTICLE",
+          "name": "Particle System",
+          "description": "",
+          "value": 5
+        },
+        {
+          "identifier": "LIBRARY",
+          "name": "Library",
+          "description": "",
+          "value": 6
+        },
+        {
+          "identifier": "LIBRARY_OBDATA",
+          "name": "Library (Object Data)",
+          "description": "",
+          "value": 7
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

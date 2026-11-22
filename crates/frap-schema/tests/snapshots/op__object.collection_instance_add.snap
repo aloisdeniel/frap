@@ -1,0 +1,302 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.collection_instance_add",
+  "bl_idname": "OBJECT_OT_collection_instance_add",
+  "label": "Add Collection Instance",
+  "description": "Add a collection instance",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an editable scene, Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "name",
+      "name": "Name",
+      "description": "Collection name to add",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Collection",
+      "length_max": 256,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "collection",
+      "name": "Collection",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "enum_items": [],
+      "is_enum_flag": false,
+      "dynamic_enum": "OBJECT_OT_collection_instance_add.collection",
+      "context_rule": "items depend on the context in Blender (OBJECT_OT_collection_instance_add.collection); frap narrows them to the live context, enum_items is the superset",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "align",
+      "name": "Align",
+      "description": "The alignment of the new object",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "WORLD",
+      "enum_items": [
+        {
+          "identifier": "WORLD",
+          "name": "World",
+          "description": "Align the new object to the world",
+          "value": 0
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the new object to the view",
+          "value": 1
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "3D Cursor",
+          "description": "Use the 3D cursor orientation for the new object",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "location",
+      "name": "Location",
+      "description": "Location for the newly added object",
+      "type": "FLOAT",
+      "subtype": "XYZ_LENGTH",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -1000,
+      "soft_max": 1000,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: the 3D cursor location (scene.cursor.location)",
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "rotation",
+      "name": "Rotation",
+      "description": "Rotation for the newly added object",
+      "type": "FLOAT",
+      "subtype": "EULER",
+      "unit": "ROTATION (radians)",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -6.2831855,
+      "soft_max": 6.2831855,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins",
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "scale",
+      "name": "Scale",
+      "description": "Scale for the newly added object",
+      "type": "FLOAT",
+      "subtype": "XYZ_LENGTH",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -1000,
+      "soft_max": 1000,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "session_uid",
+      "name": "Session UID",
+      "description": "Session UID of the data-block to use by the operator",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "drop_x",
+      "name": "Drop X",
+      "description": "X-coordinate (screen space) to place the new object under",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "drop_y",
+      "name": "Drop Y",
+      "description": "Y-coordinate (screen space) to place the new object under",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "drop_x/drop_y (placement under the mouse) answer OP_NOT_IMPLEMENTED: the virtual 3D View has no region",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "the collection comes from session_uid, else name (when passed), else the collection enum",
+      "the instance goes to the closest visible ancestor of the active collection when that one is part of the instanced collection (the active collection moves there)"
+    ]
+  }
+}

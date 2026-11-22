@@ -939,6 +939,10 @@ impl Main {
             if let Some(a) = ob.animation_data.as_ref().and_then(|a| a.action) {
                 f(me, a.any());
             }
+            // `Object.instance_collection` (`IDWALK_CB_USER`; WP 8.3.4).
+            if let Some(c) = ob.instance_collection {
+                f(me, c.any());
+            }
             // Modifier pointers (M4 W0): node groups, textures, collections are users
             // (`IDWALK_CB_USER` in every `MOD_*.cc` `foreach_ID_link`); objects are not
             // (`IDWALK_CB_NOP`: Boolean operands, mirror objects, …).
