@@ -1,0 +1,103 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.select_mirror",
+  "bl_idname": "MESH_OT_select_mirror",
+  "label": "Select Mirror",
+  "description": "Select mesh items at mirrored locations",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "axis",
+      "name": "Axis",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "X"
+      ],
+      "enum_items": [
+        {
+          "identifier": "X",
+          "name": "X",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "Y",
+          "name": "Y",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "Z",
+          "name": "Z",
+          "description": "",
+          "value": 4
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ENUM_FLAG",
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "extend",
+      "name": "Extend",
+      "description": "Extend the existing selection",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "always the spatial mirror table (Mesh.use_mirror_topology is not bound)"
+    ]
+  }
+}

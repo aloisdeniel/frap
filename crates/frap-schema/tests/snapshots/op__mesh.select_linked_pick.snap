@@ -1,0 +1,170 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.select_linked_pick",
+  "bl_idname": "MESH_OT_select_linked_pick",
+  "label": "Select Linked",
+  "description": "(De)select all vertices linked to the edge under the mouse cursor",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "deselect",
+      "name": "Deselect",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "delimit",
+      "name": "Delimit",
+      "description": "Delimit selected region",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "SEAM"
+      ],
+      "enum_items": [
+        {
+          "identifier": "NORMAL",
+          "name": "Normal",
+          "description": "Delimit by face directions",
+          "value": 1
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "Delimit by face material",
+          "value": 2
+        },
+        {
+          "identifier": "SEAM",
+          "name": "Seam",
+          "description": "Delimit by edge seams",
+          "value": 4
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Delimit by sharp edges",
+          "value": 8
+        },
+        {
+          "identifier": "UV",
+          "name": "UVs",
+          "description": "Delimit by UV coordinates",
+          "value": 16
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ENUM_FLAG",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "object_index",
+      "name": "",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "index",
+      "name": "",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "select by index like Blender's redo path: object_index (objects in Edit Mode, active first) and index (vertices, then edges, then faces) are required; without them the operator is CANCELLED",
+      "an unset delimit is Blender's initial default for the select mode: none in vertex/edge mode, {'SEAM'} in face-only mode (Blender then remembers the last delimit passed in the session; frap does not)"
+    ]
+  }
+}

@@ -45,19 +45,19 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.loop_to_region` | M2 | P2 |  |
 | [x] | `mesh.region_to_loop` | M2 | P2 |  |
 | [x] | `mesh.shortest_path_select` | M2 | P2 |  |
-| [ ] | `mesh.select_nth` | M8 | P2 | undefined without active element; WP 8.3.1 |
-| [ ] | `mesh.select_boundary_loop_multi` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_similar` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_similar_region` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_interior_faces` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_mirror` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_axis` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_ungrouped` | M8 | P2 | needs vertex groups (M6); WP 8.3.1 |
-| [ ] | `mesh.select_by_pole_count` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_next_item` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_prev_item` | M8 | P2 | WP 8.3.1 |
-| [ ] | `mesh.select_linked_pick` | M8 | P2 | headless-extended: index; WP 8.3.1 |
-| [ ] | `mesh.shortest_path_pick` | M8 | P2 | headless-extended: index; WP 8.3.1 |
+| [x] | `mesh.select_nth` | M8 | P2 | without an active element: the first selected one (Blender's `deselect_nth_active`); WP 8.3.1 |
+| [x] | `mesh.select_boundary_loop_multi` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_similar` | M8 | P2 | threshold shared with `uv.select_similar` (`ToolSettings.select_thresh`); WP 8.3.1 |
+| [x] | `mesh.select_similar_region` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_interior_faces` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_mirror` | M8 | P2 | spatial mirror table (`use_mirror_topology` not bound); WP 8.3.1 |
+| [x] | `mesh.select_axis` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_ungrouped` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_by_pole_count` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_next_item` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_prev_item` | M8 | P2 | WP 8.3.1 |
+| [x] | `mesh.select_linked_pick` | M8 | P2 | headless-extended: index; WP 8.3.1 |
+| [x] | `mesh.shortest_path_pick` | M8 | P2 | headless-extended: index; WP 8.3.1 |
 | [x] | `mesh.extrude_region` | M2 | P0 | T1 |
 | [x] | `mesh.extrude_region_move` | M2 | P0 | macro; T1 |
 | [x] | `mesh.extrude_region_shrink_fatten` | M2 | P0 | macro |

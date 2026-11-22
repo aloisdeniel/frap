@@ -62,7 +62,7 @@ fn manifest_selected_operators() {
         "object.track_set",
         "armature.extrude_forked",
         "object.voxel_remesh",
-        "mesh.select_similar",
+        "anim.keying_set_active_set",
     ] {
         let e = find_op(idname).unwrap();
         assert!(
