@@ -17,9 +17,9 @@
 //!   `get_default_pbr_for_emissive_node` (`baseColorFactor` [0, 0, 0, 1]); any other surface
 //!   keeps the glTF default material and gets a WARNING.
 //!
-//! frap does not pack an alpha taken from another image (or from an image's colour output,
-//! RGB → BW) into the base-colour texture as the add-on does: the alpha texture is dropped
-//! with a WARNING (docs/deviations.md §2).
+//! An alpha taken from another image (or another channel of it, or from an image's colour
+//! output, RGB → BW) is packed into the base colour image's alpha as the add-on does
+//! (`MaterialExts::base_alpha`, WP 8.12); a grey alpha alone gives a white image carrying it.
 //!
 //! Raising ports `base_color()` (`imp/pbrMetallicRoughness.py`): constant factor (and
 //! `Material.diffuse_color`, `set_viewport_color`), or the "Alpha Clip" frame
@@ -32,7 +32,9 @@
 use frap_nodes::{Node, SocketAddr, SocketValue};
 
 use crate::graph::{In, Src, SrcChannel, unrecognised};
-use crate::{AlphaMode, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef};
+use crate::{
+    AlphaMode, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, PackedAlpha, RaiseCx, TexRef,
+};
 
 /// Short description of the node behind a source, for diagnostics.
 pub(crate) fn describe(src: Src<'_>) -> String {
@@ -53,41 +55,48 @@ pub(crate) fn base_color_texture<'a>(
     color: Option<In<'a>>,
     alpha: Option<In<'a>>,
     diags: &mut Vec<frap_rna::Report>,
-) -> Option<TexRef> {
+) -> (Option<TexRef>, Option<PackedAlpha>) {
     let color_hit = color.and_then(|s| cx.texture_from(s));
     let alpha_hit = alpha.and_then(|s| cx.texture_from(s).map(|h| (s, h)));
     match (color_hit, alpha_hit) {
         (Some(c), alpha_hit) => {
-            let mut t = cx.tex_ref(c.node, ChannelSel::Rgb, diags)?;
+            let Some(mut t) = cx.tex_ref(c.node, ChannelSel::Rgb, diags) else {
+                return (None, None);
+            };
+            let mut packed = None;
             if let Some((a, ah)) = alpha_hit {
                 let same = cx.image_of(ah.node) == Some(t.image);
                 match cx.source_channel(a, &ah) {
                     SrcChannel::One(ChannelSel::A) if same => t.channel = ChannelSel::Rgba,
-                    _ => unrecognised(
-                        diags,
-                        format!(
-                            "Alpha: Image Texture \"{}\" cannot be packed into the base colour image's alpha; exported without it",
-                            ah.node.name
-                        ),
-                    ),
+                    // Another image, another channel, or a colour converted to grey: packed
+                    // into the base colour image's alpha (WP 8.12).
+                    ch => {
+                        let (channel, rgb_to_bw) = match ch {
+                            SrcChannel::One(ch) => (ch, false),
+                            SrcChannel::Rgb2Bw => (ChannelSel::A, true),
+                        };
+                        packed = cx.tex_ref(ah.node, channel, diags).map(|texture| PackedAlpha {
+                            texture,
+                            rgb_to_bw,
+                        });
+                    }
                 }
             }
-            Some(t)
+            (Some(t), packed)
         }
         (None, Some((a, ah))) => match cx.source_channel(a, &ah) {
-            SrcChannel::One(ch) => cx.tex_ref(ah.node, ch, diags),
+            SrcChannel::One(ch) => (cx.tex_ref(ah.node, ch, diags), None),
             SrcChannel::Rgb2Bw => {
-                unrecognised(
-                    diags,
-                    format!(
-                        "Alpha: the colour of Image Texture \"{}\" (converted to grey) is not exported as alpha",
-                        ah.node.name
-                    ),
-                );
-                None
+                // A grey alpha alone: a white image carrying it (WP 8.12).
+                let t = cx.tex_ref(ah.node, ChannelSel::A, diags);
+                let packed = t.clone().map(|texture| PackedAlpha {
+                    texture,
+                    rgb_to_bw: true,
+                });
+                (t, packed)
             }
         },
-        (None, None) => None,
+        (None, None) => (None, None),
     }
 }
 
@@ -132,7 +141,9 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.base_color.factor[..3].copy_from_slice(&rgb);
     let tex_socket = base_socket.or_else(|| cx.gltf_output_input("BaseColor"));
     let alpha_socket = In::named(p, "Alpha");
-    out.base_color.texture = base_color_texture(cx, tex_socket, alpha_socket, &mut out.diagnostics);
+    let (texture, packed) = base_color_texture(cx, tex_socket, alpha_socket, &mut out.diagnostics);
+    out.base_color.texture = texture;
+    out.ext.base_alpha = packed;
     // A Base Color linked to something that is neither a texture, a factor nor a colour
     // attribute: the add-on exports the factor only.
     if let Some(s) = base_socket

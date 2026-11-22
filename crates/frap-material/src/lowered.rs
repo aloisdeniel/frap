@@ -264,6 +264,23 @@ pub struct MaterialExts {
     /// white, or a constant behind the link), so the exporter writes `specularColorFactor`
     /// even when it is `[1, 1, 1]`, as the add-on does (WP 8.12).
     pub specular_color_set: bool,
+    /// The alpha the exporter packs into the base-colour image's A channel (WP 8.12): an
+    /// `Alpha` fed by another image than the base colour's, or by an image's colour output
+    /// (converted to grey). When it is the only texture, [`LoweredMaterial::base_color`]'s
+    /// texture is the same reference, read through `A`.
+    pub base_alpha: Option<PackedAlpha>,
+}
+
+/// An alpha texture packed into the base colour image (`__get_image_data_mapping` with the
+/// `Alpha` socket, WP 8.12).
+#[derive(Clone, Debug, PartialEq)]
+pub struct PackedAlpha {
+    /// The texture behind `Alpha` (its channel: `A`, or `R`/`G`/`B` through a Separate Color).
+    pub texture: TexRef,
+    /// `Channel.RGB2BW`: a colour output plugged into `Alpha`, converted to grey
+    /// (`0.2989 R + 0.5870 G + 0.1140 B`, times the image's alpha unless its `alpha_mode` is
+    /// `CHANNEL_PACKED` or `NONE`).
+    pub rgb_to_bw: bool,
 }
 
 /// `KHR_materials_pbrSpecularGlossiness` as the glTF importer raises it

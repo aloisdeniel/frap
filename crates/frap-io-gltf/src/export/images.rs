@@ -176,9 +176,19 @@ pub enum Role {
     Occlusion,
     /// `Alpha` → A (R, G and B filled white when still empty); the image is PNG.
     Alpha,
+    /// `Alpha` fed by an image's colour output (`Channel.RGB2BW`, WP 8.12): its grey value
+    /// → A, as [`Role::Alpha`] otherwise.
+    AlphaBw,
     /// Another socket with a fixed destination channel (`Coat Weight` → R, `Thickness` → G,
     /// `Specular IOR Level` → A, …).
     Channel(u8),
+}
+
+impl Role {
+    /// The `Alpha` socket ([`Role::Alpha`] or [`Role::AlphaBw`]).
+    pub fn is_alpha(self) -> bool {
+        matches!(self, Role::Alpha | Role::AlphaBw)
+    }
 }
 
 /// One socket of a texture: its texture reference and its role.
@@ -195,6 +205,8 @@ pub struct TexInput<'t> {
 enum Fill {
     /// Channel `src` of an image.
     Image(IdRef<ImageId>, u8),
+    /// The grey value of an image's colour (`FillImageRGB2BW`, WP 8.12).
+    ImageBw(IdRef<ImageId>),
     /// All ones.
     White,
 }
@@ -228,7 +240,7 @@ impl ExportImage {
     fn images(&self) -> Vec<IdRef<ImageId>> {
         let mut v = Vec::new();
         for (_, f) in &self.fills {
-            if let Fill::Image(i, _) = f
+            if let Fill::Image(i, _) | Fill::ImageBw(i) = f
                 && !v.contains(i)
             {
                 v.push(*i);
@@ -879,14 +891,28 @@ fn encode_unhappy(
                 buf.scale(w, h);
             }
             let px = buf.pixels();
+            // `FillImageRGB2BW`: `R * 0.2989 + G * 0.5870 + B * 0.1140` in float32, times the
+            // alpha when `alpha_mode` is STRAIGHT or PREMUL.
+            let times_alpha = matches!(im.alpha_mode.as_str(), "STRAIGHT" | "PREMUL");
             for (dst, f) in &ex.fills {
-                if let Fill::Image(i, src) = f
-                    && i == r
-                {
-                    let (d, s) = (usize::from(*dst), usize::from(*src));
-                    for (o, p) in out.chunks_exact_mut(4).zip(px.chunks_exact(4)) {
-                        o[d] = p[s];
+                match f {
+                    Fill::Image(i, src) if i == r => {
+                        let (d, s) = (usize::from(*dst), usize::from(*src));
+                        for (o, p) in out.chunks_exact_mut(4).zip(px.chunks_exact(4)) {
+                            o[d] = p[s];
+                        }
                     }
+                    Fill::ImageBw(i) if i == r => {
+                        let d = usize::from(*dst);
+                        for (o, p) in out.chunks_exact_mut(4).zip(px.chunks_exact(4)) {
+                            let mut v = p[0] * 0.2989f32 + p[1] * 0.5870f32 + p[2] * 0.1140f32;
+                            if times_alpha {
+                                v *= p[3];
+                            }
+                            o[d] = v;
+                        }
+                    }
+                    _ => {}
                 }
             }
         }
@@ -999,8 +1025,12 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
                 }
             }
             Role::Occlusion => ex.fill(0, Fill::Image(img, src(i.tex, 0))),
-            Role::Alpha => {
-                ex.fill(3, Fill::Image(img, src(i.tex, 3)));
+            Role::Alpha | Role::AlphaBw => {
+                if i.role == Role::AlphaBw {
+                    ex.fill(3, Fill::ImageBw(img));
+                } else {
+                    ex.fill(3, Fill::Image(img, src(i.tex, 3)));
+                }
                 for c in 0..3 {
                     if !ex.is_filled(c) {
                         ex.fill(c, Fill::White);
@@ -1014,7 +1044,7 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
     let main = g.main;
     let mut empty = Vec::new();
     for (_, f) in &ex.fills {
-        if let Fill::Image(r, _) = f
+        if let Fill::Image(r, _) | Fill::ImageBw(r) = f
             && main
                 .images
                 .get(*r)
@@ -1033,7 +1063,7 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
             "Image '{name}' has no size and cannot be exported."
         ));
         ex.fills
-            .retain(|(_, f)| !matches!(f, Fill::Image(i, _) if *i == r));
+            .retain(|(_, f)| !matches!(f, Fill::Image(i, _) | Fill::ImageBw(i) if *i == r));
     }
     ex
 }
@@ -1109,7 +1139,7 @@ pub fn texture_writable(g: &mut Gather, inputs: &[TexInput]) -> Result<bool, Exp
         return Ok(false);
     }
     let happy = ex.happy().and_then(|r| g.main.images.get(r));
-    let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
+    let alpha = inputs.iter().any(|i| i.role.is_alpha());
     let mime = mime_for(g.settings, happy, alpha);
     Ok(encode(g, &ex, Target::from_mime(mime))?.is_some())
 }
@@ -1147,7 +1177,7 @@ fn gather_new_texture(
         }
     }
     let happy = ex.happy().and_then(|r| main.images.get(r));
-    let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
+    let alpha = inputs.iter().any(|i| i.role.is_alpha());
     let mime = mime_for(g.settings, happy, alpha);
     let names: Vec<&Image> = ex
         .images()
@@ -1302,7 +1332,7 @@ fn gather_original_texture(
     let Some(orig) = main.images.get(last.tex.image) else {
         return Ok(None);
     };
-    let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
+    let alpha = inputs.iter().any(|i| i.role.is_alpha());
     let mime = if alpha {
         if g.settings.export_image_format == ExportImageFormat::Webp {
             WEBP
