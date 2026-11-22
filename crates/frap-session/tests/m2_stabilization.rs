@@ -10,18 +10,29 @@ use support::*;
 #[test]
 fn ed_undo_and_redo_are_planned_not_unknown() {
     let mut s = session();
-    for op in ["undo", "redo", "undo_push", "undo_redo"] {
+    // M8 (WP 8.4) implements the four; with nothing to undo their polls fail as Blender's.
+    for op in ["undo", "redo", "undo_redo"] {
         let (exc, code, msg) = err(&mut s, &format!("bpy.ops.ed.{op}()"));
         assert_eq!(
             (exc.as_str(), code.as_str()),
-            ("NotImplementedError", "OP_NOT_IMPLEMENTED"),
+            ("RuntimeError", "OP_POLL_FAILED"),
             "ed.{op}"
         );
         assert_eq!(
             msg,
-            format!("ed.{op} exists in Blender 5.2 but is not implemented by frap")
+            format!("Operator bpy.ops.ed.{op}.poll() failed, context is incorrect")
         );
     }
+    // The rest of the dumped `ed` namespace is still known but not implemented.
+    let (exc, code, msg) = err(&mut s, "bpy.ops.ed.undo_history(item=0)");
+    assert_eq!(
+        (exc.as_str(), code.as_str()),
+        ("NotImplementedError", "OP_NOT_IMPLEMENTED")
+    );
+    assert_eq!(
+        msg,
+        "ed.undo_history exists in Blender 5.2 but is not implemented by frap"
+    );
     // Not a curated namespace: still unknown.
     let (_, code, _) = err(&mut s, "bpy.ops.nope.undo()");
     assert_eq!(code, "OP_UNKNOWN");

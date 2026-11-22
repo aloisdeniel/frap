@@ -68,6 +68,40 @@ pub enum UndoRequest {
     },
 }
 
+/// What the session's undo ring allows right now, as the polls of `ed.undo`, `ed.redo` and
+/// `ed.undo_redo` see it (WP 8.4: polls only receive the [`frap_scene::Context`], and the ring
+/// lives outside the snapshot). The session publishes it with [`set_undo_status`] before and
+/// after every statement; a thread without a session reads the default (nothing to undo).
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+pub struct UndoStatus {
+    /// `ed_undo_poll`: the active step has a previous one.
+    pub can_undo: bool,
+    /// `ed_redo_poll`: the active step has a next one.
+    pub can_redo: bool,
+    /// `ed_undo_redo_poll`: a last registered `UNDO` operator whose step can be undone.
+    pub can_undo_redo: bool,
+}
+
+thread_local! {
+    static UNDO_STATUS: std::cell::Cell<UndoStatus> = const {
+        std::cell::Cell::new(UndoStatus {
+            can_undo: false,
+            can_redo: false,
+            can_undo_redo: false,
+        })
+    };
+}
+
+/// The undo status the running session published (WP 8.4).
+pub fn undo_status() -> UndoStatus {
+    UNDO_STATUS.with(std::cell::Cell::get)
+}
+
+/// Publishes the session's undo status for the `ed.*` polls (WP 8.4).
+pub fn set_undo_status(s: UndoStatus) {
+    UNDO_STATUS.with(|c| c.set(s));
+}
+
 /// Session services reachable from operators.
 pub trait Services {
     /// Lazily created GPU render service; `OpError::Gpu` (`GPU_UNAVAILABLE`) when there is no

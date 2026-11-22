@@ -1,0 +1,56 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "ed.undo_push",
+  "bl_idname": "ED_OT_undo_push",
+  "label": "Undo Push",
+  "description": "Add an undo state (internal use only)",
+  "bl_options": [
+    "INTERNAL"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "message",
+      "name": "Undo Message",
+      "description": "",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Add an undo step *function may be moved*",
+      "length_max": 64,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": "headless-extended (deviations D-145): the undo history an interactive Blender keeps, from the session start or the last file load (blender -b keeps none until ed.undo_push()); every operator with the UNDO option, every RNA assignment and every RNA function call that changed data pushes a step (in Edit Mode only those on the edit data), ed.undo_push() pushes a named one; edit.undo_steps (32) steps are kept",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "result.pushed names the step; bpy.data.is_dirty becomes True"
+    ]
+  }
+}

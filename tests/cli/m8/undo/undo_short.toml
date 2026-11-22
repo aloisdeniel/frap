@@ -1,0 +1,12 @@
+# WP 8.4: undo and redo as an agent drives them, in short form (§11.4). The history starts at
+# the session start ("Original"; ed.undo first fails its poll with Blender's message and a
+# hint); operators with the UNDO option and RNA assignments push steps (headless-extended,
+# deviations D-145); an undo statement's `changes` name what came back and `result.undone` /
+# `result.redone` the step; a new step drops what could be redone; ed.undo_redo repeats the
+# last registered operator (the cone add, undone and run again); Edit Mode steps restore the
+# edit BMesh (the `edit_mesh` block) and undoing "Edit Mode" leaves Edit Mode; ed.undo_push
+# adds a named step; a file load (wm.read_homefile) starts a new history. Statements on stdin
+# (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

@@ -1934,7 +1934,7 @@ fn m8_contract_delta_cheap_parts_run() {
     );
     for (idname, planned, says) in [
         ("object.track_set", "M9", "after M8"),
-        ("ed.undo", "M8", "plans it for M8"),
+        ("render.opengl", "M8", "plans it for M8"),
         ("anim.change_frame", "OUT", "does not list it"),
         ("mesh.knife_project", "OUT", "marks it OUT"),
         ("object.constraint_add", "OUT", "marks it OUT"),
@@ -1955,6 +1955,9 @@ fn m8_contract_delta_cheap_parts_run() {
         message: "step".into(),
     };
     assert_ne!(r, frap_op::UndoRequest::Undo);
+    // The undo status the `ed.*` polls read (WP 8.4).
+    let _: frap_op::UndoStatus = frap_op::undo_status();
+    let _ = frap_op::set_undo_status as fn(frap_op::UndoStatus);
     let _ = (
         m8_bvh as fn(),
         m8_variants as fn(&mut Main, &mut ChangeLog, IdRef<ObjectId>),

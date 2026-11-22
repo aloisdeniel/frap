@@ -1,0 +1,22 @@
+ed.undo
+mesh.primitive_uv_sphere_add location=(2,0,0)
+context.object.location.z = 1.5
+ed.undo
+context.object.location.z
+ed.undo
+ed.redo
+ed.redo
+ed.redo
+mesh.primitive_cone_add vertices=8
+ed.undo_redo
+ed.undo
+ed.redo
+ed.undo_redo
+object.mode_set mode=EDIT
+mesh.select_all action=DESELECT
+ed.undo
+ed.undo
+ed.undo_push message=checkpoint
+ed.undo
+wm.read_homefile
+ed.undo

@@ -651,10 +651,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `ed.undo` | M8 | P2 | WP 8.4: the snapshot ring of committed `State`s |
-| [ ] | `ed.redo` | M8 | P2 | WP 8.4 |
-| [ ] | `ed.undo_redo` | M8 | P2 | WP 8.4 |
-| [ ] | `ed.undo_push` | M8 | P2 | WP 8.4 |
+| [x] | `ed.undo` | M8 | P2 | headless-extended (D-145): an interactive Blender's undo stack (`blender -b` has none before `ed.undo_push()`), steps for `UNDO` operators, RNA writes and data-changing RNA calls; Memfile / Edit Mesh / Edit Armature steps sharing the state's data; WP 8.4 (goldens `undo/*`) |
+| [x] | `ed.redo` | M8 | P2 | headless-extended (D-145); WP 8.4 |
+| [x] | `ed.undo_redo` | M8 | P2 | headless-extended (D-145): repeats the last `REGISTER`+`UNDO` operator call (`object.mode_set` registers its toggle operator); WP 8.4 |
+| [x] | `ed.undo_push` | M8 | P2 | headless-extended (D-145); WP 8.4 |
 
 ### `marker.* (timeline markers)`
 

@@ -6,7 +6,7 @@
 mod eval;
 mod exec;
 mod funcs;
-/// `ed.undo` / `ed.redo` (M8 W0 stub; WP 8.4 owns `session/undo.rs` and `session/undo/**`).
+/// `ed.undo` / `ed.redo` (WP 8.4 owns `session/undo.rs` and `session/undo/**`).
 mod undo;
 
 use std::collections::BTreeMap;
@@ -440,7 +440,8 @@ pub struct Session {
     /// Nesting depth of [`Session::transact`] (an operator called with nested calls in its
     /// arguments runs its own transaction inside the statement's).
     txn_depth: u32,
-    /// The undo ring of committed states (`ed.undo`/`ed.redo`, §12; M8 W0 stub, WP 8.4).
+    /// The undo ring of committed states (`ed.undo`/`ed.redo`, §12; WP 8.4): [`undo::enter`]
+    /// and [`undo::finish`] run around every statement.
     undo: undo::UndoRing,
 }
 
@@ -616,43 +617,54 @@ impl Session {
     pub fn exec(&mut self, stmt: &Stmt) -> Response {
         self.seq += 1;
         let _budget = frap_math::budget::scope(self.budget());
+        undo::enter(self);
         let r = catch_unwind(AssertUnwindSafe(|| self.dispatch(stmt)))
             .unwrap_or_else(|p| Err(Fail::new(exec::stmt_kind(&stmt.cmd), self.unwind_error(p))));
-        r.unwrap_or_else(|mut f| {
+        let mut r = r.unwrap_or_else(|mut f| {
             f.err = f.err.with_span(stmt.span);
             self.error_response(f, stmt.line)
-        })
+        });
+        undo::finish(self, undo::Origin::Stmt(stmt), &mut r);
+        r
     }
 
     /// Invokes an operator by idname with keyword inputs (front-end-free entry point, §11.6).
     pub fn invoke(&mut self, idname: &str, kwargs: IndexMap<String, Input>) -> Response {
         self.seq += 1;
         let _budget = frap_math::budget::scope(self.budget());
+        undo::enter(self);
         let kw = kwargs
-            .into_iter()
-            .map(|(k, v)| (k, eval::Py::from_input(v), Span::default()))
+            .iter()
+            .map(|(k, v)| (k.clone(), eval::Py::from_input(v.clone()), Span::default()))
             .collect();
-        self.invoke_values(1, idname, vec![], kw)
-            .unwrap_or_else(|f| self.error_response(f, 1))
+        let mut r = self
+            .invoke_values(1, idname, vec![], kw)
+            .unwrap_or_else(|f| self.error_response(f, 1));
+        undo::finish(self, undo::Origin::Invoke(idname, &kwargs), &mut r);
+        r
     }
 
     /// Reads a property path (§11.6; the path uses the shared path grammar).
     pub fn get(&mut self, path: &str) -> Response {
         self.seq += 1;
         let _budget = frap_math::budget::scope(self.budget());
-        match exec::parse_path(path) {
+        undo::enter(self);
+        let mut r = match exec::parse_path(path) {
             Ok(p) => self
                 .get_path(1, &p)
                 .unwrap_or_else(|f| self.error_response(f, 1)),
             Err(e) => self.error_response(Fail::new("get", e), 1),
-        }
+        };
+        undo::finish(self, undo::Origin::Other, &mut r);
+        r
     }
 
     /// Assigns a property path (§11.6).
     pub fn set(&mut self, path: &str, value: Input) -> Response {
         self.seq += 1;
         let _budget = frap_math::budget::scope(self.budget());
-        match exec::parse_path(path) {
+        undo::enter(self);
+        let mut r = match exec::parse_path(path) {
             Ok(p) => self
                 .set_path(
                     1,
@@ -662,7 +674,9 @@ impl Session {
                 )
                 .unwrap_or_else(|f| self.error_response(f, 1)),
             Err(e) => self.error_response(Fail::new("set", e), 1),
-        }
+        };
+        undo::finish(self, undo::Origin::Other, &mut r);
+        r
     }
 
     /// Calls an RNA function path (§11.6).
@@ -687,12 +701,15 @@ impl Session {
             value: eval::Py::from_input(v),
             span: Span::default(),
         }));
-        match exec::parse_path(path) {
+        undo::enter(self);
+        let mut r = match exec::parse_path(path) {
             Ok(p) => self
                 .call_path(1, &p, exec::ArgsSrc::Values(call_args))
                 .unwrap_or_else(|f| self.error_response(f, 1)),
             Err(e) => self.error_response(Fail::new("call", e), 1),
-        }
+        };
+        undo::finish(self, undo::Origin::Other, &mut r);
+        r
     }
 
     // ------------------------------------------------------------------ helpers
