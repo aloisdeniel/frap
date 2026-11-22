@@ -251,6 +251,66 @@ pub(crate) mod imp {
         Cancelled,
     }
 
+    /// The most deadline-bound boolean workers running at once per process (running or
+    /// abandoned after a timeout: a worker holds its slot until its work ends), as the WebP
+    /// encoder's `MAX_WORKERS` (M7W0-10). An abandoned worker ends at its next cancellation
+    /// point, at most one uncancellable manifold-rust step later (about 60 ms per
+    /// 130k-triangle import in a release build), but an agent resending a timed-out boolean
+    /// in a `serve`/`mcp` session must not pile them up.
+    pub(crate) const MAX_WORKERS: usize = 4;
+
+    /// The `TIMEOUT` reason of a boolean that never got a worker slot.
+    pub(crate) const SLOTS_BUSY: &str = "the boolean waited for a worker slot: earlier booleans \
+        that timed out are still finishing their current step in the background (at most 4 at \
+        once per process); retry once they finish";
+
+    static WORKERS: std::sync::Mutex<usize> = std::sync::Mutex::new(0);
+    static WORKER_FREED: std::sync::Condvar = std::sync::Condvar::new();
+
+    fn workers() -> std::sync::MutexGuard<'static, usize> {
+        WORKERS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    /// A worker slot, released when the worker's work ends (also by a panic).
+    struct Slot;
+
+    impl Drop for Slot {
+        fn drop(&mut self) {
+            let mut n = workers();
+            *n = n.saturating_sub(1);
+            WORKER_FREED.notify_all();
+        }
+    }
+
+    /// Waits for a worker slot until `deadline`, then unwinds with `Interrupted`
+    /// ([`SLOTS_BUSY`]).
+    fn acquire_slot(deadline: std::time::Instant) -> Slot {
+        let mut n = workers();
+        while *n >= MAX_WORKERS {
+            let left = deadline.saturating_duration_since(std::time::Instant::now());
+            if left.is_zero() {
+                drop(n);
+                frap_math::budget::check_now_because(SLOTS_BUSY);
+                n = workers();
+                continue;
+            }
+            n = WORKER_FREED
+                .wait_timeout(n, left)
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .0;
+        }
+        *n += 1;
+        Slot
+    }
+
+    /// The deadline-bound boolean workers running now (tests).
+    #[cfg(test)]
+    pub(crate) fn running_workers() -> usize {
+        *workers()
+    }
+
     /// Runs `work` with a cancellation token (`--stmt-timeout`, ARCHITECTURE §12). Without a
     /// deadline it runs here. With one it runs on a worker thread while this thread waits for
     /// its result until the deadline: then the token is cancelled (manifold-rust's kernels
@@ -259,7 +319,8 @@ pub(crate) mod imp {
     /// cancel (the import of an operand, `Manifold::from_mesh_gl*`, `trim_by_plane`, the export,
     /// `get_mesh_gl`). The abandoned worker stops at its next cancellation point (after at most
     /// that step) and its result is dropped. A worker that panics (a manifold-rust bug) is
-    /// Blender's unknown error.
+    /// Blender's unknown error. At most [`MAX_WORKERS`] such workers run at once: a further
+    /// boolean waits for a slot within its own deadline (then `TIMEOUT`, [`SLOTS_BUSY`]).
     pub(crate) fn on_worker<T: Send + 'static>(
         work: impl FnOnce(&CancelToken) -> T + Send + 'static,
     ) -> Result<T, BoolError> {
@@ -267,12 +328,14 @@ pub(crate) mod imp {
             return Ok(work(&CancelToken::new()));
         };
         frap_math::budget::check_now();
+        let slot = acquire_slot(deadline);
         let token = CancelToken::new();
         let (tx, rx) = std::sync::mpsc::channel();
         let worker_token = token.clone();
         let spawned = std::thread::Builder::new()
             .name("frap-boolean".into())
             .spawn(move || {
+                let _slot = slot;
                 let r = work(&worker_token);
                 let _ = tx.send(r);
             });
@@ -801,6 +864,39 @@ mod tests {
         assert_eq!(
             ManifoldSolver.run(&ops, &opts),
             Err(BoolError::NonManifold(vec![1]))
+        );
+    }
+
+    /// Timed-out workers keep running until their current uncancellable step ends, but at most
+    /// `MAX_WORKERS` at once: with every slot taken, a further boolean waits for one within its
+    /// own deadline and answers TIMEOUT (`SLOTS_BUSY`) without starting another worker.
+    #[test]
+    fn abandoned_workers_are_bounded() {
+        use std::time::{Duration, Instant};
+        let timed_out = |sleep: Duration| {
+            std::panic::catch_unwind(|| {
+                let _scope = frap_math::budget::scope(frap_math::budget::Budget {
+                    timeout: Some(Duration::from_millis(50)),
+                    ..Default::default()
+                });
+                imp::on_worker(move |_token| std::thread::sleep(sleep))
+            })
+            .err()
+            .and_then(|p| frap_math::budget::interrupted(&*p))
+        };
+        for _ in 0..imp::MAX_WORKERS {
+            let i = timed_out(Duration::from_secs(3)).expect("TIMEOUT");
+            assert_eq!(i.reason, None, "a slot was free: its own work timed out");
+        }
+        assert_eq!(imp::running_workers(), imp::MAX_WORKERS);
+        let waited = Instant::now();
+        let i = timed_out(Duration::from_secs(10)).expect("TIMEOUT");
+        assert_eq!(i.reason, Some(imp::SLOTS_BUSY));
+        assert!(imp::running_workers() <= imp::MAX_WORKERS);
+        assert!(
+            waited.elapsed() < Duration::from_secs(1),
+            "{:?}",
+            waited.elapsed()
         );
     }
 }

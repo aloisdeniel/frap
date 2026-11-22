@@ -111,9 +111,22 @@ impl BMesh {
         }
     }
     /// `bmesh_disk_faceedge_find_next`.
+    ///
+    /// Guarded against walks that never come back to `e` (Blender would loop forever there):
+    /// `e` not in the disk cycle of `v` (a loop whose `v` was left behind by a disk-only vertex
+    /// swap, see `BM_vert_separate_tested_edges`) or a corrupt cycle longer than the edge count.
+    /// Both return `e`, which ends the `BM_LOOPS_OF_VERT` walk.
     fn disk_faceedge_find_next(&self, e: EdgeId, v: VertId) -> EdgeId {
+        if !self.vert_in_edge(e, v) {
+            return e;
+        }
+        let mut steps = self.edges_num();
         let mut f = self.disk_edge_next(e, v);
         loop {
+            if steps == 0 {
+                return e;
+            }
+            steps -= 1;
             if let Some(l) = self.edge(f).l
                 && self.radial_facevert_check(l, v)
             {

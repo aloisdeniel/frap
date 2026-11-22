@@ -24,6 +24,8 @@ pub mod ghash;
 pub mod math;
 pub mod query;
 pub mod tessellate;
+#[cfg(test)]
+mod tests;
 
 use rustc_hash::{FxHashMap, FxHashSet};
 use smallvec::SmallVec;
