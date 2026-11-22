@@ -188,7 +188,11 @@ fn object_shear(
         let active_center = c
             .active_object()
             .filter(|a| c.main.objects.contains(*a))
-            .map(|a| frap_scene::id::transform::world_matrix_in(c.main, a).w_axis.truncate());
+            .map(|a| {
+                frap_scene::id::transform::world_matrix_in(c.main, a)
+                    .w_axis
+                    .truncate()
+            });
         let center = pivot::center(
             around,
             &centers,

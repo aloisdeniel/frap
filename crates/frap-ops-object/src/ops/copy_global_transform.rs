@@ -26,7 +26,9 @@ use glam::Mat4;
 
 /// `bool(context.active_pose_bone) or bool(context.active_object)`.
 pub(crate) fn has_active(c: &Context) -> bool {
-    c.active_pose_bone().is_some() || c.active_object().is_some_and(|a| c.main.objects.contains(a))
+    c.active_pose_bone().is_some()
+        || c.active_object()
+            .is_some_and(|a| c.main.objects.contains(a))
 }
 
 /// A Python poll that returns `False` (`failed, context is incorrect`).

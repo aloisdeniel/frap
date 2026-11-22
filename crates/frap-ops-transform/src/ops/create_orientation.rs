@@ -100,7 +100,10 @@ fn exec(cx: &mut OpCtx, p: transform::CreateOrientation) -> OpResult {
     let index = s.transform_orientation_add(&name, matrix, overwrite);
     if use_it {
         // `BIF_selectTransformOrientation`.
-        s.orientation_slot_set_index(Scene::ORIENT_SLOT_DEFAULT, Scene::ORIENT_CUSTOM + index as i32);
+        s.orientation_slot_set_index(
+            Scene::ORIENT_SLOT_DEFAULT,
+            Scene::ORIENT_CUSTOM + index as i32,
+        );
     }
     Ok(OpStatus::Finished)
 }

@@ -31,8 +31,7 @@ fn relative_ob(c: &Context) -> Option<frap_rna::IdRef<frap_rna::ObjectId>> {
 fn poll_relative(c: &Context) -> Result<(), PollFail> {
     if relative_ob(c).is_none() {
         let mut f = context_incorrect(
-            "set the scene camera: bpy.context.scene.camera = bpy.data.objects['<camera>']"
-                .into(),
+            "set the scene camera: bpy.context.scene.camera = bpy.data.objects['<camera>']".into(),
         );
         f.unmet = smallvec::smallvec![PollReq::SceneHasCamera];
         return Err(f);

@@ -245,6 +245,12 @@ fn rich() -> (Main, WindowState, Preferences) {
         let l: &mut Light = main.lights.get_mut(li, &mut log).unwrap();
         l.r#type = "SPOT".into();
     }
+    // `Collection.instance_offset` (WP 8.3.5).
+    let coll = main.collections.find("Collection").unwrap();
+    main.collections
+        .get_mut(coll, &mut log)
+        .unwrap()
+        .instance_offset = [1.0, -2.5, 0.125];
 
     // Link the new object into the scene and select it.
     let scene = win.scene;
@@ -399,6 +405,10 @@ fn scene_json_shape() {
     // Non-finite floats inside a buffer survive; the Cube's mesh is small enough to be inline.
     assert!(tree["meshes"]["Cube"]["attributes"][0]["data"].is_array());
     assert_eq!(tree["scenes"]["Scene"]["frame_current"], json!(42));
+    assert_eq!(
+        tree["collections"]["Collection"]["instance_offset"],
+        json!([1.0, -2.5, 0.125])
+    );
     assert_eq!(
         tree["cameras"]["Camera"]["dof"]["focus_object"],
         json!({"$id": "OB", "name": "Thing"})

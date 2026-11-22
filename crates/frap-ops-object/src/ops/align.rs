@@ -18,8 +18,10 @@
 //! products in single precision with double sums (`mathutils`), the offsets in double
 //! precision, stored as float. Nothing selected → WARNING `No objects with bound-box selected`
 //! and `CANCELLED`. With `relative_to='OPT_4'`, an axis and no active object among the
-//! selection, the add-on fails on an unbound variable; frap answers that `UnboundLocalError`
-//! as a `RuntimeError` before changing anything (Blender keeps the axes it already moved).
+//! selection, the add-on fails on an unbound variable (`size_active_*` or `center_active_*`
+//! of the first axis, so nothing has moved yet); frap answers that `UnboundLocalError` as the
+//! `RuntimeError` Blender raises, with its traceback (the add-on's path relative to Blender's
+//! version directory, no `Location:` line). The locations already written stay, as in Blender.
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -77,11 +79,21 @@ impl<T: PartialOrd + Copy> PyMinMax for T {
     }
 }
 
-fn unbound(name: &str) -> OpError {
+/// The add-on's lines reading `size_active_*` (`OPT_1`, `OPT_3`) and `center_active_*`, per
+/// axis (`object_align.py`, Blender 5.2.4).
+const SIZE_LINES: [[u32; 2]; 3] = [[224, 227], [260, 263], [295, 298]];
+const CENTER_LINES: [u32; 3] = [251, 287, 322];
+
+/// The `RuntimeError` of a Python operator whose `execute` raised `UnboundLocalError` reading
+/// `{var}_{axis}` at `line` of `align_objects`.
+fn unbound(var: &str, axis: usize, line: u32) -> OpError {
+    let name = format!("{var}_{}", ["x", "y", "z"][axis]);
     OpError::Runtime(format!(
-        "Python: UnboundLocalError: cannot access local variable '{name}' where it is not \
-         associated with a value (object.align with relative_to='OPT_4' needs the active \
-         object among the selection)"
+        "Python: Traceback (most recent call last):\n  File \"scripts/startup/bl_operators/\
+         object_align.py\", line 388, in execute\n    ret = align_objects(\n  File \
+         \"scripts/startup/bl_operators/object_align.py\", line {line}, in align_objects\n\
+         UnboundLocalError: cannot access local variable '{name}' where it is not associated \
+         with a value"
     ))
 }
 
@@ -153,7 +165,8 @@ fn exec(cx: &mut OpCtx, p: object::Align) -> OpResult {
     let center_sel: [f64; 3] = std::array::from_fn(|k| (lfu_sel[k] + rbd_sel[k]) / 2.0);
     // Main loop: one axis at a time, the location read live.
     let mut writes: Vec<(usize, usize, f32)> = Vec::new();
-    for (i, &ob) in objects.iter().enumerate() {
+    let mut failed: Option<OpError> = None;
+    'objects: for (i, &ob) in objects.iter().enumerate() {
         let (lfu, rbd) = gbb[i];
         let center: [f64; 3] = std::array::from_fn(|k| (lfu[k] + rbd[k]) / 2.0);
         let positive = [rbd[0], rbd[1], lfu[2]];
@@ -162,14 +175,15 @@ fn exec(cx: &mut OpCtx, p: object::Align) -> OpResult {
         for k in (0..3).filter(|k| axes[*k]) {
             let l = f64::from(loc[k]);
             let obj = if relative == RelativeTo::Opt4 {
-                match mode {
-                    AlignMode::Opt1 => {
-                        l - negative[k] - size_active.ok_or_else(|| unbound("size_active_x"))?[k]
+                match (mode, size_active) {
+                    (AlignMode::Opt1, Some(s)) => l - negative[k] - s[k],
+                    (AlignMode::Opt3, Some(s)) => l - positive[k] + s[k],
+                    (AlignMode::Opt1 | AlignMode::Opt3, None) => {
+                        let line = SIZE_LINES[k][usize::from(mode == AlignMode::Opt3)];
+                        failed = Some(unbound("size_active", k, line));
+                        break 'objects;
                     }
-                    AlignMode::Opt3 => {
-                        l - positive[k] + size_active.ok_or_else(|| unbound("size_active_x"))?[k]
-                    }
-                    AlignMode::Opt2 => l - center[k],
+                    (AlignMode::Opt2, _) => l - center[k],
                 }
             } else {
                 match mode {
@@ -182,9 +196,13 @@ fn exec(cx: &mut OpCtx, p: object::Align) -> OpResult {
                 RelativeTo::Opt1 => obj,
                 RelativeTo::Opt2 => obj + f64::from(cursor[k]),
                 RelativeTo::Opt3 => obj + center_sel[k],
-                RelativeTo::Opt4 => {
-                    obj + center_active.ok_or_else(|| unbound("center_active_x"))?[k]
-                }
+                RelativeTo::Opt4 => match center_active {
+                    Some(c) => obj + c[k],
+                    None => {
+                        failed = Some(unbound("center_active", k, CENTER_LINES[k]));
+                        break 'objects;
+                    }
+                },
             };
             writes.push((i, k, v as f32));
         }
@@ -192,7 +210,10 @@ fn exec(cx: &mut OpCtx, p: object::Align) -> OpResult {
     for (i, k, v) in writes {
         cx.object_mut(objects[i])?.location[k] = v;
     }
-    Ok(OpStatus::Finished)
+    match failed {
+        Some(e) => Err(e),
+        None => Ok(OpStatus::Finished),
+    }
 }
 
 #[cfg(test)]
@@ -206,5 +227,28 @@ mod tests {
         assert_eq!(rbd, [1.0, 5.0, 0.5]);
         let p = mul_point(&Mat4::from_translation(glam::Vec3::X), [1.0, 1.0, 1.0]);
         assert_eq!(p, [2.0, 1.0, 1.0]);
+    }
+
+    #[test]
+    fn unbound_active_names_the_axis_and_line_as_python() {
+        let OpError::Runtime(m) = unbound("center_active", 1, CENTER_LINES[1]) else {
+            panic!("not a RuntimeError");
+        };
+        assert!(
+            m.starts_with("Python: Traceback (most recent call last):\n"),
+            "{m}"
+        );
+        assert!(
+            m.contains("object_align.py\", line 287, in align_objects\n"),
+            "{m}"
+        );
+        assert!(
+            m.ends_with(
+                "UnboundLocalError: cannot access local variable 'center_active_y' where it \
+                 is not associated with a value"
+            ),
+            "{m}"
+        );
+        assert_eq!(SIZE_LINES[2], [295, 298]);
     }
 }

@@ -360,10 +360,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `transform.vert_crease` | M2 | P2 |  |
 | [x] | `transform.push_pull` | M2 | P2 | Edit Mode (meshes) only |
 | [x] | `transform.vertex_random` | M2 | P2 | BliRng |
-| [x] | `transform.shear` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.shear` | M8 | P2 | WP 8.3.5. Partial: Object Mode and mesh Edit Mode; armature Edit and Pose Mode answer OP_NOT_IMPLEMENTED (deviations §2, M9) |
 | [x] | `transform.bend` | M8 | P2 | WP 8.3.5; Blender has no exec: a script call changes nothing (PASS_THROUGH) |
 | [x] | `transform.rotate_normal` | M8 | P2 | WP 8.3.5 |
-| [x] | `transform.create_orientation` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.create_orientation` | M8 | P2 | WP 8.3.5. Partial: from bones (armature Edit and Pose Mode) OP_NOT_IMPLEMENTED (deviations §2, M9) |
 | [x] | `transform.select_orientation` | M8 | P2 | WP 8.3.5 |
 | [x] | `transform.delete_orientation` | M8 | P2 | WP 8.3.5 |
 | — | `transform.trackball` | OUT | — |  |

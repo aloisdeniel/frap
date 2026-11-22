@@ -15,7 +15,9 @@ use frap_spec_ops_object::object;
 
 /// `DupliOffsetFromObject.poll`: `context.active_object is not None`.
 fn has_active(c: &Context) -> Result<(), PollFail> {
-    if c.active_object().is_some_and(|a| c.main.objects.contains(a)) {
+    if c.active_object()
+        .is_some_and(|a| c.main.objects.contains(a))
+    {
         return Ok(());
     }
     let hint = match c

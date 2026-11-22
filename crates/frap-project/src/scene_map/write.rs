@@ -656,6 +656,7 @@ impl<'a> Writer<'a> {
         m.insert("hide_viewport".into(), json!(c.hide_viewport));
         m.insert("hide_render".into(), json!(c.hide_render));
         m.insert("color_tag".into(), json!(c.color_tag.as_str()));
+        m.insert("instance_offset".into(), f32s(&c.instance_offset));
         m
     }
 

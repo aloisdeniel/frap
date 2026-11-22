@@ -746,6 +746,7 @@ fn collection(c: &mut Collection, o: &mut Obj, cx: &mut Cx) -> Result<(), MapErr
     o.bool("hide_viewport", &mut c.hide_viewport)?;
     o.bool("hide_render", &mut c.hide_render)?;
     o.smol("color_tag", &mut c.color_tag)?;
+    o.arr("instance_offset", &mut c.instance_offset)?;
     Ok(())
 }
 

@@ -914,7 +914,8 @@ fn apply(t: &mut TransInfo) {
             let mat_final = shear_matrix(&spacemtx, t.req.orient_axis, ortho, t.req.values[0]);
             for tc in &mut t.tcs {
                 let center_local = tc.center_local;
-                let tmat = tc.smtx * (mat_final * tc.mtx);
+                // `mul_m3_series(tmat, td->smtx, mat_final, td->mtx)`.
+                let tmat = (tc.smtx * mat_final) * tc.mtx;
                 for td in &mut tc.data {
                     let center = if local { td.center } else { center_local };
                     let mut vec = tmat * (td.iloc - center);
@@ -939,7 +940,9 @@ pub fn shear_matrix(spacemtx: &Mat3, axis: usize, ortho: usize, value: f32) -> M
     let z = spacemtx.col(axis);
     let axismat_inv = Mat3::from_cols(x, super::mathx::cross(x, z), z);
     let axismat = invert_m3(&axismat_inv).unwrap_or(Mat3::ZERO);
-    axismat_inv * (smat * axismat)
+    // `mul_m3_series(mat_final, axismat_inv, smat, axismat)`: `(axismat_inv · smat) · axismat`
+    // (glam sums each product in `mul_m3_m3m3`'s order, k = 0, 1, 2, without contraction).
+    (axismat_inv * smat) * axismat
 }
 
 /// The rotation axis of `rotate`/`rotate_normal` (`transform_mode_rotation_axis_get` /

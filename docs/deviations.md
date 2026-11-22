@@ -241,6 +241,8 @@ what to avoid.
 | `export_gpu_instances` with meshopt compression (WP 7.5, M7 W1 integration): the instance `TRANSLATION` / `ROTATION` / `SCALE` accessors are meshopt-encoded as the add-on does (EXPONENTIAL, and QUATERNION with ROTATION as normalized SHORT whose fallback view keeps the FLOAT length, as `manage_gpu_instancing_nodes`; the decoded length under `frap_compat='SPEC'`); still open: a `TRANSLATION`, `ROTATION` or `SCALE` the add-on would share with an equal mesh vertex accessor (`@cached gather_accessor`) is shared only with other instance accessors | M8 | WP 8.12 |
 | Custom transform orientations (WP 8.3.5): `Scene.transform_orientation_slots`, `TransformOrientationSlot` and `TransformOrientation` are not bound (the structs are not in the RNA dump), so a script cannot read or set the slots or a custom orientation's `name` / `matrix` (`RNA_NO_ATTRIBUTE`); the orientations live on the scene and are created, selected and deleted by `transform.create_orientation`, `select_orientation`, `delete_orientation`, used through `orient_type='<name>'` (every transform with a `dyn_enums` entry for it: `translate`, `rotate`, `resize`, `shear`, `rotate_normal`) and as the scene orientation when `orient_type` is unset; they are not written to `.frap` files (`frap-project` has no field for them) and `transform.transform` / `mirror` / the slide tools take only the built-in orientation names. `create_orientation` in armature Edit or Pose Mode (bone orientations) answers `OP_NOT_IMPLEMENTED` | M9 (post-M8, decision log M8W0-3) | WP 8.3.5 follow-ups |
 | Copy Global Transform add-on (WP 8.3.5): `tool_settings.anim_relative_object` and `anim_mirror_object` / `anim_mirror_bone` are not bound (the relative object is always the scene camera); `object.paste_transform` cannot paste at all, as in `blender -b` (no clipboard, see §3), so its `method`, `use_mirror` and `use_relative` paths are not reachable | M9 (post-M8, decision log M8W0-3) | WP 8.3.5 follow-ups |
+| `transform.shear` in armature Edit and Pose Mode (WP 8.3.5): Blender shears the selected bones (heads and tails in Edit Mode, the pose channels' locations in Pose Mode); frap answers `OP_NOT_IMPLEMENTED` there (`translate`, `rotate` and `resize` work in both modes). `create_orientation` from bones is the same gap (row above) | M9 (post-M8, decision log M8W0-3) | WP 8.3.5 follow-ups |
+| `NORMAL` orientation of a selection whose face normals cancel out (WP 8.3.5): frap's face normals differ from Blender's in the last bits (a 6-sided cylinder side `(0.49999994, 0.86602545)` against `(0.5, 0.8660254)`, a cap `(-4.6e-8, 0, 1)` against `(0, 0, 0.99999994)`), so with a whole closed, rotated mesh selected Blender's normal sum is exactly zero (the orientation falls back to identity and `create_orientation` reports `Unable to create orientation`) while frap's is a tiny noise vector that it normalizes into an orientation; `shear`, `rotate`, `translate` with `orient_type='NORMAL'` and `create_orientation` then differ. A selection with a non-zero normal sum matches | M9 (post-M8, decision log M8W0-3) | face normals (`frap-bmesh` / `frap-mesh` normal calculation) |
 
 ## 3. Protocol notes (frap envelope, not Blender behaviour)
 
@@ -251,6 +253,14 @@ what to avoid.
   `window_manager`). As an envelope extra, the copy operators put the text the add-on would
   have copied (`Matrix((\n    (…),\n …\n))`) in `result.clipboard`, with the hint
   `HEADLESS_CLIPBOARD`.
+- `object.align` with `relative_to='OPT_4'` and no active object among the selection
+  (WP 8.3.5): the add-on raises `UnboundLocalError` on the first axis, before moving anything,
+  and Blender's `RuntimeError` carries the Python traceback with absolute paths of the Blender
+  install, the source lines and caret markers, then a `Location:` line naming the calling
+  script. frap raises the same `RuntimeError` with a shortened traceback (the two frames, the
+  add-on path relative to Blender's version directory, no source excerpt or `Location:`) ending
+  in the same `UnboundLocalError: cannot access local variable '…' where it is not associated
+  with a value` line.
 - `transform.bend` (WP 8.3.5): Blender 5.2.4 registers it without an exec, so a script call
   logs `Invalid operator call 'TRANSFORM_OT_bend'`, changes nothing and returns
   `{'PASS_THROUGH'}`; frap answers `FINISHED` with a WARNING and the hint `BEND_NO_EXEC`
