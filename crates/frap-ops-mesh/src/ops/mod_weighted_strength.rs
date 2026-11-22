@@ -36,7 +36,8 @@ fn strength_value(s: FaceStrength) -> i32 {
 
 /// The position of the INT32 face layer, added (zeros) when missing; `None` when a layer of
 /// another type has the name (`CustomData_get_named_layer_index(pdata, CD_PROP_INT32, …)`
-/// would then add a second layer of the same name, which the attribute API cannot hold).
+/// would then add a second layer of the same name, which the attribute API cannot hold;
+/// deviation D-152).
 fn ensure_layer(bm: &mut BMesh) -> Option<usize> {
     match bm.pdata.find(FACEWEIGHT_LAYER) {
         Some(i) => matches!(bm.pdata.layers[i].data, AttrData::Int(_)).then_some(i),

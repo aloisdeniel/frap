@@ -120,6 +120,8 @@ fn exec(cx: &mut OpCtx, p: mesh::PointNormals) -> OpResult {
         strength: p.spherize_strength.value,
     };
     if !point_normals(cx.bmesh_mut(me)?, settings) {
+        // Blender keeps the `custom_normal` layer its init added; frap rolls the cancelled
+        // statement back (deviation D-151).
         return Ok(OpStatus::Cancelled);
     }
     Ok(OpStatus::Finished)

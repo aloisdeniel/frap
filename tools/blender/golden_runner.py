@@ -204,6 +204,8 @@ NORMALISE = {
     "D-148": ("cases", "vertex_group_copy_to_selected only fails where Blender changes nothing"),
     "D-149": ("cases", "undo cases push the steps frap pushes implicitly with #@blender bpy.ops.ed.undo_push(...) lines"),
     "D-150": ("cases", "normals_tools COPY only fails where the state after it is the same in both tools"),
+    "D-151": ("cases", "cases do not point normals with nothing selected on a mesh without custom_normal"),
+    "D-152": ("cases", "cases do not create __mod_weightednormals_faceweight with another type"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

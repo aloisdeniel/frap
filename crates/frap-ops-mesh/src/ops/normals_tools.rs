@@ -190,7 +190,8 @@ fn exec(cx: &mut OpCtx, p: mesh::NormalsTools) -> OpResult {
         set_buffer(cx, buffer);
     }
     if errors > 0 {
-        // Blender reports once per mesh and keeps what the other meshes did; the error reports
+        // Blender reports once per mesh and keeps what every mesh did (the `custom_normal`
+        // layer it added, even on a single failing mesh); the error reports
         // make `bpy.ops` raise, and frap's statement is rolled back (deviation D-150).
         let msg = vec![COPY_ERROR; errors].join("\nError: ");
         return Err(OpError::Runtime(msg));
