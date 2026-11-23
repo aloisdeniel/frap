@@ -41,6 +41,8 @@ env:
   WARP_VERSION: "1.0.20"
   # GPU tests skip with a visible notice here; gpu.yml runs them on real/software adapters.
   FRAP_GPU_OPTIONAL: "1"
+  # The EEVEE scene goldens (about 35 min on WARP) render in gpu.yml only, on every adapter.
+  FRAP_SKIP_EEVEE_SCENES: "1"
 
 jobs:
   test:

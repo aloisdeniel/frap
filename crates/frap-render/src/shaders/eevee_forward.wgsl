@@ -1157,12 +1157,29 @@ fn view_vector(P: vec3<f32>) -> vec3<f32> {
 // so the TAA samples converge), mapped to a uniform distribution and jittered per sample by
 // `hash_offset` (`frame.clamp.z`). Front and back faces at one pixel get independent
 // thresholds, as in Blender.
-fn hashed_transparency_hash(a: vec2<f32>) -> f32 {
-    return fract(1e4 * sin(17.0 * a.x + 0.1 * a.y) * (0.1 + abs(sin(13.0 * a.y + a.x))));
+//
+// The per-cell hash is an integer `pcg3d` of the cell coordinates, not Blender's
+// `fract(1e4 * sin(17 x + 0.1 y) …)`: `sin` of arguments in the thousands has no accuracy
+// guarantee (WGSL bounds it on [-π, π] only) and the 1e4 factor turns its last bits into the
+// threshold, so every adapter (Metal, lavapipe, WARP) drew a different noise pattern. The
+// integer hash is bit-identical everywhere and as uniform; Blender's own pattern depends on
+// its GPU's `sin` (deviations D-170).
+fn hashed_transparency_pcg3d(v: vec3<u32>) -> vec3<u32> {
+    var u = v * 1664525u + 1013904223u;
+    u.x += u.y * u.z;
+    u.y += u.z * u.x;
+    u.z += u.x * u.y;
+    u ^= u >> vec3<u32>(16u);
+    u.x += u.y * u.z;
+    u.y += u.z * u.x;
+    u.z += u.x * u.y;
+    return u;
 }
 
+// A uniform value in [0, 1) of the integral cell `a` (24 bits: exact in f32).
 fn hashed_transparency_hash_3d(a: vec3<f32>) -> f32 {
-    return hashed_transparency_hash(vec2<f32>(hashed_transparency_hash(a.xy), a.z));
+    let u = hashed_transparency_pcg3d(bitcast<vec3<u32>>(vec3<i32>(a)));
+    return f32(u.x >> 8u) * (1.0 / 16777216.0);
 }
 
 fn hashed_alpha_threshold(hash_scale: f32, hash_offset: f32, P: vec3<f32>, dPdx: vec3<f32>,

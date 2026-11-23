@@ -543,8 +543,10 @@ fn deterministic_and_cached() {
 }
 
 /// Cold start (new device, pipelines, first render) of the factory-like scene at the M5
-/// golden size, within the CI budget (`FRAP_EEVEE_COLD_BUDGET_S`, default 60 s: lavapipe and
-/// WARP run it in gpu.yml). The adapter, cold and warm times are printed and appended to
+/// golden size, within the CI budget (`FRAP_EEVEE_COLD_BUDGET_S`; default 60 s on a hardware
+/// adapter and 180 s on a software one, wgpu's `DeviceType::Cpu`: WARP's FXC compile of the
+/// uber-shader plus 64 samples rasterised on the CPU take 85-105 s on the Windows runner;
+/// decision log M56CI-3). The adapter, cold and warm times are printed and appended to
 /// `FRAP_RENDER_TIMINGS` (gpu.yml's per-adapter timings artifact), as Workbench's
 /// `cold_first_render_time` does.
 #[test]
@@ -566,11 +568,12 @@ fn cold_start_within_budget() {
     let t1 = std::time::Instant::now();
     let _ = render(&gpu, &mut e, &sc);
     let warm = t1.elapsed().as_secs_f64();
+    let a = gpu.summary();
+    let software = gpu.info.device_type == wgpu::DeviceType::Cpu;
     let budget: f64 = std::env::var("FRAP_EEVEE_COLD_BUDGET_S")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(60.0);
-    let a = gpu.summary();
+        .unwrap_or(if software { 180.0 } else { 60.0 });
     eprintln!(
         "FRAP_RENDER_TIMING engine=BLENDER_EEVEE adapter={:?} backend={} cold_first_render_ms={:.1} warm_render_ms={:.1} (device + pipelines + 64 samples, 320x180)",
         a.name,
@@ -595,7 +598,11 @@ fn cold_start_within_budget() {
         )
         .expect("FRAP_RENDER_TIMINGS write");
     }
-    assert!(cold < budget, "cold start {cold:.1} s > budget {budget} s");
+    assert!(
+        cold < budget,
+        "cold start {cold:.1} s > budget {budget} s ({} adapter)",
+        a.device_type
+    );
 }
 
 // A test-only shading feature: proves the WP 5.5 extension point (flag bit, `pack`, WGSL
