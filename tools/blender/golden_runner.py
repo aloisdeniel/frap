@@ -214,6 +214,10 @@ NORMALISE = {
     "D-158": ("cases", "cases remove the Hook before modifiers_copy_to_selected"),
     "D-159": ("cases", "Blender runs material.copy / material.paste in a #@blender temp_override(material=bpy.context.object.active_material)"),
     "D-160": ("render goldens", "Blender's reference for render.opengl is render.render with BLENDER_WORKBENCH (#@opengl-blender lines)"),
+    "D-161": ("cases", "cases copy before every pose.paste (the copy buffer lives in the frap process)"),
+    "D-162": ("cases", "pose selection cases cancel only with extend=True or where the deselect changes nothing"),
+    "D-163": ("cases", "Blender runs anim.channels_bake in a #@blender Graph Editor temp_override and update_tag()s the baked actions before evaluating them"),
+    "D-164": ("cases", "cases create the NLA tracks before nla.actionclip_add"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

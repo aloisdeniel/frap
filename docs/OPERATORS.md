@@ -459,7 +459,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `anim.keyframe_clear_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
 | [x] | `anim.keyframe_delete_by_name` | M6 | P2 | WP 6.4 (M5+M6 W0) |
 | [ ] | `anim.keying_set_active_set` | M9 | P2 | post-M8 (M8 W0, M8W0-3): keying sets are not bound (`Scene.keying_sets`, `keying_sets.new()` raise `RNA_NOT_IMPLEMENTED`) |
-| [ ] | `anim.channels_bake` | M8 | P2 | WP 8.3.11 |
+| [x] | `anim.channels_bake` | M8 | P2 | headless-extended: the factory Graph Editor's channel list (D-163); T1; WP 8.3.11 |
 
 ### `screen.* (frames)`
 
@@ -525,20 +525,20 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `pose.scale_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [x] | `pose.armature_apply` | M6 | P1 | apply pose as rest pose; WP 6.2 (M5+M6 W0) |
 | [x] | `pose.rotation_mode_set` | M6 | P1 | WP 6.2 (M5+M6 W0) |
-| [ ] | `pose.user_transforms_clear` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.visual_transform_apply` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.copy` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.paste` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.select_hierarchy` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.select_parent` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.select_linked` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.select_mirror` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.select_grouped` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.hide` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.reveal` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.flip_names` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.autoside_names` | M8 | P2 | WP 8.3.11 |
-| [ ] | `pose.quaternions_flip` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.user_transforms_clear` | M8 | P2 | the action evaluated at the current frame on a pose copy, else the rest pose; WP 8.3.11 |
+| [x] | `pose.visual_transform_apply` | M8 | P2 | T1; WP 8.3.11 |
+| [x] | `pose.copy` | M8 | P2 | copy buffer in the frap process (D-161); WP 8.3.11 |
+| [x] | `pose.paste` | M8 | P2 | `flipped`, `selected_mask`; rotation converted to the target mode; WP 8.3.11 |
+| [x] | `pose.select_hierarchy` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.select_parent` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.select_linked` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.select_mirror` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.select_grouped` | M8 | P2 | COLOR matches every bone (no bone colours), KEYINGSET fails (no keying sets); WP 8.3.11 |
+| [x] | `pose.hide` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.reveal` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.flip_names` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.autoside_names` | M8 | P2 | WP 8.3.11 |
+| [x] | `pose.quaternions_flip` | M8 | P2 | WP 8.3.11 |
 | — | `pose.constraint_add` | OUT | — | constraints out of scope |
 | — | `pose.ik_add` | OUT | — |  |
 | — | `pose.breakdown` | OUT | — | interactive pose tools |
@@ -551,8 +551,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 |---|---|---|---|---|
 | [x] | `nla.action_pushdown` | M6 | P1 | headless-extended: active object's AnimData; feeds NLA_TRACKS export; WP 6.4 (M5+M6 W0) |
 | [x] | `nla.tracks_add` | M6 | P2 | headless-extended; WP 6.4 (M5+M6 W0) |
-| [ ] | `nla.tracks_delete` | M8 | P2 | WP 8.3.11 |
-| [ ] | `nla.actionclip_add` | M8 | P2 | WP 8.3.11 |
+| [x] | `nla.tracks_delete` | M8 | P2 | headless-extended: active object's AnimData; WP 8.3.11 |
+| [x] | `nla.actionclip_add` | M8 | P2 | headless-extended: active object's AnimData; WP 8.3.11 |
 
 ### `render.*`
 
