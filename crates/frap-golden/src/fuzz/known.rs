@@ -417,6 +417,7 @@ pub const KNOWN: &[Known] = &[
     gap(D_111, "uv.shortest_path_select", POLL),
     // The box packer's qsort ties.
     mesh(QSORT, "uv.lightmap_pack", UVS),
+    mesh(QSORT, "mesh.face_split_by_edges", ANY),
     gap(SNAP, "bpy.ops.view3d.snap_", "is not implemented yet"),
     gap(
         TRANSFORM_OBJECT,
@@ -598,7 +599,23 @@ pub const KNOWN: &[Known] = &[
         "mesh.reorder_vertices_spatial",
         "frap ok != blender CANCELLED",
     )
-    .with(&["mesh.merge"]),
+    .with(&["mesh.primitive_"]),
+    mesh(FOUND, "mesh.offset_edge_loops", NORMALS).with(&["mesh.poke"]),
+    mesh(FOUND, "mesh.delete_edgeloop", ANY).with(&["mesh.extrude_edges_indiv"]),
+    mesh(
+        FOUND,
+        "geometry.attribute_remove|geometry.attribute_convert",
+        ANY,
+    )
+    .with(&["geometry.attribute_add", "object.shade_"]),
+    // Normals of thin faces: float accumulation (positions agree at the case tolerance).
+    mesh(
+        FOUND,
+        "bpy.ops.mesh.|bpy.ops.transform.|bpy.ops.object.modifier_add|modifiers.new\
+         |bpy.ops.object.subdivision_set",
+        &["corner_normals", "face_normals"],
+    )
+    .max_delta(1e-3),
     mesh(FOUND, "SCREW", WINDING),
     mesh(FOUND, "WEIGHTED_NORMAL", NORMALS).max_delta(1e-3),
     mesh(FOUND, "WEIGHTED_NORMAL", &["attributes[\"custom_normal\"]"]).max_delta(4.0),
