@@ -198,6 +198,7 @@ NORMALISE = {
     "D-142": ("cases", "cases do not use such names, read at most one generic attribute as a UV map, drop iridescence channels next to other pointer channels, or export or import pointer channels Blender fails on; reports are not compared"),
     "D-143": ("cases", "cases export the fcurves path with meshopt only without shape-key animation"),
     "D-144": ("cases", "cases use Draco normal quantization 0 or 2..30 and finite meshes"),
+    "D-150": None,
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
