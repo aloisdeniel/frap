@@ -552,6 +552,7 @@ dependencies = [
  "frap-gltf",
  "frap-imbuf",
  "frap-lang",
+ "frap-math",
  "frap-project",
  "libfuzzer-sys",
 ]

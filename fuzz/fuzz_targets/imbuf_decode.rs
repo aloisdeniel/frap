@@ -7,6 +7,11 @@
 //! as they are), so every decoder sees mutated headers rather than only the sniffer. When both
 //! `probe` and `decode` succeed they agree on the size, the channels and the sample type, and
 //! the pixel buffer holds exactly `width × height × channels` samples.
+//!
+//! Decoding runs under a `--max-elements` budget, as in a statement: buffers above
+//! [`BUDGET_ELEMENTS`] × 32 bytes (512 MiB) are refused by `frap_math::budget::reserve_buffer`
+//! (a very compressible codec such as OpenEXR DWA legitimately declares far more samples than
+//! its bytes).
 #![no_main]
 
 use frap_imbuf::{FileFormat, PixelData};
@@ -27,7 +32,14 @@ const MAGIC: [&[u8]; 9] = [
     b"",
 ];
 
+/// The `--max-elements` the target decodes under (512 MiB of image buffers).
+const BUDGET_ELEMENTS: u64 = 16 << 20;
+
 fn exercise(bytes: &[u8]) {
+    let _budget = frap_math::budget::scope(frap_math::budget::Budget {
+        timeout: None,
+        max_elements: BUDGET_ELEMENTS,
+    });
     let _ = FileFormat::detect(bytes);
     let info = frap_imbuf::probe(bytes);
     let decoded = frap_imbuf::decode(bytes);

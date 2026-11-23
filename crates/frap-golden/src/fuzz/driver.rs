@@ -17,17 +17,21 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
-use frap_rna::{IdRef, MeshId};
+use std::collections::BTreeSet;
+
+use frap_rna::{IdRef, MeshId, ObjectId};
+use frap_scene::{Main, ObjectMode};
 use frap_session::{Session, SessionOptions, Startup as SessionStartup};
 
 use super::catalog::Catalog;
-use super::known;
+use super::known::{self, Outcome, Trace};
 use super::minimize;
 use super::rng::Rng;
 use super::sequence;
 use crate::blender::{self, Repo, ScratchDir};
 use crate::case::{Case, CompareSpec, Mismatch};
 use crate::runner::{self, Props, RunOptions};
+use crate::state::LineOutcome;
 
 /// The case header every fuzz case uses: T2 (canonical mesh order), `tol=1e-4` (long
 /// sequences accumulate float differences of solvers that are T2 elsewhere).
@@ -68,27 +72,77 @@ pub struct Options {
 /// objects frap has at the end (by data name) and the evaluated meshes of objects with
 /// modifiers.
 pub fn compare_specs(statements: &[String]) -> Vec<CompareSpec> {
+    probe(statements).0
+}
+
+/// A frap run of `statements`, one at a time: the compared items ([`compare_specs`]) and the
+/// meshes and objects each statement acted on ([`Trace`] without the outcomes, which come
+/// from the compared run of both tools).
+pub fn probe(statements: &[String]) -> (Vec<CompareSpec>, Trace) {
     let mut specs = vec![CompareSpec::Objects, CompareSpec::Context];
+    let mut trace = Trace::default();
     let work = match ScratchDir::new("fuzz-probe") {
         Ok(w) => w,
-        Err(_) => return specs,
+        Err(_) => return (specs, trace),
     };
     let mut so = SessionOptions::default();
     so.cwd = work.path().to_owned();
     so.startup = SessionStartup::Factory;
     let Ok(mut s) = Session::new(so) else {
-        return specs;
+        return (specs, trace);
     };
-    let src = source(statements);
     let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        s.exec_source_at(&src, 1);
+        s.exec_source_at("import bpy\n", PREAMBLE_LINES);
     }));
     if ran.is_err() {
-        return specs;
+        return (specs, trace);
+    }
+    // Per statement, by identity (names change: renames, `.001` suffixes).
+    let mut acted: Vec<Acted> = Vec::new();
+    for (i, st) in statements.iter().enumerate() {
+        let line = PREAMBLE_LINES + 1 + i as u32;
+        let before = (acted_on(s.main(), ""), all_ids(s.main()));
+        let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            s.exec_source_at(&format!("{st}\n"), line);
+        }));
+        if ran.is_err() {
+            return (specs, trace);
+        }
+        acted.push(acted_on(s.main(), st));
+        // Data made from other data (`mesh.separate`, `object.duplicate`, `object.convert`)
+        // carries the history of what it came from: every earlier statement that acted on
+        // the source acted on the copy. Added primitives and objects (`…_add(`) start anew.
+        if !st.contains("_add(") {
+            let now = all_ids(s.main());
+            let new_meshes: Vec<_> = now.0.difference(&before.1.0).copied().collect();
+            let new_objects: Vec<_> = now.1.difference(&before.1.1).copied().collect();
+            let (src_meshes, src_objects) = &before.0;
+            for a in acted.iter_mut().take(i) {
+                if !a.0.is_disjoint(src_meshes) {
+                    a.0.extend(new_meshes.iter().copied());
+                }
+                if !a.1.is_disjoint(src_objects) {
+                    a.1.extend(new_objects.iter().copied());
+                }
+            }
+        }
     }
     let main = s.main();
+    let mesh_name = |r: IdRef<MeshId>| main.meshes.get(r).map(|m| m.header.name.to_string());
+    let object_name = |r: IdRef<ObjectId>| main.objects.get(r).map(|o| o.header.name.to_string());
+    for (meshes, objects) in acted {
+        trace
+            .meshes
+            .push(meshes.into_iter().filter_map(mesh_name).collect());
+        trace
+            .objects
+            .push(objects.into_iter().filter_map(object_name).collect());
+    }
     let (mut meshes, mut evaluated) = (Vec::new(), Vec::new());
     for (_, o) in main.objects.iter() {
+        if o.mode == ObjectMode::Edit {
+            trace.edit_end.insert(o.header.name.to_string());
+        }
         let Some(m) = o
             .data
             .and_then(IdRef::<MeshId>::from_any)
@@ -114,11 +168,60 @@ pub fn compare_specs(statements: &[String]) -> Vec<CompareSpec> {
             .take(MAX_COMPARED)
             .map(CompareSpec::Evaluated),
     );
-    specs
+    (specs, trace)
+}
+
+/// Every mesh and object of `main`.
+fn all_ids(main: &Main) -> Acted {
+    (
+        main.meshes.iter().map(|(r, _)| r).collect(),
+        main.objects.iter().map(|(r, _)| r).collect(),
+    )
+}
+
+/// The meshes and objects one statement acted on, by identity.
+type Acted = (BTreeSet<IdRef<MeshId>>, BTreeSet<IdRef<ObjectId>>);
+
+/// What a statement acted on, read after it ran: the objects active, selected or in Edit
+/// Mode in the window's view layer (the factory scene's), those it names in quotes, and
+/// their meshes, plus meshes it names.
+fn acted_on(main: &Main, statement: &str) -> Acted {
+    let mut objects = BTreeSet::new();
+    if let Some(layer) = main
+        .scenes
+        .iter()
+        .next()
+        .and_then(|(_, sc)| sc.view_layers.first())
+    {
+        objects.extend(layer.active);
+        objects.extend(
+            layer
+                .bases
+                .iter()
+                .filter(|b| b.selected())
+                .map(|b| b.object),
+        );
+    }
+    objects.extend(
+        main.objects
+            .iter()
+            .filter(|(_, o)| o.mode != ObjectMode::Object)
+            .map(|(r, _)| r),
+    );
+    let quoted: Vec<&str> = statement.split('\'').skip(1).step_by(2).collect();
+    objects.extend(quoted.iter().filter_map(|n| main.objects.find(n)));
+    let mut meshes: BTreeSet<IdRef<MeshId>> = objects
+        .iter()
+        .filter_map(|r| main.objects.get(*r))
+        .filter_map(|o| o.data.and_then(IdRef::<MeshId>::from_any))
+        .collect();
+    meshes.extend(quoted.iter().filter_map(|n| main.meshes.find(n)));
+    (meshes, objects)
 }
 
 /// The statements as case source with the preamble's line numbering (statement `i` on line
 /// `PREAMBLE_LINES + 1 + i`), for running outside a case file.
+#[cfg(test)]
 fn source(statements: &[String]) -> String {
     let mut s = "\n".repeat(PREAMBLE_LINES as usize - 1);
     s.push_str("import bpy\n");
@@ -150,11 +253,13 @@ pub struct RunResult {
     pub mismatches: Vec<Mismatch>,
     /// Blender itself failed (crashed, wrote no dump): not compared.
     pub blender_failure: Option<String>,
+    /// What each statement did (for [`classify`]).
+    pub trace: Trace,
 }
 
 /// Runs `statements` in both tools and compares.
 pub fn run_both(repo: &Repo, props: &Props, blender: &Path, statements: &[String]) -> RunResult {
-    let specs = compare_specs(statements);
+    let (specs, mut trace) = probe(statements);
     let text = case_text(statements, &specs, "candidate");
     let work = match ScratchDir::new("fuzz") {
         Ok(w) => w,
@@ -201,11 +306,38 @@ pub fn run_both(repo: &Repo, props: &Props, blender: &Path, statements: &[String
             mismatches: vec![Mismatch::new("harness", "frap", e.to_string())],
             ..Default::default()
         },
-        (Ok(f), Ok(b)) => RunResult {
-            mismatches: runner::compare(&case, &f.state, &b),
-            ..Default::default()
-        },
+        (Ok(f), Ok(b)) => {
+            let mismatches = runner::compare(&case, &f.state, &b);
+            trace.outcomes = outcomes(statements.len(), &f.state.lines, &mismatches);
+            RunResult {
+                mismatches,
+                blender_failure: None,
+                trace,
+            }
+        }
     }
+}
+
+/// Each statement's [`Outcome`]: [`Outcome::Differs`] where the `lines` comparator found a
+/// mismatch (it normalises messages), else frap's outcome.
+fn outcomes(n: usize, frap: &[LineOutcome], mismatches: &[Mismatch]) -> Vec<Outcome> {
+    (0..n)
+        .map(|i| {
+            let line = PREAMBLE_LINES + 1 + i as u32;
+            let path = format!("line {line}");
+            if mismatches
+                .iter()
+                .any(|m| m.comparator == "lines" && m.path == path)
+            {
+                return Outcome::Differs;
+            }
+            match frap.iter().find(|l| l.line == line) {
+                Some(l) if l.ok => Outcome::Ok,
+                Some(l) => Outcome::Failed(l.message.clone().unwrap_or_default()),
+                None => Outcome::Differs,
+            }
+        })
+        .collect()
 }
 
 /// The statement a `lines` mismatch path (`line 7`) points at.
@@ -296,23 +428,20 @@ pub enum Verdict<'a> {
     Unexplained(&'a Mismatch),
 }
 
-/// Classifies `mismatches` (non-empty) of `statements`.
-pub fn classify<'a>(statements: &[String], mismatches: &'a [Mismatch]) -> Verdict<'a> {
-    let explain = |m: &Mismatch| {
-        let at = (m.comparator == "lines")
-            .then(|| statement_at(statements, &m.path))
-            .flatten();
-        known::explain(statements, at, m)
-    };
-    if let Some(k) = mismatches.iter().filter_map(explain).find(|k| k.cascade) {
-        return Verdict::Explained(k.deviation);
-    }
-    match mismatches.iter().find(|m| explain(m).is_none()) {
-        Some(m) => Verdict::Unexplained(m),
+/// Classifies `mismatches` (non-empty) of `statements` by cause ([`known::explain_all`]).
+pub fn classify<'a>(
+    statements: &[String],
+    trace: &Trace,
+    mismatches: &'a [Mismatch],
+) -> Verdict<'a> {
+    let explained = known::explain_all(statements, trace, mismatches);
+    match mismatches.iter().zip(&explained).find(|(_, k)| k.is_none()) {
+        Some((m, _)) => Verdict::Unexplained(m),
         None => Verdict::Explained(
-            mismatches
+            explained
                 .first()
-                .and_then(explain)
+                .copied()
+                .flatten()
                 .map_or("?", |k| k.deviation),
         ),
     }
@@ -346,6 +475,8 @@ pub struct Report {
     pub explained: BTreeMap<String, u64>,
     /// Trials where Blender failed (by first line of the error).
     pub blender_failures: BTreeMap<String, u64>,
+    /// Trial seeds whose unexplained mismatch did not come back when re-run.
+    pub unreproduced: Vec<u64>,
     /// Unexplained mismatches by signature.
     pub findings: BTreeMap<String, Finding>,
     /// Statements run per callee (operator idname or RNA path).
@@ -356,7 +487,31 @@ pub struct Report {
     pub elapsed: Duration,
 }
 
+/// A run is unhealthy when more than this fraction of its trials could not run in Blender.
+pub const MAX_BLENDER_FAILURE_RATE: f64 = 0.05;
+
 impl Report {
+    /// Why the run did not really compare the tools, if so: no clean trial, or more than
+    /// [`MAX_BLENDER_FAILURE_RATE`] of the trials failed in Blender (crash, no dump,
+    /// timeout). A run that compared nothing must not pass for a clean one.
+    pub fn health_problem(&self) -> Option<String> {
+        let failures: u64 = self.blender_failures.values().sum();
+        if self.trials > 0 && self.clean == 0 {
+            return Some(format!(
+                "no clean trial out of {} ({failures} Blender failures)",
+                self.trials
+            ));
+        }
+        if failures as f64 > MAX_BLENDER_FAILURE_RATE * self.trials as f64 {
+            return Some(format!(
+                "Blender failed on {failures} of {} trials (more than {:.0}%)",
+                self.trials,
+                MAX_BLENDER_FAILURE_RATE * 100.0
+            ));
+        }
+        None
+    }
+
     /// The summary printed at the end of a run.
     pub fn summary(&self) -> String {
         let ops = self
@@ -376,8 +531,22 @@ impl Report {
             self.callees.len() - ops,
             self.findings.len()
         );
+        if let Some(p) = self.health_problem() {
+            s.push_str(&format!("  UNHEALTHY RUN: {p}\n"));
+        }
         for (d, n) in &self.explained {
             s.push_str(&format!("  explained {d}: {n} trial(s)\n"));
+        }
+        if !self.unreproduced.is_empty() {
+            s.push_str(&format!(
+                "  {} unexplained mismatch(es) did not come back on a re-run (seeds {})\n",
+                self.unreproduced.len(),
+                self.unreproduced
+                    .iter()
+                    .map(|x| format!("{x:#x}"))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
         }
         for (e, n) in &self.blender_failures {
             s.push_str(&format!("  blender failure ({n}x): {e}\n"));
@@ -408,6 +577,9 @@ impl Report {
             "clean": self.clean,
             "explained": self.explained,
             "blender_failures": self.blender_failures,
+            "healthy": self.health_problem().is_none(),
+            "health_problem": self.health_problem(),
+            "unreproduced": self.unreproduced.iter().map(|s| format!("{s:#x}")).collect::<Vec<_>>(),
             "elapsed_secs": self.elapsed.as_secs_f64(),
             "callees": self.callees,
             "clean_seeds": self.clean_seeds.iter().map(|s| format!("{s:#x}")).collect::<Vec<_>>(),
@@ -450,7 +622,18 @@ fn case_name(sig: &str) -> String {
     s.chars().take(120).collect()
 }
 
-/// Minimises `statements` while a mismatch with signature `sig` remains.
+/// Whether `r` shows a mismatch with signature `sig` that [`known`] does not explain.
+fn shows_unexplained(statements: &[String], r: &RunResult, sig: &str) -> bool {
+    r.blender_failure.is_none()
+        && known::explain_all(statements, &r.trace, &r.mismatches)
+            .iter()
+            .zip(&r.mismatches)
+            .any(|(k, m)| k.is_none() && signature(statements, m) == sig)
+}
+
+/// Minimises `statements` while an unexplained mismatch with signature `sig` remains (so
+/// the minimised sequence cannot drift to an explained mismatch of the same signature);
+/// the minimised statements and their run.
 pub fn minimise(
     repo: &Repo,
     props: &Props,
@@ -458,14 +641,11 @@ pub fn minimise(
     statements: &[String],
     sig: &str,
     budget: usize,
-) -> (Vec<String>, Vec<Mismatch>) {
-    let fails = |v: &[String]| {
-        let r = run_both(repo, props, blender, v);
-        r.blender_failure.is_none() && r.mismatches.iter().any(|m| signature(v, m) == sig)
-    };
+) -> (Vec<String>, RunResult) {
+    let fails = |v: &[String]| shows_unexplained(v, &run_both(repo, props, blender, v), sig);
     let (min, _) = minimize::ddmin(statements, budget, fails);
     let r = run_both(repo, props, blender, &min);
-    (min, r.mismatches)
+    (min, r)
 }
 
 /// Runs the fuzzer.
@@ -506,7 +686,7 @@ pub fn run(repo: &Repo, opts: &Options) -> Result<Report, String> {
                 }
                 continue;
             }
-            let first = match classify(&statements, &r.mismatches) {
+            let first = match classify(&statements, &r.trace, &r.mismatches) {
                 Verdict::Explained(d) => {
                     *rep.explained.entry(d.to_owned()).or_insert(0) += 1;
                     continue;
@@ -518,21 +698,21 @@ pub fn run(repo: &Repo, opts: &Options) -> Result<Report, String> {
             // Every unexplained hit is minimised: one coarse signature (`mesh_canonical:
             // meshes[].positions[]`) covers many bugs, which the minimised statements tell
             // apart (the finding key is the signature plus their callees).
-            let (min, mism) = if opts.minimize {
+            let (min, mr) = if opts.minimize {
                 minimise(repo, &props, &opts.blender, &statements, &sig, opts.budget)
             } else {
-                (statements.clone(), r.mismatches.clone())
+                (statements.clone(), r.clone())
             };
-            // A minimised sequence that only shows explained mismatches is explained.
-            if let Verdict::Explained(d) = classify(&min, &mism)
-                && !mism.is_empty()
-            {
+            // The unexplained mismatch did not come back when the sequence ran again (Blender
+            // is not deterministic everywhere: D-19): reported, not a finding.
+            if opts.minimize && !shows_unexplained(&min, &mr, &sig) {
                 let mut rep = report
                     .lock()
                     .expect("invariant: no worker panics holding the lock");
-                *rep.explained.entry(d.to_owned()).or_insert(0) += 1;
+                rep.unreproduced.push(seed);
                 continue;
             }
+            let mism = mr.mismatches;
             let key = finding_key(&sig, &min);
             let mut rep = report
                 .lock()
@@ -669,5 +849,44 @@ mod tests {
             "{specs:?}"
         );
         assert!(!specs.contains(&CompareSpec::Evaluated("Cube".into())));
+    }
+
+    #[test]
+    fn probe_traces_what_each_statement_acted_on() {
+        let st: Vec<String> = [
+            "bpy.ops.mesh.primitive_plane_add()",
+            "bpy.context.object.data.name = 'MeshData'",
+            "bpy.data.objects['Cube'].select_set(True)",
+            "bpy.ops.object.mode_set(mode='EDIT')",
+        ]
+        .iter()
+        .map(|s| (*s).to_owned())
+        .collect();
+        let (_, t) = probe(&st);
+        let set = |v: &[&str]| v.iter().map(|s| (*s).to_owned()).collect::<BTreeSet<_>>();
+        // Names at the end of the sequence (the plane's mesh was renamed).
+        assert_eq!(t.meshes[0], set(&["MeshData"]));
+        assert_eq!(t.objects[0], set(&["Plane"]));
+        assert_eq!(t.meshes[2], set(&["MeshData", "Cube"]));
+        assert_eq!(t.objects[3], set(&["Plane", "Cube"]));
+        assert_eq!(t.edit_end, set(&["Plane", "Cube"]));
+        // Copies share the history of what they were made from (of every selected object:
+        // which copy came from which is not tracked); an added object does not.
+        let st: Vec<String> = [
+            "bpy.ops.mesh.primitive_plane_add()",
+            "bpy.data.objects['Cube'].select_set(True)",
+            "bpy.ops.object.duplicate()",
+            "bpy.ops.mesh.primitive_cone_add()",
+        ]
+        .iter()
+        .map(|s| (*s).to_owned())
+        .collect();
+        let (_, t) = probe(&st);
+        assert_eq!(t.objects[0], set(&["Plane", "Plane.001", "Cube.001"]));
+        assert_eq!(
+            t.objects[1],
+            set(&["Plane", "Cube", "Plane.001", "Cube.001"])
+        );
+        assert_eq!(t.objects[3], set(&["Cone"]));
     }
 }

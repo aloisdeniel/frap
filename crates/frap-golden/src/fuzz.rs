@@ -10,7 +10,8 @@
 //! cargo xtask golden fuzz replay <trial seed> [--len N]   print one sequence as a case
 //! cargo xtask golden fuzz catalog                          list what the fuzzer draws from
 //! cargo xtask golden fuzz check <case.py>                  run a case's statements in both tools
-//! cargo xtask golden fuzz minimize <case.py> [--budget N]  minimise a case on its first mismatch
+//! cargo xtask golden fuzz minimize <case.py> [--budget N]  minimise a case on its first
+//!                                                         unexplained mismatch
 //! ```
 //!
 //! - [`catalog`]: the operators (properties varied within their Blender 5.2.4 definitions)
@@ -88,7 +89,8 @@ pub fn case_statements(text: &str) -> Vec<String> {
         .collect()
 }
 
-/// `frap-golden fuzz …`; `Ok(false)` when unexplained mismatches were found.
+/// `frap-golden fuzz …`; `Ok(false)` when unexplained mismatches were found or the run was
+/// unhealthy ([`driver::Report::health_problem`]).
 pub fn main(args: &[String]) -> Result<bool, String> {
     match args.first().map(String::as_str) {
         Some("replay") => {
@@ -133,27 +135,44 @@ pub fn main(args: &[String]) -> Result<bool, String> {
             if let Some(e) = r.blender_failure {
                 return Err(format!("Blender failed: {e}"));
             }
-            let Some(first) = r.mismatches.first() else {
+            if r.mismatches.is_empty() {
                 println!("no mismatch");
                 return Ok(true);
+            }
+            if cmd == "check" {
+                // What each statement did, as the classification sees it.
+                for (i, st) in statements.iter().enumerate() {
+                    let t = &r.trace;
+                    println!(
+                        "# {i}: {:?} meshes {:?} objects {:?}: {st}",
+                        t.outcomes.get(i),
+                        t.meshes.get(i),
+                        t.objects.get(i)
+                    );
+                }
+                let why = known::explain_all(&statements, &r.trace, &r.mismatches);
+                for (m, k) in r.mismatches.iter().zip(&why) {
+                    match k {
+                        Some(k) => println!("{m}\n    explained: {}", k.deviation),
+                        None => println!("{m}\n    UNEXPLAINED"),
+                    }
+                }
+            }
+            let first = match driver::classify(&statements, &r.trace, &r.mismatches) {
+                driver::Verdict::Explained(d) => {
+                    println!("explained: {d}");
+                    return Ok(true);
+                }
+                driver::Verdict::Unexplained(m) => m,
             };
             if cmd == "check" {
-                for m in &r.mismatches {
-                    println!("{m}");
-                }
-                return Ok(match driver::classify(&statements, &r.mismatches) {
-                    driver::Verdict::Explained(d) => {
-                        println!("explained: {d}");
-                        true
-                    }
-                    driver::Verdict::Unexplained(m) => {
-                        println!("UNEXPLAINED: {m}");
-                        false
-                    }
-                });
+                println!("UNEXPLAINED: {first}");
+                return Ok(false);
             }
+            // Minimised on its first unexplained mismatch.
             let sig = driver::signature(&statements, first);
-            let (min, mism) = driver::minimise(&repo, &props, &blender, &statements, &sig, budget);
+            let (min, mr) = driver::minimise(&repo, &props, &blender, &statements, &sig, budget);
+            let mism = mr.mismatches;
             let specs = driver::compare_specs(&min);
             print!(
                 "{}",
@@ -206,5 +225,9 @@ pub fn main(args: &[String]) -> Result<bool, String> {
     let report = driver::run(&repo, &opts)?;
     print!("{}", report.summary());
     println!("report: {}", opts.out.join("report.json").display());
+    if let Some(p) = report.health_problem() {
+        eprintln!("fuzz: the run did not compare the tools: {p}");
+        return Ok(false);
+    }
     Ok(report.findings.is_empty())
 }

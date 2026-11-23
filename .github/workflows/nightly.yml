@@ -4,12 +4,15 @@
 # - cargo-fuzz: each target of fuzz/ (its own workspace) runs 10 minutes with libFuzzer and
 #   AddressSanitizer (ASan global redzones off: they break linkme's duplicate check), a 2 GiB
 #   malloc/RSS limit (an allocation sized from a header is a failure) and a seed corpus made
-#   from the repository's own files. Crash inputs are uploaded; add them to
-#   crates/frap-golden/src/fuzz/regress/ with the fix.
+#   from the repository's own files (frap_read: every committed .frap, including the seeds of
+#   crates/frap-golden/src/fuzz/seeds/ with modifiers, shape keys, vertex groups, UV layers,
+#   a material, a packed image, an armature and an action). Crash inputs are uploaded; add
+#   them to crates/frap-golden/src/fuzz/regress/ with the fix.
 # - differential: `cargo xtask golden fuzz` replays seeded random sequences over the
 #   catalogue (>= 150 operators and the RNA statements) in frap and in Blender 5.2.4 for one
-#   hour and fails on any mismatch docs/deviations.md does not explain; the minimised cases
-#   and report.json are uploaded. It runs on macOS arm64 like the fixtures (D-67, D-94).
+#   hour and fails on any mismatch docs/deviations.md does not explain, and on a run that did
+#   not compare the tools (no clean trial, or Blender failing on more than 5% of the trials:
+#   report.json `healthy`); the minimised cases and report.json are uploaded. It runs on macOS arm64 like the fixtures (D-67, D-94).
 
 name: nightly
 
@@ -131,6 +134,13 @@ jobs:
           seed="${SEED:-$(date -u +%Y%m%d)}"
           cargo xtask golden fuzz --minutes "$MINUTES" --seed "$seed" \
             --out "$RUNNER_TEMP/fuzz-cases" | tee "$RUNNER_TEMP/fuzz.out"
+      - name: check the run compared the tools
+        run: |
+          set -eu
+          r="$RUNNER_TEMP/fuzz-cases/report.json"
+          jq '{trials, clean, healthy, health_problem, blender_failures}' "$r"
+          test "$(jq -r '.healthy' "$r")" = true
+          test "$(jq -r '.clean' "$r")" -gt 0
       - name: job summary
         if: always()
         run: |

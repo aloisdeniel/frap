@@ -441,33 +441,39 @@ pub fn decode_exr_channels(bytes: &[u8]) -> Result<(u32, u32, ExrChannels), Imag
 }
 
 /// WP 8.7 (fuzzing): refuses an OpenEXR whose header declares more sample data than its
-/// bytes can hold, before the `exr` crate allocates it from the header alone. Compressed
-/// chunks expand at most about as much as Deflate (1032:1); below 64 MiB every header is
-/// accepted, so only a corrupt (or extraordinarily compressible) file is refused.
+/// bytes can hold, before the `exr` crate allocates it from the header alone, and reserves
+/// the decoded buffer in the statement's budget (`--max-elements`,
+/// [`frap_math::budget::reserve_buffer`]). Below 64 MiB every header is accepted; above, the
+/// bound is the largest expansion of the file's codecs ([`exr_max_ratio`]), so only a corrupt
+/// file is refused.
 fn exr_check_size(bytes: &[u8]) -> Result<(), ImageError> {
     const FLOOR: u64 = 64 << 20;
-    const RATIO: u64 = DEFLATE_MAX_RATIO;
     let Ok(meta) = exr::meta::MetaData::read_from_buffered(Cursor::new(bytes), false) else {
         // The reader reports the error itself.
         return Ok(());
     };
-    let mut total: u64 = 0;
+    let (mut total, mut decoded, mut ratio): (u64, u64, u64) = (0, 0, 1);
     for h in meta.headers.iter().filter(|h| !h.deep) {
         let (w, hh) = (h.layer_size.width() as u64, h.layer_size.height() as u64);
+        ratio = ratio.max(exr_max_ratio(h.compression));
         for c in &h.channels.list {
             let size = match c.sample_type {
                 exr::meta::attribute::SampleType::F16 => 2,
                 _ => 4,
             };
-            total = total.saturating_add(w.saturating_mul(hh).saturating_mul(size));
+            let n = w.saturating_mul(hh);
+            total = total.saturating_add(n.saturating_mul(size));
+            decoded = decoded.saturating_add(n.saturating_mul(4));
         }
     }
-    if total > FLOOR.max((bytes.len() as u64).saturating_mul(RATIO)) {
+    if total > FLOOR.max((bytes.len() as u64).saturating_mul(ratio)) {
         return Err(ImageError::Decode(format!(
             "OpenEXR: {total} bytes of samples cannot come from {} bytes (truncated or corrupt file)",
             bytes.len()
         )));
     }
+    frap_math::budget::reserve_buffer("OpenEXR image", Some(decoded))
+        .map_err(|e| ImageError::Decode(format!("OpenEXR: {e}")))?;
     let dwa = |h: &exr::meta::header::Header| {
         matches!(
             h.compression,
@@ -478,6 +484,25 @@ fn exr_check_size(bytes: &[u8]) -> Result<(), ImageError> {
         exr_check_dwa(bytes)?;
     }
     Ok(())
+}
+
+/// The largest ratio of sample bytes to file bytes a codec reaches (on a flat image):
+/// uncompressed 1; RLE 64 (a 2-byte run codes 128 bytes); ZIP, ZIPS and PIZ (Huffman with
+/// 255-symbol run codes, about 400:1) at most Deflate's 1032; PXR24 (32-bit floats cut to
+/// 24 bits before Deflate) 4/3 of that; B44/B44A 11 (a flat 4×4 block of halves in 3 bytes);
+/// DWAA/DWAB 64 × 1032 (a flat 8×8 block of halves becomes one 2-byte DC value and an
+/// end-of-block code, both Deflated again: Blender 5.2.4 writes a flat 4096² RGBA DWAA in
+/// 33,969 bytes, 3951:1); HTJ2K as DWA (not bounded more tightly).
+fn exr_max_ratio(c: exr::compression::Compression) -> u64 {
+    use exr::compression::Compression as C;
+    match c {
+        C::Uncompressed => 1,
+        C::RLE => 64,
+        C::ZIP1 | C::ZIP16 | C::PIZ => DEFLATE_MAX_RATIO,
+        C::PXR24 => DEFLATE_MAX_RATIO * 4 / 3 + 1,
+        C::B44 | C::B44A => 11,
+        _ => 64 * DEFLATE_MAX_RATIO,
+    }
 }
 
 /// WP 8.7 (fuzzing): `exr` 1.74.3's DWA decoder sizes its zlib output buffers from the

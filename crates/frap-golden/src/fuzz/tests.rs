@@ -180,3 +180,80 @@ fn exr_guards_keep_real_files() {
         assert!((px[i + 3] - 1.0).abs() < 1e-3, "{name}");
     }
 }
+
+/// The size guard keeps very compressible real files: Blender 5.2.4's flat-colour
+/// (0.2, 0.4, 0.6, 1) half-float EXRs, 4096² RGBA DWAA (33,969 bytes for 128 MiB of samples)
+/// and 4096×2048 DWAB (5,097 bytes), far beyond Deflate's 1032:1, decode (`regress/flat4k*.exr`;
+/// Blender reads `pixels[0]` = 0.0330810546875, the sRGB-linear red, and alpha 1).
+#[test]
+fn exr_guard_keeps_flat_dwa_files() {
+    for (name, bytes, (w, h)) in [
+        (
+            "flat4k_dwaa",
+            &include_bytes!("regress/flat4k_dwaa.exr")[..],
+            (4096, 4096),
+        ),
+        (
+            "flat4k2k_dwab",
+            &include_bytes!("regress/flat4k2k_dwab.exr")[..],
+            (4096, 2048),
+        ),
+    ] {
+        let img = frap_imbuf::decode(bytes).unwrap_or_else(|e| panic!("{name}: {e}"));
+        assert_eq!((img.width, img.height, img.channels), (w, h, 4), "{name}");
+        let frap_imbuf::PixelData::F32(px) = &img.pixels else {
+            panic!("{name}: not float");
+        };
+        assert!((px[0] - 0.033_081_055).abs() < 1e-6, "{name}: {}", px[0]);
+        assert!((px[3] - 1.0).abs() < 1e-6, "{name}");
+        let last = px.len() - 4;
+        assert!((px[last] - 0.033_081_055).abs() < 1e-6, "{name}");
+    }
+}
+
+/// The `frap_read` seed files (`seeds/*.frap`, copied into the nightly corpus by its
+/// `git ls-files '*.frap'`) still open, and hold what their scripts (`seeds/*.py`) made:
+/// modifiers, shape keys and vertex groups; UV layers, a material and a packed image; an
+/// armature with auto weights and an animated object.
+#[test]
+fn frap_read_seeds_open() {
+    let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src/fuzz/seeds");
+    for (file, checks) in [
+        (
+            "modifiers_shapekeys.frap",
+            &[
+                "bpy.data.objects['Cube'].modifiers['Array'].count",
+                "bpy.data.shape_keys['Key'].key_blocks['Key'].value",
+                "bpy.data.objects['Cube'].vertex_groups['Group'].index",
+            ][..],
+        ),
+        (
+            "uv_material_image.frap",
+            &[
+                "bpy.data.meshes['Suzanne'].uv_layers['UV2'].name",
+                "bpy.data.images['Tex'].packed_file.size",
+                "bpy.data.materials['Red'].name",
+            ][..],
+        ),
+        (
+            "armature_animation.frap",
+            &[
+                "bpy.data.armatures['Armature'].bones['Bone.001'].name",
+                "bpy.data.objects['Cube'].animation_data.action.name",
+                "bpy.data.objects['Cube'].vertex_groups['Bone'].index",
+            ][..],
+        ),
+    ] {
+        let mut so = SessionOptions::default();
+        so.cwd = dir.clone();
+        let mut s = Session::new(so).unwrap();
+        let mut src = format!("bpy.ops.wm.open_mainfile(filepath='{file}')\n");
+        for c in checks {
+            src.push_str(c);
+            src.push('\n');
+        }
+        for r in s.exec_source(&src) {
+            assert!(r.ok(), "{file}: line {}: {:?}", r.line, r.error);
+        }
+    }
+}
