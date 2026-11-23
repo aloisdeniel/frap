@@ -651,6 +651,25 @@ pub fn minimise(
     (min, r)
 }
 
+/// The key a Blender failure is counted under: its exit status and the last line it wrote
+/// (the scratch paths of the first line differ on every trial).
+fn failure_key(e: &str) -> String {
+    let first = e.lines().next().unwrap_or("");
+    let key = match first.split_once(" exited with ") {
+        Some((_, status)) => {
+            let last = e
+                .lines()
+                .rev()
+                .map(str::trim)
+                .find(|l| !l.is_empty() && !l.starts_with("---"))
+                .unwrap_or("");
+            format!("Blender exited with {status}: {last}")
+        }
+        None => first.to_owned(),
+    };
+    key.chars().take(160).collect()
+}
+
 /// Runs the fuzzer.
 pub fn run(repo: &Repo, opts: &Options) -> Result<Report, String> {
     let props = Props::load(&repo.props_path()).map_err(|e| e.to_string())?;
@@ -678,7 +697,7 @@ pub fn run(repo: &Repo, opts: &Options) -> Result<Report, String> {
                 *rep.callees.entry(callee(s)).or_insert(0) += 1;
             }
             if let Some(e) = r.blender_failure {
-                let first = e.lines().next().unwrap_or("").chars().take(160).collect();
+                let first = failure_key(&e);
                 *rep.blender_failures.entry(first).or_insert(0) += 1;
                 continue;
             }
@@ -822,6 +841,17 @@ mod tests {
             source(&st).lines().nth(line as usize - 1),
             Some(st[0].as_str())
         );
+    }
+
+    #[test]
+    fn blender_failures_are_keyed_without_paths() {
+        let e = "/x/Blender on /tmp/frap-golden-1-2-fuzz/case.py exited with signal: 9 (SIGKILL)\n\
+                 --- stdout (tail)\nRead prefs\n--- stderr (tail)\nError: oops\n";
+        assert_eq!(
+            failure_key(e),
+            "Blender exited with signal: 9 (SIGKILL): Error: oops"
+        );
+        assert_eq!(failure_key("cannot start x"), "cannot start x");
     }
 
     #[test]

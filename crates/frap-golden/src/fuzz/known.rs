@@ -175,7 +175,7 @@ fn delta(detail: &str) -> Option<f64> {
 }
 
 /// One explained mismatch (see the module docs).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Known {
     /// The `docs/deviations.md` row: `D-nn`, or `§2 <words of the row>`.
     pub deviation: &'static str,
@@ -197,6 +197,40 @@ pub struct Known {
     pub edit_end: bool,
     /// Explains the mismatches after the cause too.
     pub cascade: bool,
+    /// A further condition on the cause statement (its arguments), `None`: none.
+    pub when: Option<fn(&str) -> bool>,
+}
+
+impl PartialEq for Known {
+    /// Entries are distinct by their data; `when` only by presence (function addresses are
+    /// not meaningful).
+    fn eq(&self, o: &Known) -> bool {
+        (
+            self.deviation,
+            self.comparator,
+            self.cause,
+            self.with,
+            self.detail,
+            self.fields,
+            self.fails_with,
+            self.max_delta,
+            self.edit_end,
+            self.cascade,
+            self.when.is_some(),
+        ) == (
+            o.deviation,
+            o.comparator,
+            o.cause,
+            o.with,
+            o.detail,
+            o.fields,
+            o.fails_with,
+            o.max_delta,
+            o.edit_end,
+            o.cascade,
+            o.when.is_some(),
+        )
+    }
 }
 
 const LINES: &str = "lines";
@@ -214,6 +248,7 @@ const BASE: Known = Known {
     max_delta: 0.0,
     edit_end: false,
     cascade: false,
+    when: None,
 };
 
 /// A `lines` difference at `cause` whose outcome text contains `detail`.
@@ -280,6 +315,17 @@ impl Known {
     const fn fails_with(self, fails_with: &'static str) -> Known {
         Known { fails_with, ..self }
     }
+    const fn when(self, when: fn(&str) -> bool) -> Known {
+        Known {
+            when: Some(when),
+            ..self
+        }
+    }
+
+    /// Whether `statement` is this entry's cause.
+    fn is_cause(&self, statement: &str) -> bool {
+        pattern_matches(self.cause, statement) && self.when.is_none_or(|f| f(statement))
+    }
 }
 
 const D_74: &str = "D-74";
@@ -329,13 +375,32 @@ const CUSTOM_NORMALS: &str = "mesh.smooth_normals|mesh.average_normals|mesh.merg
      |mesh.split_normals|mesh.set_normals_from_faces|mesh.normals_tools|mesh.point_normals\
      |mesh.customdata_custom_splitnormals_add";
 
+/// `transform.shear` with a singular shear frame: its effective `orient_axis_ortho` is its
+/// `orient_axis` (`initShear` resets equal axes to Z and Y, then the axes that were given
+/// are read again: both given and equal, only `orient_axis_ortho='Z'`, or only
+/// `orient_axis='Y'`).
+fn shear_frame_is_singular(statement: &str) -> bool {
+    let arg = |k: &str| {
+        statement
+            .split(&format!("{k}='"))
+            .nth(1)
+            .and_then(|r| r.chars().next())
+    };
+    match (arg("orient_axis"), arg("orient_axis_ortho")) {
+        (Some(a), Some(o)) => a == o,
+        (None, Some(o)) => o == 'Z',
+        (Some(a), None) => a == 'Y',
+        (None, None) => false,
+    }
+}
+
 /// Operators that change the topology (and so interpolate corner data).
 const TOPOLOGY: &str = "mesh.dissolve_|mesh.unsubdivide|mesh.merge(|mesh.remove_doubles\
      |mesh.edge_split|mesh.delete|mesh.quads_convert_to_tris|mesh.tris_convert_to_quads\
      |mesh.subdivide|mesh.beautify_fill|mesh.edge_rotate|mesh.decimate|mesh.inset\
      |mesh.vert_connect|mesh.split(|mesh.extrude_|mesh.bevel|mesh.poke|mesh.bridge_edge_loops\
      |mesh.fill|mesh.spin|mesh.solidify|mesh.wireframe|mesh.duplicate|mesh.offset_edge_loops\
-     |mesh.edge_face_add|mesh.triangulate|mesh.rip|mesh.bisect|mesh.knife";
+     |mesh.edge_face_add|mesh.triangulate|mesh.rip|mesh.bisect|mesh.knife|mesh.edge_collapse";
 
 /// The explained mismatches (see the module docs).
 pub const KNOWN: &[Known] = &[
@@ -415,9 +480,7 @@ pub const KNOWN: &[Known] = &[
         &["edges", "faces", ""],
     )
     .with(&["SUBSURF|subdivision_set"]),
-    mesh(GEOMETRY, "extrude_region&use_normal_flip=True", ANY)
-        .with(&["SUBSURF|subdivision_set"])
-        .edit_end(),
+    mesh(GEOMETRY, "mesh.extrude_region", ANY).with(&["SUBSURF|subdivision_set"]),
     mesh(GEOMETRY, "object.transform_apply", POSITIONS)
         .with(&["shape_key_add", "SUBSURF|subdivision_set"]),
     // A few units of the custom normals' 16-bit encoding.
@@ -483,7 +546,7 @@ pub const KNOWN: &[Known] = &[
     mesh("D-19", "mesh.primitive_uv_sphere_add", ANY),
     // --- found by the causal triage (WP 8.7 fix round) ---
     mesh(FOUND, "transform.shear", NORMALS).with(&["mesh.subdivide", "mesh.faces_shade_smooth"]),
-    mesh(FOUND, "mesh.bevel", ANY).with(&["mesh.extrude_faces_indiv"]),
+    mesh(FOUND, "mesh.bevel", ANY).with(&["mesh.extrude_faces_indiv|mesh.wireframe"]),
     mesh(FOUND, "mesh.bridge_edge_loops", ANY),
     mesh(FOUND, "mesh.extrude_region", NORMALS).with(&["mesh.dissolve_edges"]),
     mesh(FOUND, "transform.tosphere", NORMALS).with(&["mesh.extrude_faces_indiv"]),
@@ -500,12 +563,14 @@ pub const KNOWN: &[Known] = &[
         "transform.shrink_fatten&use_even_offset=True",
         POSITIONS,
     ),
-    mesh(FOUND, "transform.shear&angle=0.0,", ANY),
+    mesh(FOUND, "transform.shear", ANY).when(shear_frame_is_singular),
     mesh(FOUND, "mesh.tris_convert_to_quads", ANY).with(&["TRIFAN"]),
     state(FOUND, RNA, "bpy.ops.transform.rotate", &["rotation"])
         .with(&["object.transforms_to_deltas"]),
     mesh(FOUND, "use_boundary_tear=True", ANY),
-    mesh(FOUND, "transform.push_pull", POSITIONS).with(&["mode_set(mode='EDIT')"]),
+    mesh(FOUND, "transform.push_pull|transform.tosphere", POSITIONS)
+        .with(&["mode_set(mode='EDIT')"]),
+    gap(D_111, "bpy.ops.uv.", "frap CANCELLED != blender ok").with(&["bpy.ops.uv.select"]),
     // A UV selection operator after `uv.select_split` (which may leave Blender's UV
     // selection partly independent of the mesh selection even when it cancels).
     mesh(D_111, "bpy.ops.uv.select", ANY).with(&["~uv.select_split"]),
@@ -518,19 +583,12 @@ pub const KNOWN: &[Known] = &[
     )
     .max_delta(2e-3),
     mesh(FOUND, "TRIANGULATE", ANY).with(&["mesh.subdivide"]),
-    mesh(FOUND, "mesh.primitive_cube_add", UVS).with(&[
-        "transform.rotate",
-        "mode_set(mode='EDIT')",
-        "mesh.tris_convert_to_quads",
-    ]),
-    mesh(FOUND, "mesh.primitive_grid_add", UVS).with(&[
-        "mode_set(mode='EDIT')",
-        "mesh.extrude_repeat",
-        "mesh.bisect",
-    ]),
+    mesh(FOUND, "mesh.primitive_", UVS).with(&["mode_set(mode='EDIT')", TOPOLOGY]),
+    mesh(FOUND, "mesh.unsubdivide", WINDING).with(&["mesh.extrude_region"]),
     mesh(FOUND, "mesh.separate", &["attributes[\"__mirror_index\"]"]).with(&["mesh.select_mirror"]),
     mesh(FOUND, "mesh.remove_doubles", ANY),
-    mesh(FOUND, "~mesh.edge_face_add", &["selection"]).with(&["mesh.region_to_loop"]),
+    // (The selection differs: whatever acts on it next differs too.)
+    mesh(FOUND, "~mesh.edge_face_add", ANY).with(&["mesh.region_to_loop"]),
     mesh(FOUND, "mesh.select_random", ANY).with(&[TOPOLOGY]),
     mesh(FOUND, "mesh.vert_connect", NORMALS).with(&["mesh.sort_elements"]),
     mesh(FOUND, "mesh.duplicate", ANY).with(&["mesh.wireframe"]),
@@ -569,9 +627,7 @@ impl Known {
         }
         if m.comparator == LINES {
             let i = line_index(&m.path)?;
-            let ok = statements
-                .get(i)
-                .is_some_and(|s| pattern_matches(self.cause, s))
+            let ok = statements.get(i).is_some_and(|s| self.is_cause(s))
                 && m.detail.contains(self.detail)
                 && self
                     .with
@@ -619,9 +675,9 @@ impl Known {
                 matches!(trace.outcomes.get(i), Some(Outcome::Failed(f)) if f.contains(self.fails_with))
             }
         };
-        let cause = (0..statements.len()).rev().find(|&i| {
-            pattern_matches(self.cause, &statements[i]) && ran(i) && trace.touches(i, &t)
-        })?;
+        let cause = (0..statements.len())
+            .rev()
+            .find(|&i| self.is_cause(&statements[i]) && ran(i) && trace.touches(i, &t))?;
         let with = self.with.iter().all(|p| {
             (0..statements.len()).any(|j| {
                 trace.ran(j, p) && pattern_matches(p, &statements[j]) && trace.touches(j, &t)
@@ -681,7 +737,7 @@ pub fn explain_all(
             (0..statements.len()).filter_map(move |i| {
                 let failed = matches!(trace.outcomes.get(i),
                     Some(Outcome::Failed(f)) if f.contains(k.fails_with));
-                (failed && pattern_matches(k.cause, &statements[i])).then_some((k, i))
+                (failed && k.is_cause(&statements[i])).then_some((k, i))
             })
         });
     // The earliest cascade cause explains what follows it.
@@ -799,6 +855,21 @@ mod tests {
             Some(0.0010000000000000009)
         );
         assert_eq!(delta("frap (1, 2) != blender (2, 3)"), None);
+        assert!(shear_frame_is_singular(
+            "bpy.ops.transform.shear(angle=0.4, orient_axis_ortho='Z')"
+        ));
+        assert!(shear_frame_is_singular(
+            "bpy.ops.transform.shear(angle=0.4, orient_axis='Y', orient_axis_ortho='Y')"
+        ));
+        assert!(!shear_frame_is_singular(
+            "bpy.ops.transform.shear(angle=0.4)"
+        ));
+        assert!(shear_frame_is_singular(
+            "bpy.ops.transform.shear(angle=0.4, orient_axis='Y')"
+        ));
+        assert!(!shear_frame_is_singular(
+            "bpy.ops.transform.shear(angle=0.4, orient_axis='X', orient_axis_ortho='Y')"
+        ));
         assert_eq!(
             delta("frap 6008 != blender 6009 (tol 0.00009999999747378752)"),
             Some(1.0)
@@ -1012,12 +1083,12 @@ mod tests {
         let s = st(&[
             "bpy.ops.object.modifier_add(type='SUBSURF')",
             "bpy.ops.object.mode_set(mode='EDIT')",
-            "bpy.ops.mesh.extrude_region(use_normal_flip=True)",
+            "bpy.ops.transform.shear(angle=0.4)",
         ]);
         let m = Mismatch::new(
             "mesh_canonical",
-            "evaluated[\"Cube\"].edges[3]",
-            "frap edge [1, 3] has no blender counterpart",
+            "evaluated[\"Cube\"].corner_normals[3]",
+            "frap [0.0, 0.0, 1.0] != blender [0.3, 0.0, 0.95]",
         );
         let mut tr = cube_trace(3);
         assert_eq!(explain_all(&s, &tr, std::slice::from_ref(&m)), vec![None]);
