@@ -158,7 +158,8 @@ fn exec(bm: &mut BMesh, i: &ExtrudeFaceRegionIn) -> Result<ExtrudeFaceRegionOut,
             }
             let mut found = false;
             let mut edge_face_tot = 0;
-            for f in bm.edge_faces(e) {
+            // (Walks in place: these loops visit every edge and vertex of the mesh.)
+            for f in bm.edge_loops_iter(e).map(|l| bm.lp(l).f) {
                 if !bm.oflag_test(f, EXT_INPUT) {
                     found = true;
                     delorig = true;
@@ -178,13 +179,11 @@ fn exec(bm: &mut BMesh, i: &ExtrudeFaceRegionIn) -> Result<ExtrudeFaceRegionOut,
             continue;
         }
         let mut found = bm
-            .vert_edges(v)
-            .into_iter()
+            .vert_edges_iter(v)
             .any(|e| !bm.oflag_test(e, EXT_INPUT) || !bm.oflag_test(e, EXT_DEL));
         if !found {
             found = bm
-                .vert_faces(v)
-                .into_iter()
+                .vert_faces_any_order(v)
                 .any(|f| !bm.oflag_test(f, EXT_INPUT));
         }
         if !found {

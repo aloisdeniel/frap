@@ -376,15 +376,15 @@ pub(crate) mod common {
     }
 
     // Ported from blender/source/blender/editors/mesh/editmesh_extrude.cc (edbm_extrude_mesh).
-    /// `edbm_extrude_mesh`; `Ok(false)` when the selection gives nothing to extrude (the
-    /// `NONE` case returns before Blender's `Not a valid selection for extrude` report, which
-    /// the other cases never reach).
-    pub(crate) fn extrude_mesh(
+    /// `edbm_extrude_mesh`: the case that ran; [`Nr::None`] when the selection gives nothing
+    /// to extrude (the `NONE` case returns before Blender's `Not a valid selection for extrude`
+    /// report, which the other cases never reach).
+    fn extrude_mesh(
         bm: &mut BMesh,
         clips: &[MirrorClip],
         use_normal_flip: bool,
         use_dissolve_ortho_edges: bool,
-    ) -> Result<bool, OpError> {
+    ) -> Result<Nr, OpError> {
         let h = htype_from_select(bm);
         let (v, e, f) = counts(bm);
         let nr = if bm.select_mode.contains(SelectMode::VERT) {
@@ -409,7 +409,7 @@ pub(crate) mod common {
             Nr::ElemFlag
         };
         match nr {
-            Nr::None => return Ok(false),
+            Nr::None => return Ok(nr),
             Nr::ElemFlag => {
                 let exclude = mirror_exclude(bm, clips);
                 extrude_ex(
@@ -424,7 +424,7 @@ pub(crate) mod common {
             Nr::VertOnly => extrude_verts_indiv(bm)?,
             Nr::EdgeOnly => extrude_edges_indiv(bm, use_normal_flip)?,
         }
-        Ok(true)
+        Ok(nr)
     }
 
     /// `edbm_extrude_region_exec` / `edbm_extrude_context_exec`: [`extrude_mesh`] on every
@@ -441,8 +441,14 @@ pub(crate) mod common {
             }
             let clips = mirror_clips(cx, ob);
             let bm = cx.bmesh_mut(me)?;
-            if extrude_mesh(bm, &clips, use_normal_flip, use_dissolve_ortho_edges)? {
-                bm.normals_update();
+            match extrude_mesh(bm, &clips, use_normal_flip, use_dissolve_ortho_edges)? {
+                Nr::None => {}
+                // `extrude_face_region` is `NORMALS_CALC`: its `bmesh_edit_end` already ran
+                // `BM_mesh_normals_update`, and only the selection changed since, so Blender's
+                // second update (`EDBM_update`, `calc_normals`) would recompute the same bits
+                // (M8 WP 8.8: a third of the time of a whole-mesh extrude on 100k faces).
+                Nr::ElemFlag => {}
+                Nr::VertOnly | Nr::EdgeOnly => bm.normals_update(),
             }
         }
         Ok(())
@@ -538,7 +544,7 @@ pub(crate) mod common {
                 }
             );
             // Nothing selected: nothing to extrude, nothing changed.
-            assert!(!extrude_mesh(&mut bm, &[], false, false).unwrap());
+            assert_eq!(extrude_mesh(&mut bm, &[], false, false).unwrap(), Nr::None);
             assert_eq!(bm.verts_num(), 4);
         }
     }

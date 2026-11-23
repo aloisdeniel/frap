@@ -93,33 +93,16 @@ pub fn not_bound(srna: &'static StructDef, prop: &PropDef) -> FrapError {
     )
 }
 
-thread_local! {
-    /// Evaluated objects of the reads of this thread (`with_struct` sees only `&dyn HostRead`,
-    /// not the session's evaluator). Keyed like the session cache by object and generation
-    /// fingerprint; IDs and generations are process-unique (`frap_rna::id`), so states of
-    /// several sessions (and their snapshots, which share generations with identical data)
-    /// never collide.
-    static READ_EVAL: std::cell::RefCell<frap_eval::EvalCache> =
-        std::cell::RefCell::new(frap_eval::EvalCache::new());
-}
-
-/// Bound on [`READ_EVAL`]: one entry per object read evaluated; a session that removes and
-/// adds many objects does not keep the removed ones' meshes alive for ever.
-const READ_EVAL_MAX: usize = 64;
-
-/// The evaluated object (viewport), from the cache of this thread's reads.
+/// The evaluated object (viewport), from the cache of this thread's reads
+/// ([`frap_eval::EvalCache::evaluated_for_read`]: `with_struct` sees only `&dyn HostRead`,
+/// not the session's evaluator). The RNA get hooks of evaluated data (`Object.dimensions`,
+/// `Object.bound_box`) share the same cache (M8 WP 8.8), so a change is evaluated once
+/// whichever read comes first.
 pub(crate) fn evaluated_for_read(
     host: &dyn HostRead,
     ob: frap_rna::IdRef<frap_rna::ObjectId>,
 ) -> Result<std::sync::Arc<frap_scene::EvaluatedObject>, FrapError> {
-    READ_EVAL
-        .with(|c| {
-            let mut c = c.borrow_mut();
-            if c.len() > READ_EVAL_MAX {
-                c.clear();
-            }
-            frap_scene::Evaluator::object(&mut *c, host, ob, frap_scene::EvalMode::Viewport)
-        })
+    frap_eval::EvalCache::evaluated_for_read(host, ob, frap_scene::EvalMode::Viewport)
         .map_err(|e| stale(e.message))
 }
 

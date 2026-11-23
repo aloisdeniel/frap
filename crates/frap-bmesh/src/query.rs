@@ -88,10 +88,25 @@ impl BMesh {
     }
     /// `bmesh_disk_facevert_count` (`BM_vert_face_count`): corners using `v`.
     pub fn vert_face_count(&self, v: VertId) -> usize {
+        // Walks the disk cycle in place (no `vert_edges` list: this runs for every vertex of
+        // `BM_LOOPS_OF_VERT`, M8 WP 8.8).
         let mut count = 0;
-        for e in self.vert_edges(v) {
+        let Some(first) = self.vert(v).e else {
+            return 0;
+        };
+        let mut e = first;
+        let mut steps = 0usize;
+        loop {
             if let Some(l) = self.edge(e).l {
                 count += self.radial_facevert_count(l, v);
+            }
+            e = self.disk_edge_next(e, v);
+            if e == first {
+                break;
+            }
+            steps += 1;
+            if steps > self.edges.capacity() {
+                panic!("BMesh: disk cycle of vertex {} does not close", v.0);
             }
         }
         count
@@ -251,6 +266,47 @@ impl BMesh {
         // large n-gons (subdividing an n-gon n times) are cancelled promptly.
         frap_math::budget::check_n(out.len() as u32);
         out
+    }
+    /// `BM_LOOPS_OF_FACE`, from `l_first`, without building a list (`face.len` corners; no
+    /// cancellation point).
+    pub fn face_loops_iter(&self, f: FaceId) -> impl Iterator<Item = LoopId> + '_ {
+        let fa = self.face(f);
+        let mut l = fa.l_first;
+        (0..fa.len).map(move |_| {
+            let cur = l;
+            l = self.lp(l).next;
+            cur
+        })
+    }
+    /// `BM_EDGES_OF_VERT` (the disk cycle of `v`), without building a list.
+    pub fn vert_edges_iter(&self, v: VertId) -> impl Iterator<Item = EdgeId> + '_ {
+        let first = self.vert(v).e;
+        let mut cur = first;
+        std::iter::from_fn(move || {
+            let e = cur?;
+            let next = self.disk_edge_next(e, v);
+            cur = (Some(next) != first).then_some(next);
+            Some(e)
+        })
+    }
+    /// `BM_LOOPS_OF_EDGE` (the radial cycle of `e`), without building a list.
+    pub fn edge_loops_iter(&self, e: EdgeId) -> impl Iterator<Item = LoopId> + '_ {
+        let first = self.edge(e).l;
+        let mut cur = first;
+        std::iter::from_fn(move || {
+            let l = cur?;
+            let next = self.lp(l).radial_next;
+            cur = (Some(next) != first).then_some(next);
+            Some(l)
+        })
+    }
+    /// The faces using `v` (each face once per corner on each of its edges at `v`): the set of
+    /// `BM_FACES_OF_VERT` in another order, without building a list; for order-independent
+    /// tests (`any`, `all`).
+    pub fn vert_faces_any_order(&self, v: VertId) -> impl Iterator<Item = FaceId> + '_ {
+        self.vert_edges_iter(v)
+            .flat_map(move |e| self.edge_loops_iter(e))
+            .map(move |l| self.lp(l).f)
     }
     /// `BM_VERTS_OF_FACE`, from `l_first`.
     pub fn face_verts(&self, f: FaceId) -> Vec<VertId> {
@@ -559,11 +615,24 @@ impl BMesh {
     /// `BM_face_calc_normal` (quad and triangle special cases, Newell otherwise); a zero vector
     /// for degenerate faces.
     pub fn face_calc_normal(&self, f: FaceId) -> [f32; 3] {
-        let c = self.loop_cos(f);
-        match c.len() {
-            4 => geom::normal_quad_v3(c[0], c[1], c[2], c[3]).0,
-            3 => geom::normal_tri_v3(c[0], c[1], c[2]).0,
-            _ => geom::normal_poly_newell(&c).0,
+        // Triangles and quads (the common case) read their corners in place: no allocation
+        // (M8 WP 8.8, `BM_mesh_normals_update` on 100k-face meshes).
+        let fa = self.face(f);
+        let l0 = fa.l_first;
+        let co = |l: LoopId| self.vert(self.lp(l).v).co;
+        match fa.len {
+            4 => {
+                let l1 = self.lp(l0).next;
+                let l2 = self.lp(l1).next;
+                let l3 = self.lp(l2).next;
+                geom::normal_quad_v3(co(l0), co(l1), co(l2), co(l3)).0
+            }
+            3 => {
+                let l1 = self.lp(l0).next;
+                let l2 = self.lp(l1).next;
+                geom::normal_tri_v3(co(l0), co(l1), co(l2)).0
+            }
+            _ => geom::normal_poly_newell(&self.loop_cos(f)).0,
         }
     }
     /// `BM_face_normal_update`.
@@ -586,25 +655,33 @@ impl BMesh {
     /// `BM_vert_normal_update` with the angle weighting of `BM_mesh_normals_update` (face
     /// normals must be current).
     pub fn vert_normal_update(&mut self, v: VertId) {
+        let n = self.vert_calc_normal(v, |bm, e| {
+            let ed = bm.edge(e);
+            geom::normalize_v3(geom::sub(bm.vert(ed.v[0]).co, bm.vert(ed.v[1]).co)).0
+        });
+        self.vert_mut(v).no = n;
+    }
+
+    // Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
+    // (bm_vert_calc_normals_impl).
+    /// The normal [`BMesh::vert_normal_update`] stores, with `edge_dir(e)` the unit vector
+    /// `normalize(e.v1.co - e.v2.co)` (computed on the fly, or read from a per-edge table
+    /// by [`BMesh::normals_update`]: the same arithmetic, so the same bits).
+    fn vert_calc_normal(&self, v: VertId, edge_dir: impl Fn(&Self, EdgeId) -> V3) -> V3 {
         let mut v_no = [0.0f32; 3];
         let vco = self.vert(v).co;
         if let Some(e_first) = self.vert(v).e {
             let mut e = e_first;
             loop {
                 if let Some(l_first) = self.edge(e).l {
-                    let ed = self.edge(e);
-                    let (e2diff, _) =
-                        geom::normalize_v3(geom::sub(self.vert(ed.v[0]).co, self.vert(ed.v[1]).co));
+                    let e2diff = edge_dir(self, e);
                     let mut l = l_first;
                     loop {
                         let ll = self.lp(l);
                         if ll.v == v {
                             let lp = self.lp(ll.prev);
                             let ep = self.edge(lp.e);
-                            let (e1diff, _) = geom::normalize_v3(geom::sub(
-                                self.vert(ep.v[0]).co,
-                                self.vert(ep.v[1]).co,
-                            ));
+                            let e1diff = edge_dir(self, lp.e);
                             let mut dotprod = geom::dot(e1diff, e2diff);
                             if (ep.v[0] == lp.v) ^ (self.edge(ll.e).v[0] == ll.v) {
                                 dotprod = -dotprod;
@@ -625,22 +702,33 @@ impl BMesh {
             }
             let (n, len) = geom::normalize_v3(v_no);
             if len != 0.0 {
-                self.vert_mut(v).no = n;
-                return;
+                return n;
             }
         }
-        self.vert_mut(v).no = geom::normalize_v3(vco).0;
+        geom::normalize_v3(vco).0
     }
 
-    /// `BM_mesh_normals_update`: face normals, then angle-weighted vertex normals.
+    // Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
+    // (BM_mesh_normals_update_ex: bm_mesh_edges_calc_vectors, then the faces and verts).
+    /// `BM_mesh_normals_update`: face normals, then angle-weighted vertex normals. Like
+    /// Blender's `BM_mesh_normals_update_ex` (`edge_vectors`), the unit edge vectors are
+    /// computed once per edge instead of twice per corner.
     pub fn normals_update(&mut self) {
         for f in self.face_ids() {
             frap_math::budget::check();
             self.face_normal_update(f);
         }
-        for v in self.vert_ids() {
+        let mut edge_dirs: Vec<V3> = vec![[0.0; 3]; self.edges.capacity()];
+        for e in self.edges.ids().map(EdgeId) {
+            let ed = self.edge(e);
+            edge_dirs[e.0 as usize] =
+                geom::normalize_v3(geom::sub(self.vert(ed.v[0]).co, self.vert(ed.v[1]).co)).0;
+        }
+        let verts: Vec<VertId> = self.vert_ids();
+        for v in verts {
             frap_math::budget::check();
-            self.vert_normal_update(v);
+            let n = self.vert_calc_normal(v, |_, e| edge_dirs[e.0 as usize]);
+            self.vert_mut(v).no = n;
         }
     }
 }

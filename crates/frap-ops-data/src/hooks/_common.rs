@@ -5,7 +5,7 @@
 use std::sync::Arc;
 
 use frap_rna::{IdRef, ObjectId, PyExc, RnaError, RnaErrorKind, RnaPtr, Root};
-use frap_scene::{EvalMode, EvaluatedObject, Evaluator, HostRead};
+use frap_scene::{EvalMode, EvaluatedObject, HostRead};
 
 /// An inconsistency between the hook target and the data (should not happen).
 pub(crate) fn internal(msg: impl std::fmt::Display) -> RnaError {
@@ -28,13 +28,14 @@ pub(crate) fn object_of(this: &RnaPtr) -> Result<IdRef<ObjectId>, RnaError> {
 }
 
 /// The evaluated object, always fresh with respect to the originals (D-04, §7.3). Get hooks
-/// only see `&dyn HostRead`, so reads evaluate with a throwaway cache (the depsgraph-lite of
-/// M1 shares the original mesh `Arc`, so this only computes matrices and bounds).
+/// only see `&dyn HostRead`, so they read through the per-thread read cache
+/// (`EvalCache::evaluated_for_read`, keyed by generation fingerprint): the modifier stack is
+/// evaluated once per change, not once per read (§21.7; M8 WP 8.8 replaced a throwaway cache
+/// that re-evaluated every modifier on every `dimensions` / `bound_box` read).
 pub(crate) fn evaluated_read(
     h: &dyn HostRead,
     ob: IdRef<ObjectId>,
 ) -> Result<Arc<EvaluatedObject>, RnaError> {
-    frap_eval::EvalCache::new()
-        .object(h, ob, EvalMode::Viewport)
+    frap_eval::EvalCache::evaluated_for_read(h, ob, EvalMode::Viewport)
         .map_err(|e| internal(e.message))
 }

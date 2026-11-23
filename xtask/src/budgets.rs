@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `cargo xtask budgets [--record]`: clean build time of each `frap-spec-*` crate against
 //! `xtask/budgets.toml` (ARCHITECTURE §4.2). CI fails when a crate exceeds `factor` × baseline.
+//! `--record` also writes `recorded_on = "<runner class>"` (`crate::perf::runner_class`): the
+//! baselines gate in `cargo xtask perf build-budgets` once recorded on ubuntu-24.04.
 
 use std::process::Command;
 use std::time::Instant;
@@ -74,6 +76,13 @@ pub fn run(args: &[String]) -> Result<(), String> {
         for (name, secs) in measured {
             table.insert(name, toml::Value::Float((secs * 100.0).round() / 100.0));
         }
+        // Provenance of the baselines (M8 WP 8.8): `cargo xtask perf build-budgets` gates only
+        // on baselines recorded on the CI runner class.
+        let class = crate::perf::runner_class(&|k| std::env::var(k).ok());
+        doc.insert(
+            crate::perf::RECORDED_ON_KEY.into(),
+            toml::Value::String(class),
+        );
         let header: String = text
             .lines()
             .take_while(|l| l.starts_with('#') || l.is_empty())

@@ -1,0 +1,69 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Performance budgets of ARCHITECTURE §21.7 (M8 WP 8.8), read by `cargo xtask perf`.
+#
+# [budgets_ms]      the §21.7 budgets, in milliseconds. The release-mode tests of
+#                   crates/frap-perf-tests gate on the same values (each test fails over its
+#                   budget); `cargo xtask perf` fails when a test's budget and this table differ,
+#                   or when a budget here has no test.
+# regression_factor a measurement above this factor times the value recorded for the same
+#                   runner class (and more than 1 ms above it) is reported as a warning.
+# build-time       the frap-spec-* baselines live in xtask/budgets.toml: `cargo xtask budgets
+#                   --record` writes them with `recorded_on = "<runner class>"`; once that says
+#                   "ubuntu-24.04" (the `perf` workflow, input `record`, then commit its
+#                   artifact) `cargo xtask perf build-budgets` gates there.
+# [blender_reference_ms]  Blender 5.2.4 on the same scenes (xtask/perf/blender_reference.py,
+#                   `cargo xtask perf blender`): Apple M1 Max, macOS 26.6, warm, median of the
+#                   last three of four runs; the machine was shared (load average ~40 on 10 cores),
+#                   so values vary by up to 2x between runs. A reference point, not a budget.
+# [recorded.<runner class>]  the measurements of `cargo xtask perf --record` on that class
+#                   (median of each test's repetitions, ms). The local-macos-aarch64 values were
+#                   recorded on an Apple M1 Max (10 cores, 32 GiB, macOS 26.6, Rust 1.97, load
+#                   average ~20 from other builds); the ubuntu-24.04 table appears once the
+#                   `perf` workflow has run with `record` and its artifact is committed.
+#
+# The scenes: edit_op_100k.* = a 100,000-face mesh in Edit Mode with a 144-face selection;
+# edit_op_100k_all.* = a 317 x 317 grid with everything selected (extrude_region gates at 200 ms,
+# Blender's own time is inside it; subdivide is tracked: Blender needs 262 ms itself);
+# glb_export_1m_corners = a 500 x 500 grid exported as GLB; snapshot.* = one-property statements
+# on a 1M-corner mesh (vs the cube) and on 2,002 objects (vs 252); editmode_reads.* = 105 element
+# reads in Edit Mode, gated by the modifier-evaluation counter, not by time.
+
+regression_factor = 1.5
+
+[blender_reference_ms]
+"edit_op_100k.bevel" = 35.696
+"edit_op_100k.extrude_region" = 29.291
+"edit_op_100k.subdivide" = 29.894
+"edit_op_100k_all.extrude_region" = 107.932
+"edit_op_100k_all.subdivide" = 261.952
+glb_export_1m_corners = 403.599
+
+[budgets_ms]
+cold_start = 30.0
+"edit_op_100k.bevel" = 200.0
+"edit_op_100k.extrude_region" = 200.0
+"edit_op_100k.subdivide" = 200.0
+"edit_op_100k_all.extrude_region" = 200.0
+glb_export_1m_corners = 2000.0
+
+[recorded.local-macos-aarch64]
+cold_start = 9.598
+"edit_op_100k.bevel" = 54.704
+"edit_op_100k.extrude_region" = 21.175
+"edit_op_100k.subdivide" = 36.446
+"edit_op_100k_all.extrude_region" = 91.849
+"edit_op_100k_all.subdivide" = 322.461
+"editmode_reads.evaluations" = 1.001
+"editmode_reads.evaluations_full" = 1.131
+"editmode_reads.many_objects" = 7.476
+glb_export_1m_corners = 136.82
+session_new_empty = 0.249
+"snapshot.data_size.edit.object_location" = 0.008
+"snapshot.data_size.edit.scene_frame_end" = 0.007
+"snapshot.data_size.edit_normal.object_location" = 0.74
+"snapshot.data_size.edit_normal.scene_frame_end" = 0.764
+"snapshot.data_size.object.object_location" = 0.01
+"snapshot.data_size.object.scene_frame_end" = 0.01
+"snapshot.ids.object_location" = 0.555
+"snapshot.ids.scene_frame_end" = 0.488

@@ -40,6 +40,28 @@ pub struct EvalCache {
     pub(crate) in_progress: crate::geometry::InProgress,
 }
 
+/// The per-thread cache of [`EvalCache::evaluated_for_read`].
+struct ReadCache {
+    cache: EvalCache,
+    /// Entry count at which the next read prunes the results of objects the host being read
+    /// no longer has; doubled after each prune, so pruning stays amortised O(1) per read.
+    prune_at: usize,
+}
+
+thread_local! {
+    static READ_CACHE: std::cell::RefCell<ReadCache> = std::cell::RefCell::new(ReadCache {
+        cache: EvalCache::new(),
+        prune_at: READ_CACHE_PRUNE_MIN,
+    });
+}
+
+/// Smallest prune threshold of [`READ_CACHE`]. The cache holds one entry per object and mode
+/// (a changed fingerprint replaces the entry, it never adds one), so it only grows past the
+/// objects that exist through objects that were removed (or belong to a dropped session or
+/// a factory reset: IDs are process-unique, so those never resolve again). Pruning drops
+/// exactly those; every live object keeps its result, however many are read in turn.
+const READ_CACHE_PRUNE_MIN: usize = 64;
+
 /// `Dependency cycle detected` report of a parent cycle, worded like Blender's depsgraph log.
 fn cycle_report(host: &dyn HostRead, cycle: &Cycle) -> Report {
     let objects = &host.main().objects;
@@ -127,6 +149,32 @@ impl EvalCache {
     /// Drops every cached result.
     pub fn clear(&mut self) {
         self.objects.clear();
+    }
+
+    /// The evaluated object for a **read** that only sees `&dyn HostRead` (RNA get hooks such
+    /// as `Object.dimensions` and `Object.bound_box`, the session's path resolver and its
+    /// `--verbosity full` context): served from one cache per thread, keyed like every cache
+    /// by object and generation fingerprint, so repeated reads evaluate the modifier stack once
+    /// per change (§21.7: a read never re-evaluates modifiers; M8 WP 8.8). IDs and generations
+    /// are process-unique, so the states of several sessions and of their snapshots never
+    /// collide. A read made while the cache is busy (a read from inside an evaluation) uses a
+    /// fresh cache.
+    pub fn evaluated_for_read(
+        host: &dyn HostRead,
+        ob: IdRef<ObjectId>,
+        mode: EvalMode,
+    ) -> Result<Arc<EvaluatedObject>, EvalError> {
+        READ_CACHE.with(|c| match c.try_borrow_mut() {
+            Ok(mut c) => {
+                let c = &mut *c;
+                if c.cache.len() >= c.prune_at {
+                    c.cache.prune(host);
+                    c.prune_at = (2 * c.cache.len()).max(READ_CACHE_PRUNE_MIN);
+                }
+                c.cache.object(host, ob, mode)
+            }
+            Err(_) => EvalCache::new().object(host, ob, mode),
+        })
     }
 
     /// The cached result of `(ob, mode)` when it is still valid.

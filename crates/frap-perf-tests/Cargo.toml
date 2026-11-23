@@ -18,6 +18,8 @@ publish.workspace = true
 frap-session.workspace = true
 frap-ops-all = { workspace = true, features = ["meshopt", "draco", "basisu", "webp-lossy"] }
 frap-scene.workspace = true
+# WP 8.8: `EvalCache::stack_evaluations` (the Edit Mode read counter of §21.7).
+frap-eval.workspace = true
 frap-mesh.workspace = true
 frap-bmesh.workspace = true
 frap-rna.workspace = true

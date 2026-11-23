@@ -11,7 +11,8 @@
 #              pass their tests on macOS, Linux and Windows (M7 W0).
 # - cc-only:   a clean container with only cc/c++ (no cmake, no libclang) builds the default
 #              features (rule 2.2.9).
-# - budgets:   clean build time of each frap-spec-* crate vs xtask/budgets.toml (§4.2).
+# - budgets:   clean build time of each frap-spec-* crate vs xtask/budgets.toml (§4.2), gating
+#              once the baselines are recorded on ubuntu-24.04 (`cargo xtask perf build-budgets`).
 # - blender-live: Blender 5.2 differential tests, nightly and on demand (skipped elsewhere).
 # GPU adapters (Metal / lavapipe / WARP) are exercised by gpu.yml.
 
@@ -191,10 +192,11 @@ jobs:
           toolchain: "1.97"
       - uses: Swatinem/rust-cache@v2
       # The committed baselines are provisional (recorded on an M1 Max by WP 1.1, decision log
-      # W1-2). Non-gating until they are re-recorded here with `cargo xtask budgets --record`.
-      - name: budgets (fails above 2x the recorded baseline; non-gating until re-recorded on CI)
-        continue-on-error: true
-        run: cargo xtask budgets
+      # W1-2): `perf build-budgets` only warns until `cargo xtask budgets --record` has run on
+      # ubuntu-24.04 (perf.yml, input `record`) and written `recorded_on = "ubuntu-24.04"` into
+      # xtask/budgets.toml; from then on it fails above 2x the baseline (M8 WP 8.8).
+      - name: budgets (fails above 2x the baseline once recorded on ubuntu-24.04)
+        run: cargo xtask perf build-budgets
 
   blender-live:
     name: blender-live (linux-x86_64, Blender 5.2.4)

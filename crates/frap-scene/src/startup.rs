@@ -43,10 +43,122 @@ pub const OMITTED_MATERIALS: [&str; 1] = ["Dots Stroke"];
 /// Images of the factory file that frap does not create (runtime render/compositor images).
 pub const OMITTED_IMAGES: [&str; 2] = ["Render Result", "Viewer Node"];
 
-/// The parsed factory dump (`spec/blender-5.2/startup.json`).
+/// The parsed factory dump (`spec/blender-5.2/startup.json`), without the values of its
+/// `pixels` keys (they read `null`): the only one is the `Viewer Node` image's 262,144 floats
+/// (half the file), an omitted image. Skipping them unparsed halves the dump's parse, which
+/// every process pays on its first session (§21.7 cold start; M8 WP 8.8).
 pub fn factory_dump() -> &'static J {
     static DUMP: OnceLock<J> = OnceLock::new();
-    DUMP.get_or_init(|| serde_json::from_str(STARTUP_JSON).expect("invariant: startup.json parses"))
+    DUMP.get_or_init(|| {
+        use serde::de::DeserializeSeed as _;
+        let mut de = serde_json::Deserializer::from_str(STARTUP_JSON);
+        let v = no_pixels::Seed
+            .deserialize(&mut de)
+            .and_then(|v| de.end().map(|()| v));
+        v.expect("invariant: startup.json parses")
+    })
+}
+
+/// A `serde_json::Value` deserializer that skips the values of `pixels` keys.
+mod no_pixels {
+    use std::fmt;
+
+    use serde::de::{DeserializeSeed, Deserializer, IgnoredAny, MapAccess, SeqAccess, Visitor};
+    use serde_json::{Map, Value as J};
+
+    pub(super) struct Seed;
+
+    impl<'de> DeserializeSeed<'de> for Seed {
+        type Value = J;
+        fn deserialize<D: Deserializer<'de>>(self, d: D) -> Result<J, D::Error> {
+            d.deserialize_any(self)
+        }
+    }
+
+    impl<'de> Visitor<'de> for Seed {
+        type Value = J;
+        fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.write_str("any JSON value")
+        }
+        fn visit_bool<E>(self, v: bool) -> Result<J, E> {
+            Ok(J::Bool(v))
+        }
+        fn visit_i64<E>(self, v: i64) -> Result<J, E> {
+            Ok(J::from(v))
+        }
+        fn visit_u64<E>(self, v: u64) -> Result<J, E> {
+            Ok(J::from(v))
+        }
+        fn visit_f64<E>(self, v: f64) -> Result<J, E> {
+            Ok(J::from(v))
+        }
+        fn visit_str<E>(self, v: &str) -> Result<J, E> {
+            Ok(J::String(v.to_owned()))
+        }
+        fn visit_string<E>(self, v: String) -> Result<J, E> {
+            Ok(J::String(v))
+        }
+        fn visit_unit<E>(self) -> Result<J, E> {
+            Ok(J::Null)
+        }
+        fn visit_none<E>(self) -> Result<J, E> {
+            Ok(J::Null)
+        }
+        fn visit_some<D: Deserializer<'de>>(self, d: D) -> Result<J, D::Error> {
+            Seed.deserialize(d)
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<J, A::Error> {
+            let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0));
+            while let Some(v) = seq.next_element_seed(Seed)? {
+                out.push(v);
+            }
+            Ok(J::Array(out))
+        }
+        fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<J, A::Error> {
+            let mut out = Map::new();
+            while let Some(k) = map.next_key::<String>()? {
+                let v = if k == "pixels" {
+                    map.next_value::<IgnoredAny>()?;
+                    J::Null
+                } else {
+                    map.next_value_seed(Seed)?
+                };
+                out.insert(k, v);
+            }
+            Ok(J::Object(out))
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn same_value_as_serde_json_without_pixels() {
+            let src = r#"{"a": [1, -2, 3.5, 1e300, true, null, "sé"], "pixels": [0.0, 1.0],
+                "b": {"pixels": [[1]], "c": {}}, "d": []}"#;
+            let mut de = serde_json::Deserializer::from_str(src);
+            let got = Seed.deserialize(&mut de).expect("parses");
+            let mut want: J = serde_json::from_str(src).expect("parses");
+            want["pixels"] = J::Null;
+            want["b"]["pixels"] = J::Null;
+            assert_eq!(got, want);
+            // Key order is kept (`preserve_order`).
+            let keys: Vec<&String> = got.as_object().expect("object").keys().collect();
+            assert_eq!(keys, ["a", "pixels", "b", "d"]);
+        }
+
+        #[test]
+        fn the_factory_dump_parses_like_serde_json() {
+            let mut want: J = serde_json::from_str(super::super::STARTUP_JSON).expect("parses");
+            for im in want["ids"]["images"].as_array_mut().expect("images") {
+                if im.get("pixels").is_some() {
+                    im["pixels"] = J::Null;
+                }
+            }
+            assert_eq!(super::super::factory_dump(), &want);
+        }
+    }
 }
 
 fn s(j: &J) -> &str {
