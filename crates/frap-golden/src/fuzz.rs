@@ -19,14 +19,18 @@
 //! - [`sequence`]: the sequence generator and its scene model.
 //! - [`driver`]: running both tools, signatures, minimisation, cases, the report.
 //! - [`minimize`]: `ddmin`.
-//! - [`known`]: mismatches `docs/deviations.md` explains.
+//! - [`known`]: mismatches `docs/deviations.md` explains, by their cause (the documented
+//!   statement ran in both tools and acted on the mismatched mesh or object), never by
+//!   co-occurrence.
 //!
 //! Triage: a minimised case written to `--out` (default
 //! `target/fuzz-cases/`) is either a bug, fixed by the owner of the code and then moved to
 //! `tests/golden/cases/fuzz/` and blessed as a regression case, or a documented deviation,
 //! added to [`known::KNOWN`] with its `docs/deviations.md` row. The nightly workflow
 //! (`.github/workflows/nightly.yml`) runs an hour of it and fails on any unexplained
-//! mismatch. `tests/golden/cases/fuzz/seed_<hex>.py` are clean sequences replayed by the golden
+//! mismatch, and on a run that did not compare the tools (no clean trial, or Blender failing
+//! on more than 5% of the trials: [`driver::Report::health_problem`]).
+//! `tests/golden/cases/fuzz/seed_<hex>.py` are clean sequences replayed by the golden
 //! suite (`replay <hex>`, blessed): they pin the generator (a test checks that each still
 //! comes out of `replay`) and keep both tools agreeing on them.
 

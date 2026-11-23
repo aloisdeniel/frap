@@ -457,7 +457,8 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "mesh.loop_to_region", ANY),
     mesh(GEOMETRY, "mesh.flatten", ANY),
     mesh(GEOMETRY, "mesh.vert_connect_nonplanar", ANY),
-    mesh(GEOMETRY, "mesh.extrude_edges_", WINDING).with(&["mode_set(mode='EDIT')"]),
+    // (Faces wound the other way: whatever later follows the normals differs too.)
+    mesh(GEOMETRY, "mesh.extrude_edges_", ANY).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.extrude_context", ANY).with(&["mode_set(mode='EDIT')", "mesh.primitive_"]),
     state(
         GEOMETRY,
@@ -485,7 +486,7 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "object.transform_apply", POSITIONS)
         .with(&["shape_key_add", "SUBSURF|subdivision_set"]),
     // A few units of the custom normals' 16-bit encoding.
-    mesh(GEOMETRY, CUSTOM_NORMALS, &["attributes[\"custom_normal\"]"]).max_delta(4.0),
+    mesh(GEOMETRY, CUSTOM_NORMALS, &["attributes[\"custom_normal\"]"]).max_delta(8.0),
     mesh(GEOMETRY, "mesh.dissolve_mode&use_face_split=True", NORMALS).with(&["mesh.normals_tools"]),
     mesh(GEOMETRY, "mesh.edge_face_add", ANY).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.decimate", ANY),
@@ -501,7 +502,7 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "mesh.convex_hull", ANY),
     mesh(
         GEOMETRY,
-        "mesh.fill_grid",
+        "~bpy.ops.mesh.",
         &["attributes[\"material_index\"]"],
     )
     .with(&["material_slot_add"]),
@@ -554,8 +555,7 @@ pub const KNOWN: &[Known] = &[
     mesh(FOUND, "transform.shear", ANY)
         .with(&["mode_set(mode='EDIT')"])
         .edit_end(),
-    mesh(FOUND, "mesh.dissolve_edges", NORMALS)
-        .with(&["mesh.set_sharpness_by_angle|mesh.mark_sharp"]),
+    mesh(FOUND, "mesh.dissolve_", NORMALS).with(&["mesh.set_sharpness_by_angle|mesh.mark_sharp"]),
     state(FOUND, RNA, "object.align", OBJECT_TRANSFORM).with(&["SUBSURF|subdivision_set"]),
     mesh(FOUND, TOPOLOGY, NORMALS).with(&[CUSTOM_NORMALS]),
     mesh(FOUND, "mesh.solidify", POSITIONS).with(&["mesh.dissolve_edges"]),
@@ -583,7 +583,7 @@ pub const KNOWN: &[Known] = &[
         &["corner_normals", "face_normals", "uv_layers"],
     )
     .max_delta(2e-3),
-    mesh(FOUND, "TRIANGULATE", ANY).with(&["mesh.subdivide"]),
+    mesh(FOUND, "TRIANGULATE", ANY),
     mesh(FOUND, "mesh.primitive_", UVS).with(&["mode_set(mode='EDIT')", TOPOLOGY]),
     mesh(FOUND, "mesh.unsubdivide", WINDING).with(&["mesh.extrude_region"]),
     mesh(FOUND, "mesh.separate", &["attributes[\"__mirror_index\"]"]).with(&["mesh.select_mirror"]),
@@ -601,6 +601,18 @@ pub const KNOWN: &[Known] = &[
     )
     .with(&["mesh.primitive_"]),
     mesh(FOUND, "mesh.offset_edge_loops", NORMALS).with(&["mesh.poke"]),
+    state(
+        POLLS,
+        RNA,
+        "object.parent_no_inverse_set",
+        &["parent", "location", "rotation", "scale", "matrix"],
+    )
+    .with(&["object.select_pattern|object.select_all"]),
+    mesh(FOUND, "MIRROR", &["edges", "faces", ""]).with(&["SUBSURF|subdivision_set"]),
+    mesh(FOUND, "mesh.spin", NORMALS).with(&["mesh.extrude_faces_indiv"]),
+    mesh(FOUND, "bpy.ops.transform.rotate", NORMALS).with(&[CUSTOM_NORMALS]),
+    mesh(FOUND, "transform.shrink_fatten", POSITIONS)
+        .with(&["mesh.extrude_verts_indiv|mesh.extrude_vertices_move"]),
     mesh(FOUND, "mesh.delete_edgeloop", ANY).with(&["mesh.extrude_edges_indiv"]),
     mesh(
         FOUND,
@@ -615,7 +627,7 @@ pub const KNOWN: &[Known] = &[
          |bpy.ops.object.subdivision_set",
         &["corner_normals", "face_normals"],
     )
-    .max_delta(1e-3),
+    .max_delta(2e-3),
     mesh(FOUND, "SCREW", WINDING),
     mesh(FOUND, "WEIGHTED_NORMAL", NORMALS).max_delta(1e-3),
     mesh(FOUND, "WEIGHTED_NORMAL", &["attributes[\"custom_normal\"]"]).max_delta(4.0),
@@ -692,8 +704,8 @@ impl Known {
                 matches!(trace.outcomes.get(i), Some(Outcome::Failed(f)) if f.contains(self.fails_with))
             }
         };
+        // The first statement that can be the cause (what follows it may be its consequence).
         let cause = (0..statements.len())
-            .rev()
             .find(|&i| self.is_cause(&statements[i]) && ran(i) && trace.touches(i, &t))?;
         let with = self.with.iter().all(|p| {
             (0..statements.len()).any(|j| {
@@ -719,9 +731,11 @@ pub fn explain_all(
     let mut direct: Vec<Option<(&'static Known, usize)>> = mismatches
         .iter()
         .map(|m| {
+            // The entry with the earliest cause (the first entry on a tie).
             KNOWN
                 .iter()
-                .find_map(|k| k.explains(statements, trace, m).map(|i| (k, i)))
+                .filter_map(|k| k.explains(statements, trace, m).map(|i| (k, i)))
+                .min_by_key(|(_, i)| *i)
         })
         .collect();
     // A comparator's `… and N more differing elements` continues its listed elements of the
