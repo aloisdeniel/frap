@@ -46,7 +46,12 @@ fn modifier_layout(
     };
     let types = frap_modifiers::types::data_transfer::data_types(s);
     let (src, dst) = frap_modifiers::types::data_transfer::layer_selects(s);
-    Some((s.object.and_then(|o| o.typed::<ObjectId>()), types, src, dst))
+    Some((
+        s.object.and_then(|o| o.typed::<ObjectId>()),
+        types,
+        src,
+        dst,
+    ))
 }
 
 #[operator(poll = TRANSFER_POLL, tier = T2)]

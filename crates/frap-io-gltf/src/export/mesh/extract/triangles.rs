@@ -115,7 +115,10 @@ fn run(cx: &MeshExportCx, key: &SplitKey, out: &mut Vec<PrimitiveDraft>) {
         for (mi, corners) in buckets {
             let mut d = shared.clone();
             d.material_slot = slot_of(mi);
-            d.indices = corners.iter().map(|&c| shared.indices[c as usize]).collect();
+            d.indices = corners
+                .iter()
+                .map(|&c| shared.indices[c as usize])
+                .collect();
             d.shared_vertices = true;
             out.push(d);
         }

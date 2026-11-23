@@ -26,17 +26,19 @@
 //! Poll: an active mesh object with data (`data_transfer_poll`).
 
 use frap_modifiers::data_transfer::modes::{self, DT_MULTILAYER_INDEX_MAX};
-use frap_modifiers::data_transfer::{Destination, Source, SpaceTransform, TransferParams, transfer};
+use frap_modifiers::data_transfer::{
+    Destination, Source, SpaceTransform, TransferParams, transfer,
+};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_op::{EnumItemOwned, Poll, PollFail, PollReq};
 use frap_rna::{
     EnumItem, IdRef, MeshId, ObjectId, OperatorSpec, PropKind, PyExc, RnaError, RnaErrorKind,
 };
-use smol_str::SmolStr;
 use frap_scene::Context;
 use frap_scene::EvaluatedObject;
 use frap_spec_ops_object::object;
+use smol_str::SmolStr;
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -45,7 +47,10 @@ use crate::support::weights;
 /// `data_transfer_poll`: an active mesh object with data.
 pub(crate) fn transfer_poll(c: &Context) -> Result<(), PollFail> {
     let Some((_, ob)) = poll::active(c) else {
-        return Err(poll::fail(PollReq::ActiveObject, "make a mesh object active"));
+        return Err(poll::fail(
+            PollReq::ActiveObject,
+            "make a mesh object active",
+        ));
     };
     if ob.object_type() != "MESH" || ob.data.is_none() {
         return Err(poll::fail(
@@ -78,9 +83,17 @@ fn world(eo: &EvaluatedObject) -> [[f32; 4]; 4] {
 }
 
 /// The source side of a transfer from `ob` (its evaluated mesh `eo`).
-pub(crate) fn source<'a>(c: &Context, ob: IdRef<ObjectId>, eo: &'a EvaluatedObject) -> Option<Source<'a>> {
+pub(crate) fn source<'a>(
+    c: &Context,
+    ob: IdRef<ObjectId>,
+    eo: &'a EvaluatedObject,
+) -> Option<Source<'a>> {
     let mesh = eo.mesh.as_deref()?;
-    let active = c.main.objects.get(ob).map_or(-1, |o| o.vertex_groups_active_index);
+    let active = c
+        .main
+        .objects
+        .get(ob)
+        .map_or(-1, |o| o.vertex_groups_active_index);
     let bone_select = Some(weights::subset(c, ob, "BONE_SELECT").0);
     let bone_deform = Some(weights::subset(c, ob, "BONE_DEFORM").0);
     Some(Source {
@@ -108,7 +121,11 @@ pub(crate) fn with_destination<R>(
         .get(me)
         .cloned()
         .ok_or_else(|| OpError::Runtime("mesh no longer exists".into()))?;
-    let mut active = cx.main().objects.get(ob_dst).map_or(0, |o| o.vertex_groups_active_index);
+    let mut active = cx
+        .main()
+        .objects
+        .get(ob_dst)
+        .map_or(0, |o| o.vertex_groups_active_index);
     let before = active;
     let r = {
         let mut dst = Destination {
@@ -169,7 +186,10 @@ pub(crate) fn layer_arrays(
     data_type: u32,
     layers_src: i32,
     layers_dst: i32,
-) -> ([i32; DT_MULTILAYER_INDEX_MAX], [i32; DT_MULTILAYER_INDEX_MAX]) {
+) -> (
+    [i32; DT_MULTILAYER_INDEX_MAX],
+    [i32; DT_MULTILAYER_INDEX_MAX],
+) {
     let mut src = [0i32; DT_MULTILAYER_INDEX_MAX];
     let mut dst = [0i32; DT_MULTILAYER_INDEX_MAX];
     let idx = modes::srcdst_index(data_type);
@@ -283,7 +303,11 @@ fn check_layer_item(id: &str, items: &[EnumItem]) -> Result<(), OpError> {
     );
     e.detail.insert(
         "valid".into(),
-        items.iter().map(|i| i.identifier).collect::<Vec<_>>().into(),
+        items
+            .iter()
+            .map(|i| i.identifier)
+            .collect::<Vec<_>>()
+            .into(),
     );
     Err(OpError::Rna(e))
 }
@@ -397,8 +421,18 @@ fn exec(cx: &mut OpCtx, a: DataTransferArgs) -> OpResult {
             continue;
         }
         if !reverse && !done.insert(me_dst) {
-            let ob_name = cx.main().objects.name_of(dst).unwrap_or_default().to_owned();
-            let me_name = cx.main().meshes.name_of(me_dst).unwrap_or_default().to_owned();
+            let ob_name = cx
+                .main()
+                .objects
+                .name_of(dst)
+                .unwrap_or_default()
+                .to_owned();
+            let me_name = cx
+                .main()
+                .meshes
+                .name_of(me_dst)
+                .unwrap_or_default()
+                .to_owned();
             cx.report(
                 ReportType::Warning,
                 format!(
@@ -455,12 +489,26 @@ mod tests {
         let src = union_items(src_items(), dst_items());
         assert_eq!(
             ids(&src),
-            ["ACTIVE", "ALL", "BONE_SELECT", "BONE_DEFORM", "NAME", "INDEX"]
+            [
+                "ACTIVE",
+                "ALL",
+                "BONE_SELECT",
+                "BONE_DEFORM",
+                "NAME",
+                "INDEX"
+            ]
         );
         let dst = union_items(dst_items(), src_items());
         assert_eq!(
             ids(&dst),
-            ["ACTIVE", "NAME", "INDEX", "ALL", "BONE_SELECT", "BONE_DEFORM"]
+            [
+                "ACTIVE",
+                "NAME",
+                "INDEX",
+                "ALL",
+                "BONE_SELECT",
+                "BONE_DEFORM"
+            ]
         );
     }
 

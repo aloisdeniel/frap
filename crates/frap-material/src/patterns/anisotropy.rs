@@ -275,7 +275,6 @@ static LAYOUT: crate::build::LayoutBlock = crate::build::LayoutBlock {
     },
 };
 
-
 #[cfg(test)]
 mod tests {
     use crate::graph::testkit::*;

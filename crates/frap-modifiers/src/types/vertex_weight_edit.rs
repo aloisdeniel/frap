@@ -57,7 +57,11 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
 }
 
 /// `modify_mesh` of VERTEX_WEIGHT_EDIT on the mesh of object `object_name`.
-pub(crate) fn vertex_weight_edit(s: &VertexWeightEditSettings, mut mesh: Mesh, object_name: &str) -> Mesh {
+pub(crate) fn vertex_weight_edit(
+    s: &VertexWeightEditSettings,
+    mut mesh: Mesh,
+    object_name: &str,
+) -> Mesh {
     let verts_num = mesh.verts_num();
     if verts_num == 0 || mesh.vertex_group_names.is_empty() {
         return mesh;
@@ -114,7 +118,12 @@ mod tests {
     fn plane_with_group() -> Mesh {
         let mut m = Mesh::new("p");
         m.from_pydata(
-            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]],
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
             &[],
             &[vec![0, 1, 2, 3]],
             false,

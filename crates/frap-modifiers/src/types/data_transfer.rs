@@ -57,7 +57,10 @@ pub fn data_types(s: &DataTransferSettings) -> u32 {
 /// `layers_select_src` / `_dst` by `DT_MULTILAYER_INDEX_*`.
 pub fn layer_selects(
     s: &DataTransferSettings,
-) -> ([i32; DT_MULTILAYER_INDEX_MAX], [i32; DT_MULTILAYER_INDEX_MAX]) {
+) -> (
+    [i32; DT_MULTILAYER_INDEX_MAX],
+    [i32; DT_MULTILAYER_INDEX_MAX],
+) {
     let mut src = [modes::DT_LAYERS_ALL_SRC; DT_MULTILAYER_INDEX_MAX];
     let mut dst = [modes::DT_LAYERS_NAME_DST; DT_MULTILAYER_INDEX_MAX];
     src[modes::DT_MULTILAYER_INDEX_MDEFORMVERT as usize] =

@@ -735,7 +735,10 @@ mod tests {
         assert_eq!(d.texcoords[0].len(), 11);
         assert_eq!(d.indices.len(), 15);
         assert_eq!(d.indices[0], 7, "the largest gathered index");
-        assert_eq!(d.encoding.gathered_indices.as_ref().map(Vec::len), Some(strip_len));
+        assert_eq!(
+            d.encoding.gathered_indices.as_ref().map(Vec::len),
+            Some(strip_len)
+        );
         for c in 0..3 {
             let lo = before.iter().map(|p| p[c]).fold(f32::MAX, f32::min);
             let hi = before.iter().map(|p| p[c]).fold(f32::MIN, f32::max);

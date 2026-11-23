@@ -228,7 +228,13 @@ pub(crate) fn vertex_weight_proximity(
                 let tv = use_v.then(|| MeshTree::verts(tm.positions(), None));
                 let te = use_e.then(|| MeshTree::edges(tm.positions(), tm.edges()));
                 let tf = use_f.then(|| {
-                    MeshTree::tris(tm.positions(), tm.corner_verts(), &tris, tm.face_offsets(), None)
+                    MeshTree::tris(
+                        tm.positions(),
+                        tm.corner_verts(),
+                        &tris,
+                        tm.face_offsets(),
+                        None,
+                    )
                 });
                 let d = vert2geom_distance(
                     &positions,

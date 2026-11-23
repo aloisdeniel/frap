@@ -154,7 +154,6 @@ static LAYOUT_COLOR: crate::build::LayoutBlock = crate::build::LayoutBlock {
     },
 };
 
-
 #[cfg(test)]
 mod tests {
     use frap_nodes::SocketValue;

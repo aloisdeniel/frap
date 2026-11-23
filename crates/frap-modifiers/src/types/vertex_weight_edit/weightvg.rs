@@ -67,7 +67,12 @@ pub(crate) fn falloff_rng(falloff: Falloff, object_name: &str) -> Option<BliRng>
 }
 
 /// `weightvg_do_map`: maps each weight through the falloff, inverted with `do_invert`.
-pub(crate) fn do_map(new_w: &mut [f32], falloff: Falloff, do_invert: bool, rng: Option<&mut BliRng>) {
+pub(crate) fn do_map(
+    new_w: &mut [f32],
+    falloff: Falloff,
+    do_invert: bool,
+    rng: Option<&mut BliRng>,
+) {
     if !do_invert && falloff == Falloff::None {
         return;
     }
@@ -117,7 +122,13 @@ pub(crate) fn texture_unsupported(ty: &str) -> ModError {
 
 /// `weightvg_do_mask`: mixes `new_w` into `org_w` (indexed by `indices`, or by vertex)
 /// with the global factor, scaled by the mask group's weights when it exists.
-pub(crate) fn do_mask(mesh: &Mesh, indices: Option<&[usize]>, org_w: &mut [f32], new_w: &[f32], mask: &Mask<'_>) {
+pub(crate) fn do_mask(
+    mesh: &Mesh,
+    indices: Option<&[usize]>,
+    org_w: &mut [f32],
+    new_w: &[f32],
+    mask: &Mask<'_>,
+) {
     let fact = mask.constant;
     if fact == 0.0 {
         return;
@@ -272,12 +283,32 @@ mod tests {
                 weights: smallvec::smallvec![(1, 0.3), (0, 0.9)],
             },
         ];
-        update_vg(&mut dv, 0, None, &[0.05, 0.6, 2.0], true, 0.5, true, 0.1, false);
+        update_vg(
+            &mut dv,
+            0,
+            None,
+            &[0.05, 0.6, 2.0],
+            true,
+            0.5,
+            true,
+            0.1,
+            false,
+        );
         assert!(dv[0].weights.is_empty(), "removed at or below 0.1");
         assert_eq!(dv[1].weights.as_slice(), &[(0, 0.6)]);
         assert_eq!(dv[2].weights.as_slice(), &[(1, 0.3), (0, 1.0)], "clamped");
         let mut dv = vec![DeformVert::default(); 3];
-        update_vg(&mut dv, 2, None, &[1.0, 2.0, 3.0], true, 0.0, false, 0.0, true);
+        update_vg(
+            &mut dv,
+            2,
+            None,
+            &[1.0, 2.0, 3.0],
+            true,
+            0.0,
+            false,
+            0.0,
+            true,
+        );
         let w: Vec<f32> = dv.iter().map(|d| d.weights[0].1).collect();
         assert_eq!(w, [0.0, 0.5, 1.0]);
     }

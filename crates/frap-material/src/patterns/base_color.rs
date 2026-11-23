@@ -75,10 +75,9 @@ pub(crate) fn base_color_texture<'a>(
                             SrcChannel::One(ch) => (ch, false),
                             SrcChannel::Rgb2Bw => (ChannelSel::A, true),
                         };
-                        packed = cx.tex_ref(ah.node, channel, diags).map(|texture| PackedAlpha {
-                            texture,
-                            rgb_to_bw,
-                        });
+                        packed = cx
+                            .tex_ref(ah.node, channel, diags)
+                            .map(|texture| PackedAlpha { texture, rgb_to_bw });
                     }
                 }
             }
@@ -414,12 +413,19 @@ mod tests {
         let mut m = crate::graph::testkit::mat("Packed");
         let c = crate::graph::testkit::image_node(&mut m, col);
         let a = crate::graph::testkit::image_node(&mut m, mask);
-        crate::graph::testkit::link(&mut m, (c, "Color"), (crate::graph::testkit::BSDF, "Base Color"));
+        crate::graph::testkit::link(
+            &mut m,
+            (c, "Color"),
+            (crate::graph::testkit::BSDF, "Base Color"),
+        );
         crate::graph::testkit::link(&mut m, (a, "Alpha"), (crate::graph::testkit::BSDF, "Alpha"));
         let lm = crate::graph::testkit::lower_m(&m, &images);
         assert_eq!(lm.base_color.texture.as_ref().unwrap().image, col);
         let pa = lm.ext.base_alpha.as_ref().unwrap();
-        assert_eq!((pa.texture.image, pa.texture.channel, pa.rgb_to_bw), (mask, ChannelSel::A, false));
+        assert_eq!(
+            (pa.texture.image, pa.texture.channel, pa.rgb_to_bw),
+            (mask, ChannelSel::A, false)
+        );
         let mut m = crate::graph::testkit::mat("Grey");
         let a = crate::graph::testkit::image_node(&mut m, mask);
         crate::graph::testkit::link(&mut m, (a, "Color"), (crate::graph::testkit::BSDF, "Alpha"));

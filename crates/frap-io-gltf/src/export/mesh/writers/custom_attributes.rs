@@ -244,7 +244,14 @@ fn run(cx: &MeshExportCx, k: &SplitKey, d: &mut PrimitiveDraft) -> Result<(), Ex
             ),
             Shape::UShort4 => AttrValues::U16x4(
                 flat.chunks_exact(4)
-                    .map(|c| [to_ushort(c[0]), to_ushort(c[1]), to_ushort(c[2]), to_ushort(c[3])])
+                    .map(|c| {
+                        [
+                            to_ushort(c[0]),
+                            to_ushort(c[1]),
+                            to_ushort(c[2]),
+                            to_ushort(c[3]),
+                        ]
+                    })
                     .collect(),
             ),
             Shape::Mat4 => AttrValues::F32x16(
@@ -323,11 +330,36 @@ mod tests {
                 data,
             })
         };
-        add(&mut m, "_temp", Domain::Point, AttrData::Float(Arc::new(vec![1.0, 2.0, 3.0, 4.0])));
-        add(&mut m, "KHR_x", Domain::Face, AttrData::Int(Arc::new(vec![7])));
-        add(&mut m, "plain", Domain::Point, AttrData::Float(Arc::new(vec![0.0; 4])));
-        add(&mut m, "_edge", Domain::Edge, AttrData::Float(Arc::new(vec![0.0; 4])));
-        add(&mut m, "_TEMP", Domain::Point, AttrData::Float(Arc::new(vec![0.0; 4])));
+        add(
+            &mut m,
+            "_temp",
+            Domain::Point,
+            AttrData::Float(Arc::new(vec![1.0, 2.0, 3.0, 4.0])),
+        );
+        add(
+            &mut m,
+            "KHR_x",
+            Domain::Face,
+            AttrData::Int(Arc::new(vec![7])),
+        );
+        add(
+            &mut m,
+            "plain",
+            Domain::Point,
+            AttrData::Float(Arc::new(vec![0.0; 4])),
+        );
+        add(
+            &mut m,
+            "_edge",
+            Domain::Edge,
+            AttrData::Float(Arc::new(vec![0.0; 4])),
+        );
+        add(
+            &mut m,
+            "_TEMP",
+            Domain::Point,
+            AttrData::Float(Arc::new(vec![0.0; 4])),
+        );
         let main = Main::default();
         let s = settings(true);
         let cx = MeshExportCx::new(&main, &m, None, &s);

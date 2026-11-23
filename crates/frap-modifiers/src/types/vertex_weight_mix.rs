@@ -145,9 +145,17 @@ pub(crate) fn vertex_weight_mix(s: &VertexWeightMixSettings, mut mesh: Mesh) -> 
     let mut new_w = Vec::with_capacity(affected.len());
     for &(_, a, b) in &affected {
         let wa = a.unwrap_or(s.default_weight_a);
-        let wa = if s.invert_vertex_group_a { 1.0 - wa } else { wa };
+        let wa = if s.invert_vertex_group_a {
+            1.0 - wa
+        } else {
+            wa
+        };
         let wb = b.unwrap_or(s.default_weight_b);
-        let wb = if s.invert_vertex_group_b { 1.0 - wb } else { wb };
+        let wb = if s.invert_vertex_group_b {
+            1.0 - wb
+        } else {
+            wb
+        };
         org_w.push(wa);
         new_w.push(mix_weight(wa, wb, &s.mix_mode));
     }
@@ -195,7 +203,12 @@ mod tests {
     fn sets_select_vertices() {
         let mut m = Mesh::new("p");
         m.from_pydata(
-            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]],
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
             &[],
             &[vec![0, 1, 2, 3]],
             false,
