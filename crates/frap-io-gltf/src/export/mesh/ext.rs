@@ -181,6 +181,10 @@ pub enum AttrValues {
     U16x2(Vec<[u16; 2]>),
     /// UNSIGNED_SHORT VEC3 (KHR_mesh_quantization)
     U16x3(Vec<[u16; 3]>),
+    /// FLOAT SCALAR (`export_attributes`: FLOAT, INT, INT8, BOOLEAN, WP 8.12)
+    F32(Vec<f32>),
+    /// FLOAT MAT4 (`export_attributes`: FLOAT4X4, column-major, WP 8.12)
+    F32x16(Vec<[f32; 16]>),
 }
 
 /// One glTF vertex attribute of a draft primitive.
@@ -226,6 +230,10 @@ pub struct PrimitiveDraft {
     /// How the accessors are written (M7 W0, decision log M7W0-6): set by the M7
     /// post-processors (quantization, Draco); the default writes the data above as it is.
     pub encoding: PrimitiveEncoding,
+    /// `export_shared_accessors` (WP 8.12): every triangle primitive of the mesh carries the
+    /// same vertex set (`primitive_creation_shared`), so the mesh gatherer writes the vertex
+    /// and morph-target accessors of the first one and reuses them for the others.
+    pub shared_vertices: bool,
 }
 
 /// What M7 post-processors change about how a draft's accessors are written (CONTRACT, M7 W0,
@@ -245,6 +253,17 @@ pub struct PrimitiveEncoding {
     /// accessors keep theirs, and the index accessor is shared by content only with other
     /// view-less ones (the add-on's behaviour, verified on 5.2.4).
     pub without_buffer_views: bool,
+    /// The indices as gathered, before a post-processor replaced `indices` with stand-ins of
+    /// the encoded count (Draco): the add-on's `gather_accessor` cache shares index accessors
+    /// by this content, not by the encoded one (WP 8.12). `None` when `indices` are the
+    /// gathered ones.
+    pub gathered_indices: Option<Vec<u32>>,
+    /// `export_shared_accessors` under Draco (WP 8.12): the vertex count the shared accessors
+    /// had when this primitive was encoded. `io/exp/draco.py` sets the shared accessors'
+    /// `count` to each primitive's encoded vertex count, and the next primitive's encoder is
+    /// created with that count (`encoderCreate(positions.count)`), so it reads only the first
+    /// `count` vertices of the shared set. Set by the mesh gatherer, read by `post/draco.rs`.
+    pub shared_vertex_count: Option<usize>,
     /// Extensions of the glTF primitive (`KHR_draco_mesh_compression`).
     pub extensions: frap_gltf::Extensions,
     /// Extensions to list in `extensionsUsed`, with whether each is also required

@@ -154,6 +154,9 @@ pub enum TextureSlot {
     /// A `KHR_materials_*` texture by its glTF member name (`"clearcoatTexture"`; M3 W0,
     /// `crate::material_ext`).
     Ext(&'static str),
+    /// The `k`-th unused Image Texture of a material (`export_unused_textures`, WP 8.12,
+    /// `unused.rs`).
+    Additional(usize),
 }
 
 /// A texture's identity: the material and the feature using it.
@@ -173,9 +176,24 @@ pub enum Role {
     Occlusion,
     /// `Alpha` → A (R, G and B filled white when still empty); the image is PNG.
     Alpha,
+    /// `Alpha` fed by an image's colour output (`Channel.RGB2BW`, WP 8.12): its grey value
+    /// → A, as [`Role::Alpha`] otherwise.
+    AlphaBw,
+    /// `Anisotropic` of a grayscale anisotropy texture (WP 8.12): its grey value → B.
+    AnisotropyStrength,
+    /// `Anisotropic Rotation` of a grayscale anisotropy texture (WP 8.12): the direction of its
+    /// grey value × 2π → R, G.
+    AnisotropyRotation,
     /// Another socket with a fixed destination channel (`Coat Weight` → R, `Thickness` → G,
     /// `Specular IOR Level` → A, …).
     Channel(u8),
+}
+
+impl Role {
+    /// The `Alpha` socket ([`Role::Alpha`] or [`Role::AlphaBw`]).
+    pub fn is_alpha(self) -> bool {
+        matches!(self, Role::Alpha | Role::AlphaBw)
+    }
 }
 
 /// One socket of a texture: its texture reference and its role.
@@ -192,6 +210,8 @@ pub struct TexInput<'t> {
 enum Fill {
     /// Channel `src` of an image.
     Image(IdRef<ImageId>, u8),
+    /// The grey value of an image's colour (`FillImageRGB2BW`, WP 8.12).
+    ImageBw(IdRef<ImageId>),
     /// All ones.
     White,
 }
@@ -200,7 +220,13 @@ enum Fill {
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub(crate) struct ExportImage {
     fills: Vec<(u8, Fill)>,
+    /// `set_calc(grayscale_anisotropy_calculation)` with the stored images (WP 8.12):
+    /// `(anisotropy, anisotropic_rotation)`, `None` for a stored value (an unlinked socket).
+    anisotropy: Option<AnisotropyImages>,
 }
+
+/// The stored images of a grayscale anisotropy bake: `(anisotropy, anisotropic_rotation)`.
+type AnisotropyImages = (Option<IdRef<ImageId>>, Option<IdRef<ImageId>>);
 
 impl ExportImage {
     fn fill(&mut self, dst: u8, f: Fill) {
@@ -218,6 +244,7 @@ impl ExportImage {
     fn from_image(image: IdRef<ImageId>) -> ExportImage {
         ExportImage {
             fills: (0..4).map(|c| (c, Fill::Image(image, c))).collect(),
+            anisotropy: None,
         }
     }
 
@@ -225,7 +252,7 @@ impl ExportImage {
     fn images(&self) -> Vec<IdRef<ImageId>> {
         let mut v = Vec::new();
         for (_, f) in &self.fills {
-            if let Fill::Image(i, _) = f
+            if let Fill::Image(i, _) | Fill::ImageBw(i) = f
                 && !v.contains(i)
             {
                 v.push(*i);
@@ -261,6 +288,84 @@ pub struct ImageCache {
     images: HashMap<(Arc<[u8]>, &'static str, String), Index>,
     textures: HashMap<TextureUse, Option<Index>>,
     file_names: Vec<String>,
+    /// Names of the images a texture's image was made from (the add-on's
+    /// `export_settings['exported_images']`, WP 8.12: `export_unused_images` skips them).
+    exported: std::collections::HashSet<String>,
+}
+
+impl ImageCache {
+    /// Whether a texture already wrote (part of) image `r` (`img.name in exported_images`).
+    pub(crate) fn was_exported(&self, main: &frap_scene::Main, r: IdRef<ImageId>) -> bool {
+        main.images
+            .get(r)
+            .is_some_and(|im| self.exported.contains(im.header.name.as_str()))
+    }
+}
+
+/// `__get_mime_type_of_image` for an image written whole (`export_unused_images`, WP 8.12):
+/// a 4-channel image is PNG, WebP for a WebP file; otherwise `export_image_format` decides
+/// (`AUTO`: JPEG and WebP files keep their format, `JPEG`: JPEG), and `WEBP` and `NONE` fall
+/// off the end of the add-on's function: no MIME type (the data is encoded as PNG). Only an
+/// image without a buffer (a missing file, 0 channels) has fewer than 4 channels in frap.
+pub(crate) fn whole_image_mime(
+    settings: &ExportSettings,
+    im: &Image,
+    four: bool,
+) -> Option<&'static str> {
+    if four {
+        return Some(if is_webp_image(im) { WEBP } else { PNG });
+    }
+    match settings.export_image_format {
+        ExportImageFormat::Auto if is_jpeg_image(im) => Some(JPEG),
+        ExportImageFormat::Auto if is_webp_image(im) => Some(WEBP),
+        ExportImageFormat::Auto => Some(PNG),
+        ExportImageFormat::Jpeg => Some(JPEG),
+        _ => None,
+    }
+}
+
+/// `Image.channels` (`ibuf->channels`): 4 for every byte buffer Blender allocates (generated,
+/// PNG, JPEG, …) and for frap's float buffers, which are RGBA; 0 when the image has no
+/// buffer (a missing file).
+pub(crate) fn image_channels(g: &Gather, im: &Image) -> u8 {
+    let (w, h) = image_size(g, im);
+    if w == 0 || h == 0 { 0 } else { 4 }
+}
+
+/// `get_gltf_image_from_blender_image` + `__traverse` (WP 8.12): image `r` written whole as
+/// `mime` (`None`: encoded as PNG, no `mimeType`), named as the add-on names it; nothing when
+/// it cannot be encoded. An image without a buffer (a missing file: `Image.channels` 0) gives
+/// `ExportImage.from_blender_image` no fill, so the add-on writes its fill-less encode, a 1×1
+/// white pixel, named `Image` (`__gather_name` of no image; verified on 5.2.4).
+pub(crate) fn write_whole_image(
+    g: &mut Gather,
+    r: IdRef<ImageId>,
+    mime: Option<&'static str>,
+) -> Result<Option<Index>, ExportError> {
+    let main = g.main;
+    let Some(im) = main.images.get(r) else {
+        return Ok(None);
+    };
+    let (ex, name) = if image_channels(g, im) == 0 {
+        (ExportImage::default(), "Image".to_owned())
+    } else {
+        g.images.exported.insert(im.header.name.to_string());
+        (ExportImage::from_image(r), image_name(im))
+    };
+    let Some(bytes) = encode(g, &ex, Target::from_mime(mime.unwrap_or(PNG)))? else {
+        g.warn(format!(
+            "image '{name}': Image data is empty, not exporting image"
+        ));
+        return Ok(None);
+    };
+    let p = make_image(g, bytes, mime.unwrap_or(PNG), name);
+    let i = push_image_unshared(g, p);
+    if mime.is_none()
+        && let Some(img) = g.doc.images.get_mut(i as usize)
+    {
+        img.mime_type = None;
+    }
+    Ok(Some(i))
 }
 
 /// `tex_coord` moved to its own file (M7 W0, decision log M7W0-4: WP 7.7's Attribute-node
@@ -790,6 +895,9 @@ fn encode_unhappy(
     target: Target,
 ) -> Result<Option<Vec<u8>>, ExportError> {
     let main = g.main;
+    if let Some((strength, rotation)) = ex.anisotropy {
+        return encode_anisotropy(g, strength, rotation, target);
+    }
     let images = ex.images();
     let (w, h, out) = if images.is_empty() {
         (1, 1, vec![1.0f32; 4])
@@ -816,14 +924,28 @@ fn encode_unhappy(
                 buf.scale(w, h);
             }
             let px = buf.pixels();
+            // `FillImageRGB2BW`: `R * 0.2989 + G * 0.5870 + B * 0.1140` in float32, times the
+            // alpha when `alpha_mode` is STRAIGHT or PREMUL.
+            let times_alpha = matches!(im.alpha_mode.as_str(), "STRAIGHT" | "PREMUL");
             for (dst, f) in &ex.fills {
-                if let Fill::Image(i, src) = f
-                    && i == r
-                {
-                    let (d, s) = (usize::from(*dst), usize::from(*src));
-                    for (o, p) in out.chunks_exact_mut(4).zip(px.chunks_exact(4)) {
-                        o[d] = p[s];
+                match f {
+                    Fill::Image(i, src) if i == r => {
+                        let (d, s) = (usize::from(*dst), usize::from(*src));
+                        for (o, p) in out.chunks_exact_mut(4).zip(px.chunks_exact(4)) {
+                            o[d] = p[s];
+                        }
                     }
+                    Fill::ImageBw(i) if i == r => {
+                        let d = usize::from(*dst);
+                        for (o, p) in out.chunks_exact_mut(4).zip(px.chunks_exact(4)) {
+                            let mut v = p[0] * 0.2989f32 + p[1] * 0.5870f32 + p[2] * 0.1140f32;
+                            if times_alpha {
+                                v *= p[3];
+                            }
+                            o[d] = v;
+                        }
+                    }
+                    _ => {}
                 }
             }
         }
@@ -851,6 +973,91 @@ fn encode_unhappy(
     let names: Vec<&Image> = images.iter().filter_map(|r| main.images.get(*r)).collect();
     let name = images_name(&names);
     finish_encode(g, &name, target, r)
+}
+
+/// `grayscale_anisotropy_calculation` (WP 8.12), ported from blender/scripts/addons_core/
+/// io_scene_gltf2/blender/exp/material/extensions/anisotropy.py (io_scene_gltf2 5.2.41,
+/// Apache-2.0, The glTF-Blender-IO authors): the size of the largest image, each image
+/// (scaled to it) as its grey value `0.2989 R + 0.5870 G + 0.1140 B` (an unlinked socket: 1);
+/// B = the strength, R, G = `(cos, sin)` of the rotation × 2π, normalised, then `(x + 1) / 2`;
+/// A = 1. In `float32` as the add-on's numpy arrays, except that an unlinked rotation is the
+/// integer 1 (`np.full(…, 1)`), so its angle `2π` and the direction are in double precision.
+/// Written without alpha (`images.new(alpha=False)`: no Alpha fill), named `Image`.
+fn encode_anisotropy(
+    g: &mut Gather,
+    strength: Option<IdRef<ImageId>>,
+    rotation: Option<IdRef<ImageId>>,
+    target: Target,
+) -> Result<Option<Vec<u8>>, ExportError> {
+    let main = g.main;
+    let images: Vec<IdRef<ImageId>> = [strength, rotation].into_iter().flatten().collect();
+    let (w, h) = if images.is_empty() {
+        (1, 1)
+    } else {
+        let sizes: Vec<(u32, u32)> = images
+            .iter()
+            .map(|r| main.images.get(*r).map_or((0, 0), |im| image_size(g, im)))
+            .collect();
+        (
+            sizes.iter().map(|s| s.0).max().unwrap_or(1),
+            sizes.iter().map(|s| s.1).max().unwrap_or(1),
+        )
+    };
+    frap_math::budget::check_buffer(
+        frap_scene::id::imbuf::BUFFER,
+        frap_scene::id::imbuf::buffer_bytes(w, h, true),
+    );
+    let n = w as usize * h as usize;
+    let gray = |g: &Gather, r: Option<IdRef<ImageId>>| -> Option<Option<Vec<f32>>> {
+        let Some(r) = r else { return Some(None) };
+        let im = main.images.get(r)?;
+        let mut buf = acquire(g, im)?;
+        if (buf.x, buf.y) != (w, h) {
+            buf.scale(w, h);
+        }
+        let px = buf.pixels();
+        Some(Some(
+            px.chunks_exact(4)
+                .map(|p| 0.2989f32 * p[0] + 0.5870f32 * p[1] + 0.1140f32 * p[2])
+                .collect(),
+        ))
+    };
+    let Some(s) = gray(g, strength) else {
+        return Ok(None);
+    };
+    let Some(rt) = gray(g, rotation) else {
+        return Ok(None);
+    };
+    let mut out = vec![0.0f32; n * 4];
+    for (k, o) in out.chunks_exact_mut(4).enumerate() {
+        o[3] = 1.0;
+        o[2] = s.as_ref().map_or(1.0, |v| v[k]);
+        let (x, y) = match &rt {
+            Some(v) => {
+                let a = v[k] * 2.0f32 * std::f32::consts::PI;
+                let (c, sn) = (a.cos(), a.sin());
+                let norm = (c * c + sn * sn).sqrt();
+                ((c / norm + 1.0) / 2.0, (sn / norm + 1.0) / 2.0)
+            }
+            None => {
+                let a = 2.0 * std::f64::consts::PI;
+                let (c, sn) = (a.cos(), a.sin());
+                let norm = (c * c + sn * sn).sqrt();
+                (
+                    ((c / norm + 1.0) / 2.0) as f32,
+                    ((sn / norm + 1.0) / 2.0) as f32,
+                )
+            }
+        };
+        o[0] = x;
+        o[1] = y;
+    }
+    let mut bytes: Vec<u8> = out.iter().map(|v| unit_to_u8(*v)).collect();
+    bytes = ImBuf::flip_rows(&bytes, w as usize * 4);
+    let format = Format::of(target, false, g.settings.export_image_quality);
+    let img = DecodedImage::new(w, h, 4, PixelData::U8(bytes)).and_then(|i| i.with_channels(3));
+    let r = img.and_then(|i| encode_pixels(&i, &format));
+    finish_encode(g, "Image", target, r)
 }
 
 /// The encoded bytes of `ex` as `target` (cached per description and target; `None` with a
@@ -936,8 +1143,12 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
                 }
             }
             Role::Occlusion => ex.fill(0, Fill::Image(img, src(i.tex, 0))),
-            Role::Alpha => {
-                ex.fill(3, Fill::Image(img, src(i.tex, 3)));
+            Role::Alpha | Role::AlphaBw => {
+                if i.role == Role::AlphaBw {
+                    ex.fill(3, Fill::ImageBw(img));
+                } else {
+                    ex.fill(3, Fill::Image(img, src(i.tex, 3)));
+                }
                 for c in 0..3 {
                     if !ex.is_filled(c) {
                         ex.fill(c, Fill::White);
@@ -945,13 +1156,19 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
                 }
             }
             Role::Channel(dst) => ex.fill(dst, Fill::Image(img, src(i.tex, dst))),
+            Role::AnisotropyStrength => {
+                ex.anisotropy.get_or_insert((None, None)).0 = Some(img);
+            }
+            Role::AnisotropyRotation => {
+                ex.anisotropy.get_or_insert((None, None)).1 = Some(img);
+            }
         }
     }
     // "Check that we don't have some empty channels".
     let main = g.main;
     let mut empty = Vec::new();
     for (_, f) in &ex.fills {
-        if let Fill::Image(r, _) = f
+        if let Fill::Image(r, _) | Fill::ImageBw(r) = f
             && main
                 .images
                 .get(*r)
@@ -970,7 +1187,7 @@ fn compose(g: &mut Gather, inputs: &[TexInput]) -> ExportImage {
             "Image '{name}' has no size and cannot be exported."
         ));
         ex.fills
-            .retain(|(_, f)| !matches!(f, Fill::Image(i, _) if *i == r));
+            .retain(|(_, f)| !matches!(f, Fill::Image(i, _) | Fill::ImageBw(i) if *i == r));
     }
     ex
 }
@@ -1035,6 +1252,22 @@ pub fn slot_inputs(slot: TextureSlot, t: &TexRef) -> Vec<TexInput<'_>> {
     }
 }
 
+/// Whether a texture of `inputs` gets an image (`gather_texture_info(...) is not None`, the
+/// ORM double check of `__gather_orm_texture`, WP 8.12): its fills are not empty and encode.
+pub fn texture_writable(g: &mut Gather, inputs: &[TexInput]) -> Result<bool, ExportError> {
+    if g.settings.props.export_keep_originals.value {
+        return Ok(true);
+    }
+    let ex = compose(g, inputs);
+    if ex.fills.is_empty() {
+        return Ok(false);
+    }
+    let happy = ex.happy().and_then(|r| g.main.images.get(r));
+    let alpha = inputs.iter().any(|i| i.role.is_alpha());
+    let mime = mime_for(g.settings, happy, alpha);
+    Ok(encode(g, &ex, Target::from_mime(mime))?.is_some())
+}
+
 /// The WARNING of a texture gathered from more than one socket (`__gather_sampler`).
 pub const SAMPLER_OF_FIRST_NODE: &str = "More than one shader node tex image used for a texture. \
      The resulting glTF sampler will behave like the first shader node tex image.";
@@ -1054,12 +1287,21 @@ fn gather_new_texture(
     if inputs.len() > 1 {
         g.warn(SAMPLER_OF_FIRST_NODE);
     }
+    if g.settings.props.export_keep_originals.value {
+        return gather_original_texture(g, inputs);
+    }
     let ex = compose(g, inputs);
-    if ex.fills.is_empty() {
+    if ex.fills.is_empty() && ex.anisotropy.is_none() {
         return Ok(None);
     }
+    // `exported_images[name] = 1 / 2` (`encode_image.py`): fully or partly used.
+    for r in ex.images() {
+        if let Some(im) = main.images.get(r) {
+            g.images.exported.insert(im.header.name.to_string());
+        }
+    }
     let happy = ex.happy().and_then(|r| main.images.get(r));
-    let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
+    let alpha = inputs.iter().any(|i| i.role.is_alpha());
     let mime = mime_for(g.settings, happy, alpha);
     let names: Vec<&Image> = ex
         .images()
@@ -1156,6 +1398,155 @@ fn gather_new_texture(
     Ok(Some((g.doc.textures.len() - 1) as Index))
 }
 
+/// `os.path.relpath(path, start)` on absolute, lexically normalised paths (`None` without a
+/// common root, as on Windows across drives), with `/` separators.
+fn relpath(path: &std::path::Path, start: &std::path::Path) -> Option<String> {
+    use std::path::Component;
+    fn norm(p: &std::path::Path) -> Vec<Component<'_>> {
+        let mut out: Vec<Component> = Vec::new();
+        for c in p.components() {
+            match c {
+                Component::CurDir => {}
+                Component::ParentDir => {
+                    if matches!(out.last(), Some(Component::Normal(_))) {
+                        out.pop();
+                    }
+                }
+                c => out.push(c),
+            }
+        }
+        out
+    }
+    let (p, s) = (norm(path), norm(start));
+    if p.first() != s.first() {
+        return None;
+    }
+    let common = p.iter().zip(&s).take_while(|(a, b)| a == b).count();
+    let mut parts: Vec<String> = vec!["..".to_owned(); s.len() - common];
+    parts.extend(
+        p[common..]
+            .iter()
+            .map(|c| c.as_os_str().to_string_lossy().into_owned()),
+    );
+    Some(if parts.is_empty() {
+        ".".to_owned()
+    } else {
+        parts.join("/")
+    })
+}
+
+/// `export_keep_originals` (WP 8.12), ported from blender/scripts/addons_core/io_scene_gltf2/
+/// blender/exp/material/image.py (`__get_image_data_mapping`: `ExportImage.from_original` of
+/// each socket's image, the last one kept; `__gather_mime_type`: PNG (WebP) for an Alpha
+/// socket, else the original file's format with `AUTO`; `__gather_name`: the image's name;
+/// `__gather_original_uri`: the file's path relative to the exported file's directory, the
+/// image dropped when the file does not exist; `__gather_buffer_view`: outside
+/// `GLTF_SEPARATE`, the encode of the fill-less `ExportImage`, a 1×1 white pixel (written next
+/// to the URI)) and texture.py (`__gather_extensions`: a WebP original goes into
+/// `EXT_texture_webp`, required, without a core `source`), io_scene_gltf2 5.2.41, Apache-2.0,
+/// The glTF-Blender-IO authors. A texture without an image is not written.
+fn gather_original_texture(
+    g: &mut Gather,
+    inputs: &[TexInput],
+) -> Result<Option<Index>, ExportError> {
+    let main = g.main;
+    let (Some(first), Some(last)) = (inputs.first(), inputs.last()) else {
+        return Ok(None);
+    };
+    let Some(orig) = main.images.get(last.tex.image) else {
+        return Ok(None);
+    };
+    let alpha = inputs.iter().any(|i| i.role.is_alpha());
+    let mime = if alpha {
+        if g.settings.export_image_format == ExportImageFormat::Webp {
+            WEBP
+        } else {
+            PNG
+        }
+    } else {
+        match g.settings.export_image_format {
+            ExportImageFormat::Webp => WEBP,
+            ExportImageFormat::Jpeg => JPEG,
+            _ if is_jpeg_image(orig) => JPEG,
+            _ if is_webp_image(orig) => WEBP,
+            _ => PNG,
+        }
+    };
+    let file = (!orig.filepath.is_empty()).then(|| resolve(g, &orig.filepath));
+    let start = match (&g.settings.out_dir, &g.settings.cwd) {
+        (Some(d), _) => d.clone(),
+        (None, Some(c)) => c.clone(),
+        (None, None) => std::env::current_dir().unwrap_or_default(),
+    };
+    let uri = file
+        .filter(|f| f.exists())
+        .and_then(|f| relpath(&f, &start))
+        .map(|r| path_to_uri(&r));
+    let Some(uri) = uri else {
+        return Ok(None);
+    };
+    let name = orig.header.name.to_string();
+    let bytes = if g.settings.export_format == ExportFormat::GltfSeparate {
+        None
+    } else {
+        encode(g, &ExportImage::default(), Target::from_mime(mime))?
+    };
+    let key = (
+        bytes.clone().unwrap_or_else(|| Arc::from(Vec::new())),
+        mime,
+        format!("{name}\u{0}{uri}"),
+    );
+    let image = match g.images.images.get(&key) {
+        Some(i) => *i,
+        None => {
+            let img = GImage {
+                mime_type: Some(mime.to_owned()),
+                name: Some(name),
+                uri: Some(uri),
+                buffer_view: bytes.map(|b| g.buf.push_view(&b, 4, None, None)),
+                ..GImage::default()
+            };
+            g.doc.images.push(img);
+            let i = (g.doc.images.len() - 1) as Index;
+            g.images.images.insert(key, i);
+            i
+        }
+    };
+    let s = sampler(first.tex);
+    let skey = (
+        s.mag_filter.map_or(0, u32::from),
+        s.min_filter.map_or(0, u32::from),
+        s.wrap_s.map(u32::from),
+        s.wrap_t.map(u32::from),
+    );
+    let sampler_index = match g.images.samplers.get(&skey) {
+        Some(i) => *i,
+        None => {
+            g.doc.samplers.push(s);
+            let i = (g.doc.samplers.len() - 1) as Index;
+            g.images.samplers.insert(skey, i);
+            i
+        }
+    };
+    let mut texture = Texture {
+        sampler: Some(sampler_index),
+        ..Texture::default()
+    };
+    if mime == WEBP {
+        texture
+            .extensions
+            .set(Some(frap_gltf::ext::ext_texture_webp::ExtTextureWebp {
+                source: Some(image),
+                ..Default::default()
+            }));
+        g.use_extension(frap_gltf::ext::ext_texture_webp::ExtTextureWebp::NAME, true);
+    } else {
+        texture.source = Some(image);
+    }
+    g.doc.textures.push(texture);
+    Ok(Some((g.doc.textures.len() - 1) as Index))
+}
+
 /// The WARNING of an export that makes `KHR_texture_basisu` required (M8 W0, decision log
 /// M8W0-7): once per export.
 pub const KTX2_REQUIRED_WARNING: &str = "frap: KHR_texture_basisu is required in this file (a \
@@ -1208,6 +1599,16 @@ fn push_image(g: &mut Gather, p: PendingImage) -> Index {
     if let Some(i) = g.images.images.get(&key) {
         return *i;
     }
+    let i = push_image_unshared(g, p);
+    g.images.images.insert(key, i);
+    i
+}
+
+/// A new glTF image, never shared: `traverse_additional_images` gathers each `bpy.data`
+/// image on its own, and its `Image` (its own file or buffer view) equals no other in
+/// `__append_unique_and_get_index` (verified on 5.2.4: two images with the same pixels and
+/// name are written twice, `paint.png` and `paint-1.png`).
+fn push_image_unshared(g: &mut Gather, p: PendingImage) -> Index {
     let mut img = GImage {
         mime_type: Some(p.mime.to_owned()),
         name: Some(p.name),
@@ -1221,9 +1622,7 @@ fn push_image(g: &mut Gather, p: PendingImage) -> Index {
         None => img.buffer_view = Some(g.buf.push_view(&p.bytes, 4, None, None)),
     }
     g.doc.images.push(img);
-    let i = (g.doc.images.len() - 1) as Index;
-    g.images.images.insert(key, i);
-    i
+    (g.doc.images.len() - 1) as Index
 }
 
 /// `KHR_texture_transform` of a texture (identity members omitted; `None` when all are).

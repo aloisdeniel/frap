@@ -14,9 +14,8 @@
 //!   tangents per those seconds, `keyframes.py`); Blender's clock is
 //!   `frame × fps_base / fps`. SPEC rescales every sampler of a scene with `fps_base ≠ 1`:
 //!   times × fps_base², CUBICSPLINE tangents ÷ fps_base², and drops the exporter's fps_base
-//!   WARNING. `KHR_animation_pointer` samplers stay as written (the pointer bake uses
-//!   `(frame − slide) / fps` when it slides, which the written times no longer tell apart)
-//!   and get a WARNING instead.
+//!   WARNING. `KHR_animation_pointer` samplers are baked on Blender's clock directly
+//!   (`(frame − slide) × fps_base / fps`, `pointer/bake.rs`, WP 8.12) and stay as written.
 //! - **Skinned mesh nodes at the scene root** ([`skinned_roots`]). The add-on keeps a skinned
 //!   mesh under its armature's node (Blender's usual rig: the mesh parented to the armature),
 //!   which the Khronos validator reports (`NODE_SKINNED_MESH_NON_ROOT`: the specification
@@ -91,7 +90,6 @@ pub fn animation_times(g: &mut Gather) -> Result<(), ExportError> {
     let mut outputs: HashMap<Index, Option<f64>> = HashMap::new();
     let mut cubic: HashSet<Index> = HashSet::new();
     let mut corrected: HashSet<IdRef<SceneId>> = HashSet::new();
-    let mut kept: HashSet<IdRef<SceneId>> = HashSet::new();
     for anim in &g.doc.animations {
         let scene = anim
             .channels
@@ -111,13 +109,10 @@ pub fn animation_times(g: &mut Gather) -> Result<(), ExportError> {
                 .channels
                 .iter()
                 .any(|c| c.sampler as usize == si && c.target.path == AnimationPath::Pointer);
-            let want = if pointer {
-                kept.insert(scene);
-                None
-            } else {
-                corrected.insert(scene);
-                Some(b * b)
-            };
+            // `KHR_animation_pointer` samplers are baked on Blender's clock already
+            // (`pointer/bake.rs`, WP 8.12).
+            corrected.insert(scene);
+            let want = (!pointer).then_some(b * b);
             // An accessor shared by samplers that disagree is left alone.
             for (map, a) in [(&mut inputs, s.input), (&mut outputs, s.output)] {
                 let e = map.entry(a).or_insert(want);
@@ -184,19 +179,9 @@ pub fn animation_times(g: &mut Gather) -> Result<(), ExportError> {
         write_in_place(g, a, &new, false)?;
     }
     for &scene in &corrected {
-        if kept.contains(&scene) {
-            continue;
-        }
         if let Some(name) = g.main.scenes.get(scene).map(|s| s.header.name.to_string()) {
             let prefix = format!("glTF export: animation times of scene '{name}'");
             g.reports.retain(|r| !r.message.starts_with(&prefix));
-        }
-    }
-    for &scene in &kept {
-        if let Some(name) = g.main.scenes.get(scene).map(|s| s.header.name.to_string()) {
-            g.warn(format!(
-                "glTF export: frap_compat='SPEC' keeps the add-on's KHR_animation_pointer times of scene '{name}' (fps_base ≠ 1)"
-            ));
         }
     }
     Ok(())

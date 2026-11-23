@@ -19,7 +19,7 @@
 //!
 //! Not folded (left linked, as frap did before): the texture nodes, Color Ramp, the curve
 //! nodes, Vector Rotate, Blackbody and Radial Tiling, which have multi-functions in Blender
-//! too (docs/deviations.md §2), and anything inside a node group.
+//! too (docs/deviations.md §2). Node groups are inlined before (`lowered/inline.rs`, WP 8.12).
 
 use std::collections::{BTreeSet, HashMap};
 

@@ -49,11 +49,11 @@
 //! several textures, `clearcoatNormalTexture/scale` and `normalTexture/scale`) keeps its first
 //! pointer and gets the others as `additional` (one channel copy each). The importer's
 //! anisotropy texture set-up (`detect_anisotropy_nodes`) registers the strength and rotation
-//! constants and its texture's transform.
+//! constants and its texture's transform; the anisotropy baked from grayscale textures its
+//! texture's transform, then the strength and rotation factors (WP 8.12).
 //!
 //! The material is read from its original node tree (an animated tree is never inlined), so
-//! no constant folding applies here. Not registered: the textures frap's static exporter does
-//! not write (the anisotropy bake from grayscale textures), light node trees (frap has none).
+//! no constant folding applies here. Not registered: light node trees (frap has none).
 
 use frap_gltf::json::Material as GMaterial;
 use frap_material::LowerCx;
@@ -1016,7 +1016,8 @@ fn anisotropy_nodes<'a>(
 /// `export_anisotropy`: both sockets unlinked, the strength and the raw rotation socket (the
 /// add-on samples it unconverted, unlike the static export); else the importer's texture
 /// set-up ([`anisotropy_nodes`]: the MULTIPLY's and the ADD's second inputs, then the
-/// texture's transform). The grayscale-texture bake is not exported by frap (no paths).
+/// texture's transform); else the grayscale-texture bake (WP 8.12: the texture transform, the
+/// strength and the rotation factors).
 fn anisotropy(nav: &Nav, gm: &GMaterial, p: &mut Found) {
     const EXT: &str = "KHR_materials_anisotropy";
     let (Some(a), Some(r), Some(t)) = (
@@ -1034,10 +1035,28 @@ fn anisotropy(nav: &Nav, gm: &GMaterial, p: &mut Found) {
         p.put(Some(input_key(r.node, r.index)), rotation);
         return;
     }
-    if !nav.is_linked(r) || !nav.is_linked(t) {
-        return;
-    }
-    let Some((mul, add, tex)) = anisotropy_nodes(nav, a, t) else {
+    // `detect_anisotropy_nodes` needs the rotation and the tangent linked.
+    let nodes = (nav.is_linked(r) && nav.is_linked(t))
+        .then(|| anisotropy_nodes(nav, a, t))
+        .flatten();
+    let Some((mul, add, tex)) = nodes else {
+        // `export_anisotropy_from_grayscale_textures` (WP 8.12): the primary socket's
+        // texture transform, then the factors of `Anisotropic` and `Anisotropic Rotation`.
+        if ext_has(gm, EXT, "anisotropyTexture") {
+            let primary = if nav.cx.texture_from(a).is_some() {
+                a
+            } else {
+                r
+            };
+            texture_transform(
+                nav,
+                Some(primary),
+                &format!("extensions/{EXT}/anisotropyTexture/extensions"),
+                p,
+            );
+            p.put(nav.factor(a).and_then(|c| c.path), strength);
+            p.put(nav.factor(r).and_then(|c| c.path), rotation);
+        }
         return;
     };
     p.put(

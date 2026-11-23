@@ -69,7 +69,31 @@ pub fn apply(
         ..PbrMetallicRoughness::default()
     };
     if let Some(t) = &lm.base_color.texture {
-        pbr.base_color_texture = gather_texture_info(g, t, (r, TextureSlot::BaseColor), mesh)?;
+        pbr.base_color_texture = match &lm.ext.base_alpha {
+            // The alpha packed into the base colour image (WP 8.12, `__get_image_data_mapping`
+            // with the Base Color and Alpha sockets): the colour image whole, then the alpha.
+            Some(pa) => {
+                let alpha = TexInput {
+                    tex: &pa.texture,
+                    role: if pa.rgb_to_bw {
+                        Role::AlphaBw
+                    } else {
+                        Role::Alpha
+                    },
+                };
+                let full = TexInput {
+                    tex: t,
+                    role: Role::Full,
+                };
+                let inputs: Vec<TexInput> = if pa.texture == *t {
+                    vec![alpha]
+                } else {
+                    vec![full, alpha]
+                };
+                gather_texture_info_from(g, t, &inputs, (r, TextureSlot::BaseColor), mesh)?
+            }
+            None => gather_texture_info(g, t, (r, TextureSlot::BaseColor), mesh)?,
+        };
     }
     let inputs = metallic_roughness_inputs(lm);
     if let Some(primary) = inputs.first().map(|i| i.tex) {

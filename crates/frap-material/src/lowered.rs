@@ -12,6 +12,8 @@ use smol_str::SmolStr;
 // building for `raise`). They name no pattern; the patterns live in `patterns/`.
 pub mod build;
 pub mod graph;
+/// `InlineShaderNodes`' group inlining and muted-node bypass (WP 8.12).
+pub mod inline;
 
 /// A factor and an optional texture multiplying it.
 #[derive(Clone, Debug, PartialEq)]
@@ -254,6 +256,49 @@ pub struct MaterialExts {
     /// the diffuse colour is [`LoweredMaterial::base_color`], and the importer sets no other
     /// extension (the add-on ignores them).
     pub pbr_specular_glossiness: Option<SpecularGlossiness>,
+    /// `occlusionTexture.strength` was read from a Mix with white in front of the occlusion
+    /// socket (`__gather_occlusion_strength` found one), so the exporter writes it even when
+    /// it is 1, as the add-on does (WP 8.12).
+    pub occlusion_strength_set: bool,
+    /// `Specular Tint` is linked and its colour factor was found (a Mix whose factor folds to
+    /// white, or a constant behind the link), so the exporter writes `specularColorFactor`
+    /// even when it is `[1, 1, 1]`, as the add-on does (WP 8.12).
+    pub specular_color_set: bool,
+    /// The alpha the exporter packs into the base-colour image's A channel (WP 8.12): an
+    /// `Alpha` fed by another image than the base colour's, or by an image's colour output
+    /// (converted to grey). When it is the only texture, [`LoweredMaterial::base_color`]'s
+    /// texture is the same reference, read through `A`.
+    pub base_alpha: Option<PackedAlpha>,
+    /// `export_anisotropy_from_grayscale_textures` (WP 8.12): `anisotropyTexture` is baked from
+    /// the grey values of the images behind `Anisotropic` (B) and `Anisotropic Rotation`
+    /// (R, G: the unit direction of the angle × 2π, mapped to [0, 1]); an unlinked one counts
+    /// as 1. [`Anisotropy::texture`] is the primary socket's texture (texture coordinates,
+    /// transform).
+    pub anisotropy_grayscale: Option<GrayscaleAnisotropy>,
+}
+
+/// The grayscale textures of a baked `anisotropyTexture` (WP 8.12).
+#[derive(Clone, Debug, PartialEq)]
+pub struct GrayscaleAnisotropy {
+    /// The texture behind `Anisotropic`.
+    pub strength: Option<TexRef>,
+    /// The texture behind `Anisotropic Rotation`.
+    pub rotation: Option<TexRef>,
+    /// `anisotropyRotation` as the add-on computes it, in Python floats (the factor × 2π in
+    /// double precision; [`Anisotropy::rotation`] is that value rounded to `f32`).
+    pub rotation_f64: f64,
+}
+
+/// An alpha texture packed into the base colour image (`__get_image_data_mapping` with the
+/// `Alpha` socket, WP 8.12).
+#[derive(Clone, Debug, PartialEq)]
+pub struct PackedAlpha {
+    /// The texture behind `Alpha` (its channel: `A`, or `R`/`G`/`B` through a Separate Color).
+    pub texture: TexRef,
+    /// `Channel.RGB2BW`: a colour output plugged into `Alpha`, converted to grey
+    /// (`0.2989 R + 0.5870 G + 0.1140 B`, times the image's alpha unless its `alpha_mode` is
+    /// `CHANNEL_PACKED` or `NONE`).
+    pub rgb_to_bw: bool,
 }
 
 /// `KHR_materials_pbrSpecularGlossiness` as the glTF importer raises it
@@ -401,11 +446,19 @@ impl LoweredMaterial {
 pub trait ImageLookup {
     /// The image datablock.
     fn image(&self, im: IdRef<ImageId>) -> Option<&Image>;
+    /// The node group a group node uses (`bpy.data.node_groups`; WP 8.12, for
+    /// [`inline::expand`]). `None` by default: groups are not inlined.
+    fn node_group(&self, _id: frap_rna::IdAny) -> Option<&NodeTree> {
+        None
+    }
 }
 
 impl ImageLookup for frap_scene::Main {
     fn image(&self, im: IdRef<ImageId>) -> Option<&Image> {
         self.images.get(im)
+    }
+    fn node_group(&self, id: frap_rna::IdAny) -> Option<&NodeTree> {
+        IdRef::<frap_rna::NodeTreeId>::from_any(id).and_then(|r| self.node_groups.get(r))
     }
 }
 
@@ -430,6 +483,10 @@ pub struct LowerCx<'a> {
     /// a material whose node tree is animated when pointer animation is exported, and with
     /// `export_unused_textures` (`BlenderMaterialIndentifier.__can_use_inline`).
     pub original: bool,
+    /// Names of the Image Texture nodes a texture was read from while lowering (the add-on's
+    /// `export_settings['nodes_used']`, set by `__gather_texture_transform_and_tex_coord`;
+    /// WP 8.12: `export_unused_textures` exports the others).
+    pub used_nodes: std::cell::RefCell<Vec<SmolStr>>,
 }
 
 impl<'a> LowerCx<'a> {
@@ -440,6 +497,7 @@ impl<'a> LowerCx<'a> {
             mat,
             images,
             original: false,
+            used_nodes: std::cell::RefCell::new(Vec::new()),
         }
     }
 
@@ -520,18 +578,47 @@ pub fn patterns_in_order() -> Vec<&'static MaterialPattern> {
 
 /// Lowers a material's node tree by running [`MATERIAL_PATTERNS`] in `order`, starting from
 /// [`LoweredMaterial::gltf_default`].
+///
+/// When the exporter would read the inlined tree (`LowerCx::uses_inline_tree`), node groups
+/// are inlined and links through muted nodes bypassed first ([`inline::expand`], WP 8.12);
+/// otherwise (a glTF Material Output with `Occlusion`) the add-on's original-tree traversal
+/// still goes through groups ([`inline::expand_original`]).
 pub fn lower(tree: &NodeTree, mat: &Material, images: &dyn ImageLookup) -> LoweredMaterial {
-    lower_cx(&LowerCx::new(tree, mat, images))
+    let cx = LowerCx::new(tree, mat, images);
+    if cx.uses_inline_tree() {
+        if !cx.inline_fails()
+            && let Some(t) = inline::expand(tree, mat, images)
+        {
+            return lower_cx(&LowerCx::new(&t, mat, images));
+        }
+    } else if let Some(t) = inline::expand_original(tree, images) {
+        return lower_cx(&LowerCx::new(&t, mat, images));
+    }
+    lower_cx(&cx)
 }
 
-/// [`lower`] from the original tree (`bmat.used == "ORIGINAL"`: no constant folding, see
-/// [`LowerCx::original`]).
+/// [`lower`] from the original tree (`bmat.used == "ORIGINAL"`: no constant folding and no
+/// muted-node bypass, see [`LowerCx::original`]; textures behind node groups are found, as
+/// the add-on's `NodeNav` and `from_socket` go through groups, [`inline::expand_original`]).
 pub fn lower_original(
     tree: &NodeTree,
     mat: &Material,
     images: &dyn ImageLookup,
 ) -> LoweredMaterial {
-    lower_cx(&LowerCx::new(tree, mat, images).with_original(true))
+    lower_original_used(tree, mat, images).0
+}
+
+/// [`lower_original`], also returning the names of the Image Texture nodes its textures were
+/// read from (the add-on's `nodes_used`, in first-use order; WP 8.12).
+pub fn lower_original_used(
+    tree: &NodeTree,
+    mat: &Material,
+    images: &dyn ImageLookup,
+) -> (LoweredMaterial, Vec<SmolStr>) {
+    let expanded = inline::expand_original(tree, images);
+    let cx = LowerCx::new(expanded.as_ref().unwrap_or(tree), mat, images).with_original(true);
+    let lm = lower_cx(&cx);
+    (lm, cx.used_nodes.into_inner())
 }
 
 /// Runs every pattern over `cx`.

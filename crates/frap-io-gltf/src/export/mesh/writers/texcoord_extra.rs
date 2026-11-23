@@ -136,7 +136,7 @@ pub fn plan(cx: &MeshExportCx) -> (Vec<(usize, Vec<SmolStr>)>, Vec<SmolStr>) {
         let names: Vec<SmolStr> = material_for_slot(cx.settings.export_materials, b, &mats)
             .and_then(|m| cx.main.materials.get(m))
             .map(|mat| {
-                let lm = crate::export::materials::lower::lowered(cx.main, mat);
+                let lm = crate::export::materials::lower::lowered_for(cx.main, mat, cx.settings);
                 attribute_uvs(mat, &lm)
                     .into_iter()
                     .filter(|n| !uv_names.contains(&n.as_str()))

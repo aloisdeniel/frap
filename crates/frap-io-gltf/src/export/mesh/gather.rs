@@ -95,6 +95,12 @@ pub fn column_data(c: &AttrColumn) -> AccessorData {
         AttrValues::I16x4(v) => AccessorData::from_elements(v),
         AttrValues::U16x2(v) => AccessorData::from_elements(v),
         AttrValues::U16x3(v) => AccessorData::from_elements(v),
+        AttrValues::F32(v) => AccessorData::from_elements(v),
+        AttrValues::F32x16(v) => AccessorData {
+            type_: frap_gltf::json::AccessorType::Mat4,
+            normalized: false,
+            components: frap_gltf::Components::F32(v.iter().flatten().copied().collect()),
+        },
     };
     AccessorData {
         normalized: c.normalized && d.component_type().can_normalize(),
@@ -233,6 +239,10 @@ fn build_mesh(
         }
     };
     let fresh = matches!(source, Source::Fresh(_));
+    type SharedAccessors = (IndexMap<String, Index>, Vec<IndexMap<String, Index>>);
+    let mut shared: Option<SharedAccessors> = None;
+    // The shared accessors' `count` after the last Draco encode (`io/exp/draco.py`).
+    let mut shared_count: Option<usize> = None;
     let mut out: Vec<Primitive> = Vec::new();
     let mut written_all: Vec<WrittenPrimitive> = Vec::new();
     loop {
@@ -240,14 +250,53 @@ fn build_mesh(
             Source::Fresh(drafts) => {
                 let Some(mut d) = drafts.next() else { break };
                 let cx = MeshExportCx::new(main, data, object, settings).with_skin(skin);
+                if d.shared_vertices {
+                    d.encoding.shared_vertex_count = shared_count;
+                }
                 primitives::post_process(&cx, &mut d, &mut g.buf)?;
+                if d.shared_vertices && d.encoding.without_buffer_views {
+                    shared_count = Some(d.positions.len());
+                }
                 for m in cx.take_reports() {
                     g.warn(m);
                 }
                 for (name, required) in &d.encoding.extensions_used {
                     g.use_extension(name, *required);
                 }
-                let w = write_accessors(g, &d)?;
+                // `export_shared_accessors` (WP 8.12): one set of vertex and morph-target
+                // accessors for every triangle primitive (`__gather_cache_primitives` with
+                // `shared_attributes`). Under Draco too: `io/exp/draco.py` encodes each
+                // primitive with the whole shared vertex set and its own indices (a
+                // bitstream each) and sets the shared accessors' `count` to its encoded
+                // vertex count, so the last primitive's count stays (verified on 5.2.4).
+                let share = d.shared_vertices;
+                let w = match (&shared, share) {
+                    (Some((attributes, targets)), true) => {
+                        if d.encoding.without_buffer_views {
+                            let count = d.positions.len() as u64;
+                            for &i in attributes.values() {
+                                if let Some(a) = g.buf.accessor_mut(i) {
+                                    a.count = count;
+                                }
+                            }
+                        }
+                        WrittenPrimitive {
+                            attributes: attributes.clone(),
+                            indices: write_indices(g, &d)?,
+                            mode: d.mode,
+                            material_slot: d.material_slot,
+                            targets: targets.clone(),
+                            extensions: d.encoding.extensions.clone(),
+                        }
+                    }
+                    _ => {
+                        let w = write_accessors(g, &d)?;
+                        if share {
+                            shared = Some((w.attributes.clone(), w.targets.clone()));
+                        }
+                        w
+                    }
+                };
                 written_all.push(w.clone());
                 w
             }
@@ -324,6 +373,14 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         }
     };
     let mut attributes = IndexMap::new();
+    // `export_attributes` first (`custom_attributes::is_custom`), then the add-on's order.
+    let custom = crate::export::mesh::writers::custom_attributes::is_custom;
+    for (name, col) in d.attributes.iter().filter(|(n, _)| custom(n)) {
+        let data = encoded(name, column_data(col));
+        check(name, data.count())?;
+        let i = push(g, &data, &AccessorOpts::attribute(false));
+        attributes.insert(name.to_string(), i);
+    }
     let data = encoded("POSITION", AccessorData::from_elements(&d.positions));
     check("POSITION", data.count())?;
     let pos = push(g, &data, &AccessorOpts::attribute(true));
@@ -343,50 +400,13 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         let i = push(g, &data, &AccessorOpts::attribute(false));
         attributes.insert(name, i);
     }
-    for (name, col) in &d.attributes {
+    for (name, col) in d.attributes.iter().filter(|(n, _)| !custom(n)) {
         let data = encoded(name, column_data(col));
         check(name, data.count())?;
         let i = push(g, &data, &AccessorOpts::attribute(false));
         attributes.insert(name.to_string(), i);
     }
-    // `primitive_creation_edges_and_points` gives the POINTS primitive no `indices`.
-    let indices = if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
-        None
-    } else if enc.without_buffer_views {
-        // The add-on's `gather_accessor` cache shares index accessors by content under Draco
-        // too (WP 7.2, verified on 5.2.4: two meshes with the same triangles share one
-        // view-less index accessor). Keyed apart from the accessors with a view (`u32::MAX`
-        // is never an index).
-        let mut key = d.indices.clone();
-        key.push(u32::MAX);
-        Some(match g.index_accessors.get(&key) {
-            Some(i) => *i,
-            None => {
-                if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
-                    return Err(ExportError::Invalid(format!(
-                        "index {bad} out of range ({n} vertices)"
-                    )));
-                }
-                let i = g.buf.push_indices_without_view(&d.indices);
-                g.index_accessors.insert(key, i);
-                i
-            }
-        })
-    } else {
-        Some(match g.index_accessors.get(&d.indices) {
-            Some(i) => *i,
-            None => {
-                if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
-                    return Err(ExportError::Invalid(format!(
-                        "index {bad} out of range ({n} vertices)"
-                    )));
-                }
-                let i = g.buf.push_indices(&d.indices);
-                g.index_accessors.insert(d.indices.clone(), i);
-                i
-            }
-        })
-    };
+    let indices = write_indices(g, d)?;
     let mut targets = Vec::with_capacity(d.targets.len());
     for (ti, t) in d.targets.iter().enumerate() {
         let mut m = IndexMap::new();
@@ -415,6 +435,54 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         targets,
         extensions: enc.extensions.clone(),
     })
+}
+
+/// The index accessor of one primitive (shared by content, the add-on's `@cached
+/// gather_accessor`); `None` for the POINTS primitive of loose vertices.
+fn write_indices(g: &mut Gather, d: &PrimitiveDraft) -> Result<Option<Index>, ExportError> {
+    let n = d.positions.len();
+    let enc = &d.encoding;
+    // `primitive_creation_edges_and_points` gives the POINTS primitive no `indices`.
+    Ok(
+        if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
+            None
+        } else if enc.without_buffer_views {
+            // The add-on's `gather_accessor` cache shares index accessors by content under Draco
+            // too (WP 7.2, verified on 5.2.4: two meshes with the same triangles share one
+            // view-less index accessor). Keyed apart from the accessors with a view (`u32::MAX`
+            // is never an index).
+            // The key is the gathered indices (`encoding.gathered_indices`): the stand-ins
+            // of an encoded count carry only the count and the component type, and their
+            // largest index is the gathered one (the encoded vertex count can be smaller).
+            let mut key = enc
+                .gathered_indices
+                .clone()
+                .unwrap_or_else(|| d.indices.clone());
+            key.push(u32::MAX);
+            Some(match g.index_accessors.get(&key) {
+                Some(i) => *i,
+                None => {
+                    let i = g.buf.push_indices_without_view(&d.indices);
+                    g.index_accessors.insert(key, i);
+                    i
+                }
+            })
+        } else {
+            Some(match g.index_accessors.get(&d.indices) {
+                Some(i) => *i,
+                None => {
+                    if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
+                        return Err(ExportError::Invalid(format!(
+                            "index {bad} out of range ({n} vertices)"
+                        )));
+                    }
+                    let i = g.buf.push_indices(&d.indices);
+                    g.index_accessors.insert(d.indices.clone(), i);
+                    i
+                }
+            })
+        },
+    )
 }
 
 #[cfg(test)]
@@ -855,13 +923,17 @@ mod tests {
 
         #[test]
         fn viewport_depsgraph_evaluates_hidden_geometry_dependencies() {
-            // A hidden Boolean operand is evaluated (its geometry is read), unless the Boolean
-            // is disabled in the viewport or its owner is not evaluated either.
+            // A hidden Boolean operand is evaluated, the Boolean enabled in the viewport or not
+            // (`modifier_walk` follows every modifier's IDs), unless its owner is not
+            // evaluated either.
             assert_eq!(
                 in_depsgraph(&scene_with_hidden_operand(true)),
                 ["Cube", "Op"]
             );
-            assert_eq!(in_depsgraph(&scene_with_hidden_operand(false)), ["Cube"]);
+            assert_eq!(
+                in_depsgraph(&scene_with_hidden_operand(false)),
+                ["Cube", "Op"]
+            );
             let mut s = scene_with_hidden_operand(true);
             set_object_hidden(&mut s, "Cube");
             assert!(in_depsgraph(&s).is_empty());
@@ -873,6 +945,15 @@ mod tests {
             if let ModifierSettings::Boolean(b) = &mut o.modifiers[0].settings {
                 b.operand_type = "COLLECTION".into();
                 b.collection = Some(coll.any());
+            }
+            assert_eq!(in_depsgraph(&s), ["Cube", "Op"]);
+            // The object pointer of a COLLECTION Boolean (and the reverse) still pulls its
+            // object in: `foreach_ID_link` walks both.
+            let mut s = scene_with_hidden_operand(true);
+            let cube = s.ob("Cube");
+            let o = s.main.objects.get_mut(cube, &mut s.log).unwrap();
+            if let ModifierSettings::Boolean(b) = &mut o.modifiers[0].settings {
+                b.operand_type = "COLLECTION".into();
             }
             assert_eq!(in_depsgraph(&s), ["Cube", "Op"]);
         }

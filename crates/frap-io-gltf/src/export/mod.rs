@@ -49,6 +49,8 @@ pub mod skins;
 pub mod spec_complete;
 /// The `texCoord` of a texture reference (moved out of `images.rs` by M7 W0; WP 7.7).
 pub mod tex_coord;
+/// `export_unused_textures` / `export_unused_images` (WP 8.12).
+pub mod unused;
 /// `KHR_materials_variants` export (WP 7.5; M7 W0 stub).
 pub mod variants;
 pub mod vtree;
@@ -113,6 +115,8 @@ pub fn export(
     pointer::gather(&mut g)?;
     // `traverse_unused_skins`: after the animations.
     skins::write_unused_skins(&mut g)?;
+    // `traverse_additional_textures` and `traverse_additional_images` (WP 8.12).
+    unused::finish(&mut g)?;
     // M7 W0 hooks: the root variant list (WP 7.5), then `manage_gpu_instancing_nodes`
     // (WP 7.5), which the add-on runs after gathering everything.
     variants::finish(&mut g)?;

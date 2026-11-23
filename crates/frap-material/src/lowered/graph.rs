@@ -16,10 +16,10 @@
 //! - the texture reference of an Image Texture: image, colour space, sampler (`sampler.rs`),
 //!   texture transform (`texture_transform.rs`) and UV source (`uv_source.rs`).
 //!
-//! Node groups: frap's lowering sees one tree (`LowerCx` has no access to
-//! `bpy.data.node_groups`), so it does not descend into group nodes as the add-on does; a
-//! group node only provides the inputs of the "glTF Material Output" group (see
-//! [`LowerCx::gltf_output_input`]). Recorded in docs/deviations.md §2.
+//! Node groups: `lower` reads the tree with its groups inlined and the links through muted
+//! nodes bypassed when the exporter reads the inlined tree (`lowered/inline.rs`, WP 8.12); a
+//! group node of the original tree only provides the inputs of the "glTF Material Output"
+//! group (see [`LowerCx::gltf_output_input`]).
 
 use frap_nodes::{Node, Socket, SocketType, SocketValue};
 use frap_rna::{IdRef, ImageId, Report, ReportType, Value};
@@ -29,6 +29,12 @@ use crate::{ChannelSel, LowerCx, Sampler, TexRef, TexTransform, UvSource};
 
 mod fold;
 pub use fold::FoldVal;
+
+/// `find_internally_linked_input`: the input a muted node passes to output `o` (for
+/// `inline.rs`).
+pub(crate) fn fold_internal_input(cx: &LowerCx, n: &Node, o: usize) -> Option<usize> {
+    fold::internal_input(cx, n, o)
+}
 
 /// Where an input socket gets its value from.
 #[derive(Copy, Clone, Debug)]
@@ -227,8 +233,13 @@ impl<'a> LowerCx<'a> {
     /// `frap_nodes::builtin_groups::gltf_material_output::is_gltf_material_output`), so any
     /// group node with a node tree qualifies; a group node without a tree has no inputs.
     /// Muted group nodes are skipped (`get_material_nodes`).
+    ///
+    /// `None` when the exporter reads the inlined tree (WP 8.12): `InlineShaderNodes` keeps
+    /// only what reaches the Material Output, and the "glTF Material Output" group has no
+    /// output, so the inlined tree has no group node at all (verified on 5.2.4). The group's
+    /// inputs are read only from the original tree, i.e. when it has an `Occlusion` input.
     pub fn gltf_output_input(&self, name: &str) -> Option<In<'a>> {
-        if self.inline_fails() {
+        if self.uses_inline_tree() {
             return None;
         }
         self.gltf_output_input_raw(name)
@@ -915,6 +926,12 @@ impl<'a> LowerCx<'a> {
         diags: &mut Vec<Report>,
     ) -> Option<TexRef> {
         let image = self.image_of(tex)?;
+        {
+            let mut used = self.used_nodes.borrow_mut();
+            if !used.contains(&tex.name) {
+                used.push(tex.name.clone());
+            }
+        }
         let colorspace_is_data = self.images.image(image).is_some_and(|im| {
             im.colorspace_settings.is_data || im.colorspace_settings.name == "Non-Color"
         });

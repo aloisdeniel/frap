@@ -98,13 +98,31 @@ fn run(cx: &MeshExportCx, key: &SplitKey, out: &mut Vec<PrimitiveDraft>) {
             buckets.entry(mi).or_default().extend_from_slice(t);
         }
     }
-    for (mi, corners) in buckets {
-        let slot = if cx.settings.export_materials == ExportMaterials::None {
+    let slot_of = |mi: u32| {
+        if cx.settings.export_materials == ExportMaterials::None {
             NO_MATERIAL_SLOT
         } else {
             mi as usize
-        };
-        out.push(primitive(cx, key, slot, &corners));
+        }
+    };
+    if cx.settings.props.export_shared_accessors.value {
+        // `primitive_creation_shared` (WP 8.12): the dots of every corner deduplicated
+        // together (`fast_structured_np_unique(self.dots, return_inverse=True)`), each
+        // primitive indexing that one vertex set. Every draft carries the whole set; the mesh
+        // gatherer writes its accessors once.
+        let all: Vec<u32> = (0..cx.mesh.corners_num() as u32).collect();
+        let shared = primitive(cx, key, 0, &all);
+        for (mi, corners) in buckets {
+            let mut d = shared.clone();
+            d.material_slot = slot_of(mi);
+            d.indices = corners.iter().map(|&c| shared.indices[c as usize]).collect();
+            d.shared_vertices = true;
+            out.push(d);
+        }
+        return;
+    }
+    for (mi, corners) in buckets {
+        out.push(primitive(cx, key, slot_of(mi), &corners));
     }
 }
 

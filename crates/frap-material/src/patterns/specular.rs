@@ -15,7 +15,8 @@
 //!   Color output names the channel) and behind `Specular Tint` (copied whole).
 //!
 //! The add-on also writes `specularColorFactor: [1, 1, 1]` for a linked tint whose constant
-//! factor is exactly white (a list compared with a tuple); frap omits it like any default.
+//! factor is exactly white (a list compared with a tuple): `MaterialExts::specular_color_set`
+//! tells the exporter (WP 8.12).
 //!
 //! Raising ports `specular()` (`imp/pbrMetallicRoughness.py`): `Specular IOR Level` = half the
 //! factor through `scalar_factor_and_texture` ("Specular", Alpha), then
@@ -61,6 +62,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         Some(f) => c.map(|x| (f64::from(x) * f) as f32),
         None => c,
     };
+    out.ext.specular_color_set = false;
     let color = match cx.src_at(p, ti) {
         src if konst_rgb(cx, src).is_some() => Channel {
             factor: scale(konst_rgb(cx, src).unwrap_or([1.0; 3])),
@@ -68,6 +70,13 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         },
         src => Channel {
             factor: match (factor_rgb(cx, src), over) {
+                // `get_factor_from_socket` returns a list: `[1, 1, 1] != (1.0, 1.0, 1.0)`, so
+                // the add-on writes the found factor whatever its value (WP 8.12); scaled by
+                // `fac` it becomes a tuple again.
+                (Some(c), None) => {
+                    out.ext.specular_color_set = true;
+                    c
+                }
                 (Some(c), _) => scale(c),
                 (None, Some(f)) => [f as f32; 3],
                 (None, None) => [1.0; 3],
@@ -144,3 +153,36 @@ static LAYOUT_COLOR: crate::build::LayoutBlock = crate::build::LayoutBlock {
             .is_some_and(|s| s.color.texture.is_some())
     },
 };
+
+
+#[cfg(test)]
+mod tests {
+    use frap_nodes::SocketValue;
+
+    use crate::graph::testkit::*;
+
+    /// WP 8.12: a Specular Tint linked through a Multiply with white has the factor
+    /// `[1, 1, 1]`, which the add-on writes (`specular_color_set`); an unlinked white tint is
+    /// the default, not written.
+    #[test]
+    fn a_found_white_tint_factor_is_kept() {
+        let mut images = Images::default();
+        let img = images.add("tint", false);
+        let mut m = mat("Tint");
+        let t = image_node(&mut m, img);
+        let mix = add(&mut m, "ShaderNodeMix");
+        set_enum(&mut m, mix, "data_type", "RGBA");
+        set_enum(&mut m, mix, "blend_type", "MULTIPLY");
+        set_in(&mut m, mix, "Factor", float(1.0));
+        set_in(&mut m, mix, "A", SocketValue::Color([1.0; 4]));
+        link(&mut m, (t, "Color"), (mix, "B"));
+        link(&mut m, (mix, "Result"), (BSDF, "Specular Tint"));
+        let lm = lower_m(&m, &images);
+        let s = lm.ext.specular.as_ref().unwrap();
+        assert_eq!(s.color.factor, [1.0; 3]);
+        assert!(s.color.texture.is_some());
+        assert!(lm.ext.specular_color_set);
+        let m = mat("Unlinked");
+        assert!(!lower_m(&m, &images).ext.specular_color_set);
+    }
+}

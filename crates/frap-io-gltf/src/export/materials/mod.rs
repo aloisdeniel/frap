@@ -268,6 +268,7 @@ fn gather_as(
                 .entry(r)
                 .or_insert_with(|| lower::lowered_for(main, mat, settings))
                 .clone();
+            crate::export::unused::material_gathered(g, r, &lm);
             crate::export::tex_coord::resolve_attributes(&mut lm, mat, mesh, settings);
             if settings.export_image_format == crate::export::settings::ExportImageFormat::None {
                 image_none_factors(main, mat, settings, &mut lm);
@@ -348,7 +349,14 @@ fn build(
         m.double_sided = Some(false);
     }
     core_normal::apply(g, r, lm, mesh, &mut m)?;
-    let orm = core_occlusion::orm_inputs(g, lm);
+    // `__gather_orm_texture`'s double check (WP 8.12): an ORM image that cannot be written
+    // gives separate occlusion and metallic-roughness textures.
+    let mut orm = core_occlusion::orm_inputs(g, lm);
+    if let Some(o) = &orm
+        && !crate::export::images::texture_writable(g, o)?
+    {
+        orm = None;
+    }
     core_occlusion::apply(g, r, lm, orm.as_deref(), mesh, &mut m)?;
     core_pbr::apply(g, r, lm, orm.as_deref(), mesh, &mut m)?;
     Ok(m)
