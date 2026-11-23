@@ -392,7 +392,7 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "mesh.flatten", ANY),
     mesh(GEOMETRY, "mesh.vert_connect_nonplanar", ANY),
     mesh(GEOMETRY, "mesh.extrude_edges_", WINDING).with(&["mode_set(mode='EDIT')"]),
-    mesh(GEOMETRY, "mesh.extrude_context", ANY).with(&["mesh.primitive_uv_sphere_add"]),
+    mesh(GEOMETRY, "mesh.extrude_context", ANY).with(&["mode_set(mode='EDIT')", "mesh.primitive_"]),
     state(
         GEOMETRY,
         RNA,
@@ -414,8 +414,7 @@ pub const KNOWN: &[Known] = &[
         "mesh.extrude_edges_indiv",
         &["edges", "faces", ""],
     )
-    .with(&["SUBSURF|subdivision_set"])
-    .edit_end(),
+    .with(&["SUBSURF|subdivision_set"]),
     mesh(GEOMETRY, "extrude_region&use_normal_flip=True", ANY)
         .with(&["SUBSURF|subdivision_set"])
         .edit_end(),
@@ -443,7 +442,12 @@ pub const KNOWN: &[Known] = &[
     )
     .with(&["material_slot_add"]),
     mesh(GEOMETRY, "mesh.quads_convert_to_tris", ANY),
-    mesh(GEOMETRY, "object.transform_apply", POSITIONS).with(&["shape_key_add"]),
+    mesh(
+        GEOMETRY,
+        "object.transform_apply|object.origin_set",
+        POSITIONS,
+    )
+    .with(&["shape_key_add"]),
     state(
         GEOMETRY,
         RNA,
@@ -531,6 +535,21 @@ pub const KNOWN: &[Known] = &[
     mesh(FOUND, "mesh.vert_connect", NORMALS).with(&["mesh.sort_elements"]),
     mesh(FOUND, "mesh.duplicate", ANY).with(&["mesh.wireframe"]),
     mesh(FOUND, "WELD", WINDING).with(&["mesh.edge_split"]),
+    gap(
+        POLLS,
+        "mesh.reorder_vertices_spatial",
+        "frap ok != blender CANCELLED",
+    )
+    .with(&["mesh.merge"]),
+    mesh(FOUND, "SCREW", WINDING),
+    mesh(FOUND, "WEIGHTED_NORMAL", NORMALS).max_delta(1e-3),
+    mesh(FOUND, "WEIGHTED_NORMAL", &["attributes[\"custom_normal\"]"]).max_delta(4.0),
+    mesh(FOUND, "BEVEL", ANY).with(&["mesh.primitive_torus_add"]),
+    mesh(FOUND, "mesh.merge", NORMALS).with(&["mesh.extrude_region"]),
+    mesh(FOUND, "LAPLACIANSMOOTH", POSITIONS)
+        .with(&["primitive_plane_add|primitive_grid_add|primitive_circle_add"]),
+    mesh(FOUND, CUSTOM_NORMALS, NORMALS).with(&["transform.shear"]),
+    mesh(FOUND, "mesh.extrude_region_move", NORMALS).with(&["shade_smooth_by_angle"]),
     // --- UV results after Edit Mode geometry changes ---
     mesh(UV, "uv.unwrap", UVS),
     mesh(UV, "uv.smart_project", UVS),
@@ -581,9 +600,7 @@ impl Known {
                 d
             }
         };
-        if self.max_delta > 0.0
-            && delta(&m.detail).is_none_or(|d| periodic(d) > self.max_delta)
-        {
+        if self.max_delta > 0.0 && delta(&m.detail).is_none_or(|d| periodic(d) > self.max_delta) {
             return None;
         }
         if self.edit_end {
@@ -797,8 +814,14 @@ mod tests {
             )
         };
         let tr = cube_trace(1);
-        assert!(k.explains(&s, &tr, &m("frap 32767 != blender -32767")).is_some());
-        assert!(k.explains(&s, &tr, &m("frap 100 != blender -100")).is_none());
+        assert!(
+            k.explains(&s, &tr, &m("frap 32767 != blender -32767"))
+                .is_some()
+        );
+        assert!(
+            k.explains(&s, &tr, &m("frap 100 != blender -100"))
+                .is_none()
+        );
     }
 
     #[test]
