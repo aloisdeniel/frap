@@ -36,6 +36,7 @@ fn kd_balance(nodes: &mut [KdNode], axis: usize, ofs: usize) -> u32 {
     let (mut left, mut right) = (0usize, n - 1);
     let median = n / 2;
     while right > left {
+        frap_math::budget::check_n((right - left).min(u32::MAX as usize) as u32);
         let co = nodes[right].co[axis];
         let mut i = left.wrapping_sub(1);
         let mut j = right;
@@ -110,6 +111,7 @@ impl SpatialTable {
         let mut min_node: Option<usize> = None;
         let mut stack: Vec<u32> = vec![self.root];
         while let Some(ni) = stack.pop() {
+            frap_math::budget::check();
             let node = &self.nodes[ni as usize];
             let mut test = |min_dist: &mut f32| {
                 let q = node.co;
@@ -166,6 +168,7 @@ pub(crate) fn topology_table(verts: usize, edges: &[[usize; 2]]) -> Vec<Option<u
     let mut tot_unique_edges_prev: i64 = -1;
     let mut topo_pass: u32 = 1;
     loop {
+        frap_math::budget::check_n(edges.len().min(u32::MAX as usize) as u32);
         let mut tot_unique_edges: i64 = 0;
         for e in edges {
             let (i1, i2) = (e[0], e[1]);

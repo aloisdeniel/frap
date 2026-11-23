@@ -312,6 +312,7 @@ pub fn run_both(repo: &Repo, props: &Props, blender: &Path, statements: &[String
         (Ok(f), Ok(b)) => {
             let mismatches = runner::compare(&case, &f.state, &b);
             trace.outcomes = outcomes(statements.len(), &f.state.lines, &mismatches);
+            trace.degenerate = degenerate_of(&b);
             RunResult {
                 mismatches,
                 blender_failure: None,
@@ -319,6 +320,23 @@ pub fn run_both(repo: &Repo, props: &Props, blender: &Path, statements: &[String
             }
         }
     }
+}
+
+/// [`known::Degenerate`] of every dumped mesh of Blender's result, by mismatch path prefix.
+fn degenerate_of(b: &crate::state::GoldenState) -> BTreeMap<String, known::Degenerate> {
+    let meshes = b
+        .meshes
+        .iter()
+        .map(|(n, m)| (format!("meshes[\"{n}\"]"), m));
+    let evaluated = b
+        .evaluated
+        .iter()
+        .map(|(n, m)| (format!("evaluated[\"{n}\"]"), m));
+    meshes
+        .chain(evaluated)
+        .map(|(k, m)| (k, known::Degenerate::of(m)))
+        .filter(|(_, d)| !d.faces.is_empty())
+        .collect()
 }
 
 /// Each statement's [`Outcome`]: [`Outcome::Differs`] where the `lines` comparator found a

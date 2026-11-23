@@ -49,7 +49,7 @@ pub(crate) fn mesh_view(main: &Main, edit: &EditState, mesh: IdRef<MeshId>) -> A
         .get_arc(mesh)
         .expect("invariant: mesh_view of an existing mesh");
     match edit.meshes.get(&mesh.key()) {
-        Some(em) => view_of(em, &original),
+        Some(em) => view_of(main, em, &original),
         None => original,
     }
 }
@@ -58,15 +58,15 @@ pub(crate) fn mesh_view(main: &Main, edit: &EditState, mesh: IdRef<MeshId>) -> A
 /// is keyed by `bm_gen` (`OpCtx::bmesh_mut` resets it); the non-geometry part (name,
 /// materials, active layers, …) comes from the current original mesh, so a non-geometry write
 /// made in Edit Mode shows at once.
-fn view_of(em: &EditMesh, original: &Arc<Mesh>) -> Arc<Mesh> {
+fn view_of(main: &Main, em: &EditMesh, original: &Arc<Mesh>) -> Arc<Mesh> {
     let (generation, cached) = em
         .view
         .cell
-        .get_or_init(|| (em.bm_gen, Arc::new(convert(&em.bm, original))));
+        .get_or_init(|| (em.bm_gen, Arc::new(convert(main, &em.bm, original))));
     if *generation != em.bm_gen {
         // A BMesh changed without resetting its view (cannot happen through `bmesh_mut`):
         // never serve stale geometry.
-        return Arc::new(convert(&em.bm, original));
+        return Arc::new(convert(main, &em.bm, original));
     }
     if cached.header.generation == original.header.generation
         && cached.header.name == original.header.name
@@ -79,10 +79,39 @@ fn view_of(em: &EditMesh, original: &Arc<Mesh>) -> Arc<Mesh> {
 }
 
 /// `BM_mesh_bm_to_me` for a read (`calc_object_remap` off, as `update_from_editmode`).
-fn convert(bm: &BMesh, original: &Mesh) -> Mesh {
+fn convert(main: &Main, bm: &BMesh, original: &Mesh) -> Mesh {
     let mut m = bm.to_mesh(original, &ToMeshParams::default());
     graft_non_geometry(&mut m, original);
+    if let Some(positions) = reference_key_positions(main, bm, original) {
+        *m.positions_mut() = positions;
+    }
     m
+}
+
+// Ported from blender/source/blender/bmesh/intern/bmesh_mesh_convert.cc (bm_to_mesh_shape:
+// "the mesh keeps the reference key's coordinates when another block is edited").
+/// The positions `BM_mesh_bm_to_me` writes when the BMesh edits a key block other than the
+/// reference key (`actkey != key->refkey`): the reference key's layer for the vertices that
+/// existed on entering Edit Mode, the edited coordinates for the others. `None` when the
+/// positions are the BMesh's own (no key, the basis edited, no key index layer).
+fn reference_key_positions(main: &Main, bm: &BMesh, original: &Mesh) -> Option<Vec<[f32; 3]>> {
+    let key = original.shape_keys.and_then(|k| main.shape_keys.get(k))?;
+    let act = usize::try_from(bm.shapenr).ok()?.checked_sub(1)?;
+    if act == 0 || act >= key.key_blocks.len() {
+        return None;
+    }
+    let keyindex = bm.shape_keyindex.as_ref()?;
+    let refkey = &key.key_blocks[0];
+    let layer = bm.shape_layers.iter().find(|l| l.uid == refkey.uid)?;
+    Some(
+        bm.vert_ids()
+            .into_iter()
+            .map(|v| match keyindex.get(v.slot()) {
+                Some(&k) if k != frap_bmesh::ORIGINDEX_NONE => layer.co[v.slot()],
+                _ => bm.vert(v).co,
+            })
+            .collect(),
+    )
 }
 
 /// Copies what `BMesh::to_mesh` takes from its template (everything but geometry and

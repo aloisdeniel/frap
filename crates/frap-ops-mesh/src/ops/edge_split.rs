@@ -21,11 +21,18 @@ use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh::{self, edge_split::Type};
 
+use super::rip::core::ClnorKeep;
 use super::split::edbm;
 
 /// `edbm_edge_split_selected_verts`, after the selection check (`Err` is the bmesh
 /// operator's error, reported by the caller).
 fn split_selected_verts(bm: &mut BMesh) -> Result<(), BmError> {
+    // `BM_custom_loop_normals_to_vector_layer`: with custom normals, `BM_lnorspace_update`
+    // rebuilds the corner spaces when they are dirty, which leaves `BM_ELEM_TAG` on every
+    // vertex of a smooth fan. `split_edges` does not clear vertex tags, so those vertices
+    // are split too where a tagged edge reaches them (Blender 5.2.4: the smooth cube with
+    // custom normals after `extrude_faces_indiv` gives 96 vertices, 80 without them).
+    let normals = ClnorKeep::to_vector_layer(bm);
     // Flush from vertices to edges; store the selection in loop tags.
     let mut tagged_edges: Vec<EdgeId> = Vec::new();
     for e in bm.edge_ids() {
@@ -78,6 +85,9 @@ fn split_selected_verts(bm: &mut BMesh) -> Result<(), BmError> {
             }
         }
     }
+    // `BM_custom_loop_normals_from_vector_layer(bm, false)`: the corners keep their slots
+    // (separating a vertex moves loops, it does not make new ones).
+    normals.restore(bm);
     bm.select_flush();
     Ok(())
 }

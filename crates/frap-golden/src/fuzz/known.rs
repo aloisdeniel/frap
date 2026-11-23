@@ -25,7 +25,7 @@
 //!   statement at or after the cause acted on (and of `context`).
 //!
 //! A pattern is a statement substring; `a|b` matches either, `a&b` needs both in the one
-//! statement. A `with` or state `cause` pattern starting with `~` also accepts a statement
+//! statement, `a&!b` needs `a` without `b`. A `with` or state `cause` pattern starting with `~` also accepts a statement
 //! that failed (or was CANCELLED) the same way in both tools: some operators change state
 //! before they cancel.
 //!
@@ -65,6 +65,90 @@ pub struct Trace {
     /// The mesh of each mesh object at the end (an evaluated object is acted on through its
     /// mesh too: a linked duplicate edited, a tool on another user of the mesh).
     pub object_mesh: BTreeMap<String, String>,
+    /// Per compared mesh of Blender's result (`meshes["Cube"]`, `evaluated["Cube"]`): the
+    /// corners and faces whose normals float rounding decides ([`Degenerate::of`]).
+    pub degenerate: BTreeMap<String, Degenerate>,
+}
+
+/// The corners and faces of a mesh (Blender's indices) whose normals float rounding decides:
+/// the faces whose area is zero up to rounding (a wall `extrude_faces_indiv` or
+/// `offset_edge_loops` leaves, a quad twisted onto its own plane: its Newell normal is the
+/// sum of terms that cancel exactly), their corners, and the smooth corners around them (a
+/// vertex normal sums the faces' normals). §2 "Differential fuzzing (WP 8.7), causal triage".
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Degenerate {
+    /// Face indices.
+    pub faces: BTreeSet<usize>,
+    /// Corner indices.
+    pub corners: BTreeSet<usize>,
+}
+
+impl Degenerate {
+    /// Twice the area below this fraction of the face's squared longest edge is zero.
+    pub const REL_AREA: f64 = 1e-5;
+
+    /// From a dumped mesh.
+    pub fn of(m: &crate::state::GMesh) -> Degenerate {
+        let p = |i: u32| m.positions.get(i as usize).map(|c| c.map(f64::from));
+        let mut d = Degenerate::default();
+        let mut verts: BTreeSet<u32> = BTreeSet::new();
+        for (fi, f) in m.faces.iter().enumerate() {
+            let pts: Option<Vec<[f64; 3]>> = f.iter().map(|&v| p(v)).collect();
+            let Some(pts) = pts else {
+                continue;
+            };
+            let (mut n, mut longest) = ([0.0f64; 3], 0.0f64);
+            for k in 0..pts.len() {
+                let (a, b) = (pts[k], pts[(k + 1) % pts.len()]);
+                n[0] += (a[1] - b[1]) * (a[2] + b[2]);
+                n[1] += (a[2] - b[2]) * (a[0] + b[0]);
+                n[2] += (a[0] - b[0]) * (a[1] + b[1]);
+                let e = (0..3).map(|c| (a[c] - b[c]).powi(2)).sum::<f64>();
+                longest = longest.max(e);
+            }
+            let area2 = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
+            if area2 <= Self::REL_AREA * longest {
+                d.faces.insert(fi);
+                verts.extend(f.iter().copied());
+            }
+        }
+        if d.faces.is_empty() {
+            return d;
+        }
+        let sharp = m
+            .attributes
+            .get("sharp_face")
+            .and_then(|a| a.get("data"))
+            .and_then(|v| v.as_array());
+        let mut corner = 0usize;
+        for (fi, f) in m.faces.iter().enumerate() {
+            let smooth = !sharp
+                .and_then(|a| a.get(fi))
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false);
+            for &v in f {
+                if d.faces.contains(&fi) || (smooth && verts.contains(&v)) {
+                    d.corners.insert(corner);
+                }
+                corner += 1;
+            }
+        }
+        d
+    }
+
+    /// Whether `field` (`corner_normals[12]`, `face_normals[3]`) is one of these.
+    fn covers(&self, field: &str) -> bool {
+        let index = |prefix: &str| -> Option<usize> {
+            field.strip_prefix(prefix)?.strip_suffix(']')?.parse().ok()
+        };
+        if let Some(c) = index("corner_normals[") {
+            return self.corners.contains(&c);
+        }
+        if let Some(f) = index("face_normals[") {
+            return self.faces.contains(&f);
+        }
+        false
+    }
 }
 
 impl Trace {
@@ -144,12 +228,15 @@ fn target(path: &str) -> Option<(Target, &str)> {
     None
 }
 
-/// Whether `pattern` (`a|b`, `a&b`, a leading `~` ignored) matches `statement`.
+/// Whether `pattern` (`a|b`, `a&b`, `a&!b`: `a` without `b`, a leading `~` ignored) matches
+/// `statement`.
 fn pattern_matches(pattern: &str, statement: &str) -> bool {
-    pattern
-        .trim_start_matches('~')
-        .split('|')
-        .any(|alt| alt.split('&').all(|p| statement.contains(p)))
+    pattern.trim_start_matches('~').split('|').any(|alt| {
+        alt.split('&').all(|p| match p.strip_prefix('!') {
+            Some(not) => !statement.contains(not),
+            None => statement.contains(p),
+        })
+    })
 }
 
 /// The largest difference between the two numbers or number lists of a `frap [..] !=
@@ -199,6 +286,8 @@ pub struct Known {
     pub cascade: bool,
     /// A further condition on the cause statement (its arguments), `None`: none.
     pub when: Option<fn(&str) -> bool>,
+    /// State mismatches: only normals of [`Degenerate`] corners and faces of Blender's result.
+    pub degenerate: bool,
 }
 
 impl PartialEq for Known {
@@ -217,6 +306,7 @@ impl PartialEq for Known {
             self.edit_end,
             self.cascade,
             self.when.is_some(),
+            self.degenerate,
         ) == (
             o.deviation,
             o.comparator,
@@ -229,6 +319,7 @@ impl PartialEq for Known {
             o.edit_end,
             o.cascade,
             o.when.is_some(),
+            o.degenerate,
         )
     }
 }
@@ -249,6 +340,7 @@ const BASE: Known = Known {
     edit_end: false,
     cascade: false,
     when: None,
+    degenerate: false,
 };
 
 /// A `lines` difference at `cause` whose outcome text contains `detail`.
@@ -315,6 +407,12 @@ impl Known {
     const fn fails_with(self, fails_with: &'static str) -> Known {
         Known { fails_with, ..self }
     }
+    const fn degenerate(self) -> Known {
+        Known {
+            degenerate: true,
+            ..self
+        }
+    }
     const fn when(self, when: fn(&str) -> bool) -> Known {
         Known {
             when: Some(when),
@@ -330,9 +428,12 @@ impl Known {
 
 const D_74: &str = "D-74";
 const D_111: &str = "D-111";
+const D_168: &str = "D-168";
 const POLL: &str = "poll() failed";
 const INCORRECT: &str = "context is incorrect";
 const TORUS: &str = "§2 `mesh.primitive_torus_add` while a mesh is in Edit Mode";
+const SPHERE_SLOTS: &str =
+    "§2 `mesh.primitive_uv_sphere_add` / `primitive_ico_sphere_add` in Edit Mode after elements";
 const QSORT: &str = "§2 Ties in the C library `qsort` outside `uv.smart_project`";
 const SNAP: &str =
     "§2 Differential fuzzing (WP 8.7), unimplemented modes: `view3d.snap_cursor_to_selected`";
@@ -394,6 +495,35 @@ fn shear_frame_is_singular(statement: &str) -> bool {
     }
 }
 
+/// Operators that leave zero-area faces (walls of an extrusion that has not moved yet,
+/// offset loops on top of their source).
+const ZERO_AREA_MAKERS: &str = "mesh.extrude_faces_indiv|mesh.extrude_region(|mesh.extrude_context(\
+     |mesh.extrude_edges_indiv|mesh.extrude_verts_indiv|mesh.offset_edge_loops(";
+
+/// A zero-thickness inset without depth (the default `thickness=0.0`): zero-area rims.
+const ZERO_THICKNESS_INSET: &str =
+    "mesh.inset(&!thickness=&!depth=|mesh.inset(&thickness=0.0,&!depth=|mesh.inset(&thickness=0.0)";
+
+/// `mesh.inset` with a non-zero `depth`.
+fn inset_has_depth(statement: &str) -> bool {
+    statement
+        .split("depth=")
+        .nth(1)
+        .and_then(|r| r.split([',', ')']).next())
+        .and_then(|v| v.trim().parse::<f64>().ok())
+        .is_some_and(|v| v != 0.0)
+}
+
+/// `mesh.subdivide` with a non-zero `fractal`.
+fn subdivide_is_fractal(statement: &str) -> bool {
+    statement
+        .split("fractal=")
+        .nth(1)
+        .and_then(|r| r.split([',', ')']).next())
+        .and_then(|v| v.trim().parse::<f64>().ok())
+        .is_some_and(|v| v != 0.0)
+}
+
 /// Operators that change the topology (and so interpolate corner data).
 const TOPOLOGY: &str = "mesh.dissolve_|mesh.unsubdivide|mesh.merge(|mesh.remove_doubles\
      |mesh.edge_split|mesh.delete|mesh.quads_convert_to_tris|mesh.tris_convert_to_quads\
@@ -445,7 +575,7 @@ pub const KNOWN: &[Known] = &[
     mesh(POLLS, "uv.hide", &["selection", "active", "select_history"]),
     gap(POLLS, "bpy.ops.transform.", "CANCELLED").with(&["uv.hide"]),
     gap(POLLS, "object.modifier_apply", "disabled"),
-    gap(POLLS, "object.vertex_group_copy", "no vertex groups").with(&["object.modifier_apply"]),
+    gap(POLLS, "object.vertex_group_", "no vertex groups").with(&["object.modifier_apply"]),
     line(POLLS, "object.vertex_group_normalize(", "CANCELLED"),
     line(POLLS, "object.align", "UnboundLocalError"),
     state(POLLS, RNA, "uv.lightmap_pack", &["mode", "select_mode"])
@@ -513,13 +643,6 @@ pub const KNOWN: &[Known] = &[
         POSITIONS,
     )
     .with(&["shape_key_add"]),
-    state(
-        GEOMETRY,
-        RNA,
-        "view3d.snap_selected_to_cursor",
-        OBJECT_TRANSFORM,
-    )
-    .with(&["object.parent_set&keep_transform=True"]),
     // Corner normals within about 1e-3.
     mesh(GEOMETRY, "use_proportional_edit=True", NORMALS).max_delta(2e-3),
     mesh(GEOMETRY, "mesh.spin&use_normal_flip=True", NORMALS).max_delta(2e-3),
@@ -566,6 +689,18 @@ pub const KNOWN: &[Known] = &[
     ),
     mesh(FOUND, "transform.shear", ANY).when(shear_frame_is_singular),
     mesh(FOUND, "mesh.tris_convert_to_quads", ANY).with(&["TRIFAN"]),
+    // Join errors that tie up to float rounding on the symmetric triangles of an ico sphere,
+    // a poked torus or a fan.
+    mesh(FOUND, "mesh.tris_convert_to_quads", ANY)
+        .with(&["primitive_ico_sphere_add|primitive_torus_add|mesh.poke"]),
+    // Spheres added in Edit Mode after a deletion: other element order (§2), so order-dependent
+    // tools that follow differ.
+    mesh(
+        SPHERE_SLOTS,
+        "mesh.primitive_ico_sphere_add|mesh.primitive_uv_sphere_add",
+        ANY,
+    )
+    .with(&["~mesh.delete|mesh.dissolve_|mesh.merge(|mesh.remove_doubles"]),
     state(FOUND, RNA, "bpy.ops.transform.rotate", &["rotation"])
         .with(&["object.transforms_to_deltas"]),
     mesh(FOUND, "use_boundary_tear=True", ANY),
@@ -574,7 +709,19 @@ pub const KNOWN: &[Known] = &[
     gap(D_111, "bpy.ops.uv.", "frap CANCELLED != blender ok").with(&["bpy.ops.uv.select"]),
     // A UV selection operator after `uv.select_split` (which may leave Blender's UV
     // selection partly independent of the mesh selection even when it cancels).
-    mesh(D_111, "bpy.ops.uv.select", ANY).with(&["~uv.select_split"]),
+    mesh(D_111, "bpy.ops.uv.", ANY).with(&["~uv.select_split"]),
+    gap(D_111, "bpy.ops.uv.", "frap ok != blender CANCELLED").with(&["~uv.select_split"]),
+    // `uv.select_linked` / `uv.select_pinned` leave Blender's UV selection partly independent
+    // of the mesh selection; a later UV operator, or `uv.select_all(action='INVERT')`, then
+    // starts from another selection.
+    gap(D_111, "bpy.ops.uv.", "frap ok != blender CANCELLED")
+        .with(&["uv.select_linked|uv.select_pinned"]),
+    mesh(
+        D_111,
+        "uv.select_all&INVERT",
+        &["selection", "active", "select_history"],
+    )
+    .with(&["uv.select_linked|uv.select_pinned"]),
     mesh(FOUND, "BEVEL", &["corner_normals", "face_normals"]).max_delta(1e-3),
     mesh(FOUND, "mesh.bevel&affect='VERTICES'", UVS),
     mesh(
@@ -633,10 +780,35 @@ pub const KNOWN: &[Known] = &[
     mesh(FOUND, "WEIGHTED_NORMAL", &["attributes[\"custom_normal\"]"]).max_delta(4.0),
     mesh(FOUND, "BEVEL", ANY).with(&["mesh.primitive_torus_add"]),
     mesh(FOUND, "mesh.merge", NORMALS).with(&["mesh.extrude_region"]),
+    // CAST normalises each vertex's direction from the centre: SUBSURF's T2 positions of a
+    // vertex at the centre (about 1e-8 from it) point it elsewhere.
+    mesh(FOUND, "CAST", POSITIONS).with(&["SUBSURF|subdivision_set"]),
     mesh(FOUND, "LAPLACIANSMOOTH", POSITIONS)
         .with(&["primitive_plane_add|primitive_grid_add|primitive_circle_add"]),
     mesh(FOUND, CUSTOM_NORMALS, NORMALS).with(&["transform.shear"]),
     mesh(FOUND, "mesh.extrude_region_move", NORMALS).with(&["shade_smooth_by_angle"]),
+    // Zero-area faces: their normals (and the smooth corners around them) are decided by
+    // float rounding, whichever operator made or last moved them.
+    mesh(FOUND, "~bpy.ops.", &["corner_normals", "face_normals"]).degenerate(),
+    // `subdivide(fractal=…)` displaces the new vertices along vertex normals, which zero-area
+    // walls (extruded but not moved) feed.
+    mesh(FOUND, "mesh.subdivide", POSITIONS)
+        .when(subdivide_is_fractal)
+        .with(&[ZERO_AREA_MAKERS]),
+    // `inset(depth=…)` moves the inset along vertex normals: positions differ when the mesh
+    // has zero-area faces (a zero-thickness inset before, the default `thickness=0.0`, leaves
+    // zero-area rims).
+    mesh(FOUND, "mesh.inset", POSITIONS)
+        .when(inset_has_depth)
+        .with(&[ZERO_THICKNESS_INSET]),
+    // `BM_mesh_region_match` reads an uninitialised UID for vertices inside n-gons of five or
+    // more sides (D-168).
+    mesh(
+        D_168,
+        "mesh.select_similar_region",
+        &["selection", "active", "select_history"],
+    )
+    .with(&["mesh.symmetrize|mesh.bisect|mesh.dissolve_|fill_type='NGON'|end_fill_type='NGON'"]),
     // --- UV results after Edit Mode geometry changes ---
     mesh(UV, "uv.unwrap", UVS),
     mesh(UV, "uv.smart_project", UVS),
@@ -694,6 +866,15 @@ impl Known {
                 _ => false,
             };
             if !in_edit {
+                return None;
+            }
+        }
+        if self.degenerate {
+            let key = m.path.split(']').next().map(|k| format!("{k}]"));
+            let covered = key
+                .and_then(|k| trace.degenerate.get(&k))
+                .is_some_and(|d| d.covers(field));
+            if !covered {
                 return None;
             }
         }
@@ -854,7 +1035,93 @@ mod tests {
             objects: vec![one("Cube"); n],
             edit_end: BTreeSet::new(),
             object_mesh: BTreeMap::new(),
+            degenerate: BTreeMap::new(),
         }
+    }
+
+    /// M8 stabilization round 1: normals of zero-area faces (and the smooth corners around
+    /// them) are explained, other corners of the same mesh are not.
+    #[test]
+    fn zero_area_faces_explain_their_normals_only() {
+        let mut m = crate::state::GMesh {
+            positions: Vec::new(),
+            edges: Vec::new(),
+            faces: Vec::new(),
+            corner_normals: Vec::new(),
+            face_normals: None,
+            uv_layers: BTreeMap::new(),
+            attributes: BTreeMap::new(),
+            selection: serde_json::Value::Null,
+            active: serde_json::Value::Null,
+            select_history: serde_json::Value::Null,
+        };
+        // Face 0: a unit quad (z = 0); face 1: a twisted quad within z = 1 (zero area); face
+        // 2: a flat quad sharing no vertex with face 1.
+        m.positions = vec![
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [1.0, 1.0, 1.0],
+            [-1.0, 1.0, 1.0],
+            [1.0, -1.0, 1.0],
+            [-1.0, -1.0, 1.0],
+            [5.0, 0.0, 0.0],
+            [6.0, 0.0, 0.0],
+            [6.0, 1.0, 0.0],
+            [5.0, 1.0, 0.0],
+        ];
+        m.faces = vec![vec![0, 1, 2, 3], vec![4, 5, 6, 7], vec![8, 9, 10, 11]];
+        let d = Degenerate::of(&m);
+        assert_eq!(d.faces, BTreeSet::from([1]));
+        assert_eq!(d.corners, BTreeSet::from([4, 5, 6, 7]));
+        let statements = st(&["bpy.ops.object.mode_set(mode='EDIT')"]);
+        let mut trace = cube_trace(1);
+        trace.degenerate.insert("meshes[\"Cube\"]".into(), d);
+        let mm = |path: &str| {
+            Mismatch::new(
+                MESH,
+                path,
+                "frap [0.0, 0.0, -1.0] != blender [0.0, 0.0, 1.0]",
+            )
+        };
+        let r = explain_all(
+            &statements,
+            &trace,
+            &[
+                mm("meshes[\"Cube\"].corner_normals[5]"),
+                mm("meshes[\"Cube\"].face_normals[1]"),
+            ],
+        );
+        assert!(r.iter().all(|k| k.is_some_and(|k| k.degenerate)), "{r:?}");
+        let r = explain_all(
+            &statements,
+            &trace,
+            &[mm("meshes[\"Cube\"].corner_normals[9]")],
+        );
+        assert_eq!(r, vec![None]);
+        assert!(subdivide_is_fractal(
+            "bpy.ops.mesh.subdivide(number_cuts=1, fractal=0.45, seed=23)"
+        ));
+        assert!(!subdivide_is_fractal("bpy.ops.mesh.subdivide(fractal=0.0)"));
+        assert!(!subdivide_is_fractal(
+            "bpy.ops.mesh.subdivide(number_cuts=2)"
+        ));
+        assert!(pattern_matches(
+            ZERO_THICKNESS_INSET,
+            "bpy.ops.mesh.inset(use_boundary=True)"
+        ));
+        assert!(!pattern_matches(
+            ZERO_THICKNESS_INSET,
+            "bpy.ops.mesh.inset(depth=-0.25)"
+        ));
+        assert!(!pattern_matches(
+            ZERO_THICKNESS_INSET,
+            "bpy.ops.mesh.inset(thickness=0.1)"
+        ));
+        assert!(inset_has_depth(
+            "bpy.ops.mesh.inset(depth=-0.25, use_outset=True)"
+        ));
     }
 
     fn line_of(i: usize) -> String {

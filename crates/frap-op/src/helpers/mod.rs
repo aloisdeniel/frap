@@ -227,15 +227,50 @@ fn order_log(cx: &mut OpCtx, ob: IdAny, data: IdAny) {
 pub fn add_primitive_or_merge(
     cx: &mut OpCtx,
     name: &str,
-    mut mesh: Mesh,
+    mesh: Mesh,
     at: Placement,
     enter_editmode: bool,
 ) -> Result<IdRef<ObjectId>, OpError> {
-    if let Some((edit_ob, ob)) = poll::edit_object(&cx.ctx())
-        && ob.object_type() == "MESH"
-    {
+    add_primitive_impl(cx, name, mesh, at, enter_editmode, false)
+}
+
+/// The mesh object in Edit Mode that a new primitive merges into, if any: the object whose
+/// world matrix `ED_object_new_primitive_matrix` reads (the caller builds the geometry with
+/// it, then calls [`add_primitive_or_merge_edit_space`]).
+pub fn primitive_edit_object(cx: &OpCtx) -> Option<IdRef<ObjectId>> {
+    poll::edit_object(&cx.ctx())
+        .filter(|(_, ob)| ob.object_type() == "MESH")
+        .map(|(r, _)| r)
+}
+
+/// [`add_primitive_or_merge`] for a `mesh` whose creation matrix was taken with the edit
+/// object's world matrix when [`primitive_edit_object`] is `Some` (Blender's
+/// `ED_object_new_primitive_matrix(C, obedit, …)`): it is merged without a further transform.
+pub fn add_primitive_or_merge_edit_space(
+    cx: &mut OpCtx,
+    name: &str,
+    mesh: Mesh,
+    at: Placement,
+    enter_editmode: bool,
+) -> Result<IdRef<ObjectId>, OpError> {
+    add_primitive_impl(cx, name, mesh, at, enter_editmode, true)
+}
+
+fn add_primitive_impl(
+    cx: &mut OpCtx,
+    name: &str,
+    mut mesh: Mesh,
+    at: Placement,
+    enter_editmode: bool,
+    edit_space: bool,
+) -> Result<IdRef<ObjectId>, OpError> {
+    if let Some(edit_ob) = primitive_edit_object(cx) {
         // Blender merges the new geometry into the edit mesh (WP 2.2, `edit_merge.rs`).
-        return edit_merge::merge_into_edit_mesh(cx, edit_ob, mesh, at);
+        return if edit_space {
+            edit_merge::merge_into_edit_mesh_local(cx, edit_ob, mesh)
+        } else {
+            edit_merge::merge_into_edit_mesh(cx, edit_ob, mesh, at)
+        };
     }
     exit_edit_mode(cx)?;
     let (main, log) = cx.main_mut();

@@ -15,15 +15,17 @@
 //! `BLI_string_flip_side_name` (blenlib/intern/string_utils.cc) and
 //! `BKE_object_defgroup_flip_map` / `BKE_defvert_flip(_merged)` (blenkernel/intern/deform.cc).
 //!
-//! Not ported: custom split normals of the copy (`custom_normal` keeps the source's encoded
-//! values; frap has no corner-space encoder yet): a WARNING says so when the mesh has them.
+//! Custom split normals: the corner normals of the doubled mesh (custom normals applied) are
+//! computed, those of the first half transformed by the normal matrix into the mirrored
+//! corners and encoded in their spaces (M8 stabilization round 1).
 
 use frap_bmesh::{BMesh, ElemFlag, FromMeshParams, ToMeshParams};
 use frap_mesh::{AttrData, Attribute, Domain, Mesh};
-use frap_rna::{IdAny, IdRef, ObjectId, Report, ReportType};
+use frap_rna::{IdAny, IdRef, ObjectId};
 use frap_scene::generated::modifier_settings::MirrorSettings;
 use smallvec::SmallVec;
 
+use super::normal_edit::custom_normals as cn;
 use super::weld::merge::mesh_merge_verts;
 use super::weld::util::{
     self, CORNER_EDGE, CORNER_VERT, Carry, DomainMaps, M4, Topology, invert_m4, len_sq,
@@ -65,19 +67,6 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
         }
         None => None,
     };
-    if mesh
-        .attributes()
-        .get(frap_mesh::CUSTOM_NORMAL)
-        .is_some_and(|a| a.domain == Domain::Corner)
-    {
-        cx.report(Report::new(
-            ReportType::Warning,
-            format!(
-                "Modifier '{}': custom normals of the mirrored half are not mirrored by frap",
-                md.name
-            ),
-        ));
-    }
     let mut result = mesh;
     for axis in 0..3 {
         if s.use_axis[axis] {
@@ -303,6 +292,9 @@ fn mirror_on_axis(
         }
     }
 
+    // Custom normals: mirror the first half's corner normals into the second half.
+    mirror_custom_normals(&mut result, &mtx, src_faces_num);
+
     // Vertex groups.
     if s.use_mirror_vertex_groups && result.deform_verts().is_some() {
         let flip_map = defgroup_flip_map(&result.vertex_group_names);
@@ -335,6 +327,73 @@ fn mirror_on_axis(
 }
 
 /// Copies the STRING corner attributes of `src` to both halves without the face flip.
+// Ported from blender/source/blender/blenkernel/intern/mesh_mirror.cc
+// (BKE_mesh_mirror_apply_mirror_on_axis_for_modifier, "handle custom normals").
+/// The `custom_normal` values of the mirrored corners: the first half's corner normals (custom
+/// normals applied), transformed by the transpose of the inverse of `mtx`, encoded in the
+/// spaces of the doubled mesh.
+fn mirror_custom_normals(result: &mut Mesh, mtx: &M4, src_faces_num: usize) {
+    let Some(clnors) = (match result.attributes().get(frap_mesh::CUSTOM_NORMAL) {
+        Some(Attribute {
+            domain: Domain::Corner,
+            data: AttrData::Int16x2(v),
+            ..
+        }) => Some(v.to_vec()),
+        _ => None,
+    }) else {
+        return;
+    };
+    if result.faces_num() == 0 {
+        return;
+    }
+    let mut clnors = clnors;
+    // The transform matrix of a normal: the transpose of the inverse.
+    let inv = invert_m4(mtx);
+    let mut mtx_nor = unit_m4();
+    for (i, row) in mtx_nor.iter_mut().enumerate() {
+        for (j, x) in row.iter_mut().enumerate() {
+            *x = inv[j][i];
+        }
+    }
+    let (fnor, _, map) = cn::true_normals(result);
+    let sharp_faces = cn::sharp_faces(result);
+    let sharp_edges = cn::sharp_edges_for_write(result);
+    let view = cn::MeshView {
+        positions: result.positions(),
+        face_offsets: result.face_offsets(),
+        corner_verts: result.corner_verts(),
+        corner_edges: result.corner_edges(),
+        vert_to_face: &map,
+        face_normals: &fnor,
+        sharp_faces: sharp_faces.as_deref(),
+    };
+    let (mut corner_normals, spaces) =
+        cn::calc_corners_with_spaces(&view, sharp_edges.as_deref(), Some(&clnors));
+    let offsets = result.face_offsets();
+    // Mirroring has to account for loops being reversed in faces in the second half.
+    for i in 0..src_faces_num {
+        let (st, en) = (offsets[i] as usize, offsets[i + 1] as usize);
+        let mirror_i = src_faces_num + i;
+        let (mst, men) = (offsets[mirror_i] as usize, offsets[mirror_i + 1] as usize);
+        for j in st..en {
+            let mut mirrorj = mst;
+            if j > st {
+                mirrorj += (men - mst) - (j - st);
+            }
+            corner_normals[mirrorj] = mul_m4_v3(&mtx_nor, corner_normals[j]);
+            let space = spaces.corner_space[mirrorj];
+            if let Some(sp) = spaces.spaces.get(space) {
+                clnors[mirrorj] = cn::custom_normal_to_data(sp, corner_normals[mirrorj]);
+            }
+        }
+    }
+    result.attributes_mut().insert(Attribute {
+        name: frap_mesh::CUSTOM_NORMAL.into(),
+        domain: Domain::Corner,
+        data: AttrData::Int16x2(std::sync::Arc::new(clnors)),
+    });
+}
+
 fn unflip_string_corners(src: &Mesh, result: &mut Mesh) {
     let names: Vec<(smol_str::SmolStr, AttrData)> = src
         .attributes()

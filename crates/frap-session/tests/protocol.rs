@@ -1089,6 +1089,34 @@ fn collection_methods() {
     );
     assert_eq!(val(&mut s, "bpy.data.objects.find('Cube')"), json!(1));
     assert_eq!(val(&mut s, "bpy.data.objects.find('Nope')"), json!(-1));
+    // Node sockets: `find` answers the first socket of that name, enabled or not (Blender
+    // 5.2.4: a Mix node in RGBA mode gives 2 for 'A', the disabled float socket), while
+    // `inputs['A']` is the first enabled one.
+    for src in [
+        "bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeMix')",
+        "bpy.data.materials['Material'].node_tree.nodes['Mix'].data_type = 'RGBA'",
+    ] {
+        assert_eq!(one(&mut s, src)["ok"], true, "{src}");
+    }
+    for (key, idx) in [("A", 2), ("B", 3), ("Factor", 0), ("Nope", -1)] {
+        assert_eq!(
+            val(
+                &mut s,
+                &format!(
+                    "bpy.data.materials['Material'].node_tree.nodes['Mix'].inputs.find('{key}')"
+                )
+            ),
+            json!(idx),
+            "{key}"
+        );
+    }
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.materials['Material'].node_tree.nodes['Mix'].outputs.find('Result')"
+        ),
+        json!(0)
+    );
     assert_eq!(
         val(&mut s, "bpy.data.objects.keys()"),
         json!(["Camera", "Cube", "Light"])

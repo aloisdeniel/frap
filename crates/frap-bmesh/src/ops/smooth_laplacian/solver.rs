@@ -117,6 +117,7 @@ impl LeastSquares {
         // `MtM = Mᵀ M`.
         let mut mtm: HashMap<(usize, usize), f64> = HashMap::with_capacity(n * 8);
         for row in &rows {
+            frap_math::budget::check_n(row.len().pow(2).min(u32::MAX as usize) as u32);
             for &(ci, vi) in row {
                 for &(cj, vj) in row {
                     *mtm.entry((ci, cj)).or_insert(0.0) += vi * vj;
@@ -131,9 +132,11 @@ impl LeastSquares {
         let Ok(mat) = SparseColMat::<usize, f64>::try_new_from_triplets(n, n, &trips) else {
             return false;
         };
+        frap_math::budget::check_now();
         let Ok(lu) = mat.sp_lu() else {
             return false;
         };
+        frap_math::budget::check_now();
         let mut x = [vec![0.0; n], vec![0.0; n], vec![0.0; n]];
         for (rhs, xr) in x.iter_mut().enumerate() {
             // Modify for locked variables.

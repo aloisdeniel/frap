@@ -110,7 +110,8 @@ fn run(bm: &mut BMesh, i: &PlanarFacesIn) {
     let mut order: Vec<VertId> = Vec::new();
     let mut accum: Vec<Option<([f32; 3], i32)>> = vec![None; bm.verts.capacity()];
     for _ in 0..i.iterations.max(0) {
-        frap_math::budget::check();
+        // An iteration walks every face: count it as that much work.
+        frap_math::budget::check_n(i.faces.len().min(u32::MAX as usize) as u32);
         let mut changed = false;
         for (k, &f) in i.faces.iter().enumerate() {
             if !face_adjust[f.slot()] {

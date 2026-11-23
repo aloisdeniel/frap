@@ -543,6 +543,12 @@ impl Session {
         &self.opts
     }
 
+    /// Replaces the resource limits for the statements that follow (`frap serve` workers and
+    /// tests that build a large scene before timing one statement).
+    pub fn set_limits(&mut self, limits: Limits) {
+        self.opts.limits = limits;
+    }
+
     /// Read-only access to `bpy.data` (tests, schema export).
     pub fn main(&self) -> &Main {
         &self.host.state.main

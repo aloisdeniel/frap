@@ -109,10 +109,33 @@ pub fn selected_to_location(
             Vec3::ZERO
         };
         let mut moves = Vec::new();
-        for ob in c.selected_editable_objects() {
+        let objects = c.selected_editable_objects();
+        for &ob in &objects {
             let Some(o) = c.main.objects.get(ob) else {
                 continue;
             };
+            // With offset enabled, skip child objects whose parents are also transformed to
+            // avoid double transform (`BKE_object_flag_test_recursive(ob->parent, OB_DONE)`).
+            // Ported from blender/source/blender/editors/space_view3d/view3d_snap.cc.
+            if use_offset {
+                let mut p = o.parent;
+                let mut guard = 0usize;
+                let mut skip = false;
+                while let Some(pid) = p {
+                    if objects.contains(&pid) {
+                        skip = true;
+                        break;
+                    }
+                    guard += 1;
+                    if guard > 1 << 16 {
+                        break;
+                    }
+                    p = c.main.objects.get(pid).and_then(|po| po.parent);
+                }
+                if skip {
+                    continue;
+                }
+            }
             let world = worlds.get(ob);
             let wloc = world.w_axis.truncate();
             let mut dest = if use_offset {

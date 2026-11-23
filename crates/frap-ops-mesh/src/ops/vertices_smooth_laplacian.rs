@@ -51,6 +51,8 @@ fn exec(cx: &mut OpCtx, p: mesh::VerticesSmoothLaplacian) -> OpResult {
         }
         tot_selected += 1;
         for _ in 0..repeat {
+            // Each repeat is a sparse LU of the whole selection: read the clock every time.
+            frap_math::budget::check_now();
             let bm = cx.bmesh_mut(me)?;
             let verts = edbm::selected_verts(bm);
             let r = smooth_laplacian_vert(

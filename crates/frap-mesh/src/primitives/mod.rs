@@ -55,15 +55,16 @@ pub fn scale_matrix(scale: [f32; 3]) -> Matrix4 {
 /// Euler XYZ (radians) → 3×3, `eul_to_mat3` (`blender/source/blender/blenlib/intern/
 /// math_rotation_c.cc`), as `m[col][row]`.
 fn eul_to_mat3(eul: [f32; 3]) -> [[f32; 3]; 3] {
+    // `cos(eul[0])` of a `float` argument is C++'s `cos(float)` overload: `cosf`, widened.
     let (ci, cj, ch) = (
-        libm::cos(eul[0] as f64),
-        libm::cos(eul[1] as f64),
-        libm::cos(eul[2] as f64),
+        f64::from(libm::cosf(eul[0])),
+        f64::from(libm::cosf(eul[1])),
+        f64::from(libm::cosf(eul[2])),
     );
     let (si, sj, sh) = (
-        libm::sin(eul[0] as f64),
-        libm::sin(eul[1] as f64),
-        libm::sin(eul[2] as f64),
+        f64::from(libm::sinf(eul[0])),
+        f64::from(libm::sinf(eul[1])),
+        f64::from(libm::sinf(eul[2])),
     );
     let (cc, cs) = (ci * ch, ci * sh);
     let (sc, ss) = (si * ch, si * sh);
@@ -115,10 +116,12 @@ fn invert_m3(m: &[[f32; 3]; 3]) -> [[f32; 3]; 3] {
     if det == 0.0 {
         return [[0.0; 3]; 3];
     }
+    // `det = 1.0f / det; inverse[a][b] *= det`.
+    let inv = 1.0 / det;
     let mut r = adj;
     for row in r.iter_mut() {
         for x in row.iter_mut() {
-            *x /= det;
+            *x *= inv;
         }
     }
     r

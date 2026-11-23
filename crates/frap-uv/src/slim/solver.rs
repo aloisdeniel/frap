@@ -483,11 +483,14 @@ pub(crate) fn slim_solve(data: &mut SlimData, iter_num: i32) -> Result<(), SlimF
         data.energy = data.compute_energy(&v_o, Some(&mut sing)) / data.mesh_area;
     }
     for _ in 0..iter_num.max(0) {
-        frap_math::budget::check();
+        // Each iteration is a sparse factorization plus a line search over the whole chart:
+        // read the clock every time (`check` would read it only every 1024 iterations).
+        frap_math::budget::check_now();
         let cur = data.v_o.clone();
         // Solve the weighted proxy.
         data.update_weights_and_closest_rotations(&cur);
         let dest = data.solve_weighted_arap()?;
+        frap_math::budget::check_now();
 
         // `flip_avoiding_line_search`.
         let d: Vec<[f64; 2]> = dest
@@ -513,6 +516,7 @@ pub(crate) fn slim_solve(data: &mut SlimData, iter_num: i32) -> Result<(), SlimF
                 .zip(&d)
                 .map(|(p, dd)| [p[0] + step * dd[0], p[1] + step * dd[1]])
                 .collect();
+            frap_math::budget::check_n(data.f.len().min(u32::MAX as usize) as u32);
             let e = data.compute_energy(&new_x, if pins { Some(&mut sing) } else { None });
             if e >= old_energy {
                 step /= 2.0;

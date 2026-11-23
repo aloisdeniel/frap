@@ -60,7 +60,8 @@ fn exec(cx: &mut OpCtx, p: uv::MinimizeStretch) -> OpResult {
         h.pm.stretch_blend(blend);
     }
     for _ in 0..p.iterations.value.max(0) {
-        // `minimize_stretch_iteration(C, op, false)`.
+        // `minimize_stretch_iteration(C, op, false)`: a pass over every selected UV vertex.
+        frap_math::budget::check_now();
         h.pm.stretch_blend(blend);
         h.pm.stretch_iter();
     }

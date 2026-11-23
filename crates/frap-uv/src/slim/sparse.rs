@@ -102,7 +102,9 @@ pub(crate) fn lu_solve(m: &Csc, rhs: &[&[f64]]) -> Option<Vec<Vec<f64>>> {
         return Some(rhs.iter().map(|_| Vec::new()).collect());
     }
     let mat = m.to_faer()?;
+    frap_math::budget::check_now();
     let lu = mat.sp_lu().ok()?;
+    frap_math::budget::check_now();
     let mut out = Vec::with_capacity(rhs.len());
     for b in rhs {
         let mut x = faer::Mat::<f64>::from_fn(n, 1, |i, _| b[i]);
@@ -132,7 +134,9 @@ pub(crate) fn llt_solve(m: &Csc, b: &[f64]) -> Option<Vec<f64>> {
         }
     }
     let mat = SparseColMat::<usize, f64>::try_new_from_triplets(n, n, &trips).ok()?;
+    frap_math::budget::check_now();
     let llt = mat.sp_cholesky(Side::Lower).ok()?;
+    frap_math::budget::check_now();
     let mut x = faer::Mat::<f64>::from_fn(n, 1, |i, _| b[i]);
     llt.solve_in_place(x.as_mut());
     Some((0..n).map(|i| x[(i, 0)]).collect())

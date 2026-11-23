@@ -445,14 +445,24 @@ mod tests {
     }
 
     /// The list against `RNA_def_property_flag(prop, PROP_PROPORTIONAL…)` in Blender's
-    /// `makesrna` (`FRAP_BLENDER_SRC`, else the shared checkout; skipped when absent).
+    /// `makesrna` (`FRAP_BLENDER_SRC`, else the shared checkout; skipped when absent or
+    /// incomplete: the macOS tmp cleaner can empty part of a checkout under `/private/tmp`).
     #[test]
     fn proportional_list_matches_makesrna() {
         let root = std::env::var("FRAP_BLENDER_SRC")
             .unwrap_or_else(|_| "/private/tmp/claude-501/blender-src".into());
         let dir = std::path::Path::new(&root).join("source/blender/makesrna/intern");
-        let Ok(entries) = std::fs::read_dir(&dir) else {
-            eprintln!("skipped: no Blender source at {}", dir.display());
+        // Every file the list draws from must be there, not only the directory.
+        let complete = [
+            "rna_object.cc",
+            "rna_pose.cc",
+            "rna_armature.cc",
+            "rna_mesh.cc",
+        ]
+        .iter()
+        .all(|f| dir.join(f).is_file());
+        let (true, Ok(entries)) = (complete, std::fs::read_dir(&dir)) else {
+            eprintln!("skipped: no complete Blender source at {}", dir.display());
             return;
         };
         let quoted_after = |text: &str, needle: &str| -> Option<String> {

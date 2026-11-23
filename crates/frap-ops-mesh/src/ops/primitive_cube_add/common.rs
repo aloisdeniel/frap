@@ -16,6 +16,7 @@ use frap_op::helpers::{self, Align};
 use frap_op::prelude::*;
 use frap_rna::Prop;
 use frap_scene::id::Object;
+use frap_scene::id::transform::world_matrix_in;
 
 /// `frap_note`s of every C primitive operator (`--describe`).
 pub(crate) const NOTES: [&str; 4] = [
@@ -143,8 +144,14 @@ pub(crate) fn prim_aligned(
     } else {
         helpers::placement(cx, location, rotation, align, scale)?
     };
+    // `ED_object_new_primitive_matrix(C, obedit, …)`: `obedit` is the mesh in Edit Mode the
+    // geometry merges into, else the new object.
+    let obmat = match helpers::primitive_edit_object(cx) {
+        Some(edit_ob) => world_matrix_in(cx.main(), edit_ob).to_cols_array_2d(),
+        None => object_matrix(&at),
+    };
     let matrix = creation_matrix(
-        &object_matrix(&at),
+        &obmat,
         at.location,
         at.rotation,
         uses_scale.then_some(at.scale),
@@ -172,7 +179,7 @@ pub(crate) fn finish(
     at: Placement,
     enter_editmode: bool,
 ) -> OpResult {
-    let ob = helpers::add_primitive_or_merge(cx, name, mesh, at, enter_editmode)?;
+    let ob = helpers::add_primitive_or_merge_edit_space(cx, name, mesh, at, enter_editmode)?;
     cx.result("object", ob);
     Ok(OpStatus::Finished)
 }

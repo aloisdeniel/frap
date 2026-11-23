@@ -219,6 +219,9 @@ NORMALISE = {
     "D-163": ("cases", "Blender runs anim.channels_bake in a #@blender Graph Editor temp_override and update_tag()s the baked actions before evaluating them"),
     "D-164": ("cases", "cases create the NLA tracks before nla.actionclip_add"),
     "D-165": ("cases", "op_data_transfer raises transfer errors only from calls that transfer nothing"),
+    "D-166": ("comparator", "glTF goldens compare PNG images by their decoded pixels; cases do not compare packed_file.size"),
+    "D-167": ("cases", "gltf/m8/shared_accessors_draco only exports meshes Blender encodes without reading past its buffers"),
+    "D-168": ("cases", "select_similar_region cases avoid regions next to n-gons of five or more sides"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

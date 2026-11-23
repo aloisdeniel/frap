@@ -36,16 +36,17 @@
 //! part's mesh copy gets a copy of the key (`Key.001`) whose blocks take the part's layers
 //! (`bm_to_mesh_shape` without an active block: the edits of the active block made since
 //! entering Edit Mode stay in the vertex positions, as in Blender). In Object Mode the key of
-//! the remaining mesh is rewritten the same way. Custom split normals are not carried
-//! (deviations §2).
+//! the remaining mesh is rewritten the same way. Custom split normals travel as vectors
+//! (`BM_custom_loop_normals_to_vector_layer` / `from_vector_layer`): each part re-encodes them
+//! in its own corner spaces (M8 stabilization round 1).
 
 use std::collections::BTreeMap;
 
 use frap_bmesh::ops::delete::{DeleteIn, delete};
 use frap_bmesh::ops::duplicate;
 use frap_bmesh::{
-    BMElem, BMesh, CdLayer, CreateFlag, EdgeId, ElemFlag, FaceId, FromMeshParams, ToMeshParams,
-    VertId,
+    BMElem, BMesh, CdLayer, CreateFlag, EdgeId, ElemFlag, FaceId, FromMeshParams, LoopId,
+    ToMeshParams, VertId,
 };
 use frap_mesh::Mesh;
 use frap_op::operator;
@@ -55,6 +56,7 @@ use frap_scene::id::{Collection, SlotLink, SlotOverride, layers};
 use frap_scene::{BaseFlag, ChangeLog, Main, ObjectMode};
 use frap_spec_ops_mesh::mesh::{self, separate::Type};
 
+use super::rip::core::ClnorKeep;
 use super::split::edbm;
 
 // ---------------------------------------------------------------- copying into a new BMesh
@@ -64,7 +66,13 @@ use super::split::edbm;
 /// path of `duplicate` do: positions, normals, flags (selection and UV selection cleared),
 /// materials and every custom-data layer, vertex groups and shape keys. The new BMesh has
 /// no selection history and no active face.
-fn copy_to_new(src: &BMesh, verts: &[VertId], edges: &[EdgeId], faces: &[FaceId]) -> BMesh {
+/// Also answers the copied corners as `(source loop, new loop)` pairs.
+fn copy_to_new(
+    src: &BMesh,
+    verts: &[VertId],
+    edges: &[EdgeId],
+    faces: &[FaceId],
+) -> (BMesh, Vec<(LoopId, LoopId)>) {
     let mut dst = BMesh::new();
     let mut vmap: BTreeMap<VertId, VertId> = BTreeMap::new();
     for &v in verts {
@@ -83,6 +91,7 @@ fn copy_to_new(src: &BMesh, verts: &[VertId], edges: &[EdgeId], faces: &[FaceId]
         emap.insert(e, n);
     }
     let mut lslots: Vec<usize> = Vec::new();
+    let mut lpairs: Vec<(LoopId, LoopId)> = Vec::new();
     for &f in faces {
         let loops = src.face_loops(f);
         let vtar: Vec<VertId> = loops.iter().map(|&l| vmap[&src.lp(l).v]).collect();
@@ -101,6 +110,7 @@ fn copy_to_new(src: &BMesh, verts: &[VertId], edges: &[EdgeId], faces: &[FaceId]
             let lf = src.lp(*ls).flag - keep;
             dst.lp_mut(ld).flag = lf;
             lslots.push(ls.slot());
+            lpairs.push((*ls, ld));
         }
     }
     // The new pools are dense in creation order: gather every column in that order.
@@ -146,7 +156,7 @@ fn copy_to_new(src: &BMesh, verts: &[VertId], edges: &[EdgeId], faces: &[FaceId]
             .collect()
     });
     dst.select_mode = src.select_mode;
-    dst
+    (dst, lpairs)
 }
 
 /// The creation order of `bmesh.ops.duplicate(geom=tagged, dest=bm_new)`: tagged vertices in
@@ -549,10 +559,16 @@ fn separate_tagged(
     src_ob: IdRef<ObjectId>,
     src_me: IdRef<MeshId>,
     bm: &mut BMesh,
+    normals: &ClnorKeep,
 ) -> Result<IdRef<ObjectId>, OpError> {
     let (vs, es, fs) = dupe_order(bm);
-    let mut part = copy_to_new(bm, &vs, &es, &fs);
-    part.normals_update();
+    let (mut part, lpairs) = copy_to_new(bm, &vs, &es, &fs);
+    if normals.is_some() {
+        // `BM_custom_loop_normals_from_vector_layer(bm_new, false)`.
+        normals.to_new(&lpairs).restore(&mut part);
+    } else {
+        part.normals_update();
+    }
     // The `duplicate` call on the old mesh is a top-level operator.
     bm.bmesh_edit_end(duplicate::TYPE_FLAG);
     let mut geom: Vec<BMElem> = Vec::new();
@@ -591,6 +607,7 @@ fn separate_selected(
     src_me: IdRef<MeshId>,
     bm: &mut BMesh,
 ) -> Result<bool, OpError> {
+    let normals = ClnorKeep::to_vector_layer(bm);
     clear_tags(bm);
     for v in bm.vert_ids() {
         let f = bm.vert(v).flag;
@@ -610,7 +627,8 @@ fn separate_selected(
             bm.face_mut(x).flag.insert(ElemFlag::TAG);
         }
     }
-    separate_tagged(cx, src_ob, src_me, bm)?;
+    separate_tagged(cx, src_ob, src_me, bm, &normals)?;
+    normals.restore(bm);
     Ok(true)
 }
 
@@ -622,6 +640,7 @@ fn separate_material(
     bm: &mut BMesh,
 ) -> Result<bool, OpError> {
     let mut result = false;
+    let normals = ClnorKeep::to_vector_layer(bm);
     while let Some(f_cmp) = bm.face_ids().first().copied() {
         frap_math::budget::check();
         let mat_nr = bm.face(f_cmp).mat_nr;
@@ -648,11 +667,12 @@ fn separate_material(
             break;
         }
         // Move the selection into a separate object.
-        let ob_new = separate_tagged(cx, src_ob, src_me, bm)?;
+        let ob_new = separate_tagged(cx, src_ob, src_me, bm, &normals)?;
         let (main, log) = cx.main_mut();
         assign_mat_nr(main, log, ob_new, mat_nr);
         result = true;
     }
+    normals.restore(bm);
     Ok(result)
 }
 
@@ -667,9 +687,14 @@ fn separate_loose(
     if groups.len() <= 1 {
         return Ok(false);
     }
+    let normals = ClnorKeep::to_vector_layer(bm);
     // Separate out all groups except the first.
     for (verts, edges, faces) in groups.into_iter().skip(1) {
-        let part = copy_to_new(bm, &verts, &edges, &faces);
+        let (mut part, lpairs) = copy_to_new(bm, &verts, &edges, &faces);
+        if normals.is_some() {
+            // `BM_custom_loop_normals_from_vector_layer(bm_new, false)`.
+            normals.to_new(&lpairs).restore(&mut part);
+        }
         for &v in &verts {
             if bm.verts.contains(v.0) {
                 bm.vert_kill(v);

@@ -17,10 +17,14 @@
 //!    vertex mode (`EDBM_selectmode_flush_ex(em, SCE_SELECT_VERTEX)`), so exactly the new
 //!    vertices, edges and faces end up selected.
 //!
-//! The geometry comes from frap's generators (`frap_mesh::primitives`), built for an object at
-//! the placement (`creation_matrix(object_matrix(at), …)`); it is moved into the edit object's
-//! space with `inverse(edit object world) · object_matrix(at)`, the same transform up to float
-//! rounding (exact when neither matrix rotates).
+//! The geometry comes from frap's generators (`frap_mesh::primitives`). The mesh primitive
+//! operators build it with the creation matrix of the **edit object**
+//! (`creation_matrix(edit object world, …)`, Blender's `ED_object_new_primitive_matrix(C,
+//! obedit, …)`) and merge it as it is ([`merge_into_edit_mesh_local`]): the positions are
+//! Blender's bit for bit, also in a rotated or scaled edit object (M8 stabilization round 1).
+//! [`merge_into_edit_mesh`] takes a mesh built for an object at the placement
+//! (`creation_matrix(object_matrix(at), …)`) and moves it into the edit object's space with
+//! `inverse(edit object world) · object_matrix(at)`, the same transform up to float rounding.
 //!
 //! **Pool slots.** Blender runs the `create_*` builder inside the edit BMesh, so its
 //! allocations pop the edit BMesh's freed slots first (LIFO), in the builder's creation order.
@@ -67,6 +71,28 @@ pub fn merge_into_edit_mesh(
     mesh: Mesh,
     at: Placement,
 ) -> Result<IdRef<ObjectId>, OpError> {
+    let to_edit = edit_space(cx, edit_ob, &at);
+    merge_transformed(cx, edit_ob, mesh, to_edit)
+}
+
+/// [`merge_into_edit_mesh`] of a mesh already built in the edit object's space: with
+/// `ED_object_new_primitive_matrix(C, obedit, …)` of the **edit object** (M8 stabilization
+/// round 1), the matrix Blender's `create_*` call applies, so the positions are Blender's bit
+/// for bit also when the edit object is rotated or scaled.
+pub fn merge_into_edit_mesh_local(
+    cx: &mut OpCtx,
+    edit_ob: IdRef<ObjectId>,
+    mesh: Mesh,
+) -> Result<IdRef<ObjectId>, OpError> {
+    merge_transformed(cx, edit_ob, mesh, Mat4::IDENTITY)
+}
+
+fn merge_transformed(
+    cx: &mut OpCtx,
+    edit_ob: IdRef<ObjectId>,
+    mesh: Mesh,
+    to_edit: Mat4,
+) -> Result<IdRef<ObjectId>, OpError> {
     let me = cx
         .main()
         .objects
@@ -78,7 +104,6 @@ pub fn merge_into_edit_mesh(
     let build = frap_mesh::primitives::trace::take_last()
         .filter(|b| b.counts == (mesh.verts_num(), mesh.edges_num(), mesh.faces_num()))
         .unwrap_or_default();
-    let to_edit = edit_space(cx, edit_ob, &at);
     // The generators add a UV map exactly when `calc_uvs` is on.
     let prim_uvs = mesh.uv_maps().first().map(|(_, uv)| uv.to_vec());
     let uv_active = cx.main().meshes.get(me).and_then(|m| m.uv_active.clone());

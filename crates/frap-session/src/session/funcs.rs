@@ -717,11 +717,20 @@ impl Session {
                         )));
                     }
                 };
-                let (named, found) =
-                    with_coll(host, &c.ptr, c.prop, &mut |v| Ok((v.named(), v.find(&key))))?;
                 if which == CollFunc::Find {
+                    // `pyrna_prop_collection_find`: the first item whose name property equals
+                    // the key, enabled or not (Mix `data_type='RGBA'`: `inputs.find('A')` is the
+                    // disabled `A_Float`, index 2, where `inputs['A']` is `A_Color`). ID
+                    // collections that name no items through `key_of` are searched by `find`.
+                    let found = with_coll(host, &c.ptr, c.prop, &mut |v| {
+                        let first =
+                            (0..v.len()).find(|&i| v.key_of(i).is_some_and(|k| k.as_str() == key));
+                        Ok(first.or_else(|| v.find(&key)))
+                    })?;
                     return Ok(Py::Int(found.map_or(-1, |i| i as i64)));
                 }
+                let (named, found) =
+                    with_coll(host, &c.ptr, c.prop, &mut |v| Ok((v.named(), v.find(&key))))?;
                 if !named {
                     return Err(type_err(format!(
                         "bpy_prop_collection.get: {} does not support string lookups",

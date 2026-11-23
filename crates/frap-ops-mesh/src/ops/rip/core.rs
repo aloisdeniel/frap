@@ -413,6 +413,24 @@ impl ClnorKeep {
         }
         ClnorKeep { vecs: Some(vecs) }
     }
+    /// Whether the mesh had custom normals (Blender: `bm->lnor_spacearr != nullptr` after
+    /// `BM_custom_loop_normals_to_vector_layer`).
+    pub(crate) fn is_some(&self) -> bool {
+        self.vecs.is_some()
+    }
+    /// The vector layer of a new BMesh whose loops copy these (`(old, new)` pairs): what
+    /// `BM_mesh_copy_init_customdata_all_layers` and the element copies carry into `bm_new`.
+    pub(crate) fn to_new(&self, pairs: &[(LoopId, LoopId)]) -> ClnorKeep {
+        let Some(v) = &self.vecs else {
+            return ClnorKeep::default();
+        };
+        let len = pairs.iter().map(|(_, n)| n.slot() + 1).max().unwrap_or(0);
+        let mut out = vec![None; len];
+        for (o, n) in pairs {
+            out[n.slot()] = v.get(o.slot()).copied().flatten();
+        }
+        ClnorKeep { vecs: Some(out) }
+    }
     /// `BM_elem_attrs_copy` of the `CD_NORMAL` layer.
     fn copy(&mut self, src: LoopId, dst: LoopId) {
         if let Some(v) = &mut self.vecs {

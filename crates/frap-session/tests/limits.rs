@@ -155,6 +155,46 @@ fn stmt_timeout_cancels_subsurf_evaluation() {
     }
 }
 
+/// M8 stabilization round 1: the statements whose loop bodies are whole sparse solves read
+/// the clock every iteration (`budget::check` reads it only every 1024 calls, so a SLIM run of
+/// up to 1023 iterations never checked). A 40k-vertex grid: `uv.unwrap(MINIMUM_STRETCH,
+/// iterations=1000)` (about 0.75 s per iteration in release, minutes in all) and 50
+/// `vertices_smooth_laplacian` repeats answer `TIMEOUT` shortly after a 200 ms deadline.
+#[test]
+fn stmt_timeout_cancels_slim_and_laplacian_solves() {
+    let mut s = session();
+    for src in [
+        "bpy.ops.mesh.primitive_grid_add(x_subdivisions=200, y_subdivisions=200)",
+        "bpy.ops.object.mode_set(mode='EDIT')",
+        "bpy.ops.mesh.select_all(action='SELECT')",
+    ] {
+        assert_eq!(one(&mut s, src)["status"], "FINISHED", "{src}");
+    }
+    let mut limits = s.options().limits.clone();
+    limits.stmt_timeout = Some(Duration::from_millis(200));
+    s.set_limits(limits);
+    let before = s.state_dump();
+    // Release: within about 1 s. Unoptimised test builds: the setup before the first
+    // iteration (chart building, the initial map) is slower, still far below the minutes.
+    let bound = if cfg!(debug_assertions) {
+        Duration::from_secs(15)
+    } else {
+        Duration::from_millis(1200)
+    };
+    for src in [
+        "bpy.ops.uv.unwrap(method='MINIMUM_STRETCH', iterations=1000)",
+        "bpy.ops.mesh.vertices_smooth_laplacian(repeat=50)",
+    ] {
+        let t = Instant::now();
+        let r = one(&mut s, src);
+        let took = t.elapsed();
+        assert_eq!(r["error"]["code"], "TIMEOUT", "{src}: {r}");
+        assert_eq!(r["state"], "unchanged", "{src}: {r}");
+        assert!(took < bound, "{src}: {took:?}");
+        assert_eq!(s.state_dump(), before, "{src}");
+    }
+}
+
 /// M5+M6 stabilization round 4: the glTF exporter's animation sampling (`SCENE` mode over a
 /// million frames) polls the deadline per sampled frame and in its per-frame channel loops.
 #[test]
