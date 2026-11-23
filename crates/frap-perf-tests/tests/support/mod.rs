@@ -69,7 +69,8 @@ pub fn value(s: &mut Session, src: &str) -> J {
 /// Runs one statement whose value is an integer.
 pub fn int(s: &mut Session, src: &str) -> i64 {
     let v = value(s, src);
-    v.as_i64().unwrap_or_else(|| panic!("{src}: not an int: {v}"))
+    v.as_i64()
+        .unwrap_or_else(|| panic!("{src}: not an int: {v}"))
 }
 
 /// Runs `src` as one statement, timed as a front-end sees it: execution plus the JSON

@@ -77,8 +77,6 @@ regression_factor = 1.5
 [budgets_ms]
 cold_start = 30
 "edit_op_100k.subdivide" = 200.0
-[build_budgets]
-recorded_on = "provisional"
 [recorded."ubuntu-24.04"]
 cold_start = 10.0
 "snapshot.ids.x" = 0.2
@@ -164,17 +162,24 @@ fn build_budgets_gate_only_once_recorded_on_the_ci_class() {
         Some("ubuntu-24.04"),
         "local-macos-aarch64"
     ));
-    let doc: toml::Table = "[build_budgets]\nrecorded_on = \"provisional\"\n"
-        .parse()
-        .expect("toml");
+    // `budgets --record` writes the key at the top of budgets.toml; none means provisional.
+    let doc: toml::Table =
+        "factor = 2.0\nrecorded_on = \"ubuntu-24.04\"\n[baseline_secs]\nx = 1.0\n"
+            .parse()
+            .expect("toml");
     assert_eq!(
         build_baselines_recorded_on(&doc).as_deref(),
-        Some("provisional")
+        Some("ubuntu-24.04")
     );
+    let doc: toml::Table = "factor = 2.0\n[baseline_secs]\nx = 1.0\n"
+        .parse()
+        .expect("toml");
+    assert_eq!(build_baselines_recorded_on(&doc), None);
 }
 
-/// The committed `xtask/perf.toml` parses, has every budget of §21.7, and its build-time
-/// baselines are still provisional or recorded on the CI runner class.
+/// The committed `xtask/perf.toml` parses and has every budget of §21.7; the build-time
+/// baselines of `xtask/budgets.toml` are provisional (no `recorded_on`) or recorded on a
+/// runner class.
 #[test]
 fn committed_perf_toml() {
     let text = std::fs::read_to_string(perf_toml()).expect("perf.toml");
@@ -185,10 +190,15 @@ fn committed_perf_toml() {
         ("edit_op_100k.subdivide", 200.0),
         ("edit_op_100k.extrude_region", 200.0),
         ("edit_op_100k.bevel", 200.0),
+        ("edit_op_100k_all.extrude_region", 200.0),
         ("glb_export_1m_corners", 2000.0),
     ] {
         assert_eq!(c.budgets_ms.get(name), Some(&budget), "{name}");
     }
-    let on = build_baselines_recorded_on(&doc).expect("[build_budgets] recorded_on");
-    assert!(on == "provisional" || on == CI_CLASS, "{on}");
+    assert!(doc.get("build_budgets").is_none(), "moved to budgets.toml");
+    let text = std::fs::read_to_string(budgets_toml()).expect("budgets.toml");
+    let doc: toml::Table = text.parse().expect("budgets.toml parses");
+    if let Some(on) = build_baselines_recorded_on(&doc) {
+        assert!(!on.is_empty());
+    }
 }

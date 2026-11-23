@@ -16,10 +16,12 @@
 //!   measurement over `regression_factor` × its recorded value is a warning. `--record` writes
 //!   the measurements under `[recorded."<runner class>"]`.
 //! - **Build-time budgets.** `build-budgets` runs `cargo xtask budgets`. Its baselines gate once
-//!   they were recorded on the CI runner class: `build-budgets --record` on ubuntu-24.04 runs
-//!   `budgets --record` and sets `[build_budgets] recorded_on = "ubuntu-24.04"` in
-//!   `xtask/perf.toml`; from then on an over-budget crate fails `build-budgets` there. Before
-//!   (`recorded_on = "provisional"`) and on other runner classes it is a warning.
+//!   they were recorded on the CI runner class: `cargo xtask budgets --record` writes
+//!   `recorded_on = "<runner class>"` beside `[baseline_secs]` in `xtask/budgets.toml`, so
+//!   recording on ubuntu-24.04 (`budgets --record`, or `build-budgets --record`, which refuses
+//!   other classes) makes an over-budget crate fail `build-budgets` there. Before (no
+//!   `recorded_on`: the provisional M1 Max baselines) and on other runner classes it is a
+//!   warning.
 //! - **Runner class.** `$FRAP_RUNNER_CLASS`, else `ubuntu-24.04` / `macos-15` / … on GitHub
 //!   Actions (`$ImageOS`), else `local-<os>-<arch>`.
 
@@ -329,10 +331,17 @@ fn runtime(args: &[String]) -> Result<(), String> {
     Ok(())
 }
 
-/// `[build_budgets] recorded_on` of `perf.toml`.
+/// The key of `xtask/budgets.toml` that `cargo xtask budgets --record` sets to the runner
+/// class the baselines were recorded on.
+pub const RECORDED_ON_KEY: &str = "recorded_on";
+
+fn budgets_toml() -> PathBuf {
+    crate::workspace_root().join("xtask/budgets.toml")
+}
+
+/// `recorded_on` of `budgets.toml` (`None`: provisional baselines, recorded by hand).
 pub fn build_baselines_recorded_on(doc: &toml::Table) -> Option<String> {
-    doc.get("build_budgets")
-        .and_then(|t| t.get("recorded_on"))
+    doc.get(RECORDED_ON_KEY)
         .and_then(|v| v.as_str())
         .map(str::to_owned)
 }
@@ -358,22 +367,15 @@ fn build_budgets(args: &[String]) -> Result<(), String> {
                  run the `perf` workflow with `record` (or set FRAP_RUNNER_CLASS on such a machine)"
             ));
         }
+        // `budgets --record` writes `recorded_on = "ubuntu-24.04"` beside the baselines.
         crate::budgets::run(&["--record".to_owned()])?;
-        edit_perf_toml(|doc| {
-            let t = doc
-                .entry("build_budgets")
-                .or_insert_with(|| toml::Value::Table(toml::Table::new()))
-                .as_table_mut()
-                .expect("invariant: [build_budgets] is a table");
-            t.insert("recorded_on".into(), toml::Value::String(CI_CLASS.into()));
-        })?;
         println!(
             "build-time baselines recorded on {CI_CLASS}: `perf build-budgets` gates from now on"
         );
         return Ok(());
     }
-    let text = std::fs::read_to_string(perf_toml()).map_err(|e| format!("perf.toml: {e}"))?;
-    let doc: toml::Table = text.parse().map_err(|e| format!("perf.toml: {e}"))?;
+    let text = std::fs::read_to_string(budgets_toml()).map_err(|e| format!("budgets.toml: {e}"))?;
+    let doc: toml::Table = text.parse().map_err(|e| format!("budgets.toml: {e}"))?;
     let recorded_on = build_baselines_recorded_on(&doc);
     let gate = build_budgets_gate(recorded_on.as_deref(), &class);
     match crate::budgets::run(&[]) {
@@ -384,8 +386,10 @@ fn build_budgets(args: &[String]) -> Result<(), String> {
                 "build-budgets",
                 &format!(
                     "{e} (not gating: baselines recorded on {}, runner class {class}; \
-                     `cargo xtask perf build-budgets --record` on {CI_CLASS} makes it gating)",
-                    recorded_on.as_deref().unwrap_or("nothing")
+                     `cargo xtask budgets --record` on {CI_CLASS} makes it gating)",
+                    recorded_on
+                        .as_deref()
+                        .unwrap_or("no CI runner (provisional)")
                 ),
             );
             Ok(())

@@ -58,7 +58,9 @@ fn glb_export_of_1m_corners() {
     ok(&mut s, "bpy.ops.wm.read_factory_settings(use_empty=True)");
     ok(
         &mut s,
-        &format!("bpy.ops.mesh.primitive_grid_add(x_subdivisions={n}, y_subdivisions={n}, size=2.0)"),
+        &format!(
+            "bpy.ops.mesh.primitive_grid_add(x_subdivisions={n}, y_subdivisions={n}, size=2.0)"
+        ),
     );
     let corners = len(&mut s, "bpy.context.object.data.loops");
     assert_eq!(corners, i64::from(4 * n * n));
@@ -78,12 +80,17 @@ fn glb_export_of_1m_corners() {
     let doc = glb_json(&bytes);
     let verts = i64::from((n + 1) * (n + 1));
     let prim = &doc["meshes"][0]["primitives"][0];
-    let acc = |k: &str| doc["accessors"][prim["attributes"][k].as_u64().expect("attr") as usize]["count"].as_i64();
+    let acc = |k: &str| {
+        doc["accessors"][prim["attributes"][k].as_u64().expect("attr") as usize]["count"].as_i64()
+    };
     assert_eq!(acc("POSITION"), Some(verts));
     assert_eq!(acc("NORMAL"), Some(verts));
     assert_eq!(acc("TEXCOORD_0"), Some(verts));
     let idx = prim["indices"].as_u64().expect("indices") as usize;
-    assert_eq!(doc["accessors"][idx]["count"].as_i64(), Some(i64::from(6 * n * n)));
+    assert_eq!(
+        doc["accessors"][idx]["count"].as_i64(),
+        Some(i64::from(6 * n * n))
+    );
     if n == 500 {
         // Blender 5.2.4's file, but for the generator string (deviations: `asset.generator`).
         let mut blender: serde_json::Value =

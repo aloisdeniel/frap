@@ -16,7 +16,9 @@
 //! Operator type flags: `NORMALS_CALC | SELECT_FLUSH` (the history survives the flush).
 //! `dest` (copying into another BMesh) is not supported: the copy goes into `bm`.
 
-use crate::types::{CreateFlag, EdgeId, FaceId, OpTypeFlag, VertId};
+use smallvec::SmallVec;
+
+use crate::types::{CreateFlag, EdgeId, FaceId, LoopId, OpTypeFlag, VertId};
 use crate::{BMElem, BMesh, BmError};
 
 /// Input slots of `duplicate` (Blender's slot defaults in `Default`).
@@ -82,8 +84,7 @@ fn vert_copy(bm: &mut BMesh, m: &mut Maps, v_src: VertId) -> VertId {
 // Ported from blender/source/blender/bmesh/operators/bmo_dupe.cc (bmo_edge_copy).
 fn edge_copy(bm: &mut BMesh, m: &mut Maps, e_src: EdgeId, use_edge_flip_from_face: bool) -> EdgeId {
     let rlen = bm
-        .edge_loops(e_src)
-        .into_iter()
+        .edge_loops_iter(e_src)
         .filter(|&l| bm.oflag_test(bm.lp(l).f, DUPE_INPUT))
         .count();
     let [v1, v2] = bm.edge(e_src).v;
@@ -110,16 +111,20 @@ fn edge_copy(bm: &mut BMesh, m: &mut Maps, e_src: EdgeId, use_edge_flip_from_fac
 
 // Ported from blender/source/blender/bmesh/operators/bmo_dupe.cc (bmo_face_copy).
 fn face_copy(bm: &mut BMesh, m: &mut Maps, f_src: FaceId) -> FaceId {
-    let loops = bm.face_loops(f_src);
-    let vtar: Vec<VertId> = loops.iter().map(|&l| m.v[&bm.lp(l).v]).collect();
-    let edar: Vec<EdgeId> = loops.iter().map(|&l| m.e[&bm.lp(l).e]).collect();
+    // Small faces stay on the stack (M8 WP 8.8: three heap lists per face were a fifth of a
+    // whole-mesh extrude on 100k faces).
+    let loops: SmallVec<[LoopId; 8]> = bm.face_loops_iter(f_src).collect();
+    let vtar: SmallVec<[VertId; 8]> = loops.iter().map(|&l| m.v[&bm.lp(l).v]).collect();
+    let edar: SmallVec<[EdgeId; 8]> = loops.iter().map(|&l| m.e[&bm.lp(l).e]).collect();
     let f_dst = bm
         .face_create(&vtar, &edar, None, CreateFlag::SKIP_CD)
         .expect("source face has corners");
     m.out.face_map.push((f_src, f_dst));
     bm.face_attrs_copy(f_src, f_dst);
-    for (ls, ld) in loops.into_iter().zip(bm.face_loops(f_dst)) {
+    let mut ld = bm.face(f_dst).l_first;
+    for ls in loops {
         bm.loop_attrs_copy(ls, ld);
+        ld = bm.lp(ld).next;
     }
     bm.oflag_enable(f_dst, DUPE_NEW);
     f_dst
@@ -147,14 +152,10 @@ pub fn duplicate(bm: &mut BMesh, i: &DuplicateIn) -> Result<DuplicateOut, BmErro
                 frap_math::budget::check();
                 let v2 = vert_copy(bm, &mut m, v);
                 let mut isolated = !bm
-                    .vert_faces(v)
-                    .into_iter()
+                    .vert_faces_any_order(v)
                     .any(|f| bm.oflag_test(f, DUPE_INPUT));
                 if isolated {
-                    isolated = !bm
-                        .vert_edges(v)
-                        .into_iter()
-                        .any(|e| bm.oflag_test(e, DUPE_INPUT));
+                    isolated = !bm.vert_edges_iter(v).any(|e| bm.oflag_test(e, DUPE_INPUT));
                 }
                 if isolated {
                     m.out.isovert_map.push((v, v2));
@@ -181,13 +182,16 @@ pub fn duplicate(bm: &mut BMesh, i: &DuplicateIn) -> Result<DuplicateOut, BmErro
         for f in bm.face_ids() {
             if bm.oflag_test(f, DUPE_INPUT) {
                 frap_math::budget::check();
-                for v in bm.face_verts(f) {
+                let loops: SmallVec<[LoopId; 8]> = bm.face_loops_iter(f).collect();
+                for &l in &loops {
+                    let v = bm.lp(l).v;
                     if !bm.oflag_test(v, DUPE_DONE) {
                         vert_copy(bm, &mut m, v);
                         bm.oflag_enable(v, DUPE_DONE);
                     }
                 }
-                for e in bm.face_edges(f) {
+                for &l in &loops {
+                    let e = bm.lp(l).e;
                     if !bm.oflag_test(e, DUPE_DONE) {
                         edge_copy(bm, &mut m, e, i.use_edge_flip_from_face);
                         bm.oflag_enable(e, DUPE_DONE);
@@ -199,8 +203,7 @@ pub fn duplicate(bm: &mut BMesh, i: &DuplicateIn) -> Result<DuplicateOut, BmErro
         }
         if i.use_select_history {
             // BMO_mesh_selected_remap(check_select = false).
-            let vm = m.v.clone();
-            let em = m.e.clone();
+            let (vm, em) = (&m.v, &m.e);
             let fm: rustc_hash::FxHashMap<FaceId, FaceId> =
                 m.out.face_map.iter().copied().collect();
             bm.select_history_remap(&|x| match x {

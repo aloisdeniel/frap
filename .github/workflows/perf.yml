@@ -8,14 +8,14 @@
 #                  evaluation counter), a 1M-corner GLB export < 2 s, snapshot clone and undo
 #                  push O(#IDs). A test over its budget fails the job.
 # - build-budgets: `cargo xtask perf build-budgets`: the frap-spec-* clean build times against
-#                  xtask/budgets.toml. Gating once `[build_budgets] recorded_on` in
-#                  xtask/perf.toml says "ubuntu-24.04"; a warning while the baselines are the
-#                  provisional M1 Max ones.
+#                  xtask/budgets.toml. Gating once `recorded_on` in xtask/budgets.toml says
+#                  "ubuntu-24.04" (`cargo xtask budgets --record` writes it, with the runner
+#                  class it ran on); a warning while the baselines are the provisional M1 Max
+#                  ones. ci.yml's `budgets` job runs the same command.
 # workflow_dispatch with `record: true` records instead, in the runtime job: `cargo xtask perf
-# --record`, then `cargo xtask perf build-budgets --record` (which runs `cargo xtask budgets
-# --record` and marks the baselines as recorded on ubuntu-24.04). The rewritten xtask/perf.toml
-# and xtask/budgets.toml are uploaded as one artifact, to be committed by hand; once committed,
-# the build-budgets job gates. (ci.yml's non-gating `budgets` job predates this one.)
+# --record`, then `cargo xtask perf build-budgets --record` (`cargo xtask budgets --record`
+# restricted to ubuntu-24.04). The rewritten xtask/perf.toml and xtask/budgets.toml are uploaded
+# as one artifact, to be committed by hand; once committed, the build-budgets jobs gate.
 
 name: perf
 
@@ -61,7 +61,7 @@ jobs:
         if: ${{ !inputs.record }}
         run: cargo xtask perf
       # Recording runs both recorders in this job, so one artifact carries one consistent
-      # xtask/perf.toml (runtime values and `[build_budgets] recorded_on`).
+      # pair of xtask/perf.toml (runtime values) and xtask/budgets.toml (with `recorded_on`).
       - name: cargo xtask perf --record, cargo xtask perf build-budgets --record
         if: ${{ inputs.record }}
         run: |

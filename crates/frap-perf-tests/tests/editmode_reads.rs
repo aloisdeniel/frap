@@ -10,6 +10,8 @@
 //!   cache, every later one hits it.
 //! - With `--verbosity full` (evaluated counts in every response's `context`) the same holds:
 //!   one evaluation after an edit, none for the reads after it.
+//! - The same holds over many objects: derived reads cycling over 100 modifier objects in
+//!   Edit Mode evaluate each stack once, then never again until an edit.
 
 mod support;
 
@@ -74,7 +76,10 @@ fn scene(verbosity: Verbosity) -> Session {
     o.verbosity = verbosity;
     let mut s = Session::new(o).expect("session");
     ok(&mut s, "bpy.ops.object.modifier_add(type='SUBSURF')");
-    ok(&mut s, "bpy.context.object.modifiers['Subdivision'].levels = 2");
+    ok(
+        &mut s,
+        "bpy.context.object.modifiers['Subdivision'].levels = 2",
+    );
     ok(&mut s, "bpy.ops.object.modifier_add(type='BEVEL')");
     ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
     s
@@ -100,7 +105,10 @@ fn check(verbosity: Verbosity, name: &str) {
     let t = Instant::now();
     let element = evaluations(&mut s, ELEMENT_READS, 5);
     let reads_ms = ms(t.elapsed());
-    assert_eq!(element, 0, "{name}: element reads in Edit Mode evaluated the stack");
+    assert_eq!(
+        element, 0,
+        "{name}: element reads in Edit Mode evaluated the stack"
+    );
     assert_eq!(fingerprint(&s), fp, "{name}: reads changed the fingerprint");
 
     let first = evaluations(&mut s, &DERIVED_READS[..1], 1);
@@ -118,9 +126,15 @@ fn check(verbosity: Verbosity, name: &str) {
     ok(&mut s, "bpy.ops.transform.translate(value=(0.1, 0, 0))");
     let after_edit = evaluations(&mut s, DERIVED_READS, 3);
     assert!(after_edit <= 1, "{name}: after an edit: {after_edit}");
-    ok(&mut s, "bpy.context.object.modifiers['Subdivision'].levels = 1");
+    ok(
+        &mut s,
+        "bpy.context.object.modifiers['Subdivision'].levels = 1",
+    );
     let after_write = evaluations(&mut s, DERIVED_READS, 3);
-    assert!(after_write <= 1, "{name}: after a modifier write: {after_write}");
+    assert!(
+        after_write <= 1,
+        "{name}: after a modifier write: {after_write}"
+    );
     let total = evaluations(&mut s, ELEMENT_READS, 1);
     assert_eq!(total, 0, "{name}: element reads after a modifier write");
     report(
@@ -155,8 +169,77 @@ fn the_counter_counts_stack_evaluations() {
     ok(&mut s, "bpy.context.object.location.x = 2.0");
     assert_eq!(evaluations(&mut s, DERIVED_READS, 4), 1);
     // No modifiers, no stack: nothing to count.
-    ok(&mut s, "bpy.ops.object.modifier_remove(modifier='Subdivision')");
+    ok(
+        &mut s,
+        "bpy.ops.object.modifier_remove(modifier='Subdivision')",
+    );
     ok(&mut s, "bpy.ops.object.modifier_remove(modifier='Bevel')");
     ok(&mut s, "bpy.context.object.location.x = 3.0");
     assert_eq!(evaluations(&mut s, DERIVED_READS, 4), 0);
+}
+
+/// Derived reads that cycle over more objects than the read cache's prune threshold (64):
+/// every object keeps its cached result (one entry per object and mode, replaced when its
+/// fingerprint changes), so the second pass evaluates nothing. Before the WP 8.8 fix round the
+/// per-thread cache was cleared whole past 64 entries, and such a pass re-evaluated the stack
+/// on almost every read.
+#[test]
+fn derived_reads_over_many_modifier_objects_evaluate_once() {
+    const N: usize = 100;
+    let _g = serial();
+    let mut s = factory();
+    ok(&mut s, "bpy.ops.wm.read_factory_settings(use_empty=True)");
+    for i in 0..N {
+        ok(
+            &mut s,
+            &format!(
+                "bpy.ops.mesh.primitive_cube_add(size=1.0, location=({}, 0, 0))",
+                3 * i
+            ),
+        );
+        ok(&mut s, "bpy.ops.object.modifier_add(type='SUBSURF')");
+    }
+    // The last cube is active; Edit Mode on it.
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    let names: Vec<String> = (0..N)
+        .map(|i| {
+            if i == 0 {
+                "Cube".to_owned()
+            } else {
+                format!("Cube.{i:03}")
+            }
+        })
+        .collect();
+    let reads: Vec<String> = names
+        .iter()
+        .map(|n| format!("bpy.data.objects['{n}'].dimensions"))
+        .collect();
+    let reads: Vec<&str> = reads.iter().map(String::as_str).collect();
+    let first = evaluations(&mut s, &reads, 1);
+    assert!(
+        first <= N as u64,
+        "first pass: {first} evaluations for {N} objects"
+    );
+    let t = Instant::now();
+    let second = evaluations(&mut s, &reads, 3);
+    let reads_ms = ms(t.elapsed());
+    assert_eq!(
+        second, 0,
+        "derived reads over {N} modifier objects in Edit Mode re-evaluated"
+    );
+    // An edit of the edited object invalidates that object alone.
+    ok(&mut s, "bpy.ops.transform.translate(value=(0.1, 0, 0))");
+    let after_edit = evaluations(&mut s, &reads, 2);
+    assert!(after_edit <= 1, "after an edit: {after_edit}");
+    report(
+        "editmode_reads.many_objects",
+        reads_ms,
+        None,
+        json!({
+            "objects": N,
+            "reads": 3 * N,
+            "evaluations_first_pass": first,
+            "evaluations_repeated_reads": second,
+        }),
+    );
 }

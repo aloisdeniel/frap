@@ -40,14 +40,27 @@ pub struct EvalCache {
     pub(crate) in_progress: crate::geometry::InProgress,
 }
 
-thread_local! {
-    /// The cache of [`EvalCache::evaluated_for_read`].
-    static READ_CACHE: std::cell::RefCell<EvalCache> = std::cell::RefCell::new(EvalCache::new());
+/// The per-thread cache of [`EvalCache::evaluated_for_read`].
+struct ReadCache {
+    cache: EvalCache,
+    /// Entry count at which the next read prunes the results of objects the host being read
+    /// no longer has; doubled after each prune, so pruning stays amortised O(1) per read.
+    prune_at: usize,
 }
 
-/// Bound on [`READ_CACHE`] (results, including the modes): a thread that reads many objects
-/// in turn does not keep removed objects' meshes alive for ever.
-const READ_CACHE_MAX: usize = 64;
+thread_local! {
+    static READ_CACHE: std::cell::RefCell<ReadCache> = std::cell::RefCell::new(ReadCache {
+        cache: EvalCache::new(),
+        prune_at: READ_CACHE_PRUNE_MIN,
+    });
+}
+
+/// Smallest prune threshold of [`READ_CACHE`]. The cache holds one entry per object and mode
+/// (a changed fingerprint replaces the entry, it never adds one), so it only grows past the
+/// objects that exist through objects that were removed (or belong to a dropped session or
+/// a factory reset: IDs are process-unique, so those never resolve again). Pruning drops
+/// exactly those; every live object keeps its result, however many are read in turn.
+const READ_CACHE_PRUNE_MIN: usize = 64;
 
 /// `Dependency cycle detected` report of a parent cycle, worded like Blender's depsgraph log.
 fn cycle_report(host: &dyn HostRead, cycle: &Cycle) -> Report {
@@ -153,10 +166,12 @@ impl EvalCache {
     ) -> Result<Arc<EvaluatedObject>, EvalError> {
         READ_CACHE.with(|c| match c.try_borrow_mut() {
             Ok(mut c) => {
-                if c.len() > READ_CACHE_MAX {
-                    c.clear();
+                let c = &mut *c;
+                if c.cache.len() >= c.prune_at {
+                    c.cache.prune(host);
+                    c.prune_at = (2 * c.cache.len()).max(READ_CACHE_PRUNE_MIN);
                 }
-                c.object(host, ob, mode)
+                c.cache.object(host, ob, mode)
             }
             Err(_) => EvalCache::new().object(host, ob, mode),
         })

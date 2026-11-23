@@ -76,7 +76,10 @@ fn statements_share_mesh_data_and_the_edit_bmesh() {
         assert_eq!(positions_ptr(&s, "Grid"), p0, "{stmt}: the mesh was copied");
     }
     // A failed statement restores the snapshot: the same data, still shared.
-    let r = s.exec_source("bpy.context.object.location.x = 'x'").remove(0).to_json();
+    let r = s
+        .exec_source("bpy.context.object.location.x = 'x'")
+        .remove(0)
+        .to_json();
     assert_eq!(r["status"], "ERROR");
     assert_eq!(positions_ptr(&s, "Grid"), p0, "rollback copied the mesh");
     // Undo and redo load steps that share the same column.
@@ -116,7 +119,10 @@ fn statement_cost_does_not_depend_on_mesh_size() {
     );
     // Same #IDs on both sides: the factory scene with its cube replaced by a grid.
     assert_eq!(small.main().meshes.len(), big.main().meshes.len());
-    for (mode, setup) in [("object", None), ("edit", Some("bpy.ops.object.mode_set(mode='EDIT')"))] {
+    for (mode, setup) in [
+        ("object", None),
+        ("edit", Some("bpy.ops.object.mode_set(mode='EDIT')")),
+    ] {
         if let Some(src) = setup {
             ok(&mut small, src);
             ok(&mut big, src);
@@ -152,7 +158,9 @@ fn objects(n: usize) -> Session {
     for i in 1..n {
         ok(
             &mut s,
-            &format!("bpy.context.collection.objects.link(bpy.data.objects.new('C{i}', bpy.data.meshes['Cube']))"),
+            &format!(
+                "bpy.context.collection.objects.link(bpy.data.objects.new('C{i}', bpy.data.meshes['Cube']))"
+            ),
         );
     }
     s
@@ -189,6 +197,47 @@ fn statement_cost_is_linear_in_ids() {
             ms(tb),
             None,
             json!({ "objects": [ia, ib], "ms": [ms(ta), ms(tb)], "ratio": ratio, "per_id_us": per_id_us }),
+        );
+    }
+}
+
+/// Tracked, no budget: the same one-property statements in Edit Mode with `normal` responses,
+/// whose `edit_mesh` summary counts the selection and the triangles over the whole edit BMesh
+/// (O(elements) per response, ~0.75 ms at 1M corners on an M1 Max). A per-`EditMesh` cached
+/// summary in frap-scene would make it O(1); it is a follow-up contract item of WP 8.8, and
+/// this measurement shows its effect when it lands.
+#[test]
+fn edit_mode_normal_response_cost_is_tracked() {
+    let _g = serial();
+    let reps = if release() { 21 } else { 3 };
+    let mut small = factory_with(Verbosity::Normal);
+    let mut big = factory_with(Verbosity::Normal);
+    let n = grid_side();
+    ok(&mut big, "bpy.ops.object.delete()");
+    ok(&mut big, "bpy.data.meshes.remove(bpy.data.meshes['Cube'])");
+    ok(
+        &mut big,
+        &format!("bpy.ops.mesh.primitive_grid_add(x_subdivisions={n}, y_subdivisions={n})"),
+    );
+    for s in [&mut small, &mut big] {
+        ok(s, "bpy.ops.object.mode_set(mode='EDIT')");
+    }
+    for &(label, stmt) in STMTS {
+        let t_small = cost(&mut small, stmt, reps);
+        let t_big = cost(&mut big, stmt, reps);
+        // The summary is in the response: the selection counts of the grid.
+        let r = ok(&mut big, stmt);
+        assert!(
+            r["edit_mesh"]["Grid"]["selected"]["verts"]
+                .as_i64()
+                .is_some(),
+            "normal responses carry the edit_mesh summary: {r}"
+        );
+        report(
+            &format!("snapshot.data_size.edit_normal.{label}"),
+            ms(t_big),
+            None,
+            json!({ "cube_ms": ms(t_small), "corners": 4 * n * n }),
         );
     }
 }

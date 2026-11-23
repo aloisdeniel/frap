@@ -9,10 +9,15 @@
 //! the edit BMesh, selection flushing, the undo step, the response's `edit_mesh` counts).
 //! Blender 5.2.4 runs the same three statements in 30 ms, 29 ms and 36 ms (M1 Max, warm,
 //! `xtask/perf/blender_reference.py`); with the whole 317 × 317 grid selected it needs 262 ms
-//! (subdivide, 400k faces out) and 108 ms (extrude_region), and 2.5 s for bevel, so a
-//! whole-mesh result is not what a 200 ms budget can mean. The whole-mesh variants are
-//! measured too ([`whole_mesh_subdivide`], [`whole_mesh_extrude_region`]), as tracked values
-//! without a budget.
+//! (subdivide, 400k faces out) and 108 ms (extrude_region), and 2.5 s for bevel.
+//!
+//! **Whole mesh.** The operator on all 100,489 faces of a 317 × 317 grid is measured too.
+//! `extrude_region` gates on the same 200 ms ([`whole_mesh_extrude_region`]): Blender itself
+//! stays inside the budget there (108 ms), so frap must too. `subdivide` (400k faces out;
+//! Blender 262 ms) and bevel (Blender 2.5 s) exceed 200 ms in Blender itself, so their whole-
+//! mesh runs are tracked values without a budget ([`whole_mesh_subdivide`]; bevel is not run).
+//! This reading of "a 100k-face op" is proposed to the integrator for the decision log (WP 8.8
+//! fix round, see the PR).
 //!
 //! **Golden.** The element and selection counts after each operator are Blender 5.2.4's (the
 //! same script): the selection is local, so the deltas do not depend on the big grid's size,
@@ -38,7 +43,9 @@ fn scene() -> frap_session::Session {
     let n = big();
     ok(
         &mut s,
-        &format!("bpy.ops.mesh.primitive_grid_add(x_subdivisions={n}, y_subdivisions={n}, size=2.0)"),
+        &format!(
+            "bpy.ops.mesh.primitive_grid_add(x_subdivisions={n}, y_subdivisions={n}, size=2.0)"
+        ),
     );
     ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
     ok(
@@ -52,11 +59,7 @@ fn scene() -> frap_session::Session {
 fn base_counts() -> (i64, i64, i64) {
     let n = i64::from(big());
     let (sv, se, sf) = (13 * 13, 2 * 12 * 13, 144);
-    (
-        (n + 1) * (n + 1) + sv,
-        2 * n * (n + 1) + se,
-        n * n + sf,
-    )
+    ((n + 1) * (n + 1) + sv, 2 * n * (n + 1) + se, n * n + sf)
 }
 
 /// Runs `stmt` on fresh scenes (one warm-up, then `reps`); checks the result counts against
@@ -137,11 +140,11 @@ fn bevel_on_100k_faces() {
 }
 
 /// Whole-mesh variant: `stmt` on an `n × n` grid with everything selected; checks the counts
-/// `expect(n)` and reports the median as a tracked value (no budget).
-fn measure_whole(name: &str, stmt: &str, expect: fn(i64) -> [i64; 6]) {
+/// `expect(n)` and reports the median against `budget_ms` (`None`: a tracked value).
+fn measure_whole(name: &str, stmt: &str, expect: fn(i64) -> [i64; 6], budget_ms: Option<f64>) {
     let _g = serial();
     let n = big() + 1;
-    let reps = if release() { 3 } else { 1 };
+    let reps = if release() { 5 } else { 1 };
     let mut times = Vec::new();
     for rep in 0..=reps {
         let mut s = factory();
@@ -168,11 +171,16 @@ fn measure_whole(name: &str, stmt: &str, expect: fn(i64) -> [i64; 6]) {
             times.push(d);
         }
     }
+    let med = median(&mut times);
     report(
         name,
-        ms(median(&mut times)),
-        None,
-        json!({ "faces": i64::from(n * n) }),
+        ms(med),
+        budget_ms,
+        json!({
+            "faces": i64::from(n * n),
+            "min_ms": ms(times[0]),
+            "max_ms": ms(*times.last().expect("reps")),
+        }),
     );
 }
 
@@ -180,11 +188,23 @@ fn measure_whole(name: &str, stmt: &str, expect: fn(i64) -> [i64; 6]) {
 fn whole_mesh_subdivide() {
     // Blender 5.2.4 at n = 317: 403225 / 805180 / 401956, all selected.
     let f = |n: i64| {
-        let (v, e, f) = ((2 * n + 1) * (2 * n + 1), 2 * (2 * n) * (2 * n + 1), 4 * n * n);
+        let (v, e, f) = (
+            (2 * n + 1) * (2 * n + 1),
+            2 * (2 * n) * (2 * n + 1),
+            4 * n * n,
+        );
         [v, e, f, v, e, f]
     };
-    assert_eq!(f(317), [403_225, 805_180, 401_956, 403_225, 805_180, 401_956]);
-    measure_whole("edit_op_100k_all.subdivide", "bpy.ops.mesh.subdivide()", f);
+    assert_eq!(
+        f(317),
+        [403_225, 805_180, 401_956, 403_225, 805_180, 401_956]
+    );
+    measure_whole(
+        "edit_op_100k_all.subdivide",
+        "bpy.ops.mesh.subdivide()",
+        f,
+        None,
+    );
 }
 
 #[test]
@@ -194,6 +214,14 @@ fn whole_mesh_extrude_region() {
         let (v, e) = ((n + 1) * (n + 1), 2 * n * (n + 1));
         [2 * v, 2 * e + 4 * n, 2 * n * n + 4 * n, v, e, n * n]
     };
-    assert_eq!(f(317), [202_248, 404_492, 202_246, 101_124, 201_612, 100_489]);
-    measure_whole("edit_op_100k_all.extrude_region", "bpy.ops.mesh.extrude_region()", f);
+    assert_eq!(
+        f(317),
+        [202_248, 404_492, 202_246, 101_124, 201_612, 100_489]
+    );
+    measure_whole(
+        "edit_op_100k_all.extrude_region",
+        "bpy.ops.mesh.extrude_region()",
+        f,
+        Some(200.0),
+    );
 }

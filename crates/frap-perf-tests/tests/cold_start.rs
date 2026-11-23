@@ -97,7 +97,10 @@ fn in_process_start_needs_no_gpu() {
     }
     let mut s = session(Startup::Empty);
     ok(&mut s, "bpy.ops.mesh.primitive_cube_add()");
-    assert!(!s.render_service_started(), "an operator initialised the GPU");
+    assert!(
+        !s.render_service_started(),
+        "an operator initialised the GPU"
+    );
     // The first start in a process pays for the lazily built registries, as `frap` does.
     let first = ms(times[0]);
     report(
