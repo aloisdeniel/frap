@@ -17,14 +17,17 @@
 //!   (it was active, selected or in Edit Mode after the statement, [`Trace`]); so did a
 //!   statement for every `with` pattern. A `max_delta` entry only explains numbers that
 //!   differ by at most that much; an `edit_end` entry only an object that ends in Edit Mode.
+//! - A state mismatch explained this way also explains a `lines` mismatch of a later
+//!   statement that acted on the same mesh or object (it ran on other geometry).
 //! - A `cascade` entry (a statement that leaves the scene different from there on: an
 //!   unimplemented case, a differing poll) also explains the mismatches *after* its cause:
 //!   `lines` mismatches of later statements and state mismatches of meshes and objects a
 //!   statement at or after the cause acted on (and of `context`).
 //!
 //! A pattern is a statement substring; `a|b` matches either, `a&b` needs both in the one
-//! statement. A `with` pattern starting with `~` also accepts a statement that failed the
-//! same way in both tools.
+//! statement. A `with` or state `cause` pattern starting with `~` also accepts a statement
+//! that failed (or was CANCELLED) the same way in both tools: some operators change state
+//! before they cancel.
 //!
 //! Entries are found by fuzzing and triaged by hand: a bug is fixed by the owner of the code
 //! (its minimised case then joins `tests/golden/cases/fuzz/`); a documented difference gets
@@ -303,8 +306,14 @@ const NORMALS: &[&str] = &[
     "attributes[\"custom_normal\"]",
 ];
 const UVS: &[&str] = &["uv_layers"];
-/// Faces wound the other way.
-const WINDING: &[&str] = &["faces", "corner_normals", "face_normals", ""];
+/// Faces wound the other way (and what face normals decide: sharp edges by angle).
+const WINDING: &[&str] = &[
+    "faces",
+    "corner_normals",
+    "face_normals",
+    "",
+    "attributes[\"sharp_edge\"]",
+];
 const OBJECT_TRANSFORM: &[&str] = &["location", "rotation", "scale", "matrix", "delta_"];
 
 /// Edge data (and the corner normals sharp edges change).
@@ -323,7 +332,10 @@ const CUSTOM_NORMALS: &str = "mesh.smooth_normals|mesh.average_normals|mesh.merg
 /// Operators that change the topology (and so interpolate corner data).
 const TOPOLOGY: &str = "mesh.dissolve_|mesh.unsubdivide|mesh.merge(|mesh.remove_doubles\
      |mesh.edge_split|mesh.delete|mesh.quads_convert_to_tris|mesh.tris_convert_to_quads\
-     |mesh.subdivide|mesh.beautify_fill|mesh.edge_rotate|mesh.decimate";
+     |mesh.subdivide|mesh.beautify_fill|mesh.edge_rotate|mesh.decimate|mesh.inset\
+     |mesh.vert_connect|mesh.split(|mesh.extrude_|mesh.bevel|mesh.poke|mesh.bridge_edge_loops\
+     |mesh.fill|mesh.spin|mesh.solidify|mesh.wireframe|mesh.duplicate|mesh.offset_edge_loops\
+     |mesh.edge_face_add|mesh.triangulate|mesh.rip|mesh.bisect|mesh.knife";
 
 /// The explained mismatches (see the module docs).
 pub const KNOWN: &[Known] = &[
@@ -388,8 +400,8 @@ pub const KNOWN: &[Known] = &[
         &["location", "matrix"],
     ),
     mesh(GEOMETRY, "ORIGIN_CENTER_OF_VOLUME", POSITIONS),
-    // The evaluated mesh of an object in Edit Mode under SUBSURF.
-    // The evaluated SUBSURF result lacks the edge data the tools write.
+    // The evaluated SUBSURF result lacks the edge data the tools write; in Edit Mode
+    // (`edit_end`) it also has other edges after some extrusions.
     mesh(
         GEOMETRY,
         "transform.edge_crease|shade_smooth_by_angle|mesh.mark_sharp|mesh.split_normals\
@@ -409,14 +421,14 @@ pub const KNOWN: &[Known] = &[
         .edit_end(),
     mesh(GEOMETRY, "object.transform_apply", POSITIONS)
         .with(&["shape_key_add", "SUBSURF|subdivision_set"]),
-    // One unit of the custom normals' 16-bit encoding.
+    // A few units of the custom normals' 16-bit encoding.
     mesh(GEOMETRY, CUSTOM_NORMALS, &["attributes[\"custom_normal\"]"]).max_delta(4.0),
     mesh(GEOMETRY, "mesh.dissolve_mode&use_face_split=True", NORMALS).with(&["mesh.normals_tools"]),
     mesh(GEOMETRY, "mesh.edge_face_add", ANY).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.decimate", ANY),
     mesh(GEOMETRY, "uv.align", UVS),
     mesh(GEOMETRY, "mesh.fill(", ANY),
-    mesh(GEOMETRY, "BEVEL", UVS).with(&["SUBSURF|subdivision_set"]),
+    mesh(GEOMETRY, "BEVEL", UVS),
     mesh(GEOMETRY, "mesh.edge_split", NORMALS).with(&["mesh.merge_normals"]),
     mesh(GEOMETRY, "mesh.edge_rotate", ANY).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.normals_make_consistent", ANY)
@@ -461,8 +473,7 @@ pub const KNOWN: &[Known] = &[
         .with(&["mesh.edge_split", "mesh.primitive_"]),
     mesh(GEOMETRY, "transform.vertex_random", POSITIONS),
     mesh(GEOMETRY, "transform.shrink_fatten", POSITIONS).with(&["mesh.extrude_faces_indiv"]),
-    mesh(GEOMETRY, "orient_type='NORMAL'", POSITIONS)
-        .with(&["mode_set(mode='EDIT')", "mesh.primitive_plane_add"]),
+    mesh(GEOMETRY, "orient_type='NORMAL'", POSITIONS).with(&["mode_set(mode='EDIT')"]),
     // Blender's own UV sphere element order changes between runs (D-19): results that
     // depend on the element order (index writes, ties) are not comparable on its mesh.
     mesh("D-19", "mesh.primitive_uv_sphere_add", ANY),
@@ -494,9 +505,15 @@ pub const KNOWN: &[Known] = &[
     // A UV selection operator after `uv.select_split` (which may leave Blender's UV
     // selection partly independent of the mesh selection even when it cancels).
     mesh(D_111, "bpy.ops.uv.select", ANY).with(&["~uv.select_split"]),
-    mesh(FOUND, "BEVEL", &["corner_normals", "face_normals"])
-        .with(&["mode_set(mode='EDIT')", "mesh.primitive_"])
-        .max_delta(1e-3),
+    mesh(FOUND, "BEVEL", &["corner_normals", "face_normals"]).max_delta(1e-3),
+    mesh(FOUND, "mesh.bevel&affect='VERTICES'", UVS),
+    mesh(
+        FOUND,
+        "mesh.bevel",
+        &["corner_normals", "face_normals", "uv_layers"],
+    )
+    .max_delta(2e-3),
+    mesh(FOUND, "TRIANGULATE", ANY).with(&["mesh.subdivide"]),
     mesh(FOUND, "mesh.primitive_cube_add", UVS).with(&[
         "transform.rotate",
         "mode_set(mode='EDIT')",
@@ -509,6 +526,11 @@ pub const KNOWN: &[Known] = &[
     ]),
     mesh(FOUND, "mesh.separate", &["attributes[\"__mirror_index\"]"]).with(&["mesh.select_mirror"]),
     mesh(FOUND, "mesh.remove_doubles", ANY),
+    mesh(FOUND, "~mesh.edge_face_add", &["selection"]).with(&["mesh.region_to_loop"]),
+    mesh(FOUND, "mesh.select_random", ANY).with(&[TOPOLOGY]),
+    mesh(FOUND, "mesh.vert_connect", NORMALS).with(&["mesh.sort_elements"]),
+    mesh(FOUND, "mesh.duplicate", ANY).with(&["mesh.wireframe"]),
+    mesh(FOUND, "WELD", WINDING).with(&["mesh.edge_split"]),
     // --- UV results after Edit Mode geometry changes ---
     mesh(UV, "uv.unwrap", UVS),
     mesh(UV, "uv.smart_project", UVS),
@@ -550,7 +572,18 @@ impl Known {
         if !self.fields.is_empty() && !self.fields.iter().any(field_is) {
             return None;
         }
-        if self.max_delta > 0.0 && delta(&m.detail).is_none_or(|d| d > self.max_delta) {
+        // The custom normals' second component is an angle in `[-π, π]` coded on ±32767:
+        // its two ends are the same direction.
+        let periodic = |d: f64| {
+            if field.starts_with("attributes[\"custom_normal\"]") {
+                d.min((65534.0 - d).abs())
+            } else {
+                d
+            }
+        };
+        if self.max_delta > 0.0
+            && delta(&m.detail).is_none_or(|d| periodic(d) > self.max_delta)
+        {
             return None;
         }
         if self.edit_end {
@@ -564,7 +597,7 @@ impl Known {
         }
         let ran = |i: usize| {
             if self.fails_with.is_empty() {
-                trace.ok(i)
+                trace.ran(i, self.cause)
             } else {
                 matches!(trace.outcomes.get(i), Some(Outcome::Failed(f)) if f.contains(self.fails_with))
             }
@@ -642,11 +675,31 @@ pub fn explain_all(
         .filter(|(k, _)| k.cascade)
         .chain(failed_causes)
         .min_by_key(|(_, i)| *i);
+    // A documented end-state difference of a mesh or object (its cause found) also explains
+    // a later statement that acts on that mesh or object and so runs differently.
+    let state_causes: Vec<(&'static Known, usize, Target)> = mismatches
+        .iter()
+        .zip(&direct)
+        .filter(|(m, _)| m.comparator != LINES)
+        .filter_map(|(m, d)| {
+            let (k, i) = (*d)?;
+            let (t, _) = target(&m.path)?;
+            (t != Target::Context).then_some((k, i, t))
+        })
+        .collect();
     mismatches
         .iter()
         .zip(&direct)
         .map(|(m, d)| {
             if let Some((k, _)) = d {
+                return Some(*k);
+            }
+            if m.comparator == LINES
+                && let Some(j) = line_index(&m.path)
+                && let Some((k, _, _)) = state_causes
+                    .iter()
+                    .find(|(_, i, t)| *i < j && trace.touches(j, t))
+            {
                 return Some(*k);
             }
             let (k, from) = cascade?;
@@ -733,6 +786,19 @@ mod tests {
             delta("frap 6008 != blender 6009 (tol 0.00009999999747378752)"),
             Some(1.0)
         );
+        // The custom normals' angle wraps around.
+        let k = mesh(GEOMETRY, CUSTOM_NORMALS, &["attributes[\"custom_normal\"]"]).max_delta(4.0);
+        let s = vec!["bpy.ops.mesh.average_normals()".to_owned()];
+        let m = |d: &str| {
+            Mismatch::new(
+                "mesh_canonical",
+                "meshes[\"Cube\"].attributes[\"custom_normal\"].data[5][1]",
+                d,
+            )
+        };
+        let tr = cube_trace(1);
+        assert!(k.explains(&s, &tr, &m("frap 32767 != blender -32767")).is_some());
+        assert!(k.explains(&s, &tr, &m("frap 100 != blender -100")).is_none());
     }
 
     #[test]
@@ -857,6 +923,27 @@ mod tests {
         assert!(e[5].is_some(), "{e:?}");
         // Before the gap, or on a mesh nothing touched since.
         assert!(e[2].is_none() && e[4].is_none(), "{e:?}");
+    }
+
+    #[test]
+    fn a_state_difference_explains_later_statements_on_its_mesh() {
+        let s = st(&[
+            "bpy.ops.object.mode_set(mode='EDIT')",
+            "bpy.ops.mesh.dissolve_verts(use_boundary_tear=True)",
+            "bpy.ops.mesh.face_make_planar()",
+        ]);
+        let state = Mismatch::new("mesh_canonical", "meshes[\"Cube\"]", "frap (8, 12, 6) != …");
+        let later = Mismatch::new("lines", line_of(2), "frap CANCELLED != blender ok");
+        let earlier = Mismatch::new("lines", line_of(0), "frap CANCELLED != blender ok");
+        let mut tr = cube_trace(3);
+        let all = [state.clone(), later.clone(), earlier];
+        let e = explain_all(&s, &tr, &all);
+        assert!(e[0].is_some() && e[1].is_some() && e[2].is_none(), "{e:?}");
+        // Not when the later statement acted on another mesh.
+        tr.meshes[2] = BTreeSet::from(["Plane".to_owned()]);
+        tr.objects[2] = BTreeSet::from(["Plane".to_owned()]);
+        let e = explain_all(&s, &tr, &[state, later]);
+        assert!(e[0].is_some() && e[1].is_none(), "{e:?}");
     }
 
     #[test]
