@@ -493,6 +493,10 @@ struct FrameU {
 #[derive(Copy, Clone, Pod, Zeroable)]
 struct ShadowLayerU {
     view_proj: [f32; 16],
+    /// The inverse of `view_proj` (`fs_shadow` casts each texel's ray, eevee_shadow.wgsl).
+    inv_view_proj: [f32; 16],
+    /// xy: the map's texel origin in its atlas layer, z: its size in texels.
+    viewport: [f32; 4],
     /// x: the sample's transparency random (transparent shadows, WP 5.5), y: the map index
     /// (the transparent-shadow hash key).
     params: [f32; 4],
@@ -1818,12 +1822,19 @@ pub fn render(
         let mats_flat: Vec<[f32; 16]> = matrices.iter().map(Mat4::to_cols_array).collect();
         gpu.queue
             .write_buffer(&shadow_mat_buf, 0, bytemuck::cast_slice(&mats_flat));
-        let layers_u: Vec<ShadowLayerU> = mats_flat
+        let layers_u: Vec<ShadowLayerU> = matrices
             .iter()
             .enumerate()
-            .map(|(i, m)| ShadowLayerU {
-                view_proj: *m,
-                params: [sample.transparency, i as f32, 0.0, 0.0],
+            .map(|(i, m)| {
+                let (_, [x, y]) = plan.tile_of(i as u32);
+                ShadowLayerU {
+                    view_proj: m.to_cols_array(),
+                    // In f64: a local light's reverse-depth projection has a near plane of
+                    // `influence / 4000`.
+                    inv_view_proj: m.as_dmat4().inverse().as_mat4().to_cols_array(),
+                    viewport: [x as f32, y as f32, shadow_size as f32, 0.0],
+                    params: [sample.transparency, i as f32, 0.0, 0.0],
+                }
             })
             .collect();
         if draw_shadows {
