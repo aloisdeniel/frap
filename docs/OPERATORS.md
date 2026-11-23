@@ -315,8 +315,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.track_clear` | M9 | P2 | post-M8 (M8 W0, M8W0-3): removes tracking constraints (constraints OUT) |
 | [x] | `object.hide_collection` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.collection_objects_select` | M8 | P2 | headless-extended (D-154): runs on the active collection, as from the Outliner; WP 8.3.4 |
-| [ ] | `object.data_transfer` | M8 | P2 | WP 8.3.13 |
-| [ ] | `object.datalayout_transfer` | M8 | P2 | WP 8.3.13 |
+| [x] | `object.data_transfer` | M8 | P2 | T2 (the DATA_TRANSFER transfer, with `use_create`, `use_reverse_transfer`, `use_auto_transform`, `islands_precision`); the static layer items only; WP 8.3.13 |
+| [x] | `object.datalayout_transfer` | M8 | P2 | T2; the objects after the source in the selection get nothing, as in Blender; WP 8.3.13 |
 | [x] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.make_links_scene` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.instance_offset_from_cursor` | M8 | P2 | WP 8.3.5 |
@@ -718,10 +718,10 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 | [x] | `CORRECTIVE_SMOOTH` | `CorrectiveSmoothModifier` | M8 | P2 | `rest_source='ORCO'` (the edit mesh in Edit Mode); `BIND` needs `object.correctivesmooth_bind` (OUT): "Bind data required", `is_bind` is `False`; WP 8.3.12 (goldens `modifiers/m8_deform/corrective_smooth/*`) |
 | [x] | `WAVE` | `WaveModifier` | M8 | P2 | time-dependent, along normals, start object, IMAGE/NONE textures; WP 8.3.12 (goldens `modifiers/m8_deform/wave/frame_*`) |
 | [x] | `WARP` | `WarpModifier` | M8 | P2 | every falloff (`CURVE`: the default curve's table, `falloff_curve` unbound), volume preserve, bones, IMAGE/NONE textures; WP 8.3.12 (goldens `modifiers/m8_deform/warp/*`) |
-| [ ] | `DATA_TRANSFER` | `DataTransferModifier` | M8 | P2 | WP 8.3.13 |
-| [ ] | `VERTEX_WEIGHT_EDIT` | `VertexWeightEditModifier` | M8 | P2 | WP 8.3.13 |
-| [ ] | `VERTEX_WEIGHT_MIX` | `VertexWeightMixModifier` | M8 | P2 | WP 8.3.13 |
-| [ ] | `VERTEX_WEIGHT_PROXIMITY` | `VertexWeightProximityModifier` | M8 | P2 | WP 8.3.13 |
+| [x] | `DATA_TRANSFER` | `DataTransferModifier` | M8 | P2 | T2: every data type and mapping mode, UV islands, mix modes; WP 8.3.13 |
+| [x] | `VERTEX_WEIGHT_EDIT` | `VertexWeightEditModifier` | M8 | P2 | T2; `CURVE` is the default curve, mask textures are not evaluated; WP 8.3.13 |
+| [x] | `VERTEX_WEIGHT_MIX` | `VertexWeightMixModifier` | M8 | P2 | T2; mask textures are not evaluated; WP 8.3.13 |
+| [x] | `VERTEX_WEIGHT_PROXIMITY` | `VertexWeightProximityModifier` | M8 | P2 | T2; mask textures are not evaluated; WP 8.3.13 |
 | — | `SKIN` | `SkinModifier` | OUT | — | data only |
 | — | `CURVE` | `CurveModifier` | OUT | — | no curve objects |
 | — | `LATTICE` | `LatticeModifier` | OUT | — | no lattice objects |

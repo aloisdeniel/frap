@@ -218,6 +218,7 @@ NORMALISE = {
     "D-162": ("cases", "pose selection cases cancel only with extend=True or where the deselect changes nothing"),
     "D-163": ("cases", "Blender runs anim.channels_bake in a #@blender Graph Editor temp_override and update_tag()s the baked actions before evaluating them"),
     "D-164": ("cases", "cases create the NLA tracks before nla.actionclip_add"),
+    "D-165": ("cases", "op_data_transfer raises transfer errors only from calls that transfer nothing"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
