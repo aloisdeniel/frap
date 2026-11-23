@@ -5,16 +5,17 @@
 // The fragment writes its own depth: the depth of the point where the ray of its texel centre
 // meets the plane of the triangle, minus the slope bias `SLOPE_BIAS × max(|∂depth/∂x|,
 // |∂depth/∂y|)` (D3D's `SlopeScaledDepthBias` formula). Neither the rasterised depth nor any
-// interpolated varying is precise enough on WARP for a caster that passes behind the light (a
-// ground plane under a point light): the clipper puts the triangle's new vertices on the near
-// plane, at depth 1 and hundreds of thousands of texels off the map (`clip_near = influence /
-// 4000`), and WARP's screen-space barycentrics are off by ~4e-5 there, which shifts the depth
-// (~1e-4 around such a light) by tens of percent and, through the near vertices' huge 1 / w,
-// the perspective-correct varyings by several percent: whole cube faces were shadowed or lit
-// (ARCHITECTURE Decision log, M56CI-1 and M56CI-7). Every interpolated world position still
-// lies in the triangle's plane, though, so the plane through it spanned by its screen
-// derivatives is exact, and the texel's ray is exact (its centre and the map's inverse
-// matrix): their intersection does not depend on the barycentrics.
+// interpolated varying can be trusted for a caster that passes behind the light (a ground
+// plane under a point light): the clipper puts the triangle's new vertices on the near plane,
+// at depth 1 and 1 / w = 1 / clip_near (`clip_near = influence / 4000`), hundreds of
+// thousands of texels off the map, and WARP's screen-space interpolation from such vertices is
+// off by up to ~1e-4 in depth (most of the ~1e-4 depth around such a light) on the +X face:
+// whole cube faces were shadowed or lit (ARCHITECTURE Decision log, M56CI-1 and M56CI-7). The
+// perspective-correct varyings carry the same error (the interpolated z / w of M56CI-1 did),
+// but every interpolated world position still lies in the triangle's plane, so the plane
+// through it spanned by its screen derivatives is exact, and so is the texel's ray (its centre
+// and the map's inverse matrix): their intersection does not depend on the interpolation.
+
 struct Layer {
     view_proj: mat4x4<f32>,
     inv_view_proj: mat4x4<f32>,
@@ -109,9 +110,7 @@ fn fs_shadow(v: ShadowOut) -> @builtin(frag_depth) f32 {
     let dPdx = dpdx(v.world);
     let dPdy = dpdy(v.world);
     let interpolated = v.zw.x / v.zw.y;
-    // DIAG (temporary): params.z selects the interpolated depth.
-    let depth = select(plane_depth(v.clip.xy, v.world, dPdx, dPdy, interpolated), interpolated,
-                       layer.params.z > 0.5);
+    let depth = plane_depth(v.clip.xy, v.world, dPdx, dPdy, interpolated);
     let slope = max(abs(dpdx(depth)), abs(dpdy(depth)));
     if (draw.flags.w == 1u) {
         let transparency = 1.0 - bitcast<f32>(draw.flags.z);
