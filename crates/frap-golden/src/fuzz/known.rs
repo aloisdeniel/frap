@@ -30,7 +30,7 @@
 //! (its minimised case then joins `tests/golden/cases/fuzz/`); a documented difference gets
 //! an entry here naming its `docs/deviations.md` row (checked by a test).
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::case::Mismatch;
 
@@ -59,6 +59,9 @@ pub struct Trace {
     pub objects: Vec<BTreeSet<String>>,
     /// Objects in Edit Mode at the end.
     pub edit_end: BTreeSet<String>,
+    /// The mesh of each mesh object at the end (an evaluated object is acted on through its
+    /// mesh too: a linked duplicate edited, a tool on another user of the mesh).
+    pub object_mesh: BTreeMap<String, String>,
 }
 
 impl Trace {
@@ -80,7 +83,13 @@ impl Trace {
     fn touches(&self, i: usize, t: &Target) -> bool {
         match t {
             Target::Mesh(n) => self.meshes.get(i).is_some_and(|s| s.contains(n)),
-            Target::Object(n) => self.objects.get(i).is_some_and(|s| s.contains(n)),
+            Target::Object(n) => {
+                self.objects.get(i).is_some_and(|s| s.contains(n))
+                    || self
+                        .object_mesh
+                        .get(n)
+                        .is_some_and(|m| self.meshes.get(i).is_some_and(|s| s.contains(m)))
+            }
             Target::Context => true,
         }
     }
@@ -294,9 +303,11 @@ const NORMALS: &[&str] = &[
     "attributes[\"custom_normal\"]",
 ];
 const UVS: &[&str] = &["uv_layers"];
+/// Faces wound the other way.
+const WINDING: &[&str] = &["faces", "corner_normals", "face_normals", ""];
 const OBJECT_TRANSFORM: &[&str] = &["location", "rotation", "scale", "matrix", "delta_"];
 
-/// Edge data of the edit mesh (and the corner normals sharp edges change).
+/// Edge data (and the corner normals sharp edges change).
 const EDIT_EDGE_DATA: &[&str] = &[
     "attributes[\"crease_edge\"]",
     "attributes[\"sharp_edge\"]",
@@ -308,6 +319,11 @@ const EDIT_EDGE_DATA: &[&str] = &[
 const CUSTOM_NORMALS: &str = "mesh.smooth_normals|mesh.average_normals|mesh.merge_normals\
      |mesh.split_normals|mesh.set_normals_from_faces|mesh.normals_tools|mesh.point_normals\
      |mesh.customdata_custom_splitnormals_add";
+
+/// Operators that change the topology (and so interpolate corner data).
+const TOPOLOGY: &str = "mesh.dissolve_|mesh.unsubdivide|mesh.merge(|mesh.remove_doubles\
+     |mesh.edge_split|mesh.delete|mesh.quads_convert_to_tris|mesh.tris_convert_to_quads\
+     |mesh.subdivide|mesh.beautify_fill|mesh.edge_rotate|mesh.decimate";
 
 /// The explained mismatches (see the module docs).
 pub const KNOWN: &[Known] = &[
@@ -362,8 +378,8 @@ pub const KNOWN: &[Known] = &[
     // --- geometry differences ---
     mesh(GEOMETRY, "mesh.loop_to_region", ANY),
     mesh(GEOMETRY, "mesh.flatten", ANY),
-    mesh(GEOMETRY, "mesh.vert_connect_nonplanar", UVS).with(&["mesh.edge_face_add"]),
-    mesh(GEOMETRY, "mesh.extrude_edges_", NORMALS).with(&["mode_set(mode='EDIT')"]),
+    mesh(GEOMETRY, "mesh.vert_connect_nonplanar", ANY),
+    mesh(GEOMETRY, "mesh.extrude_edges_", WINDING).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.extrude_context", ANY).with(&["mesh.primitive_uv_sphere_add"]),
     state(
         GEOMETRY,
@@ -373,15 +389,14 @@ pub const KNOWN: &[Known] = &[
     ),
     mesh(GEOMETRY, "ORIGIN_CENTER_OF_VOLUME", POSITIONS),
     // The evaluated mesh of an object in Edit Mode under SUBSURF.
-    // (crease_edge, sharp_edge, uv_seam, bevel_weight_edge: the edge data the tools write.)
+    // The evaluated SUBSURF result lacks the edge data the tools write.
     mesh(
         GEOMETRY,
         "transform.edge_crease|shade_smooth_by_angle|mesh.mark_sharp|mesh.split_normals\
          |mark_seam|transform.edge_bevelweight|mesh.set_sharpness_by_angle",
         EDIT_EDGE_DATA,
     )
-    .with(&["SUBSURF|subdivision_set"])
-    .edit_end(),
+    .with(&["SUBSURF|subdivision_set"]),
     mesh(
         GEOMETRY,
         "mesh.extrude_edges_indiv",
@@ -399,12 +414,12 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "mesh.dissolve_mode&use_face_split=True", NORMALS).with(&["mesh.normals_tools"]),
     mesh(GEOMETRY, "mesh.edge_face_add", ANY).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.decimate", ANY),
-    mesh(GEOMETRY, "uv.align", UVS).with(&["mesh.extrude_faces_indiv"]),
+    mesh(GEOMETRY, "uv.align", UVS),
     mesh(GEOMETRY, "mesh.fill(", ANY),
     mesh(GEOMETRY, "BEVEL", UVS).with(&["SUBSURF|subdivision_set"]),
     mesh(GEOMETRY, "mesh.edge_split", NORMALS).with(&["mesh.merge_normals"]),
     mesh(GEOMETRY, "mesh.edge_rotate", ANY).with(&["mode_set(mode='EDIT')"]),
-    mesh(GEOMETRY, "mesh.normals_make_consistent&inside=True", ANY)
+    mesh(GEOMETRY, "mesh.normals_make_consistent", ANY)
         .with(&["mode_set(mode='EDIT')", "mesh.primitive_plane_add"]),
     mesh(GEOMETRY, "mesh.primitive_", POSITIONS).with(&["shape_key_add", "mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "uv.weld", UVS).with(&["mesh.split"]),
@@ -455,6 +470,25 @@ pub const KNOWN: &[Known] = &[
     mesh(FOUND, "transform.shear", NORMALS).with(&["mesh.subdivide", "mesh.faces_shade_smooth"]),
     mesh(FOUND, "mesh.bevel", ANY).with(&["mesh.extrude_faces_indiv"]),
     mesh(FOUND, "mesh.bridge_edge_loops", ANY),
+    mesh(FOUND, "mesh.extrude_region", NORMALS).with(&["mesh.dissolve_edges"]),
+    mesh(FOUND, "transform.tosphere", NORMALS).with(&["mesh.extrude_faces_indiv"]),
+    mesh(FOUND, "transform.shear", ANY)
+        .with(&["mode_set(mode='EDIT')"])
+        .edit_end(),
+    mesh(FOUND, "mesh.dissolve_edges", NORMALS)
+        .with(&["mesh.set_sharpness_by_angle|mesh.mark_sharp"]),
+    state(FOUND, RNA, "object.align", OBJECT_TRANSFORM).with(&["SUBSURF|subdivision_set"]),
+    mesh(FOUND, TOPOLOGY, NORMALS).with(&[CUSTOM_NORMALS]),
+    mesh(FOUND, "mesh.solidify", POSITIONS).with(&["mesh.dissolve_edges"]),
+    mesh(
+        FOUND,
+        "transform.shrink_fatten&use_even_offset=True",
+        POSITIONS,
+    ),
+    mesh(FOUND, "transform.shear&angle=0.0,", ANY),
+    mesh(FOUND, "mesh.tris_convert_to_quads", ANY).with(&["TRIFAN"]),
+    state(FOUND, RNA, "bpy.ops.transform.rotate", &["rotation"])
+        .with(&["object.transforms_to_deltas"]),
     mesh(FOUND, "use_boundary_tear=True", ANY),
     mesh(FOUND, "transform.push_pull", POSITIONS).with(&["mode_set(mode='EDIT')"]),
     // A UV selection operator after `uv.select_split` (which may leave Blender's UV
@@ -505,7 +539,15 @@ impl Known {
             return ok.then_some(i);
         }
         let (t, field) = target(&m.path)?;
-        if !self.fields.is_empty() && !self.fields.iter().any(|f| field.starts_with(f)) {
+        // `""` is the whole mesh (counts, `… unmatched … in total`), a name a field prefix.
+        let field_is = |f: &&str| {
+            if f.is_empty() {
+                field.is_empty()
+            } else {
+                field.starts_with(f)
+            }
+        };
+        if !self.fields.is_empty() && !self.fields.iter().any(field_is) {
             return None;
         }
         if self.max_delta > 0.0 && delta(&m.detail).is_none_or(|d| d > self.max_delta) {
@@ -579,13 +621,27 @@ pub fn explain_all(
             direct[i] = direct[listed[0]];
         }
     }
+    // A cascade entry whose cause fails in both tools with its documented message is
+    // triggered by that statement alone (what follows may show no state mismatch of its own:
+    // `uv.lightmap_pack` failing in Edit Mode, then a mode-dependent poll).
+    let failed_causes = KNOWN
+        .iter()
+        .filter(|k| k.cascade && !k.fails_with.is_empty())
+        .flat_map(|k| {
+            (0..statements.len()).filter_map(move |i| {
+                let failed = matches!(trace.outcomes.get(i),
+                    Some(Outcome::Failed(f)) if f.contains(k.fails_with));
+                (failed && pattern_matches(k.cause, &statements[i])).then_some((k, i))
+            })
+        });
     // The earliest cascade cause explains what follows it.
     let cascade = direct
         .iter()
         .flatten()
+        .copied()
         .filter(|(k, _)| k.cascade)
-        .min_by_key(|(_, i)| *i)
-        .copied();
+        .chain(failed_causes)
+        .min_by_key(|(_, i)| *i);
     mismatches
         .iter()
         .zip(&direct)
@@ -640,6 +696,7 @@ mod tests {
             meshes: vec![one("Cube"); n],
             objects: vec![one("Cube"); n],
             edit_end: BTreeSet::new(),
+            object_mesh: BTreeMap::new(),
         }
     }
 
@@ -730,6 +787,11 @@ mod tests {
         );
         assert!(k.explains(&s, &cube_trace(2), &small).is_some());
         assert!(k.explains(&s, &cube_trace(2), &big).is_none());
+        // `""` is the whole mesh only.
+        let k = mesh(GEOMETRY, "mesh.decimate", &[""]);
+        let counts = Mismatch::new("mesh_canonical", "meshes[\"Cube\"]", "frap (8, 12, 6) != …");
+        assert!(k.explains(&s, &cube_trace(2), &counts).is_some());
+        assert!(k.explains(&s, &cube_trace(2), &m).is_none());
     }
 
     /// The verifier's case: a mismatch nothing explains (here a corner-normal flip after
@@ -815,21 +877,54 @@ mod tests {
     }
 
     #[test]
+    fn a_cascade_cause_failing_as_documented_triggers_alone() {
+        let s = st(&[
+            "bpy.ops.object.mode_set(mode='EDIT')",
+            "bpy.ops.uv.lightmap_pack(PREF_PACK_IN_ONE=False)",
+            "bpy.ops.mesh.fill()",
+        ]);
+        let mut tr = cube_trace(3);
+        tr.outcomes[1] = Outcome::Failed("Error: No mesh object".into());
+        let m = Mismatch::new(
+            "lines",
+            line_of(2),
+            "frap RuntimeError: Error: No edges selected != blender RuntimeError: Operator \
+             bpy.ops.mesh.fill.poll() failed, context is incorrect",
+        );
+        assert!(explain_all(&s, &tr, std::slice::from_ref(&m))[0].is_some());
+        // Another failure of the same operator does not.
+        tr.outcomes[1] = Outcome::Failed("Error: something else".into());
+        assert_eq!(explain_all(&s, &tr, std::slice::from_ref(&m)), vec![None]);
+    }
+
+    #[test]
     fn evaluated_entries_need_edit_mode_at_the_end() {
         let s = st(&[
             "bpy.ops.object.modifier_add(type='SUBSURF')",
             "bpy.ops.object.mode_set(mode='EDIT')",
-            "bpy.ops.transform.edge_crease(value=0.5)",
+            "bpy.ops.mesh.extrude_region(use_normal_flip=True)",
         ]);
         let m = Mismatch::new(
             "mesh_canonical",
-            "evaluated[\"Cube\"].attributes[\"crease_edge\"]",
-            "only in blender",
+            "evaluated[\"Cube\"].edges[3]",
+            "frap edge [1, 3] has no blender counterpart",
         );
         let mut tr = cube_trace(3);
         assert_eq!(explain_all(&s, &tr, std::slice::from_ref(&m)), vec![None]);
         tr.edit_end.insert("Cube".into());
         assert!(explain_all(&s, &tr, std::slice::from_ref(&m))[0].is_some());
+        // The evaluated SUBSURF lacks the edge data whatever the mode.
+        let s = st(&[
+            "bpy.ops.object.modifier_add(type='SUBSURF')",
+            "bpy.ops.object.mode_set(mode='EDIT')",
+            "bpy.ops.transform.edge_crease(value=0.5)",
+        ]);
+        let c = Mismatch::new(
+            "mesh_canonical",
+            "evaluated[\"Cube\"].attributes[\"crease_edge\"]",
+            "only in blender",
+        );
+        assert!(explain_all(&s, &cube_trace(3), std::slice::from_ref(&c))[0].is_some());
         // Other evaluated fields are not explained.
         let p = Mismatch::new("mesh_canonical", "evaluated[\"Cube\"].positions[0]", "x");
         assert_eq!(explain_all(&s, &tr, std::slice::from_ref(&p)), vec![None]);

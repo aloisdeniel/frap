@@ -150,6 +150,9 @@ pub fn probe(statements: &[String]) -> (Vec<CompareSpec>, Trace) {
         else {
             continue;
         };
+        trace
+            .object_mesh
+            .insert(o.header.name.to_string(), m.header.name.to_string());
         if m.verts_num() > MAX_COMPARED_VERTS {
             continue;
         }
