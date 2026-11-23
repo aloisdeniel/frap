@@ -79,6 +79,15 @@ pub const DEPTH_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
 /// Texture slots per material.
 pub const MAX_TEXTURES: usize = 8;
 
+#[cfg(test)]
+thread_local! {
+    /// DIAG (temporary): the interpolated shadow depth instead of the plane depth.
+    pub(crate) static DIAG_OLD_DEPTH: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// DIAG (temporary): the last sample's shadow matrices, map size and tiles.
+    pub(crate) static DIAG_MATS: std::cell::RefCell<(Vec<Mat4>, u32, u32)> =
+        const { std::cell::RefCell::new((Vec::new(), 0, 0)) };
+}
+
 /// Transparency of a material (`material.ints.y`).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
 #[repr(u32)]
@@ -493,6 +502,10 @@ struct FrameU {
 #[derive(Copy, Clone, Pod, Zeroable)]
 struct ShadowLayerU {
     view_proj: [f32; 16],
+    /// The inverse of `view_proj` (`fs_shadow` casts each texel's ray, eevee_shadow.wgsl).
+    inv_view_proj: [f32; 16],
+    /// xy: the map's texel origin in its atlas layer, z: its size in texels.
+    viewport: [f32; 4],
     /// x: the sample's transparency random (transparent shadows, WP 5.5), y: the map index
     /// (the transparent-shadow hash key).
     params: [f32; 4],
@@ -1558,7 +1571,10 @@ pub fn render(
                 layers,
                 1,
                 shadows::FORMAT,
-                wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
+                // DIAG (temporary): COPY_SRC for the depth readback.
+                wgpu::TextureUsages::RENDER_ATTACHMENT
+                    | wgpu::TextureUsages::TEXTURE_BINDING
+                    | wgpu::TextureUsages::COPY_SRC,
             ),
         ));
     }
@@ -1816,12 +1832,29 @@ pub fn render(
         let mats_flat: Vec<[f32; 16]> = matrices.iter().map(Mat4::to_cols_array).collect();
         gpu.queue
             .write_buffer(&shadow_mat_buf, 0, bytemuck::cast_slice(&mats_flat));
-        let layers_u: Vec<ShadowLayerU> = mats_flat
+        #[cfg(test)]
+        let diag_old = if DIAG_OLD_DEPTH.with(std::cell::Cell::get) {
+            1.0
+        } else {
+            0.0
+        };
+        #[cfg(not(test))]
+        let diag_old = 0.0;
+        #[cfg(test)]
+        DIAG_MATS.with(|d| *d.borrow_mut() = (matrices.clone(), plan.size, plan.tiles));
+        let layers_u: Vec<ShadowLayerU> = matrices
             .iter()
             .enumerate()
-            .map(|(i, m)| ShadowLayerU {
-                view_proj: *m,
-                params: [sample.transparency, i as f32, 0.0, 0.0],
+            .map(|(i, m)| {
+                let (_, [x, y]) = plan.tile_of(i as u32);
+                ShadowLayerU {
+                    view_proj: m.to_cols_array(),
+                    // In f64: a local light's reverse-depth projection has a near plane of
+                    // `influence / 4000`.
+                    inv_view_proj: m.as_dmat4().inverse().as_mat4().to_cols_array(),
+                    viewport: [x as f32, y as f32, shadow_size as f32, 0.0],
+                    params: [sample.transparency, i as f32, diag_old, 0.0],
+                }
             })
             .collect();
         if draw_shadows {

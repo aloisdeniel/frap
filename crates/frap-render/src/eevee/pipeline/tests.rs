@@ -713,3 +713,159 @@ fn image_decoding() {
     assert_eq!((w, h), (1, 1));
     assert_eq!(d[0], [0.5; 4]);
 }
+
+// DIAG (temporary): cube-face depths of a hard point light above the plane against the
+// analytic depth of the plane (z = 0), with the interpolated depth (old) and the plane depth.
+fn diag_depth_layer(gpu: &Gpu, tex: &wgpu::Texture, size: u32, layer: u32) -> Vec<f32> {
+    let bpr = (size * 4).div_ceil(256) * 256;
+    let buf = gpu.device.create_buffer(&wgpu::BufferDescriptor {
+        label: None,
+        size: u64::from(bpr * size),
+        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+        mapped_at_creation: false,
+    });
+    let mut enc = gpu.device.create_command_encoder(&Default::default());
+    enc.copy_texture_to_buffer(
+        wgpu::TexelCopyTextureInfo {
+            texture: tex,
+            mip_level: 0,
+            origin: wgpu::Origin3d {
+                x: 0,
+                y: 0,
+                z: layer,
+            },
+            aspect: wgpu::TextureAspect::DepthOnly,
+        },
+        wgpu::TexelCopyBufferInfo {
+            buffer: &buf,
+            layout: wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(bpr),
+                rows_per_image: Some(size),
+            },
+        },
+        wgpu::Extent3d {
+            width: size,
+            height: size,
+            depth_or_array_layers: 1,
+        },
+    );
+    gpu.queue.submit([enc.finish()]);
+    let slice = buf.slice(..);
+    slice.map_async(wgpu::MapMode::Read, |_| {});
+    let _ = gpu.device.poll(wgpu::PollType::wait_indefinitely());
+    let data = slice.get_mapped_range().unwrap();
+    let mut out = Vec::with_capacity((size * size) as usize);
+    for y in 0..size {
+        let row = &data[(y * bpr) as usize..(y * bpr + size * 4) as usize];
+        out.extend(
+            row.chunks_exact(4)
+                .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]])),
+        );
+    }
+    out
+}
+
+fn diag_analytic(m: &Mat4, size: u32, i: u32, j: u32) -> Option<f64> {
+    let inv = m.as_dmat4().inverse();
+    let u = (f64::from(i) + 0.5) / f64::from(size);
+    let v = (f64::from(j) + 0.5) / f64::from(size);
+    let ndc = glam::DVec2::new(u * 2.0 - 1.0, 1.0 - v * 2.0);
+    let a = inv * glam::DVec4::new(ndc.x, ndc.y, 1.0, 1.0);
+    let b = inv * glam::DVec4::new(ndc.x, ndc.y, 0.0, 1.0);
+    let a = a.truncate() / a.w;
+    let b = b.truncate() / b.w;
+    let dir = b - a;
+    if dir.z.abs() < 1e-12 {
+        return None;
+    }
+    let t = -a.z / dir.z;
+    if !(0.0..=1.0).contains(&t) {
+        return None;
+    }
+    let x = a + dir * t;
+    if x.x.abs() > 4.9 || x.y.abs() > 4.9 {
+        return None;
+    }
+    let c = m.as_dmat4() * x.extend(1.0);
+    Some(c.z / c.w)
+}
+
+#[test]
+fn diag_plane_depth() {
+    if std::env::var("FRAP_DIAG").is_err() {
+        return;
+    }
+    let Some(gpu) = gpu() else { return };
+    for at in [
+        Vec3::new(0.0, 0.0, 1.5),
+        Vec3::new(0.13, -0.07, 1.5),
+        Vec3::new(-0.21, 0.17, 1.5),
+        Vec3::new(0.0, 0.0, 2.0),
+        Vec3::new(0.31, 0.22, 2.0),
+    ] {
+        for old in [true, false] {
+            DIAG_OLD_DEPTH.with(|c| c.set(old));
+            let mut e = crate::eevee::Eevee::new();
+            let mut l = light(RLightKind::Point, 100.0, at);
+            l.radius = 0.0;
+            let mut sc = plane_scene(l);
+            sc.settings.taa_render_samples = 1;
+            let lit = render(&gpu, &mut e, &sc);
+            let (mats, size, tiles) = DIAG_MATS.with(|d| d.borrow().clone());
+            let (lsize, layers, tex) = e.state.shadow_atlas.as_ref().unwrap();
+            eprintln!(
+                "DIAG at={at:?} old={old} map size {size} tiles {tiles} layer {lsize} x {layers}; probes {:.4} {:.4} {:.4} {:.4}",
+                px(&lit, 32, 32)[0],
+                px(&lit, 48, 32)[0],
+                px(&lit, 16, 32)[0],
+                px(&lit, 32, 48)[0]
+            );
+            let per = tiles * tiles;
+            let layer_data: Vec<Vec<f32>> = (0..*layers)
+                .map(|l| diag_depth_layer(&gpu, tex, *lsize, l))
+                .collect();
+            for (f, m) in mats.iter().enumerate().take(6) {
+                let f = f as u32;
+                let (layer, t) = (f / per, f % per);
+                let (ox, oy) = (t % tiles * size, t / tiles * size);
+                let d = &layer_data[layer as usize];
+                let (mut n, mut lo, mut hi, mut closer, mut far3, mut worst_rel) =
+                    (0u32, f64::MAX, f64::MIN, 0u32, 0u32, 0.0f64);
+                for j in 1..size - 1 {
+                    for i in 1..size - 1 {
+                        let Some(want) = diag_analytic(m, size, i, j) else {
+                            continue;
+                        };
+                        let (Some(r), Some(dn)) = (
+                            diag_analytic(m, size, i + 1, j),
+                            diag_analytic(m, size, i, j + 1),
+                        ) else {
+                            continue;
+                        };
+                        let slope = (r - want).abs().max((dn - want).abs());
+                        let got = f64::from(d[((oy + j) * lsize + ox + i) as usize]);
+                        let diff = got - want;
+                        n += 1;
+                        lo = lo.min(diff);
+                        hi = hi.max(diff);
+                        if diff > 0.25 * slope + 1e-9 {
+                            closer += 1;
+                        }
+                        if diff < -3.0 * slope - 1e-9 {
+                            far3 += 1;
+                        }
+                        worst_rel = worst_rel.max(diff.abs() / want.max(1e-12));
+                    }
+                }
+                if n > 0 {
+                    eprintln!(
+                        "  face {f}: {n} texels, depth - analytic in [{:.3e}, {:.3e}], {closer} closer than -0.25 slope.. (acne), {far3} beyond 3 slopes, worst |rel| {worst_rel:.3e}",
+                        lo, hi
+                    );
+                }
+            }
+        }
+    }
+    DIAG_OLD_DEPTH.with(|c| c.set(false));
+}
