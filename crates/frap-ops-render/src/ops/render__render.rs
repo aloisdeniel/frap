@@ -77,7 +77,7 @@ use frap_spec_ops_render::render;
 use crate::output::{self, OutputPath, OutputRules, TemplateVars, format};
 
 /// The Workbench engine.
-const WORKBENCH: &str = "BLENDER_WORKBENCH";
+pub(crate) const WORKBENCH: &str = "BLENDER_WORKBENCH";
 /// Name of the render result image.
 const RENDER_RESULT: &str = "Render Result";
 
@@ -540,10 +540,27 @@ fn store_render_result(cx: &mut OpCtx, film: Film) {
     ]
 )]
 fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
-    let plan = plan(cx, &p)?;
-    let eevee = cx.services().render()?.supports_engine(EEVEE);
-    let engine = effective_engine(&plan.engine, eevee);
-    let warning = engine_fallback(&plan.engine, eevee);
+    run(cx, &p, None)
+}
+
+/// The body of `render.render`; `forced_engine` renders with that engine whatever
+/// `scene.render.engine` says, without the fallback WARNING (`render.opengl`, WP 8.3.6).
+pub(crate) fn run(
+    cx: &mut OpCtx,
+    p: &render::Render,
+    forced_engine: Option<&'static str>,
+) -> OpResult {
+    let plan = plan(cx, p)?;
+    let (engine, warning) = match forced_engine {
+        Some(e) => (e, None),
+        None => {
+            let eevee = cx.services().render()?.supports_engine(EEVEE);
+            (
+                effective_engine(&plan.engine, eevee),
+                engine_fallback(&plan.engine, eevee),
+            )
+        }
+    };
     let mut files: Vec<Value> = Vec::new();
     let mut skipped: Vec<Value> = Vec::new();
     let mut rendered = 0usize;

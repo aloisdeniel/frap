@@ -1,0 +1,8 @@
+# WP 8.3.6: the material copy buffer (deviation D-159) in short form (§11.4): material.copy and
+# material.paste work on the active object's active material; the buffer is a snapshot taken
+# at copy time and lives outside the undo state (an undo after the copy, and a factory reset,
+# keep it); paste into an empty slot cancels with Blender's WARNING; an empty buffer is
+# Blender's error. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true
