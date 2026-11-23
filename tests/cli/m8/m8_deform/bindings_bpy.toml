@@ -1,0 +1,9 @@
+# WP 8.3.12: UVProjectModifier.projectors survive a save and an open (`.frap` writes the ten
+# slots as the ID pointers `projectors[0]`…`projectors[9]`, generated `id_refs`/`set_id_ref`):
+# the projector objects and the evaluated UVs are the same after the open; removing a projector
+# object clears its slot (ID remapping), and the cleared slot stays empty after another save.
+# CorrectiveSmoothModifier.is_bind is False (frap stores no bind data) and read-only.
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

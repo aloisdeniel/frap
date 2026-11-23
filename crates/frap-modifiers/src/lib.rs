@@ -187,6 +187,12 @@ pub trait ModEvalCx {
     fn prev_coords_slot(&mut self) -> Option<&mut Option<Vec<[f32; 3]>>> {
         None
     }
+    /// The edit mesh of this object's mesh when it is in Edit Mode (`BMEditMesh`, the stack's
+    /// base before shape keys and modifiers): CORRECTIVE_SMOOTH's `ORCO` rest shape
+    /// (`BKE_editmesh_vert_coords_alloc_orco`, WP 8.3.12). Default: not in Edit Mode.
+    fn edit_mesh(&self) -> Option<Arc<Mesh>> {
+        None
+    }
 }
 
 /// What a `types/<type>.rs` file needs.

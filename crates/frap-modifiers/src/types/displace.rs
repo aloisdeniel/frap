@@ -14,7 +14,7 @@
 //! `texture_coords_bone` needs evaluated poses (M6), so the object's matrix is used, as Blender
 //! does when the bone does not exist.
 
-mod tex;
+pub(crate) mod tex;
 
 use frap_mesh::{AttrData, Domain, Mesh};
 use frap_rna::{IdAny, IdRef, ImageId, ObjectId, TextureId};
@@ -100,7 +100,7 @@ fn eval(md: &Modifier, mut mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, M
 
 /// The `ImBuf` Blender samples for an image, with "the image has alpha" (`alpha_mode` other
 /// than `'NONE'`); `None` when it has no pixels.
-fn image_buffer(
+pub(crate) fn image_buffer(
     cx: &mut dyn ModEvalCx,
     im: IdRef<ImageId>,
 ) -> Result<Option<(ImBuf, bool)>, ModError> {

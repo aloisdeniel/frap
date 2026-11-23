@@ -712,12 +712,12 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 | [x] | `LAPLACIANSMOOTH` | `LaplacianSmoothModifier` | M4 | P2 |  |
 | [x] | `ARMATURE` | `ArmatureModifier` | M6 | P0 | LBS, envelopes, mask group, preserve volume (dual quaternions), multi modifier; armature-parent virtual modifier (WP 6.5); B-Bone segments M8 |
 | [ ] | `REMESH` | `RemeshModifier` | M9 | P2 | post-M8 (M8 W0, M8W0-3): VOXEL needs OpenVDB, BLOCKS/SMOOTH/SHARP the dualcon octree contourer (`intern/dualcon`); passes through with the WARNING |
-| [ ] | `SHRINKWRAP` | `ShrinkwrapModifier` | M8 | P2 | WP 8.3.12 |
-| [ ] | `UV_PROJECT` | `UVProjectModifier` | M8 | P2 | WP 8.3.12 |
-| [ ] | `UV_WARP` | `UVWarpModifier` | M8 | P2 | WP 8.3.12 |
-| [ ] | `CORRECTIVE_SMOOTH` | `CorrectiveSmoothModifier` | M8 | P2 | WP 8.3.12 |
-| [ ] | `WAVE` | `WaveModifier` | M8 | P2 | WP 8.3.12 |
-| [ ] | `WARP` | `WarpModifier` | M8 | P2 | WP 8.3.12 |
+| [x] | `SHRINKWRAP` | `ShrinkwrapModifier` | M8 | P2 | every `wrap_method` (BVH nearest point/vertex/target-project, watertight ray casts, auxiliary target, culling, limit, `subsurf_levels` as Blender's uniform refinement) and `wrap_mode`; bit-exact with Blender's arm64 `invert_m4_m4`; WP 8.3.12 (goldens `modifiers/m8_deform/shrinkwrap/*`) |
+| [x] | `UV_PROJECT` | `UVProjectModifier` | M8 | P2 | empties and cameras (perspective, orthographic, panoramic), several projectors chosen per face normal; `projectors[i].object` bound (saved in `.frap`, remapped on removal); WP 8.3.12 (golden `modifiers/m8_deform/uv_project/projectors`) |
+| [x] | `UV_WARP` | `UVWarpModifier` | M8 | P2 | objects/bones, 2D transform, vertex group; WP 8.3.12 (goldens `modifiers/m8_deform/uv_warp/transforms`, `warp/bones`) |
+| [x] | `CORRECTIVE_SMOOTH` | `CorrectiveSmoothModifier` | M8 | P2 | `rest_source='ORCO'` (the edit mesh in Edit Mode); `BIND` needs `object.correctivesmooth_bind` (OUT): "Bind data required", `is_bind` is `False`; WP 8.3.12 (goldens `modifiers/m8_deform/corrective_smooth/*`) |
+| [x] | `WAVE` | `WaveModifier` | M8 | P2 | time-dependent, along normals, start object, IMAGE/NONE textures; WP 8.3.12 (goldens `modifiers/m8_deform/wave/frame_*`) |
+| [x] | `WARP` | `WarpModifier` | M8 | P2 | every falloff (`CURVE`: the default curve's table, `falloff_curve` unbound), volume preserve, bones, IMAGE/NONE textures; WP 8.3.12 (goldens `modifiers/m8_deform/warp/*`) |
 | [ ] | `DATA_TRANSFER` | `DataTransferModifier` | M8 | P2 | WP 8.3.13 |
 | [ ] | `VERTEX_WEIGHT_EDIT` | `VertexWeightEditModifier` | M8 | P2 | WP 8.3.13 |
 | [ ] | `VERTEX_WEIGHT_MIX` | `VertexWeightMixModifier` | M8 | P2 | WP 8.3.13 |

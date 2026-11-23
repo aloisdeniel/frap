@@ -6,13 +6,13 @@ object.modifier_move_to_index modifier=Bevel index=0
 context.object.modifiers['Bevel'].use_pin_to_last = True
 context.object.modifiers.keys()
 object.modifier_move_up modifier=Bevel
-object.modifier_add type=WAVE
+object.modifier_add type=REMESH
 object.modifier_add type=BOOLEAN
-object.modifier_remove modifier=Wave
+object.modifier_remove modifier=Remesh
 object.modifier_apply modifier=Boolean
 object.modifier_apply modifier=Bevel
 object.modifier_apply modifier=Subdivison
-object.modifier_remove modifier=Wave
+object.modifier_remove modifier=Remesh
 object.duplicate_move_linked
 object.modifier_apply modifier=Subdivision
 object.mode_set mode=EDIT
