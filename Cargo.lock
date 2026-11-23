@@ -1209,9 +1209,14 @@ dependencies = [
 name = "frap-lua"
 version = "0.1.0"
 dependencies = [
+ "frap-lang",
  "frap-ops-all",
+ "frap-rna",
  "frap-session",
+ "indexmap",
  "mlua",
+ "serde_json",
+ "toml",
 ]
 
 [[package]]

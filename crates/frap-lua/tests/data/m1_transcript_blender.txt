@@ -1,0 +1,23 @@
+import metallic 1.0
+render png 1
+object Camera type CAMERA
+object Camera data Camera.001
+object Camera location 4.0 -4.0 3.0
+object Camera rotation_euler 1.100000023841858 0.0 0.7850000262260437
+object Camera scale 1.0 1.0 1.0
+object Cylinder type MESH
+object Cylinder data Cylinder
+object Cylinder location 0.0 0.0 1.0
+object Cylinder rotation_euler 0.0 0.0 0.0
+object Cylinder scale 1.0 1.0 1.0
+mesh Cylinder vertices 32 edges 48 polygons 18
+mesh Cylinder materials Steel
+material Material diffuse_color 0.800000011920929 0.800000011920929 0.800000011920929 1.0
+material Material metallic 0.0
+material Steel diffuse_color 0.6000000238418579 0.6000000238418579 0.699999988079071 1.0
+material Steel metallic 1.0
+camera Camera.001 lens 50.0
+scene Scene camera Camera
+scene Scene engine BLENDER_WORKBENCH
+scene Scene filepath out/part.png
+context object Camera

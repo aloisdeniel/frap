@@ -1,0 +1,13 @@
+rename Box 2.0 bpy.data.objects['Box']
+child 3.0 3.0 Cube 1
+context Wheel 2.0 2.0
+material Iron 1.0
+removed error StructRNA of type Object has been removed
+removed-set error StructRNA of type Object has been removed
+removed-repr <bpy_struct, Object invalid>
+readded error StructRNA of type Object has been removed
+readded-new Wheel
+embedded error StructRNA of type ShaderNodeTree has been removed
+float 5.0 float float 50.0 float
+int-from-float error bpy_struct: item.attr = val: Object.pass_index expected an int type, not float
+float-arith 1.8446744073709552e+19
