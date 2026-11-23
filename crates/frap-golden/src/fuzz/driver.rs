@@ -335,7 +335,7 @@ fn degenerate_of(b: &crate::state::GoldenState) -> BTreeMap<String, known::Degen
     meshes
         .chain(evaluated)
         .map(|(k, m)| (k, known::Degenerate::of(m)))
-        .filter(|(_, d)| !d.faces.is_empty())
+        .filter(|(_, d)| !(d.faces.is_empty() && d.corners.is_empty()))
         .collect()
 }
 

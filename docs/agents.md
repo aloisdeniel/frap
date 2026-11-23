@@ -251,6 +251,30 @@ Other workflows in the same directory: a round table on a pedestal (inset + two 
 - `bpy.ops.mesh.delete(type='VERT')` with nothing selected is `CANCELLED` with a WARNING report; check `selected` in `edit_mesh` first.
 - Ask for help inside the session: `bpy.ops.frap.describe(target='mesh.spin')` lists every argument with its default and unit.
 
+### 10.6 Undo and redo
+
+frap keeps the undo history of an interactive Blender (headless-extended, deviations D-149: `blender -b` keeps none until a script calls `ed.undo_push()`). Use it to back out of a step that went wrong instead of rebuilding the model.
+
+- **What pushes a step**: every operator with the `UNDO` option (most modelling and object operators; repeated `screen.frame_offset` calls group into one "Frame Change" step), every RNA assignment the UI would push for (`bpy.context.object.location.z = 1.5` is the step "Location"), every RNA function call that changes data (`bpy.data.materials.new(…)` is "new"), and `bpy.ops.ed.undo_push(message='checkpoint')`, which pushes a named step. Reads, calls that change nothing (`select_get()`), context-only writes (`space_data.shading.type`) and failed statements push nothing. Writes to the 3D View or the window are never undone.
+- `bpy.ops.ed.undo()` goes back one step and `bpy.ops.ed.redo()` forward one. `result.undone` / `result.redone` name the step, and `changes` lists the datablocks that came back (`added`), went away (`removed`) or changed (`modified`). Any new step drops what could be redone. `bpy.ops.ed.undo_redo()` runs the last operator with both the `REGISTER` and `UNDO` options again with the same arguments (`result.repeated`).
+- The history holds `bpy.context.preferences.edit.undo_steps` steps (32); older ones are dropped. It starts at the session start or the last file load: `wm.read_homefile` and `wm.open_mainfile` clear it.
+- In Edit Mode, steps on the edit data restore the edit mesh only (geometry, selection, select mode: watch the `edit_mesh` block). Undoing the "Edit Mode" step itself leaves Edit Mode. Object writes made in Edit Mode push no step.
+- With nothing to undo or redo, `ed.undo` / `ed.redo` fail their poll (`OP_POLL_FAILED`, `Operator bpy.ops.ed.undo.poll() failed, context is incorrect`) with a hint that says why. Ask first with `bpy.ops.ed.undo.poll()`; a failed undo leaves the scene unchanged.
+- `bpy.data.is_dirty` is not set by the implicit steps (as in `blender -b`); only `ed.undo_push` sets it.
+
+```text
+object.mode_set mode=EDIT
+ed.undo_push message=before-bevel
+mesh.bevel offset=0.4 segments=3
+ed.undo                       # result.undone == "Bevel"
+mesh.bevel offset=0.1 segments=3
+```
+
+### 10.7 Unwrapping and Booleans
+
+- `uv.unwrap` runs all three of Blender's methods as Blender does: `ANGLE_BASED` (ABF++, the factory default), `CONFORMAL` (LSCM) and `MINIMUM_STRETCH` (SLIM, with `iterations`, `use_weights`). None of them falls back to another method or warns. `uv.smart_project` gives Blender's islands and layout, but on some meshes the last bit of a few UVs differs (D-146).
+- The BOOLEAN modifier supports `solver='FLOAT'` (Blender's fast solver), `'EXACT'` and `'MANIFOLD'`, and `mesh.intersect` / `mesh.intersect_boolean` support `'FLOAT'` and `'EXACT'`. FLOAT cuts in a fixed order, so it always gives the same result. Blender's FLOAT result can change from run to run on some inputs (D-145). Prefer `'EXACT'` (the default) or `'MANIFOLD'` for closed meshes. Use FLOAT for speed on simple cuts, or when the base mesh is open.
+
 ## 11. Checking a model
 
 - `bpy.ops.frap.scene_summary(objects='SELECTED')` answers, in one response, every object with its mode, transform, materials, modifiers, element counts and world-space bounds (`bounds_min`, `bounds_max`), plus totals. A mesh in Edit Mode is summarised from its edit mesh. Use it after a modelling step to check sizes and counts.

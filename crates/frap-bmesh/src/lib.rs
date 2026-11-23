@@ -18,6 +18,7 @@
 pub mod clnor;
 pub mod convert;
 pub mod customdata;
+pub mod cxx_sort;
 pub mod kernel;
 pub mod pool;
 pub mod query;

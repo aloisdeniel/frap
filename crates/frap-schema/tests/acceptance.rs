@@ -568,6 +568,16 @@ fn agents_guide_covers_the_agent_surface() {
         "ROTATION (radians)",
         "defaults_that_surprise",
         "not_implemented",
+        // M8 stabilization round 2: undo (D-149), the exact unwrap methods, the FLOAT Boolean.
+        "bpy.ops.ed.undo()",
+        "bpy.ops.ed.redo()",
+        "ed.undo_push",
+        "ed.undo_redo",
+        "result.undone",
+        "undo_steps",
+        "D-149",
+        "MINIMUM_STRETCH",
+        "solver='FLOAT'",
     ] {
         assert!(
             guide.contains(needle),

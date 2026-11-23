@@ -5,16 +5,15 @@
 //! Python signature: `bmesh.ops.connect_verts_concave(bmesh, faces=[])`.
 //!
 //! **Create/kill order**: each input face with a concave corner (vertices tagged, input
-//! order) is triangulated (`BM_face_triangulate`, BEAUTY; through WP 2.10's `triangulate`
-//! op), then its new interior edges are dissolved again (`BM_faces_join`, the joined face is
-//! new) as long as both sides stay convex: edges between two convex corners first, longest
-//! first.
+//! order) is triangulated (`BM_face_triangulate`, BEAUTY), then its new interior edges
+//! (creation order, sorted with libc++'s `std::sort`, `crate::cxx_sort`) are dissolved again
+//! (`BM_faces_join`, the joined face is new) as long as both sides stay convex: edges between
+//! two convex corners first, longest first.
 //!
 //! Operator type flags: `UNTAN_MULTIRES | NORMALS_CALC | SELECT_FLUSH`.
 
-use rustc_hash::FxHashSet;
-
 use crate::ops::contextual_create::bli;
+use crate::ops::triangulate::{NgonMethod, QuadMethod, face_triangulate};
 use crate::types::OpTypeFlag;
 use crate::{BMElem, BMesh, BmError, EdgeId, ElemFlag, FaceId, LoopId};
 
@@ -73,36 +72,18 @@ fn face_convex_tag_verts(bm: &mut BMesh, f: FaceId) -> bool {
 // (bm_face_split_by_concave).
 fn face_split_by_concave(bm: &mut BMesh, f_base: FaceId, eps: f32) {
     let normal = bm.face(f_base).no;
-    let before: FxHashSet<EdgeId> = bm.face_edges(f_base).into_iter().collect();
-    let r = crate::ops::triangulate::triangulate(
-        bm,
-        &crate::ops::triangulate::TriangulateIn {
-            faces: vec![f_base],
-            ..Default::default()
-        },
-    );
-    let mut tri_faces: Vec<FaceId> = Vec::new();
-    if let Ok(out) = r {
-        for g in out.geom {
-            if let BMElem::Face(f) = g
-                && bm.faces.contains(f.0)
-            {
-                tri_faces.push(f);
-            }
-        }
-    }
-    let mut edges: Vec<EdgeId> = Vec::new();
-    for &f in &tri_faces {
+    // `BM_face_triangulate(…, quad_method = 0, ngon_method = 0 (beauty), use_tag = false)`.
+    let tri = face_triangulate(bm, f_base, QuadMethod::Beauty, NgonMethod::Beauty, false);
+    for &f in &tri.faces_new {
         bm.oflag_enable(f, FACE_OUT);
-        for e in bm.face_edges(f) {
-            if !before.contains(&e) && !edges.contains(&e) {
-                edges.push(e);
-            }
-        }
     }
-    if bm.faces.contains(f_base.0) {
-        bm.oflag_enable(f_base, FACE_OUT);
-    }
+    bm.oflag_enable(f_base, FACE_OUT);
+    // `faces_double`: a linked list the triangulation prepends to (most recent first), then
+    // the joins below.
+    let mut faces_double: Vec<FaceId> = tri.faces_double;
+    // The new edges in creation order, sorted as `std::sort` does (M8 stabilization round 2:
+    // equal lengths keep libc++'s order, not the slot order).
+    let mut edges = tri.edges_new;
     let concave = |bm: &BMesh, e: EdgeId| {
         let [a, b] = bm.edge(e).v;
         bm.vert(a).flag.contains(ElemFlag::TAG) && bm.vert(b).flag.contains(ElemFlag::TAG)
@@ -111,19 +92,26 @@ fn face_split_by_concave(bm: &mut BMesh, f_base: FaceId, eps: f32) {
         let [a, b] = bm.edge(e).v;
         bli::len_squared_v3v3(bm.vert(a).co, bm.vert(b).co)
     };
-    edges.sort_by(|&a, &b| {
-        let (ca, cb) = (concave(bm, a), concave(bm, b));
-        if ca != cb {
-            return ca.cmp(&cb);
-        }
-        len_sq(bm, b).total_cmp(&len_sq(bm, a))
-    });
-    let mut faces_double: Vec<FaceId> = Vec::new();
+    {
+        let bm_ref: &BMesh = bm;
+        crate::cxx_sort::sort(&mut edges, |&a, &b| {
+            let (ca, cb) = (concave(bm_ref, a), concave(bm_ref, b));
+            if ca != cb {
+                // Edges between concave corners last.
+                return !ca & cb;
+            }
+            // Otherwise shortest edges last.
+            len_sq(bm_ref, a) > len_sq(bm_ref, b)
+        });
+    }
     for e in edges {
         if !bm.edges.contains(e.0) {
             continue;
         }
         bm.oflag_enable(e, EDGE_OUT);
+        if !bm.edge_is_contiguous(e) {
+            continue;
+        }
         let pair = bm.edge(e).l.and_then(|la| {
             let lb = bm.lp(la).radial_next;
             (la != lb && bm.lp(lb).radial_next == la).then_some([la, lb])
@@ -131,9 +119,6 @@ fn face_split_by_concave(bm: &mut BMesh, f_base: FaceId, eps: f32) {
         let Some(l_pair) = pair else {
             continue;
         };
-        if !bm.edge_is_contiguous(e) {
-            continue;
-        }
         let mut ok = true;
         for &l in &l_pair {
             let ll = bm.lp(l);
@@ -153,13 +138,14 @@ fn face_split_by_concave(bm: &mut BMesh, f_base: FaceId, eps: f32) {
             let f_pair = [bm.lp(l_pair[0]).f, bm.lp(l_pair[1]).f];
             let (f_new, f_double) = bm.faces_join(&f_pair, true, true);
             match (f_new, f_double) {
-                (Some(fnew), Some(_)) => faces_double.push(fnew),
+                // `BLI_linklist_prepend`.
+                (Some(fnew), Some(_)) => faces_double.insert(0, fnew),
                 (Some(fnew), None) => bm.oflag_enable(fnew, FACE_OUT),
                 _ => {}
             }
         }
     }
-    while let Some(f) = faces_double.pop() {
+    for f in faces_double {
         if bm.faces.contains(f.0) {
             bm.face_kill(f);
         }

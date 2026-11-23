@@ -16,7 +16,9 @@
 //!   failed in both with [`Known::fails_with`]) and acted on the mismatched mesh or object
 //!   (it was active, selected or in Edit Mode after the statement, [`Trace`]); so did a
 //!   statement for every `with` pattern. A `max_delta` entry only explains numbers that
-//!   differ by at most that much; an `edit_end` entry only an object that ends in Edit Mode.
+//!   differ by at most that much; an `edit_end` entry only an object that ends in Edit Mode;
+//!   an `anywhere` entry needs no statement to have acted on the object (Blender moved it
+//!   through a statement frap ran another way).
 //! - A state mismatch explained this way also explains a `lines` mismatch of a later
 //!   statement that acted on the same mesh or object (it ran on other geometry).
 //! - A `cascade` entry (a statement that leaves the scene different from there on: an
@@ -73,8 +75,10 @@ pub struct Trace {
 /// The corners and faces of a mesh (Blender's indices) whose normals float rounding decides:
 /// the faces whose area is zero up to rounding (a wall `extrude_faces_indiv` or
 /// `offset_edge_loops` leaves, a quad twisted onto its own plane: its Newell normal is the
-/// sum of terms that cancel exactly), their corners, and the smooth corners around them (a
-/// vertex normal sums the faces' normals). §2 "Differential fuzzing (WP 8.7), causal triage".
+/// sum of terms that cancel exactly; a face collapsed onto a point), their corners, and the
+/// smooth corners around them (a vertex normal sums the faces' normals), and the smooth
+/// corners of vertices whose face normals cancel up to rounding (overlapping faces of
+/// opposite normals). §2 "Differential fuzzing (WP 8.7), causal triage".
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Degenerate {
     /// Face indices.
@@ -86,18 +90,27 @@ pub struct Degenerate {
 impl Degenerate {
     /// Twice the area below this fraction of the face's squared longest edge is zero.
     pub const REL_AREA: f64 = 1e-5;
+    /// A face whose longest edge is below this fraction of its largest coordinate (or of 1,
+    /// when larger) is collapsed onto a point (a corner BEVEL closes after another BEVEL):
+    /// its normal is the rounding noise of coincident positions.
+    pub const REL_EDGE: f64 = 1e-5;
+    /// A smooth vertex normal whose angle-weighted sum of face normals is below this fraction
+    /// of the angle sum cancels (its direction is rounding noise).
+    pub const REL_CANCEL: f64 = 1e-5;
 
     /// From a dumped mesh.
     pub fn of(m: &crate::state::GMesh) -> Degenerate {
         let p = |i: u32| m.positions.get(i as usize).map(|c| c.map(f64::from));
         let mut d = Degenerate::default();
         let mut verts: BTreeSet<u32> = BTreeSet::new();
+        // Per vertex: the angle-weighted sum of the unit face normals, and the sum of angles.
+        let mut sums: BTreeMap<u32, ([f64; 3], f64)> = BTreeMap::new();
         for (fi, f) in m.faces.iter().enumerate() {
             let pts: Option<Vec<[f64; 3]>> = f.iter().map(|&v| p(v)).collect();
             let Some(pts) = pts else {
                 continue;
             };
-            let (mut n, mut longest) = ([0.0f64; 3], 0.0f64);
+            let (mut n, mut longest, mut extent) = ([0.0f64; 3], 0.0f64, 1.0f64);
             for k in 0..pts.len() {
                 let (a, b) = (pts[k], pts[(k + 1) % pts.len()]);
                 n[0] += (a[1] - b[1]) * (a[2] + b[2]);
@@ -105,14 +118,48 @@ impl Degenerate {
                 n[2] += (a[0] - b[0]) * (a[1] + b[1]);
                 let e = (0..3).map(|c| (a[c] - b[c]).powi(2)).sum::<f64>();
                 longest = longest.max(e);
+                extent = a.iter().fold(extent, |m, c| m.max(c.abs()));
             }
             let area2 = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
-            if area2 <= Self::REL_AREA * longest {
+            let collapsed = longest.sqrt() <= Self::REL_EDGE * extent;
+            if collapsed || area2 <= Self::REL_AREA * longest {
                 d.faces.insert(fi);
                 verts.extend(f.iter().copied());
+                continue;
+            }
+            let unit = n.map(|c| c / area2);
+            for k in 0..pts.len() {
+                let (prev, cur, next) = (
+                    pts[(k + pts.len() - 1) % pts.len()],
+                    pts[k],
+                    pts[(k + 1) % pts.len()],
+                );
+                let dir = |o: [f64; 3]| {
+                    let v = [o[0] - cur[0], o[1] - cur[1], o[2] - cur[2]];
+                    let l = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
+                    if l > 0.0 { v.map(|c| c / l) } else { v }
+                };
+                let (a, b) = (dir(prev), dir(next));
+                let angle = (a[0] * b[0] + a[1] * b[1] + a[2] * b[2])
+                    .clamp(-1.0, 1.0)
+                    .acos();
+                let e = sums.entry(f[k]).or_insert(([0.0; 3], 0.0));
+                for (acc, u) in e.0.iter_mut().zip(unit) {
+                    *acc += u * angle;
+                }
+                e.1 += angle;
             }
         }
-        if d.faces.is_empty() {
+        // Vertices whose face normals cancel up to rounding (overlapping faces of opposite
+        // normals: an in-plane extrusion, the coincident walls of individual extrusions): their
+        // smooth normal is the direction of the rounding residue.
+        for (v, (sum, weight)) in sums {
+            let len = (sum[0] * sum[0] + sum[1] * sum[1] + sum[2] * sum[2]).sqrt();
+            if weight > 0.0 && len <= Self::REL_CANCEL * weight {
+                verts.insert(v);
+            }
+        }
+        if verts.is_empty() {
             return d;
         }
         let sharp = m
@@ -288,6 +335,10 @@ pub struct Known {
     pub when: Option<fn(&str) -> bool>,
     /// State mismatches: only normals of [`Degenerate`] corners and faces of Blender's result.
     pub degenerate: bool,
+    /// State mismatches of objects the statements need not have acted on (a statement of
+    /// Blender's that frap did not run the same way moved them: proportional editing in
+    /// Object Mode after a mode difference).
+    pub anywhere: bool,
 }
 
 impl PartialEq for Known {
@@ -306,7 +357,7 @@ impl PartialEq for Known {
             self.edit_end,
             self.cascade,
             self.when.is_some(),
-            self.degenerate,
+            (self.degenerate, self.anywhere),
         ) == (
             o.deviation,
             o.comparator,
@@ -319,7 +370,7 @@ impl PartialEq for Known {
             o.edit_end,
             o.cascade,
             o.when.is_some(),
-            o.degenerate,
+            (o.degenerate, o.anywhere),
         )
     }
 }
@@ -341,6 +392,7 @@ const BASE: Known = Known {
     cascade: false,
     when: None,
     degenerate: false,
+    anywhere: false,
 };
 
 /// A `lines` difference at `cause` whose outcome text contains `detail`.
@@ -406,6 +458,12 @@ impl Known {
     }
     const fn fails_with(self, fails_with: &'static str) -> Known {
         Known { fails_with, ..self }
+    }
+    const fn anywhere(self) -> Known {
+        Known {
+            anywhere: true,
+            ..self
+        }
     }
     const fn degenerate(self) -> Known {
         Known {
@@ -581,6 +639,12 @@ pub const KNOWN: &[Known] = &[
     state(POLLS, RNA, "uv.lightmap_pack", &["mode", "select_mode"])
         .fails_with("No mesh object")
         .cascade(),
+    // After that failure Blender is in Object Mode, where proportional editing also moves
+    // unselected objects near the selection; frap transforms the edit mesh.
+    state(POLLS, RNA, "uv.lightmap_pack", OBJECT_TRANSFORM)
+        .fails_with("No mesh object")
+        .with(&["bpy.ops.transform.&use_proportional_edit=True"])
+        .anywhere(),
     gap(POLLS, "bpy.ops.transform.", "locked").with(&["shape_key_lock"]),
     line(POLLS, "object.transform_apply", "aborting"),
     // --- geometry differences ---
@@ -597,22 +661,42 @@ pub const KNOWN: &[Known] = &[
         &["location", "matrix"],
     ),
     mesh(GEOMETRY, "ORIGIN_CENTER_OF_VOLUME", POSITIONS),
-    // The evaluated SUBSURF result lacks the edge data the tools write; in Edit Mode
-    // (`edit_end`) it also has other edges after some extrusions.
+    // An edge attribute with one value on every edge is a single-value attribute in Blender,
+    // which SUBSURF gives to its inner edges too (frap: the default); a second or applied
+    // SUBSURF then creases otherwise. In Edit Mode (`edit_end`) the result also has other
+    // edges after some extrusions.
     mesh(
         GEOMETRY,
         "transform.edge_crease|shade_smooth_by_angle|mesh.mark_sharp|mesh.split_normals\
-         |mark_seam|transform.edge_bevelweight|mesh.set_sharpness_by_angle",
+         |mark_seam|transform.edge_bevelweight|mesh.set_sharpness_by_angle\
+         |uv.seams_from_islands",
         EDIT_EDGE_DATA,
     )
     .with(&["SUBSURF|subdivision_set"]),
+    mesh(
+        GEOMETRY,
+        "geometry.attribute_add&domain='EDGE'",
+        &["attributes"],
+    )
+    .with(&["SUBSURF|subdivision_set"]),
+    mesh(GEOMETRY, "transform.edge_crease", ANY).with(&[
+        "SUBSURF|subdivision_set",
+        "object.modifier_copy|object.modifier_apply|object.convert",
+    ]),
+    // `primitive_torus_add` builds a mesh whose active face is 0 (`bpy.data.meshes.new`):
+    // the `ACTIVE_ELEMENT` pivot in Edit Mode is face 0 in Blender, the median in frap.
+    mesh(GEOMETRY, "mesh.primitive_torus_add", POSITIONS).with(&[
+        "transform_pivot_point = 'ACTIVE_ELEMENT'",
+        "mode_set(mode='EDIT')",
+    ]),
     mesh(
         GEOMETRY,
         "mesh.extrude_edges_indiv",
         &["edges", "faces", ""],
     )
     .with(&["SUBSURF|subdivision_set"]),
-    mesh(GEOMETRY, "mesh.extrude_region", ANY).with(&["SUBSURF|subdivision_set"]),
+    mesh(GEOMETRY, "mesh.extrude_region|mesh.extrude_context", ANY)
+        .with(&["SUBSURF|subdivision_set"]),
     mesh(GEOMETRY, "object.transform_apply", POSITIONS)
         .with(&["shape_key_add", "SUBSURF|subdivision_set"]),
     // A few units of the custom normals' 16-bit encoding.
@@ -620,14 +704,21 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "mesh.dissolve_mode&use_face_split=True", NORMALS).with(&["mesh.normals_tools"]),
     mesh(GEOMETRY, "mesh.edge_face_add", ANY).with(&["mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "mesh.decimate", ANY),
+    // SUBSURF positions are T2: the many cost ties of a subdivided symmetric or flat mesh flip
+    // (the same `BM_mesh_decimate_dissolve_ex` as DECIMATE's `DISSOLVE`; exact on Blender's
+    // positions: `fuzz/dissolve_limited_subsurf_circle_ties.py`).
+    mesh("D-120", "mesh.dissolve_limited", ANY).with(&["SUBSURF|subdivision_set"]),
     mesh(GEOMETRY, "uv.align", UVS),
     mesh(GEOMETRY, "mesh.fill(", ANY),
     mesh(GEOMETRY, "BEVEL", UVS),
     mesh(GEOMETRY, "mesh.edge_split", NORMALS).with(&["mesh.merge_normals"]),
     mesh(GEOMETRY, "mesh.edge_rotate", ANY).with(&["mode_set(mode='EDIT')"]),
-    mesh(GEOMETRY, "mesh.normals_make_consistent", ANY)
-        .with(&["mode_set(mode='EDIT')", "mesh.primitive_plane_add"]),
-    mesh(GEOMETRY, "mesh.primitive_", POSITIONS).with(&["shape_key_add", "mode_set(mode='EDIT')"]),
+    mesh(GEOMETRY, "mesh.normals_make_consistent", ANY).with(&[
+        "mode_set(mode='EDIT')",
+        "mesh.primitive_plane_add|mesh.primitive_grid_add|mesh.primitive_circle_add",
+    ]),
+    // (Positions of the added geometry, and whatever the modifiers derive from them.)
+    mesh(GEOMETRY, "mesh.primitive_", ANY).with(&["shape_key_add", "mode_set(mode='EDIT')"]),
     mesh(GEOMETRY, "uv.weld", UVS).with(&["mesh.split"]),
     mesh(GEOMETRY, "mesh.convex_hull", ANY),
     mesh(
@@ -666,6 +757,10 @@ pub const KNOWN: &[Known] = &[
     mesh(GEOMETRY, "transform.vertex_random", POSITIONS),
     mesh(GEOMETRY, "transform.shrink_fatten", POSITIONS).with(&["mesh.extrude_faces_indiv"]),
     mesh(GEOMETRY, "orient_type='NORMAL'", POSITIONS).with(&["mode_set(mode='EDIT')"]),
+    // Blender creates the side faces of an extrusion in pointer-hash order (D-65): a later
+    // dissolve that joins them winds the merged face by that order.
+    mesh("D-65", "mesh.dissolve_", WINDING)
+        .with(&["mesh.extrude_repeat|mesh.extrude_region|mesh.extrude_context"]),
     // Blender's own UV sphere element order changes between runs (D-19): results that
     // depend on the element order (index writes, ties) are not comparable on its mesh.
     mesh("D-19", "mesh.primitive_uv_sphere_add", ANY),
@@ -681,12 +776,18 @@ pub const KNOWN: &[Known] = &[
     mesh(FOUND, "mesh.dissolve_", NORMALS).with(&["mesh.set_sharpness_by_angle|mesh.mark_sharp"]),
     state(FOUND, RNA, "object.align", OBJECT_TRANSFORM).with(&["SUBSURF|subdivision_set"]),
     mesh(FOUND, TOPOLOGY, NORMALS).with(&[CUSTOM_NORMALS]),
+    // `set_sharpness_by_angle` adds a (zero) `custom_normal` layer in Blender 5.2: topology
+    // operators after it keep Blender's custom normals as they do after the tools above.
+    mesh(FOUND, TOPOLOGY, NORMALS).with(&["mesh.set_sharpness_by_angle"]),
     mesh(FOUND, "mesh.solidify", POSITIONS).with(&["mesh.dissolve_edges"]),
     mesh(
         FOUND,
         "transform.shrink_fatten&use_even_offset=True",
         POSITIONS,
     ),
+    // An inset corner with a huge offset factor (nearly opposite edges on Suzanne's boundary)
+    // amplifies the input's rounding past the case tolerance.
+    mesh(FOUND, "mesh.inset", POSITIONS).with(&["primitive_monkey_add"]),
     mesh(FOUND, "transform.shear", ANY).when(shear_frame_is_singular),
     mesh(FOUND, "mesh.tris_convert_to_quads", ANY).with(&["TRIFAN"]),
     // Join errors that tie up to float rounding on the symmetric triangles of an ico sphere,
@@ -716,6 +817,19 @@ pub const KNOWN: &[Known] = &[
     // starts from another selection.
     gap(D_111, "bpy.ops.uv.", "frap ok != blender CANCELLED")
         .with(&["uv.select_linked|uv.select_pinned"]),
+    // A second `uv.select_linked` after a topology operator (`wireframe`) starts from
+    // Blender's surviving partial UV selection: other mesh selection, and a mesh operator
+    // after it finds nothing selected in Blender.
+    mesh(
+        D_111,
+        "bpy.ops.uv.select_linked",
+        &["selection", "active", "select_history"],
+    )
+    .with(&["uv.select_linked|uv.select_pinned", "bpy.ops.mesh."]),
+    line(D_111, "bpy.ops.mesh.", "frap ok != blender CANCELLED").with(&[
+        "uv.select_linked|uv.select_pinned",
+        "bpy.ops.mesh.wireframe",
+    ]),
     mesh(
         D_111,
         "uv.select_all&INVERT",
@@ -738,6 +852,7 @@ pub const KNOWN: &[Known] = &[
     // (The selection differs: whatever acts on it next differs too.)
     mesh(FOUND, "~mesh.edge_face_add", ANY).with(&["mesh.region_to_loop"]),
     mesh(FOUND, "mesh.select_random", ANY).with(&[TOPOLOGY]),
+    mesh(FOUND, "uv.randomize_uv_transform", UVS).with(&[TOPOLOGY]),
     mesh(FOUND, "mesh.vert_connect", NORMALS).with(&["mesh.sort_elements"]),
     mesh(FOUND, "mesh.duplicate", ANY).with(&["mesh.wireframe"]),
     mesh(FOUND, "WELD", WINDING).with(&["mesh.edge_split"]),
@@ -757,6 +872,38 @@ pub const KNOWN: &[Known] = &[
     .with(&["object.select_pattern|object.select_all"]),
     mesh(FOUND, "MIRROR", &["edges", "faces", ""]).with(&["SUBSURF|subdivision_set"]),
     mesh(FOUND, "mesh.spin", NORMALS).with(&["mesh.extrude_faces_indiv"]),
+    // `bevel_reattach_wires` picks the closest of two new vertices equidistant from a
+    // zero-length wire's other end: float rounding of the (T2) input decides (exact on
+    // Blender's positions: `fuzz/bevel_modifier_wire_reattach_ties.py`).
+    mesh(FOUND, "BEVEL", &["edges"]).with(&["mesh.extrude_verts_indiv"]),
+    // `symmetry_snap` pairs each vertex with its nearest mirror candidate within the
+    // threshold: near-equidistant candidates after a duplicating `spin` (T2 positions) pair
+    // otherwise (exact on Blender's positions: `fuzz/symmetry_snap_after_spin_ties.py`).
+    mesh(FOUND, "mesh.symmetry_snap", POSITIONS).with(&["mesh.spin"]),
+    // `dissolve_limited` of a flat mesh: its costs (face angles and vertex angles near zero)
+    // tie up to the rounding of positions a rotation left T2 (exact on Blender's positions).
+    mesh(FOUND, "mesh.dissolve_limited", ANY).with(&[
+        "bpy.ops.transform.rotate",
+        "primitive_grid_add|primitive_plane_add|primitive_circle_add",
+    ]),
+    mesh(
+        FOUND,
+        "mesh.select_mirror",
+        &["selection", "active", "select_history"],
+    )
+    .with(&["mesh.spin"]),
+    // Selected edges whose vertices are not selected (vertex extrusion in edge mode):
+    // Blender reads their vertices' mirrors from its temporary `__mirror_index` layer (0 where
+    // never written), frap finds none.
+    mesh(
+        FOUND,
+        "mesh.select_mirror",
+        &["selection", "active", "select_history"],
+    )
+    .with(&["mesh.extrude_verts_indiv|mesh.extrude_vertices_move"]),
+    // The cursor follows an object `object.align` placed otherwise (its SUBSURF bounds).
+    state(FOUND, RNA, "view3d.snap_cursor_to_", &["cursor"])
+        .with(&["object.align", "SUBSURF|subdivision_set"]),
     mesh(FOUND, "bpy.ops.transform.rotate", NORMALS).with(&[CUSTOM_NORMALS]),
     mesh(FOUND, "transform.shrink_fatten", POSITIONS)
         .with(&["mesh.extrude_verts_indiv|mesh.extrude_vertices_move"]),
@@ -783,10 +930,18 @@ pub const KNOWN: &[Known] = &[
     // CAST normalises each vertex's direction from the centre: SUBSURF's T2 positions of a
     // vertex at the centre (about 1e-8 from it) point it elsewhere.
     mesh(FOUND, "CAST", POSITIONS).with(&["SUBSURF|subdivision_set"]),
+    // SCREW treats a vertex on its axis apart: SUBSURF's T2 face centres on the axis (exactly
+    // on it in frap, about 1e-8 off in Blender) are screwed otherwise.
+    mesh(FOUND, "SCREW", ANY).with(&["SUBSURF|subdivision_set"]),
     mesh(FOUND, "LAPLACIANSMOOTH", POSITIONS)
         .with(&["primitive_plane_add|primitive_grid_add|primitive_circle_add"]),
     mesh(FOUND, CUSTOM_NORMALS, NORMALS).with(&["transform.shear"]),
-    mesh(FOUND, "mesh.extrude_region_move", NORMALS).with(&["shade_smooth_by_angle"]),
+    // In-plane extrusion of a flat mesh: overlapping faces of opposite normals whose sum
+    // cancels at the smooth corners, in the (pointer-hash, D-65) order of Blender's side faces.
+    mesh(FOUND, "mesh.extrude_region_move", NORMALS).with(&[
+        "shade_smooth",
+        "primitive_grid_add|primitive_plane_add|primitive_circle_add",
+    ]),
     // Zero-area faces: their normals (and the smooth corners around them) are decided by
     // float rounding, whichever operator made or last moved them.
     mesh(FOUND, "~bpy.ops.", &["corner_normals", "face_normals"]).degenerate(),
@@ -802,13 +957,11 @@ pub const KNOWN: &[Known] = &[
         .when(inset_has_depth)
         .with(&[ZERO_THICKNESS_INSET]),
     // `BM_mesh_region_match` reads an uninitialised UID for vertices inside n-gons of five or
-    // more sides (D-168).
-    mesh(
-        D_168,
-        "mesh.select_similar_region",
-        &["selection", "active", "select_history"],
-    )
-    .with(&["mesh.symmetrize|mesh.bisect|mesh.dissolve_|fill_type='NGON'|end_fill_type='NGON'"]),
+    // more sides (D-168); what later operators do with that selection differs too.
+    mesh(D_168, "mesh.select_similar_region", ANY).with(&[
+        "mesh.symmetrize|mesh.bisect|mesh.dissolve_|fill_type='NGON'\
+         |primitive_cone_add&!end_fill_type=|primitive_cylinder_add&!end_fill_type=",
+    ]),
     // --- UV results after Edit Mode geometry changes ---
     mesh(UV, "uv.unwrap", UVS),
     mesh(UV, "uv.smart_project", UVS),
@@ -886,11 +1039,14 @@ impl Known {
             }
         };
         // The first statement that can be the cause (what follows it may be its consequence).
-        let cause = (0..statements.len())
-            .find(|&i| self.is_cause(&statements[i]) && ran(i) && trace.touches(i, &t))?;
+        let cause = (0..statements.len()).find(|&i| {
+            self.is_cause(&statements[i]) && ran(i) && (self.anywhere || trace.touches(i, &t))
+        })?;
         let with = self.with.iter().all(|p| {
             (0..statements.len()).any(|j| {
-                trace.ran(j, p) && pattern_matches(p, &statements[j]) && trace.touches(j, &t)
+                trace.ran(j, p)
+                    && pattern_matches(p, &statements[j])
+                    && (self.anywhere || trace.touches(j, &t))
             })
         });
         with.then_some(cause)
@@ -1122,6 +1278,139 @@ mod tests {
         assert!(inset_has_depth(
             "bpy.ops.mesh.inset(depth=-0.25, use_outset=True)"
         ));
+    }
+
+    /// M8 stabilization round 2: a triangle collapsed onto a point (the corner a BEVEL closes
+    /// after another BEVEL: every vertex within rounding of the others) is degenerate.
+    #[test]
+    fn collapsed_faces_are_degenerate() {
+        let m = crate::state::GMesh {
+            positions: vec![
+                [-1.0, -0.5, -0.75],
+                [-1.0, -0.500_000_06, -0.75],
+                [-1.000_000_1, -0.5, -0.75],
+                [0.0, 0.0, 0.0],
+                [1e-6, 0.0, 0.0],
+                [0.0, 1e-6, 0.0],
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
+            edges: Vec::new(),
+            faces: vec![vec![0, 1, 2], vec![3, 4, 5], vec![6, 7, 8]],
+            corner_normals: Vec::new(),
+            face_normals: None,
+            uv_layers: BTreeMap::new(),
+            attributes: BTreeMap::new(),
+            selection: serde_json::Value::Null,
+            active: serde_json::Value::Null,
+            select_history: serde_json::Value::Null,
+        };
+        let d = Degenerate::of(&m);
+        assert_eq!(d.faces, BTreeSet::from([0, 1]));
+    }
+
+    /// M8 stabilization round 2: two coincident quads of opposite winding (an in-plane
+    /// extrusion): the smooth normals of their shared vertices cancel; a lone quad's do not.
+    #[test]
+    fn cancelling_vertex_normals_are_degenerate() {
+        let quad = |o: f32| {
+            vec![
+                [o, 0.0, 0.0],
+                [o + 1.0, 0.0, 0.0],
+                [o + 1.0, 1.0, 0.0],
+                [o, 1.0, 0.0],
+            ]
+        };
+        let mut positions = quad(0.0);
+        positions.extend(quad(5.0));
+        let m = crate::state::GMesh {
+            positions,
+            edges: Vec::new(),
+            faces: vec![vec![0, 1, 2, 3], vec![3, 2, 1, 0], vec![4, 5, 6, 7]],
+            corner_normals: Vec::new(),
+            face_normals: None,
+            uv_layers: BTreeMap::new(),
+            attributes: BTreeMap::new(),
+            selection: serde_json::Value::Null,
+            active: serde_json::Value::Null,
+            select_history: serde_json::Value::Null,
+        };
+        let d = Degenerate::of(&m);
+        assert!(d.faces.is_empty());
+        assert_eq!(d.corners, (0..8).collect());
+    }
+
+    /// M8 stabilization round 2: the fuzz cases whose causes are float ties of T2 inputs.
+    #[test]
+    fn round_two_ties_are_explained() {
+        let explained = |statements: &[&str], path: &str, detail: &str| {
+            let statements = st(statements);
+            let trace = cube_trace(statements.len());
+            explain_all(&statements, &trace, &[Mismatch::new(MESH, path, detail)])[0]
+                .map(|k| k.deviation)
+        };
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.subdivision_set()",
+                    "bpy.ops.object.modifier_apply(modifier='Subdivision')",
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.dissolve_limited(angle_limit=0.59, delimit={'NORMAL', 'SEAM'})",
+                ],
+                "meshes[\"Cube\"]",
+                "frap (verts, edges, faces) (7, 7, 1) != blender (8, 8, 1)",
+            ),
+            Some("D-120")
+        );
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.dissolve_limited(angle_limit=0.59)",
+                ],
+                "meshes[\"Cube\"]",
+                "frap (verts, edges, faces) (7, 7, 1) != blender (8, 8, 1)",
+            ),
+            None
+        );
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.subdivision_set(level=2)",
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.extrude_context(use_normal_flip=False)",
+                ],
+                "evaluated[\"Cube\"].edges[0]",
+                "frap edge [5, 16] has no blender counterpart",
+            ),
+            Some(GEOMETRY)
+        );
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.context.object.modifiers.new('Sub', 'BEVEL')",
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.spin(center=(-0.84, 0.09, -0.88), axis=(1, 0, 0))",
+                    "bpy.ops.mesh.extrude_verts_indiv()",
+                ],
+                "evaluated[\"Cube\"].edges[626]",
+                "frap edge [303, 2] has no blender counterpart",
+            ),
+            Some(FOUND)
+        );
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.spin(steps=3, axis=(1, 0, 0), dupli=True)",
+                    "bpy.ops.mesh.symmetry_snap(threshold=0.37, use_center=False)",
+                ],
+                "meshes[\"Cube\"].positions[86]",
+                "frap vertex [-0.27638802, -2.1175513, 1.6128819] has no blender counterpart",
+            ),
+            Some(FOUND)
+        );
     }
 
     fn line_of(i: usize) -> String {
@@ -1407,5 +1696,9 @@ mod tests {
         // Other evaluated fields are not explained.
         let p = Mismatch::new("mesh_canonical", "evaluated[\"Cube\"].positions[0]", "x");
         assert_eq!(explain_all(&s, &tr, std::slice::from_ref(&p)), vec![None]);
+        // Unless a second (copied) or applied SUBSURF subdivides the creased inner edges.
+        let mut s = s;
+        s.push("bpy.ops.object.modifier_copy(modifier='Subdivision')".into());
+        assert!(explain_all(&s, &cube_trace(4), std::slice::from_ref(&p))[0].is_some());
     }
 }

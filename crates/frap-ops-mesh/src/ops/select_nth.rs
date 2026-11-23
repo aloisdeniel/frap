@@ -20,7 +20,7 @@
 
 mod walk;
 
-use frap_bmesh::{BMElem, BMesh, EdgeId, FaceId, SelectMode, VertId};
+use frap_bmesh::{BMElem, BMesh, EdgeId, ElemFlag, FaceId, SelectMode, VertId};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;
@@ -163,15 +163,20 @@ fn faces_form_cyclic_chain(bm: &BMesh, f_start: FaceId) -> bool {
 
 /// `walker_deselect_nth_vertex_chain`.
 fn deselect_vertex_chain(bm: &mut BMesh, iv: &Interval, v_start: VertId) {
-    let mut visited = vec![false; bm.verts.capacity()];
+    // Mark all vertices as unvisited (`BM_ELEM_TAG`, left set on the visited ones as Blender
+    // leaves it: `split_edges(use_verts=True)` reads stale vertex tags, M8 stabilization
+    // round 2).
+    for v in bm.vert_ids() {
+        bm.vert_mut(v).flag.remove(ElemFlag::TAG);
+    }
     let mut v_prev = None;
     let mut v_curr = Some(v_start);
     let mut index = 0;
     while let Some(v) = v_curr {
-        if visited[v.slot()] {
+        if bm.vert(v).flag.contains(ElemFlag::TAG) {
             break;
         }
-        visited[v.slot()] = true;
+        bm.vert_mut(v).flag.insert(ElemFlag::TAG);
         if !iv.test(index) {
             bm.vert_select_set(v, false);
         }
@@ -187,12 +192,14 @@ fn deselect_vertex_chain(bm: &mut BMesh, iv: &Interval, v_start: VertId) {
 
 /// `walker_deselect_nth_edge_chain`.
 fn deselect_edge_chain(bm: &mut BMesh, iv: &Interval, e_start: EdgeId) {
-    let mut visited = vec![false; bm.edges.capacity()];
+    for e in bm.edge_ids() {
+        bm.edge_mut(e).flag.remove(ElemFlag::TAG);
+    }
     let mut e_curr = e_start;
     let mut v_through = bm.edge(e_start).v[0];
     let mut index = 0;
-    while !visited[e_curr.slot()] {
-        visited[e_curr.slot()] = true;
+    while !bm.edge(e_curr).flag.contains(ElemFlag::TAG) {
+        bm.edge_mut(e_curr).flag.insert(ElemFlag::TAG);
         if !iv.test(index) {
             bm.edge_select_set(e_curr, false);
         }
@@ -208,15 +215,17 @@ fn deselect_edge_chain(bm: &mut BMesh, iv: &Interval, e_start: EdgeId) {
 
 /// `walker_deselect_nth_face_chain`.
 fn deselect_face_chain(bm: &mut BMesh, iv: &Interval, f_start: FaceId) {
-    let mut visited = vec![false; bm.faces.capacity()];
+    for f in bm.face_ids() {
+        bm.face_mut(f).flag.remove(ElemFlag::TAG);
+    }
     let mut f_prev = None;
     let mut f_curr = Some(f_start);
     let mut index = 0;
     while let Some(f) = f_curr {
-        if visited[f.slot()] {
+        if bm.face(f).flag.contains(ElemFlag::TAG) {
             break;
         }
-        visited[f.slot()] = true;
+        bm.face_mut(f).flag.insert(ElemFlag::TAG);
         let next = next_face_in_chain(bm, f, f_prev);
         if !iv.test(index) {
             bm.face_select_set(f, false);
@@ -294,9 +303,27 @@ fn walker_deselect_nth(bm: &mut BMesh, iv: &Interval, act: BMElem) {
             )
         }
     };
+    // "Use tag to avoid touching the same elems twice": every element of the walked type is
+    // untagged, then each walked one tagged (and stays so after the operator, as in Blender).
+    match act {
+        BMElem::Vert(_) => bm.vert_ids().into_iter().for_each(|x| {
+            bm.vert_mut(x).flag.remove(ElemFlag::TAG);
+        }),
+        BMElem::Edge(_) => bm.edge_ids().into_iter().for_each(|x| {
+            bm.edge_mut(x).flag.remove(ElemFlag::TAG);
+        }),
+        BMElem::Face(_) => bm.face_ids().into_iter().for_each(|x| {
+            bm.face_mut(x).flag.remove(ElemFlag::TAG);
+        }),
+    }
     for (ele, depth) in walked {
         if !iv.test(depth) {
             bm.select_set(ele, false);
+        }
+        match ele {
+            BMElem::Vert(x) => bm.vert_mut(x).flag.insert(ElemFlag::TAG),
+            BMElem::Edge(x) => bm.edge_mut(x).flag.insert(ElemFlag::TAG),
+            BMElem::Face(x) => bm.face_mut(x).flag.insert(ElemFlag::TAG),
         }
     }
     bm.select_flush_mode_ex(flushtype, false);

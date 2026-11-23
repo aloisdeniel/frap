@@ -693,7 +693,7 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 | [x] | `ARRAY` | `ArrayModifier` | M4 | P0 |  |
 | [x] | `BEVEL` | `BevelModifier` | M4 | P0 | shares mesh.bevel core |
 | [x] | `SOLIDIFY` | `SolidifyModifier` | M4 | P0 | simple + complex |
-| [x] | `BOOLEAN` | `BooleanModifier` | M4 | P0 | MANIFOLD T2 (hole-bridge and coincident-vertex configurations T3, see deviations D-100; EXACT D-101), EXACT T3, FLOAT → EXACT + WARNING until M8 |
+| [x] | `BOOLEAN` | `BooleanModifier` | M4 | P0 | MANIFOLD T2 (hole-bridge and coincident-vertex configurations T3, see deviations D-100; EXACT D-101), EXACT T3, FLOAT T2 since M8 (WP 8.6: `BM_mesh_intersect` port, deterministic cut order D-145; goldens `modifiers/boolean_float/*`) |
 | [x] | `TRIANGULATE` | `TriangulateModifier` | M4 | P0 |  |
 | [x] | `DECIMATE` | `DecimateModifier` | M4 | P0 | COLLAPSE/UNSUBDIV/DISSOLVE |
 | [x] | `WELD` | `WeldModifier` | M4 | P0 |  |
