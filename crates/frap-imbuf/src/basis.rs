@@ -302,6 +302,18 @@ pub(crate) fn transcode(data: &[u8]) -> Result<DecodedImage, ImageError> {
     let (w, h) = t.base_dimensions();
     let hdr = is_hdr(&t);
     let bpp: u64 = if hdr { 8 } else { 4 };
+    // WP 8.7 (fuzzing): `basisu` 0.1.0 sizes the output as `width * height` in `u32`
+    // (`size_for_dims`, an overflow panic in debug builds and a short buffer in release), and
+    // the header alone must not size the allocation: below 64 MiB every image is accepted,
+    // above it the file must hold at least one byte per 2048 output bytes (supercompressed
+    // Basis data of real textures stays far below that ratio).
+    let out_bytes = u64::from(w) * u64::from(h) * bpp;
+    if w.checked_mul(h).is_none() || out_bytes > (64u64 << 20).max(data.len() as u64 * 2048) {
+        return Err(ImageError::Decode(format!(
+            "KTX2 (Basis Universal): a {w}x{h} image cannot come from {} bytes (corrupt file)",
+            data.len()
+        )));
+    }
     frap_math::budget::reserve_buffer(
         "KTX2 image",
         u64::from(w)

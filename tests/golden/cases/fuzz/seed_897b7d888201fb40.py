@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T2 tol=0.0001
+# fuzz: seed=0x897b7d888201fb40 (replay)
+import bpy
+bpy.ops.object.parent_no_inverse_set()
+bpy.ops.object.randomize_transform(random_seed=40, use_delta=False, use_loc=False, rot=(0.29, 0.74, 0.85), scale_even=True, scale=(1.29, 1.01, 0.99))
+bpy.ops.object.transforms_to_deltas()
+bpy.ops.view3d.snap_cursor_to_active()
+bpy.ops.object.material_slot_remove_all()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.primitive_cylinder_add(radius=1.37, depth=2.71, end_fill_type='NOTHING', location=(-0.5, 1.13, -1.91))
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.lightmap_pack(PREF_CONTEXT='ALL_FACES', PREF_PACK_IN_ONE=True, PREF_MARGIN_DIV=0.19)
+bpy.ops.mesh.uv_texture_remove()
+bpy.ops.mesh.select_linked(delimit={'MATERIAL', 'SEAM', 'UV'})
+bpy.ops.object.vertex_group_quantize()
+bpy.ops.object.mode_set(mode='OBJECT')

@@ -1,0 +1,156 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Nightly fuzzing (ARCHITECTURE §20.1, §22.10 WP 8.7).
+# - cargo-fuzz: each target of fuzz/ (its own workspace) runs 10 minutes with libFuzzer and
+#   AddressSanitizer (ASan global redzones off: they break linkme's duplicate check), a 2 GiB
+#   malloc/RSS limit (an allocation sized from a header is a failure) and a seed corpus made
+#   from the repository's own files (frap_read: every committed .frap, including the seeds of
+#   crates/frap-golden/src/fuzz/seeds/ with modifiers, shape keys, vertex groups, UV layers,
+#   a material, a packed image, an armature and an action). Crash inputs are uploaded; add
+#   them to crates/frap-golden/src/fuzz/regress/ with the fix.
+# - differential: `cargo xtask golden fuzz` replays seeded random sequences over the
+#   catalogue (>= 150 operators and the RNA statements) in frap and in Blender 5.2.4 for one
+#   hour and fails on any mismatch docs/deviations.md does not explain, and on a run that did
+#   not compare the tools (no clean trial, or Blender failing on more than 5% of the trials:
+#   report.json `healthy`); the minimised cases and report.json are uploaded. It runs on macOS arm64 like the fixtures (D-67, D-94).
+
+name: nightly
+
+on:
+  schedule:
+    - cron: "41 1 * * *"
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "differential fuzzing time (minutes)"
+        required: true
+        default: "60"
+      seed:
+        description: "differential run seed (default: the date, so every night differs)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  BLENDER_VERSION: "5.2.4"
+
+jobs:
+  cargo-fuzz:
+    name: cargo-fuzz (${{ matrix.target }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [lang_parse, lang_split, gltf_read, frap_read, imbuf_decode]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: fuzz
+      - name: install cargo-fuzz
+        run: cargo install cargo-fuzz --locked
+      - name: seed corpus
+        run: |
+          set -eu
+          C="$RUNNER_TEMP/corpus/${{ matrix.target }}"
+          mkdir -p "$C"
+          seed() { # <prefix byte as octal, or empty> <files...>
+            p="$1"; shift
+            for f in "$@"; do
+              [ "$(wc -c < "$f")" -le 400000 ] || continue
+              h=$(sha1sum "$f" | cut -c1-16)
+              { [ -n "$p" ] && printf "\\$p"; cat "$f"; } > "$C/$h"
+            done
+          }
+          case "${{ matrix.target }}" in
+            gltf_read) seed "" $(git ls-files '*.glb' '*.gltf') ;;
+            imbuf_decode) seed 000 $(git ls-files '*.png' '*.jpg' '*.webp' '*.exr' '*.hdr' '*.bmp' '*.tga' '*.ktx2') ;;
+            frap_read)
+              seed 000 $(git ls-files '*.frap')
+              for f in $(git ls-files '*.frap'); do
+                { printf '\001'; unzip -p "$f" scene.json; } > "$C/json-$(sha1sum "$f" | cut -c1-16)"
+              done ;;
+            *) seed "" $(git ls-files 'crates/frap-lang/tests/corpus/*' | head -400) ;;
+          esac
+          ls "$C" | wc -l
+      - name: fuzz 10 minutes
+        working-directory: fuzz
+        env:
+          RUSTFLAGS: -Cllvm-args=-asan-globals=0
+        run: |
+          mkdir -p "$RUNNER_TEMP/artifacts"
+          cargo +nightly fuzz run ${{ matrix.target }} "$RUNNER_TEMP/corpus/${{ matrix.target }}" -- \
+            -max_total_time=600 -rss_limit_mb=2048 -malloc_limit_mb=2048 -timeout=60 \
+            -max_len=1048576 -artifact_prefix="$RUNNER_TEMP/artifacts/"
+      - name: upload crash inputs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo-fuzz-${{ matrix.target }}
+          path: ${{ runner.temp }}/artifacts/
+          if-no-files-found: ignore
+
+  differential:
+    name: differential (macos-arm64, Blender 5.2.4)
+    runs-on: macos-15
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97"
+      - uses: Swatinem/rust-cache@v2
+      - name: cache Blender
+        id: blender-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/Applications/Blender-5.2.app
+          key: blender-${{ env.BLENDER_VERSION }}-macos-arm64
+      - name: download Blender
+        if: steps.blender-cache.outputs.cache-hit != 'true'
+        run: |
+          set -eu
+          curl -fsSL -A "frap-ci" -o "$RUNNER_TEMP/blender.dmg" \
+            "https://download.blender.org/release/Blender5.2/blender-${BLENDER_VERSION}-macos-arm64.dmg"
+          hdiutil attach -nobrowse -readonly -mountpoint "$RUNNER_TEMP/blender" "$RUNNER_TEMP/blender.dmg"
+          mkdir -p ~/Applications
+          cp -R "$RUNNER_TEMP/blender/Blender.app" ~/Applications/Blender-5.2.app
+          hdiutil detach "$RUNNER_TEMP/blender"
+      - name: Blender version
+        run: ~/Applications/Blender-5.2.app/Contents/MacOS/Blender -b --factory-startup --version
+      - name: differential fuzzing
+        env:
+          MINUTES: ${{ inputs.minutes || '60' }}
+          SEED: ${{ inputs.seed }}
+        run: |
+          set -o pipefail
+          seed="${SEED:-$(date -u +%Y%m%d)}"
+          cargo xtask golden fuzz --minutes "$MINUTES" --seed "$seed" \
+            --out "$RUNNER_TEMP/fuzz-cases" | tee "$RUNNER_TEMP/fuzz.out"
+      - name: check the run compared the tools
+        run: |
+          set -eu
+          r="$RUNNER_TEMP/fuzz-cases/report.json"
+          jq '{trials, clean, healthy, health_problem, blender_failures}' "$r"
+          test "$(jq -r '.healthy' "$r")" = true
+          test "$(jq -r '.clean' "$r")" -gt 0
+      - name: job summary
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/fuzz.out" ]; then
+            { echo '```'; tail -n 60 "$RUNNER_TEMP/fuzz.out"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: upload cases and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: differential-fuzz
+          path: ${{ runner.temp }}/fuzz-cases/
+          if-no-files-found: warn

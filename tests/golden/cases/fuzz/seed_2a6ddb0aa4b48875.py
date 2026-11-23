@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T2 tol=0.0001
+# fuzz: seed=0x2a6ddb0aa4b48875 (replay)
+import bpy
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_boundary_loop_multi()
+bpy.ops.mesh.face_make_planar(factor=0.14)
+bpy.ops.mesh.screw(center=(0.05, 0.0, 0.01), axis=(0, 1, 0))
+bpy.ops.transform.shrink_fatten(value=0.41, use_even_offset=False)
+bpy.ops.mesh.primitive_ico_sphere_add(radius=1.1, location=(0.41, -1.8, 0.38))
+bpy.ops.mesh.edges_select_sharp()
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.context.object.modifiers['Array'].relative_offset_displace = (-0.54, 1.34, 0.58)
+bpy.ops.object.vertex_group_quantize()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.object.join()
+bpy.ops.object.select_random(seed=766)

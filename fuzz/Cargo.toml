@@ -33,6 +33,8 @@ frap-lang = { path = "../crates/frap-lang" }
 frap-gltf = { path = "../crates/frap-gltf" }
 frap-project = { path = "../crates/frap-project" }
 frap-imbuf = { path = "../crates/frap-imbuf", features = ["basisu"] }
+# WP 8.7: `imbuf_decode` decodes under a `--max-elements` budget, as a statement does.
+frap-math = { path = "../crates/frap-math" }
 
 # `parse_complete` on arbitrary UTF-8: never panics, every error has a span (WP 1.3).
 [[bin]]

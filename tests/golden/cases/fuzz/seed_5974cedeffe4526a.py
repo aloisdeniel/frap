@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002,evaluated:Cube,evaluated:Cube.001,evaluated:Cube.002 tier=T2 tol=0.0001
+# fuzz: seed=0x5974cedeffe4526a (replay)
+import bpy
+bpy.ops.geometry.color_attribute_duplicate()
+bpy.ops.object.material_slot_add()
+bpy.context.object.modifiers.new('Arr', 'BEVEL')
+bpy.ops.object.duplicate(linked=False)
+bpy.ops.object.shape_key_lock(action='UNLOCK')
+bpy.ops.object.duplicate_move(TRANSFORM_OT_translate={'value': (0, 2, 0.5)})
+bpy.ops.object.select_pattern(pattern='Light')
+bpy.ops.object.location_clear()
+bpy.ops.view3d.snap_selected_to_grid()
+bpy.ops.mesh.uv_texture_add()
+bpy.ops.object.shape_key_clear()
+bpy.ops.object.transforms_to_deltas(mode='ROT')
+bpy.ops.object.shape_key_add()
+bpy.context.object.modifiers['Array'].relative_offset_displace = (0.01, 1.14, 0.31)

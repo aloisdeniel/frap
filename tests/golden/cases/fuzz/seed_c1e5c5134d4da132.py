@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Circle,mesh:Cube tier=T2 tol=0.0001
+# fuzz: seed=0xc1e5c5134d4da132 (replay)
+import bpy
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.context.object.location = (-1.99, 2.34, 1.93)
+bpy.ops.mesh.vert_connect_nonplanar(angle_limit=0.66)
+bpy.ops.mesh.customdata_custom_splitnormals_add()
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_circle_add(vertices=16, location=(0.15, 1.5, -1.43))
+bpy.ops.object.parent_inverse_apply()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.select_split()
+bpy.ops.uv.align(axis='ALIGN_S')
+bpy.ops.uv.select_all(action='INVERT')
+bpy.ops.object.vertex_group_assign_new()

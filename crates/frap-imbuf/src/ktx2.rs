@@ -176,7 +176,44 @@ mod imp {
         pub height: u32,
     }
 
+    /// WP 8.7 (fuzzing): `ktx2` 0.5.0 panics on a basic DFD block whose texel block
+    /// dimension byte is 255 (`NonZeroU8::new(dim + 1).unwrap()` in `Basic::parse`, reached
+    /// from `Reader::new`), so such files are refused before the reader sees them. The walk
+    /// mirrors `Reader::parse_dfd` / `Block::parse`; anything it cannot follow is left to the
+    /// reader's own errors.
+    fn dfd_texel_dims_ok(bytes: &[u8]) -> bool {
+        let u32_at = |at: usize| {
+            bytes
+                .get(at..at + 4)
+                .map(|b| u32::from_le_bytes([b[0], b[1], b[2], b[3]]))
+        };
+        let (Some(off), Some(len)) = (u32_at(48), u32_at(52)) else {
+            return true;
+        };
+        let (start, end) = (off as usize + 4, off as usize + len as usize);
+        let Some(mut data) = bytes.get(start..end.min(bytes.len()).max(start)) else {
+            return true;
+        };
+        while data.len() >= 8 {
+            let w0 = u32::from_le_bytes([data[0], data[1], data[2], data[3]]);
+            let size = usize::from(u16::from_le_bytes([data[6], data[7]]));
+            if size < 8 || size > data.len() {
+                return true;
+            }
+            let version = u16::from_le_bytes([data[4], data[5]]);
+            // Vendor 0 (Khronos), descriptor type 0, version 2: the basic block.
+            if w0 == 0 && version == 2 && data.get(12..16).is_some_and(|d| d.contains(&255)) {
+                return false;
+            }
+            data = &data[size..];
+        }
+        true
+    }
+
     pub(super) fn parse(bytes: &[u8]) -> Result<Parsed<'_>, ImageError> {
+        if !dfd_texel_dims_ok(bytes) {
+            return Err(bad("DFD texel block dimension of 256 (corrupt file)"));
+        }
         let reader = ktx2::Reader::new(bytes).map_err(|e| bad(format!("{e:?}")))?;
         let h = reader.header();
         if h.pixel_depth > 1 {
@@ -236,12 +273,28 @@ mod imp {
 
     /// Zstandard (`supercompressionScheme` 2): at most `max` bytes (a frame that inflates
     /// beyond the level's recorded length is an error, not an allocation).
+    ///
+    /// WP 8.7 (fuzzing): the output grows with the bytes the frames really produce (a
+    /// streaming decode per frame), not with the level's recorded length, which a corrupt
+    /// header can make arbitrarily large.
     pub(super) fn unzstd(data: &[u8], max: usize) -> Result<Vec<u8>, ImageError> {
+        use std::io::Read;
         reserve(Some(max as u64))?;
-        let mut out = Vec::with_capacity(max);
-        ruzstd::decoding::FrameDecoder::new()
-            .decode_all_to_vec(data, &mut out)
-            .map_err(|e| bad(format!("Zstandard: {e}")))?;
+        let zstd = |e: &dyn std::fmt::Display| bad(format!("Zstandard: {e}"));
+        let mut out = Vec::new();
+        let mut input = data;
+        while !input.is_empty() {
+            let left = (max - out.len()) as u64;
+            let mut frame =
+                ruzstd::decoding::StreamingDecoder::new(&mut input).map_err(|e| zstd(&e))?;
+            (&mut frame)
+                .take(left + 1)
+                .read_to_end(&mut out)
+                .map_err(|e| zstd(&e))?;
+            if out.len() > max {
+                return Err(zstd(&format_args!("data inflates beyond {max} bytes")));
+            }
+        }
         Ok(out)
     }
 

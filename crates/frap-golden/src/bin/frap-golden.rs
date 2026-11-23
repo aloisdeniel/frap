@@ -8,6 +8,7 @@
 //! frap-golden live   [--filter <glob>]   run Blender live, compare with the fixtures (drift)
 //! frap-golden report [--filter <glob>]   operator × tier coverage matrix
 //! frap-golden diff   <case.py>           run both tools live and print every mismatch
+//! frap-golden fuzz   [options]           the differential fuzzer (WP 8.7, `frap_golden::fuzz`)
 //! ```
 //! Exit status: 0 ok, 1 mismatches or failures, 2 usage or Blender missing.
 
@@ -18,7 +19,7 @@ use frap_golden::blender::{self, Repo, ScratchDir};
 use frap_golden::case::Case;
 use frap_golden::runner::{self, Props, RunOptions};
 
-const USAGE: &str = "usage: frap-golden bless|check|live|report [--filter <glob>] | diff <case.py>";
+const USAGE: &str = "usage: frap-golden bless|check|live|report [--filter <glob>] | diff <case.py> | fuzz [options]";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -162,6 +163,8 @@ fn run(args: &[String]) -> Result<bool, String> {
             println!("{} mismatches", m.len());
             Ok(m.is_empty())
         }
+        // WP 8.7: the differential fuzzer owns its arguments.
+        "fuzz" => frap_golden::fuzz::main(rest),
         _ => Err(USAGE.into()),
     }
 }

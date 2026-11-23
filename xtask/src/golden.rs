@@ -11,12 +11,13 @@
 //! cargo xtask golden live   [--filter <glob>]  `cargo test -p frap-golden` with FRAP_GOLDEN_LIVE=1
 //! cargo xtask golden report [--filter <glob>]  operator x tier coverage matrix
 //! cargo xtask golden diff <case.py>            frap and Blender side by side
+//! cargo xtask golden fuzz [options]             the differential fuzzer (WP 8.7), release build
 //! ```
 
 use std::process::Command;
 
-const USAGE: &str =
-    "usage: cargo xtask golden <bless|check|live|report> [--filter <glob>] | diff <case.py>";
+const USAGE: &str = "usage: cargo xtask golden <bless|check|live|report> [--filter <glob>] | \
+                     diff <case.py> | fuzz [options]";
 
 /// What a `golden` invocation runs: cargo arguments plus extra environment.
 #[derive(Debug, PartialEq, Eq)]
@@ -64,6 +65,16 @@ fn plan(args: &[String]) -> Result<Plan, String> {
             cargo_args: bin(cmd, rest),
             env: vec![],
         }),
+        // WP 8.7: thousands of frap runs per hour, so a release build; the options are
+        // checked by `frap-golden fuzz` itself.
+        "fuzz" => {
+            let mut a = bin(cmd, rest);
+            a.insert(1, "--release".to_owned());
+            Ok(Plan {
+                cargo_args: a,
+                env: vec![],
+            })
+        }
         "live" => {
             let mut env = vec![("FRAP_GOLDEN_LIVE".to_owned(), "1".to_owned())];
             if let Some(f) = filter(rest)? {
@@ -143,6 +154,26 @@ mod tests {
         );
         assert!(plan(&s(&["report"])).is_ok());
         assert!(plan(&s(&["diff", "a.py"])).is_ok());
+        let p = plan(&s(&["fuzz", "--minutes", "60", "--seed", "7"])).unwrap();
+        assert_eq!(
+            p.cargo_args,
+            s(&[
+                "run",
+                "--release",
+                "--quiet",
+                "--package",
+                "frap-golden",
+                "--bin",
+                "frap-golden",
+                "--",
+                "fuzz",
+                "--minutes",
+                "60",
+                "--seed",
+                "7"
+            ])
+        );
+        assert!(plan(&s(&["fuzz"])).is_ok());
         for bad in [
             &[][..],
             &["nope"][..],
