@@ -18,6 +18,11 @@
 //!
 //! Self intersection (`mode='SELECT'`) cuts every connected part of the operand with the
 //! others; a part's intersections with itself are not found (T3 deviation).
+//!
+//! Triangles with a NaN or infinite corner never reach the exact engine (it only takes finite
+//! coordinates): they are kept uncut, and Blender 5.2.4 finishes on such meshes too. A face
+//! that would visit one vertex twice (coincident input vertices are one arena vertex) is
+//! dropped like Blender's degenerate triangles.
 
 use crate::{BoolError, BoolMesh, Src};
 
@@ -79,12 +84,24 @@ mod imp {
         Vec3::new(f64::from(p[0]), f64::from(p[1]), f64::from(p[2]))
     }
 
-    /// The non-degenerate triangles of `tris` (as positions) and their indices.
+    /// Whether triangle `t` has a NaN or infinite corner: the exact engine cannot represent
+    /// it, and Blender's predicates are all false on it (it cuts nothing).
+    fn non_finite(p: &Prepared, t: usize) -> bool {
+        p.tris[t]
+            .iter()
+            .any(|&v| p.positions[v as usize].iter().any(|c| !c.is_finite()))
+    }
+
+    /// The non-degenerate triangles of `tris` (as positions) and their indices. Triangles
+    /// with a non-finite corner are left out (see [`pass_non_finite`]).
     fn soup(p: &Prepared, tris: &[usize]) -> (Vec<[Vec3; 3]>, Vec<usize>) {
         let mut out = Vec::with_capacity(tris.len());
         let mut idx = Vec::with_capacity(tris.len());
         for &t in tris {
             frap_math::budget::check();
+            if non_finite(p, t) {
+                continue;
+            }
             let [a, b, c] = p.tris[t].map(|v| p.positions[v as usize]);
             let (a, b, c) = (v3(a), v3(b), v3(c));
             let n = cross(b - a, c - a);
@@ -151,6 +168,25 @@ mod imp {
         }
     }
 
+    /// Keeps operand `op`'s triangles with a NaN or infinite corner as they are: they meet
+    /// nothing (Blender 5.2.4 finishes `mesh.intersect` on such a mesh) and must not reach
+    /// the exact engine, which only takes finite coordinates.
+    fn pass_non_finite(out: &mut Out, p: &Prepared, op: u32) {
+        for t in 0..p.tris.len() {
+            if !non_finite(p, t) {
+                continue;
+            }
+            let ids = p.tris[t].map(|v| out.vert(v3(p.positions[v as usize])));
+            if ids[0] == ids[1] || ids[1] == ids[2] || ids[0] == ids[2] {
+                continue;
+            }
+            out.groups
+                .entry((op, p.face_of_tri[t]))
+                .or_default()
+                .push(ids);
+        }
+    }
+
     /// Connected parts of an operand's faces (shared vertices), as triangle lists.
     fn components(p: &Prepared) -> Vec<Vec<usize>> {
         let n = p.positions.len();
@@ -211,6 +247,11 @@ mod imp {
             if comps.len() < 2 {
                 for (t, tri) in p.tris.iter().enumerate() {
                     let ids = tri.map(|v| out.vert(v3(p.positions[v as usize])));
+                    // Coincident input vertices are one vertex (the arena): a triangle
+                    // over two of them is degenerate and dropped, as in `Out::add`.
+                    if ids[0] == ids[1] || ids[1] == ids[2] || ids[0] == ids[2] {
+                        continue;
+                    }
                     out.groups
                         .entry((0, p.face_of_tri[t]))
                         .or_default()
@@ -229,6 +270,7 @@ mod imp {
                     let g = graph(ps, qs)?;
                     out.add(&g, &[(0, 0, &pm, p)]);
                 }
+                pass_non_finite(&mut out, p, 0);
             }
         } else {
             if operands.len() < 2 {
@@ -239,6 +281,8 @@ mod imp {
             let (qs, qm) = soup(&prepared[1], &all(&prepared[1]));
             let g = graph(ps, qs)?;
             out.add(&g, &[(0, 0, &pm, &prepared[0]), (1, 1, &qm, &prepared[1])]);
+            pass_non_finite(&mut out, &prepared[0], 0);
+            pass_non_finite(&mut out, &prepared[1], 1);
         }
         Ok(finish(out, operands, &prepared))
     }
@@ -383,6 +427,19 @@ mod imp {
                 r.corner_verts.push(remap[v as usize]);
                 cut.push(isect.contains(&(v.min(next), v.max(next))));
             }
+            // A face that visits a vertex twice (coincident input vertices merged by the
+            // arena) cannot be a BMesh face: drop it, as Blender's arrangement drops its
+            // degenerate triangles.
+            let fv = &r.corner_verts[start..];
+            let repeats = fv.len() < 3 || {
+                let mut sorted: SmallVec<[u32; 16]> = SmallVec::from_slice(fv);
+                sorted.sort_unstable();
+                sorted.windows(2).any(|w| w[0] == w[1])
+            };
+            if repeats {
+                r.corner_verts.truncate(start);
+                continue;
+            }
             let fv = &r.corner_verts[start..];
             for (i, &c) in cut.iter().enumerate() {
                 if c {
@@ -485,5 +542,92 @@ mod tests {
             e.iter()
                 .all(|&v| r.positions[v as usize][0] == 0.0 && r.positions[v as usize][2] == 0.0)
         }));
+    }
+
+    /// The default cube's positions, face offsets and corners.
+    fn cube(c: [f32; 3], h: f32) -> (Vec<[f32; 3]>, Vec<u32>, Vec<u32>) {
+        let mut p = Vec::new();
+        for x in [-h, h] {
+            for y in [-h, h] {
+                for z in [-h, h] {
+                    p.push([c[0] + x, c[1] + y, c[2] + z]);
+                }
+            }
+        }
+        let fo = vec![0, 4, 8, 12, 16, 20, 24];
+        let cv = vec![
+            0, 1, 3, 2, 2, 3, 7, 6, 6, 7, 5, 4, 4, 5, 1, 0, 2, 6, 4, 0, 7, 3, 1, 5,
+        ];
+        (p, fo, cv)
+    }
+
+    /// M8 stabilization round 3: a NaN or infinite vertex reached manifold-rust's robust
+    /// engine ("coordinate must be finite" panic). The triangles touching it are kept uncut;
+    /// the rest is still cut.
+    #[test]
+    fn non_finite_corners_are_kept_uncut() {
+        for bad in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY, f32::MAX] {
+            let (mut p, fo, cv) = cube([0.0; 3], 1.0);
+            p[0] = [bad, 0.0, 0.0];
+            let (q, qfo, qcv) = cube([0.5; 3], 0.5);
+            for self_intersect in [false, true] {
+                let r = if self_intersect {
+                    // One operand: both cubes as connected parts.
+                    let mut pp = p.clone();
+                    pp.extend_from_slice(&q);
+                    let mut ffo = fo.clone();
+                    ffo.extend(qfo[1..].iter().map(|o| o + 24));
+                    let mut ccv = cv.clone();
+                    ccv.extend(qcv.iter().map(|v| v + 8));
+                    knife(&[BoolMesh::new(&pp, &ffo, &ccv)], true).unwrap()
+                } else {
+                    knife(
+                        &[BoolMesh::new(&p, &fo, &cv), BoolMesh::new(&q, &qfo, &qcv)],
+                        false,
+                    )
+                    .unwrap()
+                };
+                assert!(r.face_offsets.windows(2).all(|w| w[1] - w[0] >= 3));
+                // The three faces at the bad vertex survive.
+                let at_bad = r
+                    .vert_src
+                    .iter()
+                    .position(|s| *s == Some((0, 0)))
+                    .expect("the bad vertex is kept");
+                let faces_at_bad = r
+                    .face_offsets
+                    .windows(2)
+                    .filter(|w| {
+                        r.corner_verts[w[0] as usize..w[1] as usize].contains(&(at_bad as u32))
+                    })
+                    .count();
+                assert!(faces_at_bad >= 3, "{bad} {self_intersect}: {faces_at_bad}");
+            }
+        }
+    }
+
+    /// Coincident vertices (a cut vertex rounded onto an input vertex by an earlier knife)
+    /// are one arena vertex: the triangle over both is dropped instead of reaching BMesh as
+    /// a face with a repeated vertex (`edge_create(v, v)`).
+    #[test]
+    fn coincident_vertices_make_no_repeated_corner() {
+        let p: Vec<[f32; 3]> = vec![
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ];
+        let fo = vec![0, 3, 6];
+        let cv = vec![0, 1, 2, 0, 2, 3];
+        let r = knife(&[BoolMesh::new(&p, &fo, &cv)], true).unwrap();
+        for w in r.face_offsets.windows(2) {
+            let f = &r.corner_verts[w[0] as usize..w[1] as usize];
+            assert!(f.len() >= 3);
+            let mut s = f.to_vec();
+            s.sort_unstable();
+            s.dedup();
+            assert_eq!(s.len(), f.len(), "{f:?}");
+        }
+        assert_eq!(r.face_offsets.len() - 1, 1);
     }
 }

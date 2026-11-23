@@ -438,6 +438,8 @@ fn restored_bmesh(stored: &Arc<BMesh>, template: &frap_mesh::Mesh) -> Arc<BMesh>
     bm.select_mode = stored.select_mode;
     bm.shapenr = stored.shapenr;
     bm.lnor_spacearr.invalidate_all();
+    // `undomesh_to_editmesh`: `BKE_editmesh_looptris_and_normals_calc`.
+    bm.normals_update();
     Arc::new(bm)
 }
 

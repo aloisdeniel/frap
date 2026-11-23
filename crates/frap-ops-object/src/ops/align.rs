@@ -131,6 +131,21 @@ fn exec(cx: &mut OpCtx, p: object::Align) -> OpResult {
                 Some(pos) if !pos.is_empty() => pos.iter().map(|v| mul_point(&m, *v)).collect(),
                 _ => vec![mul_point(&m, [0.0; 3])],
             }
+        } else if ev.bounds.is_none()
+            && let Some(orig) = is_mesh
+                .then(|| crate::ops::data_transfer::mesh_of(cx, ob))
+                .flatten()
+                .and_then(|me| cx.main().meshes.get(me))
+                .and_then(|me| me.bounds())
+        {
+            // `Object.bound_box` (`BKE_object_boundbox_eval_cached_get`): without evaluated
+            // bounds (an empty evaluated mesh: BUILD at its first frame) the original object's
+            // data bounds (`BKE_object_boundbox_get`).
+            let [lo, hi] = orig;
+            let x = [lo[0], lo[0], lo[0], lo[0], hi[0], hi[0], hi[0], hi[0]];
+            let y = [lo[1], lo[1], hi[1], hi[1], lo[1], lo[1], hi[1], hi[1]];
+            let z = [lo[2], hi[2], hi[2], lo[2], lo[2], hi[2], hi[2], lo[2]];
+            (0..8).map(|i| mul_point(&m, [x[i], y[i], z[i]])).collect()
         } else {
             frap_eval::bound_box(&ev)
                 .iter()

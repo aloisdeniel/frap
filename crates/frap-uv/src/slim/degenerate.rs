@@ -286,6 +286,13 @@ impl ParamMesh {
                 self.faces[f as usize].flag |= PFACE_DONE;
                 continue;
             }
+            if min_edge == NIL {
+                // NaN edge lengths (an infinite or NaN position) leave `min_edge` unset;
+                // Blender 5.2.4 then dereferences null below and crashes (Suzanne after
+                // `face_make_planar(repeat=100, factor=10)`, MINIMUM_STRETCH). frap leaves
+                // the face uncorrected (deviations D-169).
+                continue;
+            }
             let ed = bli::sub3(
                 self.co(self.evert(self.enext(max_edge))),
                 self.co(self.evert(max_edge)),

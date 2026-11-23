@@ -24,10 +24,10 @@
 
 pub mod data;
 
-use frap_math::euler::{eul_o_to_mat3, mat3_to_compatible_eul_o};
+use frap_math::euler::{eul_o_to_mat3, eul_o_to_quat, mat3_to_compatible_eul_o, quat_to_eul_o};
 use frap_math::matrix::RotationMode;
 use frap_math::quat::{
-    axis_angle_to_quat, mat3_to_quat, mul_qt_qtqt, quat_to_axis_angle, quat_to_mat3,
+    axis_angle_to_quat, conjugate_qt, mat3_to_quat, mul_qt_qtqt, quat_to_axis_angle, quat_to_mat3,
 };
 use frap_op::prelude::*;
 use frap_op::{TRANSFORM_MODE_HANDLERS, TransformModeHandler, TransformOp};
@@ -183,10 +183,32 @@ fn rotate_td(s: &Setup, td: &ObjectTd, mat: &Mat3, out: &mut Channels) {
             out.angle = angle;
         }
         RotationMode::Euler(order) => {
-            let d = eul_o_to_mat3(td.init.drot, order);
-            let obmat = eul_o_to_mat3(td.init.euler, order);
-            let f = d.transpose() * (smat * (d * obmat));
-            out.euler = mat3_to_compatible_eul_o(&f, td.init.euler, order);
+            // `ElementRotation_ex`: with a delta rotation, `add_eul_euleul(irot, drot)`
+            // (quaternions, `quat_to_eulO`), the compatible Euler of `smat · obmat` with the
+            // current rotation, then `sub_eul_euleul(…, drot)`, whose `quat_to_eulO` picks
+            // the result's branch (not the compatible one).
+            let drot = td.init.drot;
+            let has_delta = drot != [0.0; 3];
+            let eul = if has_delta {
+                quat_to_eul_o(
+                    mul_qt_qtqt(
+                        eul_o_to_quat(drot, order),
+                        eul_o_to_quat(td.init.euler, order),
+                    ),
+                    order,
+                )
+            } else {
+                td.init.euler
+            };
+            let obmat = eul_o_to_mat3(eul, order);
+            let fmat = smat * obmat;
+            let eul = mat3_to_compatible_eul_o(&fmat, td.init.euler, order);
+            out.euler = if has_delta {
+                let inv_d = conjugate_qt(eul_o_to_quat(drot, order));
+                quat_to_eul_o(mul_qt_qtqt(inv_d, eul_o_to_quat(eul, order)), order)
+            } else {
+                eul
+            };
         }
     }
 }

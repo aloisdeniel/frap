@@ -222,6 +222,7 @@ NORMALISE = {
     "D-166": ("comparator", "glTF goldens compare PNG images by their decoded pixels; cases do not compare packed_file.size"),
     "D-167": ("cases", "gltf/m8/shared_accessors_draco only exports meshes Blender encodes without reading past its buffers"),
     "D-168": ("cases", "select_similar_region cases avoid regions next to n-gons of five or more sides"),
+    "D-169": ("cases", "no case unwraps a non-finite mesh with MINIMUM_STRETCH (Blender crashes)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -130,9 +130,13 @@ fn enter_one(
                 .filter(|k| !k.key_blocks.is_empty())
             {
                 key.load_into_bmesh(&mut bm, active_block(cx, ob));
-                bm.normals_update();
             }
         }
+        // `BKE_editmesh_looptris_and_normals_calc` after `EDBM_mesh_make`: the BMesh normals
+        // are recomputed BMesh-style, so a zero-area face has a zero normal (the Mesh's
+        // (0, 0, 1) fallback does not reach the vertex normals the edit tools read: an
+        // `inset(depth=…)` after an in-place `extrude_faces_indiv`, M8 stabilization round 3).
+        bm.normals_update();
         bm
     };
     // `EDBM_mesh_make`: the scene's select mode, then a flush for it (the mode may differ from

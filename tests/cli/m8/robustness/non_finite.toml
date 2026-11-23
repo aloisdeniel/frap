@@ -1,0 +1,11 @@
+# M8 stabilization round 3: non-finite positions reach no panic. A NaN vertex: every unwrap
+# method and uv.minimize_stretch finish (Blender 5.2.4 finishes CONFORMAL and ANGLE_BASED with
+# NaN UVs; the polyfill k-d tree used to index past its slice on a NaN pivot); the EXACT knife
+# (mesh.intersect) keeps the faces at the NaN vertex uncut and finishes, as Blender does; the
+# EXACT Boolean (mesh.intersect_boolean, the BOOLEAN modifier) answers a clean error where
+# manifold-rust's robust engine used to panic ("coordinate must be finite", deviations D-101).
+# Suzanne after face_make_planar(repeat=100, factor=10) has infinite and NaN positions:
+# MINIMUM_STRETCH finishes where Blender 5.2.4 crashes (D-169). Statements on stdin (raw mode).
+bin.name = "frap"
+args = []
+fs.sandbox = true

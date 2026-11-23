@@ -26,7 +26,8 @@
 //! arithmetic and winding numbers, so closed non-manifold soup is accepted and an inside-out
 //! operand is empty space, as in Blender), as a left fold; the bridges merging leaves at new
 //! in-line vertices are moved off them (`assemble::reroute_bridges`) so those vertices are
-//! dissolved, as Blender's exact solver has none. Coordinates beyond 1e12 and an empty result
+//! dissolved, as Blender's exact solver has none. NaN coordinates, coordinates beyond 1e12
+//! (infinite ones included) and an empty result
 //! that cannot be right (a UNION, a DIFFERENCE whose base reaches outside its cutters) are
 //! errors, not silent empty meshes. Open operands fail with
 //! [`BoolError::NonManifold`] (Blender's exact solver accepts them). Results have Blender's
@@ -482,6 +483,19 @@ pub(crate) mod imp {
         let prepared: Vec<Prepared> = operands.iter().map(prepare).collect();
         let exact = opts.solver != SolverKind::Manifold;
         if exact {
+            // `f32::max` drops NaN: look for it first (manifold-rust's robust engine panics
+            // on a non-finite coordinate).
+            if prepared
+                .iter()
+                .flat_map(|p| p.positions.iter().flatten())
+                .any(|c| c.is_nan())
+            {
+                return Err(BoolError::Input(
+                    "frap: the EXACT solver needs finite coordinates (found NaN); Blender's \
+                     exact mesh arrangement is not ported (M9)"
+                        .into(),
+                ));
+            }
             let max = prepared
                 .iter()
                 .flat_map(|p| p.positions.iter().flatten())
@@ -793,6 +807,52 @@ mod tests {
             ..Default::default()
         };
         assert!(ManifoldSolver.run(&ops, &opts).is_ok());
+    }
+
+    /// M8 stabilization round 3: NaN passed the range check (`f32::max` drops it) and
+    /// panicked in manifold-rust's robust engine. NaN and infinite coordinates are clean
+    /// `Input` errors for EXACT; MANIFOLD does not panic either.
+    #[test]
+    fn exact_refuses_non_finite_coordinates() {
+        let b = cube(1.0, [0.5; 3]);
+        for (bad, needle) in [
+            (f32::NAN, "NaN"),
+            (f32::INFINITY, "1e12"),
+            (f32::NEG_INFINITY, "1e12"),
+            (f32::MAX, "1e12"),
+        ] {
+            let mut a = cube(2.0, [0.0; 3]);
+            a.0[0] = [bad, 0.0, 0.0];
+            for op in [
+                BoolOperation::Difference,
+                BoolOperation::Union,
+                BoolOperation::Intersect,
+            ] {
+                // Either operand.
+                for swap in [false, true] {
+                    let (x, y) = if swap { (&b, &a) } else { (&a, &b) };
+                    let ops = [
+                        BoolMesh::new(&x.0, &x.1, &x.2),
+                        BoolMesh::new(&y.0, &y.1, &y.2),
+                    ];
+                    let opts = BoolOptions {
+                        operation: op,
+                        ..Default::default()
+                    };
+                    let r = ManifoldSolver.run(&ops, &opts);
+                    assert!(
+                        matches!(r, Err(BoolError::Input(ref m)) if m.contains(needle)),
+                        "{bad} {op:?}: {r:?}"
+                    );
+                    let opts = BoolOptions {
+                        solver: SolverKind::Manifold,
+                        operation: op,
+                        ..Default::default()
+                    };
+                    let _ = ManifoldSolver.run(&ops, &opts);
+                }
+            }
+        }
     }
 
     #[test]

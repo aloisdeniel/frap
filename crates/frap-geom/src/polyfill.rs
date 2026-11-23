@@ -130,7 +130,11 @@ impl<'a> KdTree2D<'a> {
             loop {
                 loop {
                     i += 1;
-                    if coords[nodes[i as usize].index as usize][ax] >= co {
+                    // `while (coords[nodes[++i].index][axis] < co) {}`: kept as a negated
+                    // `<` (not `>=`) so a NaN pivot or coordinate stops the scan like
+                    // Blender instead of running past the slice.
+                    #[allow(clippy::neg_cmp_op_on_partial_ord)]
+                    if !(coords[nodes[i as usize].index as usize][ax] < co) {
                         break;
                     }
                 }
@@ -272,12 +276,12 @@ impl<'a> KdTree2D<'a> {
         let vs = ind.map(|i| self.coords[i as usize]);
         let bounds = [
             [
-                vs[0][0].min(vs[1][0]).min(vs[2][0]),
-                vs[0][0].max(vs[1][0]).max(vs[2][0]),
+                std_min3(vs[0][0], vs[1][0], vs[2][0]),
+                std_max3(vs[0][0], vs[1][0], vs[2][0]),
             ],
             [
-                vs[0][1].min(vs[1][1]).min(vs[2][1]),
-                vs[0][1].max(vs[1][1]).max(vs[2][1]),
+                std_min3(vs[0][1], vs[1][1], vs[2][1]),
+                std_max3(vs[0][1], vs[1][1], vs[2][1]),
             ],
         ];
         let center = [
@@ -287,6 +291,33 @@ impl<'a> KdTree2D<'a> {
         let t = tri_isect_init(vs);
         self.isect_tri_recursive(ind, &t, center, bounds, self.root)
     }
+}
+
+/// `std::min({a, b, c})`: keeps the first smallest by `<`, so NaN propagates exactly as
+/// in C++ (unlike `f32::min`, which drops NaN).
+#[inline]
+fn std_min3(a: f32, b: f32, c: f32) -> f32 {
+    let mut r = a;
+    if b < r {
+        r = b;
+    }
+    if c < r {
+        r = c;
+    }
+    r
+}
+
+/// `std::max({a, b, c})`: keeps the first largest by `<` (C++ `max_element` order).
+#[inline]
+fn std_max3(a: f32, b: f32, c: f32) -> f32 {
+    let mut r = a;
+    if r < b {
+        r = b;
+    }
+    if r < c {
+        r = c;
+    }
+    r
 }
 
 /// `SWAP(KDTreeNode2D_head, …)`: swaps `neg`, `pos` and `index` only.
@@ -665,5 +696,49 @@ mod tests {
         let c = [[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.5, -0.5]];
         let t = polyfill_calc(&c, 0);
         assert_eq!(t.len(), 3);
+    }
+
+    /// Regression (M8 stabilization round 3): NaN / ±inf coordinates reached the k-d tree
+    /// balance with an inverted comparison and indexed past the slice. Blender finishes
+    /// on such input (with garbage triangles); so must we, still producing n - 2 tris.
+    #[test]
+    fn non_finite_coords_do_not_panic() {
+        let nan = f32::NAN;
+        let inf = f32::INFINITY;
+        let base: Vec<[f32; 2]> = vec![
+            [0.0, 0.0],
+            [3.0, 0.0],
+            [3.0, 3.0],
+            [2.0, 3.0],
+            [2.0, 1.0],
+            [1.0, 1.0],
+            [1.0, 3.0],
+            [0.0, 3.0],
+        ];
+        for bad in [nan, inf, -inf, f32::MAX, -f32::MAX] {
+            for k in 0..base.len() {
+                for axis in 0..2 {
+                    let mut c = base.clone();
+                    c[k][axis] = bad;
+                    for sign in [-1, 0, 1] {
+                        let t = polyfill_calc(&c, sign);
+                        assert_eq!(t.len(), c.len() - 2, "bad={bad} k={k} axis={axis}");
+                    }
+                }
+            }
+            // Every coordinate non-finite.
+            let c = vec![[bad, bad]; 7];
+            for sign in [-1, 0, 1] {
+                assert_eq!(polyfill_calc(&c, sign).len(), 5);
+            }
+            // Mixed NaN and inf.
+            let mut c = base.clone();
+            c[1] = [nan, inf];
+            c[4] = [-inf, nan];
+            c[6] = [bad, 0.5];
+            for sign in [-1, 0, 1] {
+                assert_eq!(polyfill_calc(&c, sign).len(), 6);
+            }
+        }
     }
 }

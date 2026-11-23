@@ -509,17 +509,32 @@ fn enum_items_repr(items: &[EnumItem]) -> String {
 }
 
 /// `did_you_mean` of an unknown enum item: the closest identifiers, compared upper-cased
-/// (`'angel'` → `ANGLE`, `'SUBSURFACE'` → `SUBSURF`).
+/// (`'angel'` → `ANGLE`, `'SUBSURFACE'` → `SUBSURF`), then the identifiers that contain the
+/// word (three characters or more) as a prefix, a suffix or a `_`-separated part
+/// (`'AREA'` → `FACE_AREA`, `'RANDOM'` → `RANDOMIZE`); three at most.
 fn enum_did_you_mean(s: &str, items: &[EnumItem]) -> serde_json::Value {
     let upper = s.to_uppercase();
-    crate::error::suggest(
-        &upper,
-        items.iter().map(|i| i.identifier).filter(|i| !i.is_empty()),
-    )
-    .into_iter()
-    .map(serde_json::Value::from)
-    .collect::<Vec<_>>()
-    .into()
+    let ids = || items.iter().map(|i| i.identifier).filter(|i| !i.is_empty());
+    let mut out = crate::error::suggest(&upper, ids());
+    if upper.chars().count() >= 3 {
+        // Whole `_`-separated parts first, then plain prefixes and suffixes.
+        let part = |id: &str| id.split('_').any(|p| p == upper);
+        let affix = |id: &str| id.starts_with(upper.as_str()) || id.ends_with(upper.as_str());
+        for pass in [&part as &dyn Fn(&str) -> bool, &affix] {
+            for id in ids() {
+                if out.len() >= 3 {
+                    break;
+                }
+                if id != upper && pass(id) && !out.contains(&id) {
+                    out.push(id);
+                }
+            }
+        }
+    }
+    out.into_iter()
+        .map(serde_json::Value::from)
+        .collect::<Vec<_>>()
+        .into()
 }
 
 fn enum_valid_detail(items: &[EnumItem]) -> serde_json::Value {
@@ -1234,5 +1249,70 @@ mod repr_tests {
         ] {
             assert_eq!(py_float_repr(v), py, "{v:?}");
         }
+    }
+}
+
+#[cfg(test)]
+mod did_you_mean_tests {
+    use super::enum_did_you_mean;
+    use crate::def::EnumItem;
+
+    fn items(ids: &[&'static str]) -> Vec<EnumItem> {
+        ids.iter()
+            .enumerate()
+            .map(|(i, id)| EnumItem {
+                identifier: id,
+                name: "",
+                description: "",
+                value: i as i32,
+            })
+            .collect()
+    }
+
+    /// M8 stabilization round 3: near misses an agent makes that edit distance alone misses.
+    #[test]
+    fn parts_prefixes_and_suffixes() {
+        let similar = items(&[
+            "VERT_NORMAL",
+            "VERT_FACES",
+            "FACE_AREA",
+            "FACE_PERIMETER",
+            "FACE_NORMAL",
+            "EDGE_LENGTH",
+        ]);
+        assert_eq!(
+            enum_did_you_mean("AREA", &similar),
+            serde_json::json!(["FACE_AREA"])
+        );
+        assert_eq!(
+            enum_did_you_mean("area", &similar),
+            serde_json::json!(["FACE_AREA"])
+        );
+        assert_eq!(
+            enum_did_you_mean("NORMAL", &similar),
+            serde_json::json!(["VERT_NORMAL", "FACE_NORMAL"])
+        );
+        let sort = items(&[
+            "VIEW_ZAXIS",
+            "VIEW_XAXIS",
+            "CURSOR_DISTANCE",
+            "RANDOMIZE",
+            "REVERSE",
+        ]);
+        assert_eq!(
+            enum_did_you_mean("RANDOM", &sort),
+            serde_json::json!(["RANDOMIZE"])
+        );
+        // Edit distance still comes first; two-letter words get no affix matches.
+        let modes = items(&["ANGLE", "ANGLE_BASED", "CONFORMAL"]);
+        assert_eq!(
+            enum_did_you_mean("angel", &modes),
+            serde_json::json!(["ANGLE"])
+        );
+        assert_eq!(
+            enum_did_you_mean("ANGLE_", &modes),
+            serde_json::json!(["ANGLE", "ANGLE_BASED"])
+        );
+        assert_eq!(enum_did_you_mean("AN", &modes), serde_json::json!([]));
     }
 }

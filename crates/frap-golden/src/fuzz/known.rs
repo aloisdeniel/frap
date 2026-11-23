@@ -502,6 +502,10 @@ const GEOMETRY: &str = "§2 Differential fuzzing (WP 8.7), geometry differences"
 const UV: &str = "§2 Differential fuzzing (WP 8.7), UV results";
 const FOUND: &str = "§2 Differential fuzzing (WP 8.7), causal triage";
 
+/// Statements that give an object a SUBSURF modifier (`make_links_data(type='MODIFIERS')`
+/// copies the active object's).
+const SUBSURF_MAKERS: &str = "SUBSURF|subdivision_set|make_links_data&type='MODIFIERS'";
+
 /// Field groups.
 const ANY: &[&str] = &[];
 const POSITIONS: &[&str] = &["positions", "corner_normals", "face_normals"];
@@ -580,6 +584,20 @@ fn subdivide_is_fractal(statement: &str) -> bool {
         .and_then(|r| r.split([',', ')']).next())
         .and_then(|v| v.trim().parse::<f64>().ok())
         .is_some_and(|v| v != 0.0)
+}
+
+/// `mesh.subdivide` with a smoothing or fractal displacement (both amplify the input's
+/// last-ulp differences through the vertex normals).
+fn subdivide_displaces(statement: &str) -> bool {
+    let arg = |k: &str| {
+        statement
+            .split(k)
+            .nth(1)
+            .and_then(|r| r.split([',', ')']).next())
+            .and_then(|v| v.trim().parse::<f64>().ok())
+            .is_some_and(|v| v != 0.0)
+    };
+    arg("fractal=") || arg("smoothness=")
 }
 
 /// Operators that change the topology (and so interpolate corner data).
@@ -672,15 +690,15 @@ pub const KNOWN: &[Known] = &[
          |uv.seams_from_islands",
         EDIT_EDGE_DATA,
     )
-    .with(&["SUBSURF|subdivision_set"]),
+    .with(&[SUBSURF_MAKERS]),
     mesh(
         GEOMETRY,
         "geometry.attribute_add&domain='EDGE'",
         &["attributes"],
     )
-    .with(&["SUBSURF|subdivision_set"]),
+    .with(&[SUBSURF_MAKERS]),
     mesh(GEOMETRY, "transform.edge_crease", ANY).with(&[
-        "SUBSURF|subdivision_set",
+        SUBSURF_MAKERS,
         "object.modifier_copy|object.modifier_apply|object.convert",
     ]),
     // `primitive_torus_add` builds a mesh whose active face is 0 (`bpy.data.meshes.new`):
@@ -694,11 +712,9 @@ pub const KNOWN: &[Known] = &[
         "mesh.extrude_edges_indiv",
         &["edges", "faces", ""],
     )
-    .with(&["SUBSURF|subdivision_set"]),
-    mesh(GEOMETRY, "mesh.extrude_region|mesh.extrude_context", ANY)
-        .with(&["SUBSURF|subdivision_set"]),
-    mesh(GEOMETRY, "object.transform_apply", POSITIONS)
-        .with(&["shape_key_add", "SUBSURF|subdivision_set"]),
+    .with(&[SUBSURF_MAKERS]),
+    mesh(GEOMETRY, "mesh.extrude_region|mesh.extrude_context", ANY).with(&[SUBSURF_MAKERS]),
+    mesh(GEOMETRY, "object.transform_apply", POSITIONS).with(&["shape_key_add", SUBSURF_MAKERS]),
     // A few units of the custom normals' 16-bit encoding.
     mesh(GEOMETRY, CUSTOM_NORMALS, &["attributes[\"custom_normal\"]"]).max_delta(8.0),
     mesh(GEOMETRY, "mesh.dissolve_mode&use_face_split=True", NORMALS).with(&["mesh.normals_tools"]),
@@ -707,7 +723,7 @@ pub const KNOWN: &[Known] = &[
     // SUBSURF positions are T2: the many cost ties of a subdivided symmetric or flat mesh flip
     // (the same `BM_mesh_decimate_dissolve_ex` as DECIMATE's `DISSOLVE`; exact on Blender's
     // positions: `fuzz/dissolve_limited_subsurf_circle_ties.py`).
-    mesh("D-120", "mesh.dissolve_limited", ANY).with(&["SUBSURF|subdivision_set"]),
+    mesh("D-120", "mesh.dissolve_limited", ANY).with(&[SUBSURF_MAKERS]),
     mesh(GEOMETRY, "uv.align", UVS),
     mesh(GEOMETRY, "mesh.fill(", ANY),
     mesh(GEOMETRY, "BEVEL", UVS),
@@ -761,6 +777,11 @@ pub const KNOWN: &[Known] = &[
     // dissolve that joins them winds the merged face by that order.
     mesh("D-65", "mesh.dissolve_", WINDING)
         .with(&["mesh.extrude_repeat|mesh.extrude_region|mesh.extrude_context"]),
+    // A vertex split after such an extrusion gives each wall one of the coincident copies in
+    // the walls' order: the same mesh up to which coincident vertex each wall uses (exact on
+    // Blender's extruded mesh: `fuzz/edge_split_vert_after_extrude_ties.py`).
+    mesh("D-65", "mesh.edge_split", ANY)
+        .with(&["mesh.extrude_repeat|mesh.extrude_region|mesh.extrude_context"]),
     // Blender's own UV sphere element order changes between runs (D-19): results that
     // depend on the element order (index writes, ties) are not comparable on its mesh.
     mesh("D-19", "mesh.primitive_uv_sphere_add", ANY),
@@ -774,7 +795,7 @@ pub const KNOWN: &[Known] = &[
         .with(&["mode_set(mode='EDIT')"])
         .edit_end(),
     mesh(FOUND, "mesh.dissolve_", NORMALS).with(&["mesh.set_sharpness_by_angle|mesh.mark_sharp"]),
-    state(FOUND, RNA, "object.align", OBJECT_TRANSFORM).with(&["SUBSURF|subdivision_set"]),
+    state(FOUND, RNA, "object.align", OBJECT_TRANSFORM).with(&[SUBSURF_MAKERS]),
     mesh(FOUND, TOPOLOGY, NORMALS).with(&[CUSTOM_NORMALS]),
     // `set_sharpness_by_angle` adds a (zero) `custom_normal` layer in Blender 5.2: topology
     // operators after it keep Blender's custom normals as they do after the tools above.
@@ -802,8 +823,6 @@ pub const KNOWN: &[Known] = &[
         ANY,
     )
     .with(&["~mesh.delete|mesh.dissolve_|mesh.merge(|mesh.remove_doubles"]),
-    state(FOUND, RNA, "bpy.ops.transform.rotate", &["rotation"])
-        .with(&["object.transforms_to_deltas"]),
     mesh(FOUND, "use_boundary_tear=True", ANY),
     mesh(FOUND, "transform.push_pull|transform.tosphere", POSITIONS)
         .with(&["mode_set(mode='EDIT')"]),
@@ -870,7 +889,7 @@ pub const KNOWN: &[Known] = &[
         &["parent", "location", "rotation", "scale", "matrix"],
     )
     .with(&["object.select_pattern|object.select_all"]),
-    mesh(FOUND, "MIRROR", &["edges", "faces", ""]).with(&["SUBSURF|subdivision_set"]),
+    mesh(FOUND, "MIRROR", &["edges", "faces", ""]).with(&[SUBSURF_MAKERS]),
     mesh(FOUND, "mesh.spin", NORMALS).with(&["mesh.extrude_faces_indiv"]),
     // `bevel_reattach_wires` picks the closest of two new vertices equidistant from a
     // zero-length wire's other end: float rounding of the (T2) input decides (exact on
@@ -880,6 +899,18 @@ pub const KNOWN: &[Known] = &[
     // threshold: near-equidistant candidates after a duplicating `spin` (T2 positions) pair
     // otherwise (exact on Blender's positions: `fuzz/symmetry_snap_after_spin_ties.py`).
     mesh(FOUND, "mesh.symmetry_snap", POSITIONS).with(&["mesh.spin"]),
+    // A BEVEL over a MIRROR seam of SUBSURF vertices a few 1e-9 off the plane: which
+    // diagonal the bevel patches depends on those (T2) last ulps (exact on Blender's
+    // positions: `fuzz/bevel_mirror_subsurf_seam_ties.py`).
+    mesh(FOUND, "BEVEL", ANY).with(&[SUBSURF_MAKERS, "MIRROR"]),
+    // DISPLACE over SUBSURF folds thin faces whose normals amplify the (T2) SUBSURF positions
+    // past 2e-3 (exact on Blender's positions: `fuzz/displace_subsurf_suzanne_ties.py`).
+    mesh(FOUND, "DISPLACE", &["corner_normals", "face_normals"]).with(&[SUBSURF_MAKERS]),
+    // `subdivide` smoothing or fractal displacement amplifies the spun positions' last-ulp
+    // differences (exact on Blender's positions: `fuzz/subdivide_fractal_after_spin_ties.py`).
+    mesh(FOUND, "mesh.subdivide", POSITIONS)
+        .when(subdivide_displaces)
+        .with(&["mesh.spin"]),
     // `dissolve_limited` of a flat mesh: its costs (face angles and vertex angles near zero)
     // tie up to the rounding of positions a rotation left T2 (exact on Blender's positions).
     mesh(FOUND, "mesh.dissolve_limited", ANY).with(&[
@@ -903,8 +934,16 @@ pub const KNOWN: &[Known] = &[
     .with(&["mesh.extrude_verts_indiv|mesh.extrude_vertices_move"]),
     // The cursor follows an object `object.align` placed otherwise (its SUBSURF bounds).
     state(FOUND, RNA, "view3d.snap_cursor_to_", &["cursor"])
-        .with(&["object.align", "SUBSURF|subdivision_set"]),
+        .with(&["object.align", SUBSURF_MAKERS]),
     mesh(FOUND, "bpy.ops.transform.rotate", NORMALS).with(&[CUSTOM_NORMALS]),
+    // Edit Mode transforms other than translate/rotate/resize (no `preserve_clnor`) leave
+    // Blender's corner spaces stale, so `flip_normals` decodes the custom normals in the
+    // spaces of the untransformed geometry (frap: the current ones; M9).
+    mesh(FOUND, "mesh.flip_normals", NORMALS).with(&[
+        CUSTOM_NORMALS,
+        "transform.push_pull|transform.shrink_fatten|transform.tosphere|transform.shear\
+         |transform.bend|transform.vertex_random|transform.vert_slide|transform.edge_slide",
+    ]),
     mesh(FOUND, "transform.shrink_fatten", POSITIONS)
         .with(&["mesh.extrude_verts_indiv|mesh.extrude_vertices_move"]),
     mesh(FOUND, "mesh.delete_edgeloop", ANY).with(&["mesh.extrude_edges_indiv"]),
@@ -929,10 +968,10 @@ pub const KNOWN: &[Known] = &[
     mesh(FOUND, "mesh.merge", NORMALS).with(&["mesh.extrude_region"]),
     // CAST normalises each vertex's direction from the centre: SUBSURF's T2 positions of a
     // vertex at the centre (about 1e-8 from it) point it elsewhere.
-    mesh(FOUND, "CAST", POSITIONS).with(&["SUBSURF|subdivision_set"]),
+    mesh(FOUND, "CAST", POSITIONS).with(&[SUBSURF_MAKERS]),
     // SCREW treats a vertex on its axis apart: SUBSURF's T2 face centres on the axis (exactly
     // on it in frap, about 1e-8 off in Blender) are screwed otherwise.
-    mesh(FOUND, "SCREW", ANY).with(&["SUBSURF|subdivision_set"]),
+    mesh(FOUND, "SCREW", ANY).with(&[SUBSURF_MAKERS]),
     mesh(FOUND, "LAPLACIANSMOOTH", POSITIONS)
         .with(&["primitive_plane_add|primitive_grid_add|primitive_circle_add"]),
     mesh(FOUND, CUSTOM_NORMALS, NORMALS).with(&["transform.shear"]),
@@ -1410,6 +1449,141 @@ mod tests {
                 "frap vertex [-0.27638802, -2.1175513, 1.6128819] has no blender counterpart",
             ),
             Some(FOUND)
+        );
+    }
+
+    #[test]
+    fn round_three_ties_are_explained() {
+        let explained = |statements: &[&str], path: &str, detail: &str| {
+            let statements = st(statements);
+            let trace = cube_trace(statements.len());
+            explain_all(&statements, &trace, &[Mismatch::new(MESH, path, detail)])[0]
+                .map(|k| k.deviation)
+        };
+        // Fuzz seed 0xd261cd89f7db8a29 (run 0x8e417e57).
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.edge_split(type='EDGE')",
+                    "bpy.ops.mesh.extrude_context()",
+                    "bpy.ops.mesh.edge_split(type='VERT')",
+                ],
+                "meshes[\"Cube\"].edges[48]",
+                "frap edge [10, 51] has no blender counterpart",
+            ),
+            Some("D-65")
+        );
+        // Without the extrusion there is no wall order to differ.
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.edge_split(type='EDGE')",
+                    "bpy.ops.mesh.edge_split(type='VERT')",
+                ],
+                "meshes[\"Cube\"].edges[48]",
+                "frap edge [10, 51] has no blender counterpart",
+            ),
+            None
+        );
+        // Fuzz seed 0xe8478421dc30ca42 (run 0x5eed8e90); a plain subdivide is not explained.
+        let spin = [
+            "bpy.ops.object.mode_set(mode='EDIT')",
+            "bpy.ops.mesh.spin(center=(0.16, 0.72, -0.12), axis=(1, 0, 0), dupli=True)",
+            "bpy.ops.mesh.subdivide(smoothness=0.85, fractal=0.68)",
+        ];
+        assert_eq!(
+            explained(
+                &spin,
+                "meshes[\"Cube\"].positions[119]",
+                "frap vertex [-1.5643852, 0.8221707, 0.60858494] has no blender counterpart",
+            ),
+            Some(FOUND)
+        );
+        let mut plain = spin;
+        plain[2] = "bpy.ops.mesh.subdivide(number_cuts=2)";
+        assert_eq!(
+            explained(
+                &plain,
+                "meshes[\"Cube\"].positions[119]",
+                "frap vertex [-1.5643852, 0.8221707, 0.60858494] has no blender counterpart",
+            ),
+            None
+        );
+        // Fuzz seed 0xcd369cec07d504cf (run 0x5eed8e90): the SUBSURF came from the active
+        // object through `make_links_data`.
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1.27)",
+                    "bpy.ops.object.subdivision_set(level=1)",
+                    "bpy.ops.object.select_all(action='SELECT')",
+                    "bpy.ops.object.make_links_data(type='MODIFIERS')",
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.mark_sharp()",
+                ],
+                "evaluated[\"Cube\"].attributes[\"sharp_edge\"].data[3]",
+                "frap false != blender true",
+            ),
+            Some(GEOMETRY)
+        );
+        // Fuzz seed 0xb2269be17581f0aa (run 0x5eed8e90).
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.subdivision_set(relative=True)",
+                    "bpy.context.object.modifiers.new('Arr', 'MIRROR')",
+                    "bpy.context.object.modifiers.new('Sub', 'BEVEL')",
+                ],
+                "evaluated[\"Cube\"].positions[72]",
+                "frap vertex [0.0, 0.0, 0.9463842] has no blender counterpart",
+            ),
+            Some(FOUND)
+        );
+        // Fuzz seed 0x624c3faf39918f30 (run 0x5eed8e91).
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.mesh.primitive_monkey_add(size=1.3)",
+                    "bpy.ops.object.subdivision_set(level=2)",
+                    "bpy.ops.object.modifier_add(type='DISPLACE')",
+                ],
+                "evaluated[\"Cube\"].corner_normals[2176]",
+                "frap [-0.38685718, 0.69868505, -0.6018146] != blender [-0.3, 0.69, -0.6]",
+            ),
+            Some(FOUND)
+        );
+        // Fuzz seed 0x368aaba5457fea3f (run 0x5eed8e91).
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.average_normals()",
+                    "bpy.ops.transform.push_pull(value=0.39)",
+                    "bpy.ops.mesh.flip_normals()",
+                ],
+                "meshes[\"Cube\"].corner_normals[0]",
+                "frap [-0.94836587, 0.25712878, 0.18570702] != blender [-0.98, 0.15, 0.01]",
+            ),
+            Some(FOUND)
+        );
+        // Fuzz seed 0xb85755713edef4b: fixed (edit-mode entry recomputes the BMesh normals),
+        // so it stays unexplained.
+        assert_eq!(
+            explained(
+                &[
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.extrude_faces_indiv()",
+                    "bpy.ops.object.mode_set(mode='OBJECT')",
+                    "bpy.ops.object.mode_set(mode='EDIT')",
+                    "bpy.ops.mesh.inset(thickness=0.33, depth=-0.15, use_even_offset=False, \
+                     use_edge_rail=False, use_outset=True, use_select_inset=False)",
+                ],
+                "meshes[\"Cube\"].positions[36]",
+                "frap vertex [1.0, -0.9329, 0.8658] has no blender counterpart",
+            ),
+            None
         );
     }
 
