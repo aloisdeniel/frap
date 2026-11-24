@@ -3,9 +3,11 @@
 //! `True` when the mesh had to be changed. frap's mesh builders (`from_pydata`, primitives,
 //! operators) never produce an invalid mesh, so a valid mesh answers `False` like Blender
 //! (verified on 5.2.4: the factory cube, `verbose=True` too). A mesh made invalid through
-//! low-level writes (`foreach_set` of out-of-range indices) is not repaired yet: frap raises
-//! `NotImplementedError` (`RNA_NOT_IMPLEMENTED`) naming the first problem rather than
-//! answering `False` for a broken mesh (deviations.md §2).
+//! low-level writes (`foreach_set` of out-of-range indices, `polygons.add` / `loops.add`
+//! without the matching corners or edges: a face of fewer than 3 corners or using a vertex
+//! twice, a corner whose edge does not join its vertex to the next one) is not repaired yet:
+//! frap raises `NotImplementedError` (`RNA_NOT_IMPLEMENTED`) naming the first problem rather
+//! than answering `False` for a broken mesh (deviations.md §2; Blender answers `True`).
 
 use frap_rna::{RnaError, RnaPtr, Value, rna_func};
 use frap_scene::{FuncArgs, Host};

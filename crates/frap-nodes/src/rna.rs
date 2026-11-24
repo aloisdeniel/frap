@@ -469,7 +469,15 @@ impl RnaMut for NodeMut<'_> {
                 };
             }
             "hide" => n.hide = as_bool(prop, &v)?,
-            "mute" => n.mute = as_bool(prop, &v)?,
+            // `rna_Node_mute_set` ignores nodes whose type has `no_muting` (outputs, group
+            // input/output, zone and closure nodes, viewers; verified on 5.2.4: the material
+            // output reads `False` after `mute = True`).
+            "mute" => {
+                let m = as_bool(prop, &v)?;
+                if !no_muting(n.bl_idname) {
+                    n.mute = m;
+                }
+            }
             id if prop.is_readonly() => return Err(read_only(srna, id)),
             id => return Err(unbound(srna, id)),
         }
@@ -1063,6 +1071,33 @@ impl RnaMut for LinkMut<'_> {
             "a collection",
         ))
     }
+}
+
+/// Node types whose `typeinfo->no_muting` is set: a `mute` write is ignored (verified on 5.2.4
+/// by setting `mute = True` on every node type of the four tree types).
+pub(crate) fn no_muting(bl_idname: &str) -> bool {
+    matches!(
+        bl_idname,
+        "NodeGroupInput"
+            | "NodeGroupOutput"
+            | "NodeClosureInput"
+            | "NodeClosureOutput"
+            | "ShaderNodeOutputAOV"
+            | "ShaderNodeOutputLight"
+            | "ShaderNodeOutputLineStyle"
+            | "ShaderNodeOutputMaterial"
+            | "ShaderNodeOutputWorld"
+            | "GeometryNodeForeachGeometryElementInput"
+            | "GeometryNodeForeachGeometryElementOutput"
+            | "GeometryNodeRepeatInput"
+            | "GeometryNodeRepeatOutput"
+            | "GeometryNodeSimulationInput"
+            | "GeometryNodeSimulationOutput"
+            | "GeometryNodeViewer"
+            | "CompositorNodeViewer"
+            | "TextureNodeOutput"
+            | "TextureNodeViewer"
+    )
 }
 
 #[cfg(test)]

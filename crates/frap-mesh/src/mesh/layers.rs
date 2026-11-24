@@ -405,7 +405,11 @@ impl Mesh {
 
     /// The first structural problem of the mesh (`BKE_mesh_validate` checks frap relies on):
     /// a corner or edge vertex out of range, a degenerate edge, a corner edge out of range,
-    /// non-increasing face offsets, or columns whose lengths disagree with their domain.
+    /// non-increasing face offsets, columns whose lengths disagree with their domain, a face
+    /// of fewer than 3 corners or using a vertex twice, or a corner whose edge does not join
+    /// its vertex to the next corner's (verified on 5.2.4: `polygons.add(1)`, `loops.add(1)`,
+    /// a repeated face vertex and swapped `edge_index` values all make `validate()` answer
+    /// `True`).
     pub fn validate_report(&self) -> Option<String> {
         let (nv, ne, nc) = (
             self.verts_num() as i64,
@@ -448,6 +452,31 @@ impl Mesh {
                 .position(|e| !(0..ne).contains(&i64::from(*e)))
         {
             return Some(format!("corner {c} uses a missing edge"));
+        }
+        let (verts, edges, corner_edges) = (self.corner_verts(), self.edges(), self.corner_edges());
+        for (f, w) in self.face_offsets().windows(2).enumerate() {
+            let (a, b) = (w[0] as usize, w[1] as usize);
+            if b - a < 3 {
+                return Some(format!("face {f} has {} corners", b - a));
+            }
+            let face = &verts[a..b];
+            if let Some(i) = (1..face.len()).find(|&i| face[..i].contains(&face[i])) {
+                return Some(format!("face {f} uses vertex {} twice", face[i]));
+            }
+            if corner_edges.len() != nc {
+                continue;
+            }
+            for c in a..b {
+                let next = if c + 1 == b { a } else { c + 1 };
+                let (v, w) = (verts[c], verts[next]);
+                let e = edges[corner_edges[c] as usize];
+                if e != [v, w] && e != [w, v] {
+                    return Some(format!(
+                        "corner {c} uses edge {}, which does not join vertices {v} and {w}",
+                        corner_edges[c]
+                    ));
+                }
+            }
         }
         None
     }

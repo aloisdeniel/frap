@@ -227,7 +227,8 @@ NORMALISE = {
     "D-172": ("cases", "no case runs uv.stitch without stitchable UVs (Blender crashes)"),
     "D-173": ("cases", "no case compares a mesh after a failing foreach_set or the extra items of a longer foreach_get list"),
     "D-174": ("cases", "no case foreach_sets an enum number that names no item"),
-    "D-175": ("cases", "cases that compare matrix_world after a foreach_set end with plain location writes"),
+    "D-175": ("cases", "cases that compare matrix_world after a foreach_set end with plain location writes; no case foreach_sets matrix_world, connected edit-bone heads/tails or chained pose-bone matrices"),
+    "D-176": ("cases", "no case runs foreach on an ID-pointer collection whose first slot is empty (Blender crashes)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

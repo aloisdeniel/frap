@@ -837,15 +837,40 @@ impl Session {
         }
         let host = &self.host;
         let item_type = with_coll(host, &c.ptr, c.prop, &mut |v| Ok(v.item_type()))?;
-        let owner = match (c.ptr.root, c.ptr.path.is_empty()) {
-            (Root::Data, true) => "BlendData",
-            _ => c.ptr.srna.identifier,
+        let data_root = c.ptr.root == Root::Data && c.ptr.path.is_empty();
+        let owner = if data_root {
+            "BlendData"
+        } else {
+            c.ptr.srna.identifier
+        };
+        // The items of an ID-pointer collection, which may be empty slots (`mesh.materials`
+        // after `append(None)`): Blender skips them, they take no buffer values (verified on
+        // 5.2.4: `[Material, None]` takes 1 roughness, `[Material, None, M2]` 2; a collection
+        // whose first item is empty crashes Blender, frap skips it too, D-176).
+        let slots: Option<Vec<Option<RnaPtr>>> = if item_type.is_a("ID") && !data_root {
+            Some(
+                (0..end - start)
+                    .map(|n| self.foreach_item(&c, n))
+                    .collect::<Result<_, _>>()?,
+            )
+        } else {
+            None
+        };
+        let present = slots
+            .as_ref()
+            .map_or(end - start, |s| s.iter().flatten().count());
+        let first_item = |this: &Self| -> Result<Option<RnaPtr>, FrapError> {
+            match &slots {
+                Some(s) => Ok(s.iter().flatten().next().cloned()),
+                None if end > start => this.foreach_item(&c, 0),
+                None => Ok(None),
+            }
         };
         // Blender looks the property up on the first item's own type (verified on 5.2.4:
         // `lights.foreach_get('energy', …)`, `modifiers.foreach_get('levels', …)` with a
         // SUBSURF modifier first); every item must then have it.
-        let first_type = if item_type.find_prop(&attr).is_none() && end > start {
-            Some(self.foreach_item(&c, 0)?.srna)
+        let first_type = if item_type.find_prop(&attr).is_none() {
+            first_item(self)?.map(|p| p.srna)
         } else {
             None
         };
@@ -879,14 +904,15 @@ impl Session {
             }
             _ => None,
         };
-        let needed = lens.as_ref().map_or((end - start) * k, |l| l.iter().sum());
+        let needed = lens.as_ref().map_or(present * k, |l| l.iter().sum());
         // Blender's raw-array fast path takes exactly `needed` values; the item-by-item path
         // takes at least `needed` (and `foreach_set` writes the first ones).
         let raw = raw_array_access(c.ptr.srna.identifier, c.prop.identifier, prop.identifier);
         let fits = |n: usize| if raw { n == needed } else { n >= needed };
         let is_enum = matches!(prop.kind, PropKind::Enum { .. });
         if !set {
-            let bulk = self.foreach_read(&c, prop, (start, end), is_enum || refined)?;
+            let bulk =
+                self.foreach_read(&c, prop, (start, end), is_enum || refined, slots.as_deref())?;
             if positional.len() == 1 {
                 // A variable-length array (`polygons.foreach_get('vertices')`) answers flat,
                 // paged by whole faces.
@@ -972,10 +998,15 @@ impl Session {
             ),
             _ => None,
         };
+        // A hook-served collection (`Object.vertex_groups`) has no mutable binding.
+        let hooked =
+            frap_scene::find_hook(c.ptr.srna, c.prop.identifier).is_some_and(|h| h.get.is_some());
         let whole_rna = c.range.is_none()
             && enum_vals.is_none()
             && !refined
-            && !(c.ptr.root == Root::Data && c.ptr.path.is_empty());
+            && !hooked
+            && slots.is_none()
+            && !data_root;
         if whole_rna {
             let r = resolve::with_coll_mut(&mut self.host, &c.ptr, c.prop, &mut |cm| {
                 cm.foreach_set(prop, &bulk).map_err(FrapError::from)
@@ -1001,9 +1032,17 @@ impl Session {
         // `start` is 0 without a slice). Every item must have the property: Blender raises the
         // size error at the first one without it (after writing the ones before, which frap
         // does not, D-173).
-        let mut items = Vec::with_capacity(end - start);
+        let mut items = Vec::with_capacity(present);
         for n in 0..end - start {
-            let ptr = self.foreach_item(&c, n)?;
+            let ptr = match &slots {
+                Some(s) => match &s[n] {
+                    Some(p) => p.clone(),
+                    None => continue,
+                },
+                None => self
+                    .foreach_item(&c, n)?
+                    .ok_or_else(|| resolve::stale("foreach on an empty item"))?,
+            };
             let p = if refined {
                 ptr.srna
                     .find_prop(prop.identifier)
@@ -1029,14 +1068,16 @@ impl Session {
         Ok(Py::None)
     }
 
-    /// Item `n` of a collection or slice (`polygons[1:3]`: `n` counts from the slice start).
-    fn foreach_item(&self, c: &CollPlace, n: usize) -> Result<RnaPtr, FrapError> {
+    /// Item `n` of a collection or slice (`polygons[1:3]`: `n` counts from the slice start);
+    /// `None` for an empty slot of an ID-pointer collection (`mesh.materials`).
+    fn foreach_item(&self, c: &CollPlace, n: usize) -> Result<Option<RnaPtr>, FrapError> {
         match resolve::step(
             &self.host,
             Target::Coll(c.clone()),
             &PathSeg::Index(n as i64),
         )? {
-            Target::Struct(ptr) => Ok(ptr),
+            Target::Struct(ptr) => Ok(Some(ptr)),
+            Target::None => Ok(None),
             _ => Err(resolve::stale("foreach on a non-struct item")),
         }
     }
@@ -1046,25 +1087,31 @@ impl Session {
     /// `collection.all_objects`), hook-served properties and enums (as their item numbers,
     /// `material_slots.foreach_get('link', …)`) are read item by item (verified on 5.2.4).
     /// `item_by_item` skips the bulk read (enums, items of several types, each read through
-    /// its own type's property of that name).
+    /// its own type's property of that name). `slots` are the items of an ID-pointer
+    /// collection (empty slots are skipped).
     fn foreach_read(
         &self,
         c: &CollPlace,
         prop: &'static PropDef,
         (start, end): (usize, usize),
         item_by_item: bool,
+        slots: Option<&[Option<RnaPtr>]>,
     ) -> Result<Bulk, FrapError> {
         let host = &self.host;
         // Blender answers a property that has no bulk form (strings, pointers) with the
         // same error as a wrong buffer length.
         let no_bulk = || runtime_err("internal error setting the array");
-        if !item_by_item {
+        if !item_by_item && slots.is_none() {
             let r = with_coll(host, &c.ptr, c.prop, &mut |v| {
                 v.foreach_get(prop, start..end).map_err(FrapError::from)
             });
             match r {
                 Ok(b) => return Ok(b),
-                Err(e) if e.exception == PyExc::TypeError => {}
+                // A property the items' binding does not serve (`pose.bones` 'ik_stretch'):
+                // read item by item, which says it is unbound.
+                Err(e)
+                    if e.exception == PyExc::TypeError
+                        || e.code == frap_rna::codes::RNA_NO_ATTRIBUTE => {}
                 Err(e) => return Err(e),
             }
         }
@@ -1075,7 +1122,15 @@ impl Session {
             _ => return Err(no_bulk()),
         };
         for n in 0..end - start {
-            let ptr = self.foreach_item(c, n)?;
+            let ptr = match slots {
+                Some(s) => match &s[n] {
+                    Some(p) => p.clone(),
+                    None => continue,
+                },
+                None => self
+                    .foreach_item(c, n)?
+                    .ok_or_else(|| resolve::stale("foreach on an empty item"))?,
+            };
             // Items of several types (`modifiers`): each one's own property of that name.
             let prop = if item_by_item {
                 ptr.srna.find_prop(prop.identifier).ok_or_else(no_bulk)?

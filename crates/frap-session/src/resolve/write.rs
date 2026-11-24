@@ -148,11 +148,26 @@ pub fn set_prop(
         return Ok(());
     }
     let (main, log) = host.main_mut();
-    let outcome = with_struct_mut(main, log, ptr, &mut |s| {
+    let outcome = match with_struct_mut(main, log, ptr, &mut |s| {
         let srna = s.srna();
         s.set(prop, v.clone())
             .map_err(|e| binding_err(e, srna, prop))
-    })?;
+    }) {
+        Ok(o) => o,
+        // A struct served by a get hook (`Object.pose`) whose proxy does not know the property
+        // (`PoseBone.ik_stretch`): say it is unbound, as a read does (M8S9-1).
+        Err(e) if e.code == frap_rna::codes::RNA_NOT_IMPLEMENTED => {
+            let h: &dyn frap_scene::HostRead = &*host;
+            let read = super::with_struct(h, ptr, &mut |s| {
+                super::get_field(h, s, ptr, prop).map(|_| ())
+            });
+            return Err(match read {
+                Err(r) if r.code == frap_rna::codes::RNA_NOT_IMPLEMENTED => r,
+                _ => e,
+            });
+        }
+        Err(e) => return Err(e),
+    };
     match outcome {
         SetOutcome::Done => Ok(()),
         SetOutcome::NeedsHook => Err(needs_hook(ptr, prop)),

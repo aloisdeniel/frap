@@ -6,7 +6,8 @@
 //! - removes the attribute named like the layer from the called mesh; a name the mesh does not
 //!   have changes nothing (a layer of another mesh: no error);
 //! - an active or default colour attribute that named it moves to the colour attribute now at
-//!   its index, clamped to the last one (`color_clamp_index`; none left: unset); unlike
+//!   its index, clamped to the last one (`color_clamp_index`; none left: '', still set, so
+//!   later layers are not made active or default); unlike
 //!   `color_attributes.remove`, which keeps both names;
 //! - the active attribute keeps its index.
 //!
@@ -59,8 +60,13 @@ pub(crate) fn remove_loop_color(m: &mut Mesh, name: &str) {
         m.attributes_mut().remove(name);
     });
     let after = color_names(m);
-    let clamped =
-        |i: Option<usize>| i.and_then(|i| after.get(i.min(after.len().checked_sub(1)?)).cloned());
+    // None left: an empty name that is still set, so that a later `vertex_colors.new()` or
+    // `color_attributes.new()` does not claim it (verified on 5.2.4: `active_color_name` and
+    // `default_color_name` stay '', the new layer is neither active nor default).
+    let clamped = |i: Option<usize>| {
+        i.and_then(|i| after.get(i.min(after.len().checked_sub(1)?)).cloned())
+            .or_else(|| Some(SmolStr::default()))
+    };
     if was_active {
         m.color_active = clamped(active);
     }
@@ -136,6 +142,8 @@ mod tests {
         m.color_active = Some("G".into());
         m.color_default = Some("G".into());
         remove_loop_color(&mut m, "G");
-        assert_eq!(names(&m), (None, None));
+        assert_eq!(names(&m), (Some("".into()), Some("".into())));
+        new_layer(&mut m, "H", true);
+        assert_eq!(names(&m), (Some("".into()), Some("".into())));
     }
 }

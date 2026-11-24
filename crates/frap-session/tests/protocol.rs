@@ -1229,6 +1229,134 @@ fn foreach_matrices_items_and_mesh_element_add() {
     );
 }
 
+/// M8 stabilization round 9 (each against 5.2.4): `foreach_set` on a hook-served collection
+/// (`Object.vertex_groups`) writes item by item; empty slots of an ID-pointer collection
+/// (`mesh.materials`) are skipped and take no buffer values; an unbound item property answers
+/// `RNA_NOT_IMPLEMENTED` like a plain read; `Mesh.validate()` refuses (rather than answering
+/// `False` for) zero-size faces, repeated face vertices and corners whose edge does not join
+/// their vertex to the next.
+#[test]
+fn foreach_slots_unbound_items_and_validate() {
+    let mut s = session();
+    one(
+        &mut s,
+        "bpy.data.objects['Cube'].vertex_groups.new(name='G')",
+    );
+    one(
+        &mut s,
+        "bpy.data.objects['Cube'].vertex_groups.new(name='H')",
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].vertex_groups.foreach_set('lock_weight', [True, False])"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].vertex_groups.foreach_get('lock_weight', [False] * 2)"
+        ),
+        json!([true, false])
+    );
+    // `[Material, None]`: one value; the extra item keeps its value (D-173).
+    one(&mut s, "bpy.data.meshes['Cube'].materials.append(None)");
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].materials.foreach_get('roughness', [7.0] * 2)"
+        ),
+        json!([0.5, 7])
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].materials.foreach_get('roughness', [0.0])"
+        ),
+        json!([0.5])
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.foreach_set('roughness', [0.25])",
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.materials['Material'].roughness"),
+        json!(0.25)
+    );
+    one(&mut s, "bpy.data.materials.new('M2')");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.append(bpy.data.materials['M2'])",
+    );
+    let (exc, _, msg) = err(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.foreach_set('roughness', [0.75])",
+    );
+    assert_eq!(
+        (exc.as_str(), msg.as_str()),
+        ("RuntimeError", "internal error setting the array")
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.foreach_set('roughness', [0.75, 0.125])",
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.materials['M2'].roughness"),
+        json!(0.125)
+    );
+    // An unbound pose-bone property: the plain read's error, both ways.
+    one(&mut s, "bpy.ops.object.armature_add()");
+    let unbound = "frap: PoseBone.ik_stretch exists in Blender 5.2 but is not bound by frap yet";
+    for src in [
+        "bpy.data.objects['Armature'].pose.bones.foreach_get('ik_stretch', [0.0])",
+        "bpy.data.objects['Armature'].pose.bones.foreach_set('ik_stretch', [0.5])",
+        "bpy.data.objects['Armature'].pose.bones[0].ik_stretch",
+        "bpy.data.objects['Armature'].pose.bones[0].ik_stretch = 0.5",
+    ] {
+        let (exc, code, msg) = err(&mut s, src);
+        assert_eq!(
+            (exc.as_str(), code.as_str(), msg.as_str()),
+            ("NotImplementedError", "RNA_NOT_IMPLEMENTED", unbound),
+            "{src}"
+        );
+    }
+    // `validate()` on meshes Blender repairs (it answers True).
+    let refused = |s: &mut frap_session::Session, mesh: &str, problem: &str| {
+        let (exc, code, msg) = err(s, &format!("bpy.data.meshes['{mesh}'].validate()"));
+        assert_eq!(
+            (exc.as_str(), code.as_str()),
+            ("NotImplementedError", "RNA_NOT_IMPLEMENTED"),
+            "{msg}"
+        );
+        assert!(msg.contains(problem), "{msg}");
+    };
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].validate()"),
+        json!(false)
+    );
+    one(&mut s, "bpy.data.meshes['Cube'].polygons.add(1)");
+    refused(&mut s, "Cube", "face 6 has 0 corners");
+    one(&mut s, "bpy.ops.mesh.primitive_cube_add()");
+    one(&mut s, "bpy.data.meshes['Cube.001'].loops.add(1)");
+    refused(
+        &mut s,
+        "Cube.001",
+        "corner 23 uses edge 8, which does not join vertices 5 and 0",
+    );
+    one(&mut s, "bpy.ops.mesh.primitive_cube_add()");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube.002'].polygons.foreach_set('vertices', [0, 0, 3, 2] + [0] * 20)",
+    );
+    refused(&mut s, "Cube.002", "face 0 uses vertex 0 twice");
+    one(&mut s, "bpy.ops.mesh.primitive_monkey_add()");
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Suzanne'].validate()"),
+        json!(false)
+    );
+}
+
 #[test]
 fn bulk_writes() {
     let mut s = session();

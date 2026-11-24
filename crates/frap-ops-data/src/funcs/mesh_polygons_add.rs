@@ -13,7 +13,11 @@ use frap_scene::{FuncArgs, Host};
 use super::_common::{arg_int, internal, mesh_of};
 
 #[rna_func(srna = "MeshPolygons", func = "add")]
-fn mesh_polygons_add(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+fn mesh_polygons_add(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    args: &mut FuncArgs,
+) -> Result<Value, RnaError> {
     super::_common::refuse_detached(this, "add")?;
     let me = mesh_of(this)?;
     let count = arg_int(args, "count", 0);
