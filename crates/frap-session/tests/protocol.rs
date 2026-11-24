@@ -704,6 +704,136 @@ fn variable_length_bulk_reads_are_flat_and_page_whole_faces() {
     assert_eq!(v["shape"], json!([8]));
     assert_eq!(v["range"], json!([0, 2]));
     assert_eq!(v["truncated"], true);
+    // A page holds at least one whole face, even past `--max-array` (M8S6-1).
+    let mut s = session_with(|o| o.max_array = 3);
+    one(
+        &mut s,
+        "bpy.ops.mesh.primitive_circle_add(vertices=32, fill_type='NGON')",
+    );
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Circle'].polygons.foreach_get('vertices')",
+    );
+    assert_eq!(v["shape"], json!([32]));
+    assert_eq!(v["len"], 32);
+    assert_eq!(v["range"], json!([0, 1]));
+    assert_eq!(v["truncated"], false);
+}
+
+/// The two-argument `foreach_get` / `foreach_set` of a variable-length array size the buffer by
+/// the faces' `loop_total` sum, not 3 per face (M8 stabilization round 6; the cube's 24 values
+/// were refused and the cone's 21 accepted, cutting the last face). Blender 5.2.4: a shorter
+/// buffer raises, a longer one is accepted (`foreach_set` writes the first values, also for a
+/// fixed-size array).
+#[test]
+fn variable_length_bulk_buffers_hold_every_face() {
+    let mut s = session();
+    let cube = [
+        0, 4, 6, 2, 3, 2, 6, 7, 7, 6, 4, 5, 5, 1, 3, 7, 1, 0, 2, 3, 5, 4, 0, 1,
+    ];
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].polygons.foreach_get('vertices', [0] * 24)"
+        ),
+        json!(cube)
+    );
+    // A longer buffer keeps its extra items (Blender fills them with uninitialised memory).
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].polygons.foreach_get('vertices', [9] * 26)",
+    );
+    assert_eq!(v.as_array().map(Vec::len), Some(26));
+    assert_eq!(v[24], 9);
+    let rotated = "[4, 6, 2, 0, 2, 6, 7, 3, 7, 6, 4, 5, 5, 1, 3, 7, 1, 0, 2, 3, 5, 4, 0, 1";
+    assert_eq!(
+        val(
+            &mut s,
+            &format!("bpy.data.meshes['Cube'].polygons.foreach_set('vertices', {rotated}])")
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].polygons[1].vertices[:]"),
+        json!([2, 6, 7, 3])
+    );
+    // One value more: the first 24 are written.
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].polygons.foreach_set('vertices', \
+             [0, 4, 6, 2, 3, 2, 6, 7, 7, 6, 4, 5, 5, 1, 3, 7, 1, 0, 2, 3, 5, 4, 0, 1, 6])"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].polygons.foreach_get('vertices', [0] * 24)"
+        ),
+        json!(cube)
+    );
+    // So does a fixed-size array (`co`: 27 values, the first 24 are written).
+    let floats: Vec<String> = (0..27).map(|i| format!("{i}.0")).collect();
+    assert_eq!(
+        val(
+            &mut s,
+            &format!(
+                "bpy.data.meshes['Cube'].vertices.foreach_set('co', [{}])",
+                floats.join(", ")
+            )
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].vertices[7].co[:]"),
+        json!([21, 22, 23])
+    );
+    // A slice (frap extension, D-27) takes its faces' values.
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].polygons[1:3].foreach_set('vertices', [2, 6, 7, 3, 6, 4, 5, 7])"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].polygons[1:3].foreach_get('vertices', [0] * 8)"
+        ),
+        json!([2, 6, 7, 3, 6, 4, 5, 7])
+    );
+    one(&mut s, "bpy.ops.mesh.primitive_cone_add(vertices=6)");
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cone'].polygons.foreach_get('vertices', [0] * 24)",
+    );
+    assert_eq!(
+        v.as_array().map(|a| a[18..].to_vec()),
+        Some(vec![
+            json!(4),
+            json!(6),
+            json!(5),
+            json!(5),
+            json!(6),
+            json!(0)
+        ])
+    );
+    for src in [
+        "bpy.data.meshes['Cube'].polygons.foreach_get('vertices', [0] * 23)",
+        "bpy.data.meshes['Cube'].polygons.foreach_set('vertices', [0] * 18)",
+        "bpy.data.meshes['Cube'].polygons[1:3].foreach_get('vertices', [0] * 6)",
+        "bpy.data.meshes['Cone'].polygons.foreach_get('vertices', [0] * 21)",
+        "bpy.data.meshes['Cone'].polygons.foreach_set('vertices', [0] * 21)",
+    ] {
+        let (e, _, m) = err(&mut s, src);
+        assert_eq!(
+            (e.as_str(), m.as_str()),
+            ("RuntimeError", "internal error setting the array"),
+            "{src}"
+        );
+    }
 }
 
 #[test]

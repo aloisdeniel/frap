@@ -5,18 +5,14 @@
   },
   "lines": [
     {
-      "line": 9,
-      "ok": true
-    },
-    {
       "line": 10,
-      "ok": false,
-      "exception": "AttributeError",
-      "message": "'NoneType' object has no attribute 'name'"
+      "ok": true
     },
     {
       "line": 11,
-      "ok": true
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'NoneType' object has no attribute 'name'"
     },
     {
       "line": 12,
@@ -44,13 +40,13 @@
     },
     {
       "line": 18,
-      "ok": false,
-      "exception": "AttributeError",
-      "message": "'NoneType' object has no attribute 'name'"
+      "ok": true
     },
     {
       "line": 19,
-      "ok": true
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'NoneType' object has no attribute 'name'"
     },
     {
       "line": 20,
@@ -126,6 +122,14 @@
     },
     {
       "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
       "ok": true
     }
   ],

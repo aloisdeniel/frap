@@ -138,7 +138,7 @@ bpy.data.meshes['Cube'].polygons.foreach_get('normal')
 bpy.data.meshes['Cube'].vertices.foreach_set('co', [0,0,0, 1,0,0, …])
 ```
 
-A bulk read answers with `{"$array": [x0, y0, z0, x1, …], "shape": [N, 3], "dtype": "float32", "len": N, "range": [a, b], "truncated": false}`. The array is flat and row-major, capped at `--max-array` scalars (default 65,536). When it is capped, `truncated` is `true` and `range` says which items came back, so read the next slice. Blender's two-argument form `foreach_get("co", seq)` also works when `seq` is a literal list of the right length. A `foreach_set` of the wrong length raises Blender's error. Mesh data writes in Edit Mode raise `RNA_EDITMODE_WRITE`; switch to Object Mode first.
+A bulk read answers with `{"$array": [x0, y0, z0, x1, …], "shape": [N, 3], "dtype": "float32", "len": N, "range": [a, b], "truncated": false}`. The array is flat and row-major, capped at `--max-array` scalars (default 65,536). When it is capped, `truncated` is `true` and `range` says which items came back, so read the next slice. `polygons.foreach_get("vertices")` (faces of different sizes) answers flat, `shape: [n_values]`: `len` counts values while `range` counts faces, and a page always holds whole faces, at least one even when that face has more values than `--max-array`. Blender's two-argument form `foreach_get("co", seq)` also works when `seq` is a literal list long enough (for `polygons` `"vertices"`: the sum of the faces' `loop_total`). A `foreach_set` buffer that is too short raises Blender's error; a longer one writes its first values. Mesh data writes in Edit Mode raise `RNA_EDITMODE_WRITE`; switch to Object Mode first.
 
 For one element use a plain read: `bpy.data.meshes['Cube'].vertices[3].co`.
 

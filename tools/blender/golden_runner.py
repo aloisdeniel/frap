@@ -226,6 +226,7 @@ NORMALISE = {
     "D-170": None,
     "D-171": ("cases", "object/add_m8/make_real compares within the default 1e-5 tolerance, which covers the 1-ulp rotation"),
     "D-172": ("cases", "no case runs uv.stitch without stitchable UVs (Blender crashes)"),
+    "D-173": ("cases", "no case compares a mesh after a failing foreach_set or the extra items of a longer foreach_get list"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

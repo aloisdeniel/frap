@@ -2,7 +2,9 @@
 //! `mesh.vertex_colors.active_index` (`rna_Mesh_vertex_color_active_index_get/set`): the
 //! position of the active colour attribute in `mesh.vertex_colors`, -1 when it is not a
 //! BYTE_COLOR layer on CORNER. Setting an index makes that layer the active colour attribute;
-//! an index outside the layers is ignored. Verified on 5.2.4.
+//! an index outside the layers, negative or past the end, is ignored (the setter gets the raw
+//! number: `frap_scene::id::Scene::UNCLAMPED`). Verified on 5.2.4 (`= -1`, `-5`, `-2**31`
+//! keep the active layer).
 
 use frap_rna::traits::FromRnaValue;
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};

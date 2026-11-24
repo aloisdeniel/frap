@@ -829,7 +829,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace (`frap-geom/src/mikktspace.rs`); WP 3.7 (M3+M4 W0 assignment) |
 | [ ] | `mesh.materials.append/pop/clear, MaterialSlot.material/link` | M1 |  |
 | [ ] | `mesh.attributes.new/remove, mesh.uv_layers.new, mesh.color_attributes.new/remove` | M1 | colour attributes default to white and become active/default when none is |
-| [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
+| [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new/remove` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment); `vertex_colors.remove` since M8 stabilization round 6 (`funcs/loop_colors_remove.rs`, golden `rna/loop_colors_remove`) |
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
 | [x] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) | WP 4.1 (`funcs/object_modifiers_*.rs`); M4 golden prerequisite |
 | [x] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 | also `update`, `buffers_free`, `filepath_from_user`, `ImagePackedFile.save`; `pack(data=…)` raw bytes not supported; `Render Result.save_render()` reports no data (render with `write_still`); WP 3.2 |

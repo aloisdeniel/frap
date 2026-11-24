@@ -1,10 +1,11 @@
 # M8 stabilization round 5: mesh.vertex_colors.active and active_index (LoopColors) map to the
 # active colour attribute when it is a BYTE_COLOR layer on CORNER, None / -1 otherwise (no
 # colour attribute, a FLOAT_COLOR or POINT one active); assigning a layer or an index makes it
-# the active colour attribute, assigning None changes nothing; the evaluated mesh answers the
-# same. `active` raised NotImplementedError ("needs an RNA get hook") before. Results are
-# moved into object transforms and names (the material's name shows in the Cube's material
-# list) so that they are compared; objects are renamed last.
+# the active colour attribute, assigning None or an index outside the layers (7, and -1 since
+# round 6: it was clamped to 0) changes nothing; the evaluated mesh answers the same. `active`
+# raised NotImplementedError ("needs an RNA get hook") before. Results are moved into object
+# transforms and names (the material's name shows in the Cube's material list) so that they
+# are compared; objects are renamed last.
 # golden: startup=factory tier=T0 compare=objects
 import bpy
 bpy.data.meshes['Cube'].vertex_colors.active.name
@@ -28,6 +29,7 @@ bpy.data.objects['Cube'].scale.z = bpy.data.meshes['Cube'].vertex_colors.active_
 bpy.data.meshes['Cube'].vertex_colors.active_index = 1
 bpy.data.objects['Camera'].location.x = bpy.data.meshes['Cube'].vertex_colors.active_index
 bpy.data.meshes['Cube'].vertex_colors.active_index = 7
+bpy.data.meshes['Cube'].vertex_colors.active_index = -1
 bpy.data.meshes['Cube'].vertex_colors.active = None
 bpy.data.objects['Camera'].location.y = bpy.data.meshes['Cube'].vertex_colors.active_index
 bpy.data.meshes['Cube'].color_attributes.remove(bpy.data.meshes['Cube'].color_attributes['A'])

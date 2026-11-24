@@ -828,7 +828,21 @@ impl Session {
             ));
         };
         let k = prop.array_len();
-        let needed = (end - start) * k;
+        // A variable-length array (`MeshPolygon.vertices`): each face holds `loop_total`
+        // values, and a buffer must hold their sum (verified on 5.2.4: the cube's 24 values,
+        // a 6-sided cone's 24 in 7 faces; fewer raise, more are accepted).
+        let lens: Option<Vec<usize>> = match item_type.find_prop("loop_total") {
+            Some(total) if resolve::variable_length(prop) => {
+                match with_coll(host, &c.ptr, c.prop, &mut |v| {
+                    v.foreach_get(total, start..end).map_err(FrapError::from)
+                })? {
+                    Bulk::I32(t) => Some(t.iter().map(|&n| n.max(0) as usize).collect()),
+                    _ => None,
+                }
+            }
+            _ => None,
+        };
+        let needed = lens.as_ref().map_or((end - start) * k, |l| l.iter().sum());
         if !set {
             // Blender answers a property that has no bulk form (strings, pointers) with the
             // same error as a wrong buffer length.
@@ -843,19 +857,7 @@ impl Session {
             })?;
             if positional.len() == 1 {
                 // A variable-length array (`polygons.foreach_get('vertices')`) answers flat,
-                // paged by whole faces (`loop_total` gives each face's length).
-                let totals = match item_type.find_prop("loop_total") {
-                    Some(total) if resolve::variable_length(prop) => {
-                        Some(with_coll(host, &c.ptr, c.prop, &mut |v| {
-                            v.foreach_get(total, start..end).map_err(FrapError::from)
-                        })?)
-                    }
-                    _ => None,
-                };
-                let lens: Option<Vec<usize>> = match totals {
-                    Some(Bulk::I32(t)) => Some(t.iter().map(|&n| n as usize).collect()),
-                    _ => None,
-                };
+                // paged by whole faces.
                 return Ok(Py::Json(bulk_json(
                     &bulk,
                     prop,
@@ -896,10 +898,12 @@ impl Session {
         let Some(seq) = positional[1].items() else {
             return Err(type_err("couldn't access the py sequence"));
         };
-        if seq.len() != needed {
+        // A longer buffer is accepted and its first `needed` values are written (verified on
+        // 5.2.4: the cube's `foreach_set('vertices', <25 values>)`, `('co', <27 values>)`).
+        if seq.len() < needed {
             return Err(runtime_err("internal error setting the array"));
         }
-        let bulk = match prop.kind {
+        let mut bulk = match prop.kind {
             PropKind::Float { .. } => Bulk::F32(
                 seq.iter()
                     .map(|x| x.number().map(|f| f as f32))
@@ -924,6 +928,12 @@ impl Session {
                 ));
             }
         };
+        match &mut bulk {
+            Bulk::F32(v) => v.truncate(needed),
+            Bulk::I32(v) => v.truncate(needed),
+            Bulk::Bool(v) => v.truncate(needed),
+            _ => {}
+        }
         let whole_rna = c.range.is_none() && !(c.ptr.root == Root::Data && c.ptr.path.is_empty());
         if whole_rna {
             let r = resolve::with_coll_mut(&mut self.host, &c.ptr, c.prop, &mut |cm| {
@@ -946,16 +956,21 @@ impl Session {
             }
         }
         // Item by item (slices, `bpy.data` collections, hook collections).
-        for (n, i) in (start..end).enumerate() {
+        // Indexed from the slice's own start (`polygons[1:3][0]` is face 1; `start` is 0
+        // without a slice).
+        let mut at = 0;
+        for n in 0..end - start {
             let t = resolve::step(
                 &self.host,
                 Target::Coll(c.clone()),
-                &PathSeg::Index(i as i64),
+                &PathSeg::Index(n as i64),
             )?;
             let Target::Struct(ptr) = t else {
                 return Err(resolve::stale("foreach_set on a non-struct item"));
             };
-            let v = bulk_item(&bulk, prop, n);
+            let len = lens.as_ref().map_or(k, |l| l[n]);
+            let v = bulk_item(&bulk, prop, at..at + len);
+            at += len;
             resolve::set_prop(&mut self.host, &ptr, prop, v)?;
         }
         Ok(Py::None)
@@ -1093,10 +1108,9 @@ impl Session {
 /// `RuntimeError`-class code of a `ValueError` raised by a `bpy_struct` method.
 const RNA_RUNTIME_CODE: frap_rna::ErrorCode = frap_rna::codes::RNA_RUNTIME;
 
-fn bulk_item(b: &Bulk, prop: &PropDef, i: usize) -> Value {
-    let n = prop.array_len();
+/// The value of one item whose scalars are `b[r]` (one scalar for a non-array property).
+fn bulk_item(b: &Bulk, prop: &PropDef, r: std::ops::Range<usize>) -> Value {
     let scalar = matches!(prop.array, frap_rna::ArrayShape::Scalar);
-    let r = i * n..i * n + n;
     match b {
         Bulk::F32(v) if scalar => Value::Float(v[r.start]),
         Bulk::F32(v) => Value::FloatArray {
