@@ -1075,7 +1075,7 @@ impl RnaMut for LinkMut<'_> {
 
 /// Node types whose `typeinfo->no_muting` is set: a `mute` write is ignored (verified on 5.2.4
 /// by setting `mute = True` on every node type of the four tree types).
-pub(crate) fn no_muting(bl_idname: &str) -> bool {
+pub fn no_muting(bl_idname: &str) -> bool {
     matches!(
         bl_idname,
         "NodeGroupInput"

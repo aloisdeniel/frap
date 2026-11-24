@@ -435,8 +435,18 @@ proptest! {
             let errs = bm.validate();
             prop_assert!(errs.is_empty(), "after op {i} ({label}): {errs:?}");
         }
+        // The kernel, like Blender's (`BM_faces_join` → `BM_face_create_ngon` has no length
+        // check), can leave a 2-sided face (joining faces whose union has two boundary
+        // edges); `to_mesh` writes it as a 2-corner face, which `Mesh::validate_report` names
+        // since M8 stabilization round 9. Every other problem fails (M8S10-7).
+        let short_faces = bm.face_ids().into_iter().filter(|&f| bm.face(f).len < 3).count();
         let out = bm.to_mesh(&me, &ToMeshParams::default());
-        prop_assert!(out.validate_report().is_none(), "to_mesh: {:?}", out.validate_report());
+        let report = out.validate_report();
+        let short_only = short_faces > 0
+            && report.as_deref().is_some_and(|r| {
+                r.starts_with("face ") && (r.ends_with(" has 2 corners") || r.ends_with(" has 1 corners"))
+            });
+        prop_assert!(report.is_none() || short_only, "to_mesh: {:?}", report);
         let again = BMesh::from_mesh(&out, &FromMeshParams::default());
         prop_assert!(again.validate().is_empty());
         let out2 = again.to_mesh(&out, &ToMeshParams::default());

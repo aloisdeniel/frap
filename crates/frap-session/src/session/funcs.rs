@@ -847,12 +847,17 @@ impl Session {
         // after `append(None)`): Blender skips them, they take no buffer values (verified on
         // 5.2.4: `[Material, None]` takes 1 roughness, `[Material, None, M2]` 2; a collection
         // whose first item is empty crashes Blender, frap skips it too, D-176).
-        let slots: Option<Vec<Option<RnaPtr>>> = if item_type.is_a("ID") && !data_root {
-            Some(
-                (0..end - start)
-                    .map(|n| self.foreach_item(&c, n))
-                    .collect::<Result<_, _>>()?,
-            )
+        // Only ID-pointer arrays (`IDMaterials`) hold empty slots; the ID lists of
+        // `scene.objects` and the like are read item by item below, in one pass (M8S10-5).
+        let slotted = matches!(
+            c.prop.kind,
+            PropKind::Collection {
+                api: Some("IDMaterials"),
+                ..
+            }
+        );
+        let slots: Option<Vec<Option<RnaPtr>>> = if slotted {
+            Some(resolve::coll_items(&self.host, &c, (start, end))?)
         } else {
             None
         };
@@ -916,13 +921,11 @@ impl Session {
             if positional.len() == 1 {
                 // A variable-length array (`polygons.foreach_get('vertices')`) answers flat,
                 // paged by whole faces.
-                return Ok(Py::Json(bulk_json(
-                    &bulk,
-                    prop,
-                    start,
-                    self.opts.max_array,
-                    lens.as_deref(),
-                )));
+                let mut j = bulk_json(&bulk, prop, start, self.opts.max_array, lens.as_deref());
+                if let Some(s) = &slots {
+                    slot_range(&mut j, s, start);
+                }
+                return Ok(Py::Json(j));
             }
             // A string is a sequence of its characters: Blender checks its size first
             // (verified on 5.2.4: `foreach_get('co', 'abc')` raises the size error).
@@ -1033,15 +1036,13 @@ impl Session {
         // size error at the first one without it (after writing the ones before, which frap
         // does not, D-173).
         let mut items = Vec::with_capacity(present);
-        for n in 0..end - start {
-            let ptr = match &slots {
-                Some(s) => match &s[n] {
-                    Some(p) => p.clone(),
-                    None => continue,
-                },
-                None => self
-                    .foreach_item(&c, n)?
-                    .ok_or_else(|| resolve::stale("foreach on an empty item"))?,
+        let ptrs = match slots {
+            Some(s) => s,
+            None => self.foreach_items(&c, (start, end))?,
+        };
+        for ptr in ptrs {
+            let Some(ptr) = ptr else {
+                continue;
             };
             let p = if refined {
                 ptr.srna
@@ -1080,6 +1081,21 @@ impl Session {
             Target::None => Ok(None),
             _ => Err(resolve::stale("foreach on a non-struct item")),
         }
+    }
+
+    /// Items `start..end` (absolute) of a collection or slice, resolved in one pass (a
+    /// hook-served list is built once, M8S10-5). An empty item is an error here: only
+    /// `IDMaterials` holds empty slots, and its callers pass them as `slots`.
+    fn foreach_items(
+        &self,
+        c: &CollPlace,
+        range: (usize, usize),
+    ) -> Result<Vec<Option<RnaPtr>>, FrapError> {
+        let items = resolve::coll_items(&self.host, c, range)?;
+        if items.iter().any(Option::is_none) {
+            return Err(resolve::stale("foreach on an empty item"));
+        }
+        Ok(items)
     }
 
     /// The values of `prop` over items `start..end` (`foreach_get`). The collection's bulk
@@ -1121,15 +1137,13 @@ impl Session {
             PropKind::Bool { .. } => Bulk::Bool(Vec::new()),
             _ => return Err(no_bulk()),
         };
-        for n in 0..end - start {
-            let ptr = match slots {
-                Some(s) => match &s[n] {
-                    Some(p) => p.clone(),
-                    None => continue,
-                },
-                None => self
-                    .foreach_item(c, n)?
-                    .ok_or_else(|| resolve::stale("foreach on an empty item"))?,
+        let ptrs = match slots {
+            Some(s) => s.to_vec(),
+            None => self.foreach_items(c, (start, end))?,
+        };
+        for ptr in ptrs {
+            let Some(ptr) = ptr else {
+                continue;
             };
             // Items of several types (`modifiers`): each one's own property of that name.
             let prop = if item_by_item {
@@ -1373,6 +1387,28 @@ fn raw_int_range(owner: &str, coll: &str, prop: &str) -> Option<(i64, i64)> {
 /// ([`RAW_ARRAY`]).
 fn raw_array_access(owner: &str, coll: &str, prop: &str) -> bool {
     RAW_ARRAY.contains(&(owner, coll, prop))
+}
+
+/// The one-argument `foreach_get` answer over an ID-pointer collection with empty slots
+/// (`mesh.materials` after `append(None)`): empty slots take no values, so `range` counts
+/// slots, not values (its end is the slot after the last one the page covered, empty slots
+/// included, so the next page starts there), and `slots` lists the slot of each value item
+/// (M8S10-2). `slots` are the items `start..`. Every `IDMaterials` answer carries `slots`.
+fn slot_range(j: &mut serde_json::Value, slots: &[Option<RnaPtr>], start: usize) {
+    let filled: Vec<usize> = slots
+        .iter()
+        .enumerate()
+        .filter(|(_, p)| p.is_some())
+        .map(|(n, _)| start + n)
+        .collect();
+    let kept = j["range"][1].as_u64().unwrap_or(0) as usize - start;
+    let truncated = j["truncated"].as_bool().unwrap_or(false);
+    let end = match kept {
+        n if truncated && n > 0 => filled[n - 1] + 1,
+        _ => start + slots.len(),
+    };
+    j["range"] = serde_json::json!([start, end]);
+    j["slots"] = serde_json::json!(filled[..kept.min(filled.len())]);
 }
 
 /// A `foreach_set` buffer as `prop`'s scalars. Blender converts every item first and answers

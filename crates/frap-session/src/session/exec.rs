@@ -547,6 +547,30 @@ impl Session {
                     "an ID property of an embedded ID",
                 ));
             }
+            // `coll[i] = item` (`mesh.materials[0] = m`, M8S10-1).
+            if let (Target::Coll(c), Some(v)) = (&parent, &assigned)
+                && matches!(
+                    last,
+                    PathSeg::Index(_) | PathSeg::Key(_) | PathSeg::KeyLib(..) | PathSeg::Slice(..)
+                )
+            {
+                let item = match v {
+                    Py::None | Py::Rna(Target::None) => resolve::ItemValue::None,
+                    Py::Rna(Target::Struct(p)) => resolve::ItemValue::Struct(p),
+                    other => resolve::ItemValue::Other(other.type_name()),
+                };
+                let written = resolve::assign_item(&mut s.host, c, last, item)?;
+                let coll = resolve::repr(&parent, &s.host.state.main).unwrap_or_default();
+                let (echo, path) = match written {
+                    Some(j) => {
+                        let t = resolve::step(&s.host, parent.clone(), &PathSeg::Index(j as i64))?;
+                        let echo = resolve::encode(&s.host, &t, s.caps())?.0;
+                        (echo, Some(format!("{coll}[{j}]")))
+                    }
+                    None => (v.to_json(&s.host, s.caps())?, None),
+                };
+                return Ok((((echo, vec![], vec![]), path), false));
+            }
             let (place, v) = match (assigned, binop_of(op)) {
                 (Some(v), _) => (s.assign_target(parent, last, v.type_name())?, v),
                 (None, None) => unreachable!("an assignment without a value"),
@@ -751,6 +775,50 @@ impl Session {
             }
             if c.clamped {
                 reports.push(info(frap_rna::clamp_report(prop, &input)));
+            }
+            // `rna_Node_mute_set` ignores nodes whose type cannot be muted (outputs, group
+            // input/output, zones, viewers): nothing is written, the echo is the value read
+            // back and nothing is reported modified (M8S10-4).
+            if prop.identifier == "mute"
+                && p.ptr.srna.is_a("Node")
+                && let Some(idname) = p.ptr.srna.find_prop("bl_idname")
+                && let Ok(Value::Str(idname)) = resolve::read_value(
+                    &self.host,
+                    &PropPlace {
+                        ptr: p.ptr.clone(),
+                        prop: idname,
+                        elem: Elem::Whole,
+                    },
+                )
+                && frap_scene::node_no_muting(&idname)
+            {
+                let now = resolve::read_value(&self.host, p)?;
+                if c.value == Value::Bool(true) {
+                    let name = p
+                        .ptr
+                        .srna
+                        .find_prop("name")
+                        .and_then(|name| {
+                            resolve::read_value(
+                                &self.host,
+                                &PropPlace {
+                                    ptr: p.ptr.clone(),
+                                    prop: name,
+                                    elem: Elem::Whole,
+                                },
+                            )
+                            .ok()
+                        })
+                        .and_then(|v| match v {
+                            Value::Str(s) => Some(s),
+                            _ => None,
+                        })
+                        .unwrap_or_else(|| idname.clone());
+                    reports.push(info(format!(
+                        "frap: node '{name}' ({idname}) cannot be muted; Blender ignores the write"
+                    )));
+                }
+                return Ok((value_json(&now, &self.host.state.main), reports, hints));
             }
             resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())
                 .map_err(set_hook_prefix(set_prefix(&p.ptr)))?;

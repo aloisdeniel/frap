@@ -29,6 +29,7 @@
 //!   always recomputes them, keeping the existing ones): `.edge_verts` and `.select_edge` are
 //!   re-created at the end of the attribute list.
 
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use smol_str::SmolStr;
@@ -479,6 +480,96 @@ impl Mesh {
             }
         }
         None
+    }
+
+    /// The repairs of `BKE_mesh_validate` frap makes (M8S10-3, verified on 5.2.4), once
+    /// [`Mesh::validate_report`] finds nothing it cannot repair: a vertex position with a
+    /// non-finite component is zeroed (`(nan, 1, 2)` → `(0, 0, 0)`); an edge joining the same
+    /// two vertices as an earlier one is removed, the corners using it use the earlier one and
+    /// the edge attributes follow; a face using the same vertices as an earlier one (in any
+    /// order) is removed with its corners and their attributes. `Ok(true)` when something was
+    /// changed; `Err` names the first problem frap cannot repair yet.
+    pub fn validate_repair(&mut self) -> Result<bool, String> {
+        if let Some(problem) = self.validate_report() {
+            return Err(problem);
+        }
+        let mut changed = false;
+        if self
+            .positions()
+            .iter()
+            .any(|p| p.iter().any(|x| !x.is_finite()))
+        {
+            for p in self.positions_mut() {
+                if p.iter().any(|x| !x.is_finite()) {
+                    *p = [0.0; 3];
+                }
+            }
+            changed = true;
+        }
+        // Duplicate edges: keep the first of each vertex pair.
+        let edges = self.edges().to_vec();
+        let mut first: HashMap<(i32, i32), usize> = HashMap::with_capacity(edges.len());
+        let mut remap = vec![0i32; edges.len()];
+        let mut kept: Vec<usize> = Vec::with_capacity(edges.len());
+        for (i, e) in edges.iter().enumerate() {
+            let key = (e[0].min(e[1]), e[0].max(e[1]));
+            match first.get(&key) {
+                Some(&j) => remap[i] = remap[j],
+                None => {
+                    first.insert(key, i);
+                    remap[i] = kept.len() as i32;
+                    kept.push(i);
+                }
+            }
+        }
+        if kept.len() != edges.len() {
+            let corner_edges: Vec<i32> = self
+                .corner_edges()
+                .iter()
+                .map(|&e| remap[e as usize])
+                .collect();
+            let n = kept.len();
+            for a in self.attributes_mut().iter_mut() {
+                if a.domain == Domain::Edge {
+                    a.data = a.data.gather_with_default(&kept, n);
+                }
+            }
+            if let Some(a) = self.attributes_mut().get_mut(CORNER_EDGE) {
+                a.data = AttrData::Int(Arc::new(corner_edges));
+            }
+            changed = true;
+        }
+        // Duplicate faces: keep the first of each vertex set.
+        let mut seen: HashSet<Vec<i32>> = HashSet::with_capacity(self.faces_num());
+        let mut kept_faces = Vec::with_capacity(self.faces_num());
+        for f in 0..self.faces_num() {
+            let mut key = self.corner_verts()[self.face(f)].to_vec();
+            key.sort_unstable();
+            if seen.insert(key) {
+                kept_faces.push(f);
+            }
+        }
+        if kept_faces.len() != self.faces_num() {
+            let mut offsets = Vec::with_capacity(kept_faces.len() + 1);
+            let mut kept_corners = Vec::with_capacity(self.corners_num());
+            offsets.push(0);
+            for &f in &kept_faces {
+                kept_corners.extend(self.face(f));
+                offsets.push(kept_corners.len() as i32);
+            }
+            let (nf, nc) = (kept_faces.len(), kept_corners.len());
+            for a in self.attributes_mut().iter_mut() {
+                match a.domain {
+                    Domain::Face => a.data = a.data.gather_with_default(&kept_faces, nf),
+                    Domain::Corner => a.data = a.data.gather_with_default(&kept_corners, nc),
+                    _ => {}
+                }
+            }
+            self.face_offsets = Arc::new(offsets);
+            self.set_corner_tangents(None);
+            changed = true;
+        }
+        Ok(changed)
     }
 }
 

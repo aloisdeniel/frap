@@ -2,6 +2,8 @@
 //! `Collection.all_objects`: the collection's objects then its children's, recursively, each
 //! once (verified on 5.2.4: `['Light', 'Camera', 'aa_coll', 'Cube', 'mm_child']`).
 
+use std::collections::HashSet;
+
 use frap_rna::{CollRef, Field, IdRef, ObjectId, PropDef, RnaError, RnaPtr, Root, rna_hook};
 
 use crate::HostRead;
@@ -12,23 +14,29 @@ use crate::id::paths::internal;
 
 /// Objects of `c` and of its descendants (pre-order, deduplicated).
 pub fn all_objects(main: &Main, c: &Collection) -> Vec<IdRef<ObjectId>> {
-    fn walk(main: &Main, c: &Collection, depth: usize, out: &mut Vec<IdRef<ObjectId>>) {
+    fn walk(
+        main: &Main,
+        c: &Collection,
+        depth: usize,
+        seen: &mut HashSet<IdRef<ObjectId>>,
+        out: &mut Vec<IdRef<ObjectId>>,
+    ) {
         if depth > 256 {
             return;
         }
         for o in &c.objects {
-            if !out.contains(o) {
+            if seen.insert(*o) {
                 out.push(*o);
             }
         }
         for ch in &c.children {
             if let Some(cc) = main.collections.get(*ch) {
-                walk(main, cc, depth + 1, out);
+                walk(main, cc, depth + 1, seen, out);
             }
         }
     }
     let mut out = Vec::new();
-    walk(main, c, 0, &mut out);
+    walk(main, c, 0, &mut HashSet::new(), &mut out);
     out
 }
 

@@ -28,7 +28,7 @@ use smol_str::SmolStr;
 
 pub use access::{CollView, get_field, id_srna, not_bound, stale, with_coll, with_struct};
 pub use context::Member;
-pub use write::{set_prop, with_coll_mut, with_struct_mut};
+pub use write::{ItemValue, assign_item, set_prop, with_coll_mut, with_struct_mut};
 
 use crate::errors::*;
 use crate::response::{f32_json, rna_json, value_json};
@@ -1322,6 +1322,48 @@ fn item_target(host: &dyn HostRead, c: &CollPlace, i: usize) -> Result<Target, F
             )),
         },
     )
+}
+
+/// Items `start..end` of the collection under `c` (absolute indices, a slice's own range
+/// included), resolved in one pass: a hook-served collection (`scene.objects`,
+/// `collection.all_objects`) builds its list once instead of once per item, as stepping by
+/// index would (M8S10-5). `None`: an empty slot of an ID-pointer collection
+/// (`mesh.materials`).
+pub fn coll_items(
+    host: &dyn HostRead,
+    c: &CollPlace,
+    (start, end): (usize, usize),
+) -> Result<Vec<Option<RnaPtr>>, FrapError> {
+    let items: Vec<Option<RnaPtr>> = with_coll(host, &c.ptr, c.prop, &mut |v| {
+        (start..end)
+            .map(|i| match v.item(i).map_err(access::rna_err)? {
+                Item::Id(Some(id)) => Ok(Some(RnaPtr::id(id, id_srna(host, id)?))),
+                Item::Id(None) => Ok(None),
+                Item::Struct(s) => Ok(Some(
+                    c.ptr
+                        .child(Seg::Prop(c.prop.identifier), s.srna())
+                        .child(v.item_seg(i), s.srna()),
+                )),
+            })
+            .collect()
+    })?;
+    // Items of a detached collection are detached too, as `step` marks them.
+    let Some(d) = c.ptr.detached else {
+        return Ok(items);
+    };
+    Ok(items
+        .into_iter()
+        .map(|p| {
+            p.map(|p| {
+                let mut t = Target::Struct(p);
+                mark_detached(&mut t, d, Some(c.ptr.root));
+                match t {
+                    Target::Struct(p) => p,
+                    _ => unreachable!("mark_detached keeps the variant"),
+                }
+            })
+        })
+        .collect())
 }
 
 fn step_coll(host: &dyn HostRead, c: CollPlace, seg: &PathSeg) -> Result<Target, FrapError> {

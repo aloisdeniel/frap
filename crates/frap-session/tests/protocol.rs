@@ -1357,6 +1357,234 @@ fn foreach_slots_unbound_items_and_validate() {
     );
 }
 
+/// M8 stabilization round 10 (each against 5.2.4): `mesh.materials[i] = m` / `= None` write
+/// the slot (Blender's errors for other values, keys and ranges; other collections refuse with
+/// "failed assignment"); paged `foreach_get` over slots with an empty one counts `range` in
+/// slots and lists the filled `slots`; `Mesh.validate()` repairs duplicate edges, duplicate
+/// faces and non-finite positions; an ignored `Node.mute` write echoes the value read back.
+#[test]
+fn material_item_assign_slot_paging_validate_repairs() {
+    let mut s = session_with(|o| o.max_array = 4);
+    one(&mut s, "bpy.data.materials.new('M2')");
+    one(
+        &mut s,
+        "bpy.data.materials['M2'].diffuse_color = (0.25, 0.5, 0.75, 1)",
+    );
+    let r = one(&mut s, "bpy.data.meshes['Cube'].materials[0] = None");
+    assert_eq!(r["status"], "FINISHED", "{r}");
+    assert_eq!(r["value"], J::Null);
+    assert_eq!(r["path"], "bpy.data.meshes['Cube'].materials[0]");
+    assert_eq!(r["changes"]["modified"], json!(["bpy.data.meshes['Cube']"]));
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].material_slots[0].material"
+        ),
+        J::Null
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.append(bpy.data.materials['M2'])",
+    );
+    let r = one(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials[0] = bpy.data.materials['Material']",
+    );
+    assert_eq!(
+        r["value"],
+        json!({"$ref": "bpy.data.materials['Material']"})
+    );
+    one(&mut s, "bpy.data.meshes['Cube'].materials[-1] = None");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.append(bpy.data.materials['M2'])",
+    );
+    // [Material, None, M2]
+    for (src, exc, msg) in [
+        (
+            "bpy.data.meshes['Cube'].materials[0] = 5",
+            "TypeError",
+            "bpy_prop_collection[key] = value: invalid, expected a StructRNA type or None, not a int",
+        ),
+        (
+            "bpy.data.meshes['Cube'].materials[0] = bpy.data.objects['Cube']",
+            "TypeError",
+            "bpy_prop_collection[key] = value: invalid, expected a 'Material' type or None, not a 'Object'",
+        ),
+        (
+            "bpy.data.meshes['Cube'].materials['Material'] = None",
+            "TypeError",
+            "bpy_prop_collection[key]: invalid key, must be an int, not str",
+        ),
+        (
+            "bpy.data.meshes['Cube'].materials[3] = None",
+            "IndexError",
+            "bpy_prop_collection[index] = value: index 3 out of range, size 3",
+        ),
+        (
+            "bpy.data.meshes['Cube'].materials[-4] = None",
+            "IndexError",
+            "bpy_prop_collection[-4]: out of range.",
+        ),
+        (
+            "bpy.data.objects[0] = None",
+            "IndexError",
+            "bpy_prop_collection[index] = value: index 0 failed assignment (unknown reason)",
+        ),
+    ] {
+        let (e, _, m) = err(&mut s, src);
+        assert_eq!((e.as_str(), m.as_str()), (exc, msg), "{src}");
+    }
+    // Paging over [Material, None, M2] with 4 scalars a page: one colour each.
+    let page = |s: &mut frap_session::Session, src: &str| val(s, src);
+    let p1 = page(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.foreach_get('diffuse_color')",
+    );
+    assert_eq!(p1["range"], json!([0, 1]), "{p1}");
+    assert_eq!(p1["slots"], json!([0]));
+    assert_eq!(p1["truncated"], json!(true));
+    let p2 = page(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials[1:].foreach_get('diffuse_color')",
+    );
+    assert_eq!(p2["$array"], json!([0.25, 0.5, 0.75, 1]), "{p2}");
+    assert_eq!(p2["range"], json!([1, 3]));
+    assert_eq!(p2["slots"], json!([2]));
+    assert_eq!(p2["truncated"], json!(false));
+    let all = page(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials.foreach_get('roughness')",
+    );
+    assert_eq!(all["len"], json!(2), "{all}");
+    assert_eq!(all["range"], json!([0, 3]));
+    assert_eq!(all["slots"], json!([0, 2]));
+    let mid = page(
+        &mut s,
+        "bpy.data.meshes['Cube'].materials[1:2].foreach_get('roughness')",
+    );
+    assert_eq!(mid["range"], json!([1, 2]), "{mid}");
+    assert_eq!(mid["slots"], json!([]));
+    // `validate()` repairs.
+    one(&mut s, "bpy.data.meshes['Cube'].edges.add(1)");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].edges[12].vertices = (5, 7)",
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].validate()"),
+        json!(true)
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].edges[11].vertices"),
+        json!([3, 1])
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].validate()"),
+        json!(false)
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].vertices[0].co = (float('nan'), 1, 2)",
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].validate()"),
+        json!(true)
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].vertices[0].co"),
+        json!([0, 0, 0])
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].attributes.new('fw', 'FLOAT', 'FACE')",
+    );
+    one(&mut s, "bpy.data.meshes['Cube'].loops.add(4)");
+    let corners = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].loops[0:4].foreach_get('vertex_index', [0] * 4)",
+    );
+    let edges = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].loops[0:4].foreach_get('edge_index', [0] * 4)",
+    );
+    one(
+        &mut s,
+        &format!("bpy.data.meshes['Cube'].loops[24:].foreach_set('vertex_index', {corners})"),
+    );
+    one(
+        &mut s,
+        &format!("bpy.data.meshes['Cube'].loops[24:].foreach_set('edge_index', {edges})"),
+    );
+    one(&mut s, "bpy.data.meshes['Cube'].polygons.add(1)");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].polygons[6].loop_start = 24",
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].attributes['fw'].data.foreach_set('value', [0, 1, 2, 3, 4, 5, 6])",
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].validate()"),
+        json!(true)
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].attributes['fw'].data.foreach_get('value', [0.0] * 6)"
+        ),
+        json!([0, 1, 2, 3, 4, 5])
+    );
+    let (_, _, m) = err(
+        &mut s,
+        "bpy.data.meshes['Cube'].attributes['fw'].data.foreach_get('value', [0.0] * 7)",
+    );
+    assert!(!m.is_empty());
+    // The duplicate's corners went with it: 24 remain.
+    let (e, _, _) = err(&mut s, "bpy.data.meshes['Cube'].loops[24].vertex_index");
+    assert_eq!(e, "IndexError");
+    // An ignored `mute` write echoes what the node holds and changes nothing.
+    let r = one(
+        &mut s,
+        "bpy.data.materials['Material'].node_tree.nodes['Material Output'].mute = True",
+    );
+    assert_eq!(r["value"], json!(false), "{r}");
+    assert_eq!(r["changes"]["modified"], json!([]));
+    assert_eq!(r["reports"][0]["type"], "INFO");
+}
+
+/// M8S10-5: `foreach_get` / `foreach_set` over hook-served ID lists (`scene.objects`,
+/// `collection.all_objects`) resolve the list once, not once per item: 1536 objects took about
+/// 20 s each in a debug build (cubic), and take milliseconds now.
+#[test]
+fn foreach_over_scene_objects_scales() {
+    let mut s = session();
+    one(&mut s, "bpy.ops.object.select_all(action='SELECT')");
+    for _ in 0..9 {
+        one(&mut s, "bpy.ops.object.duplicate(linked=True)");
+        one(&mut s, "bpy.ops.object.select_all(action='SELECT')");
+    }
+    for src in [
+        "bpy.context.scene.objects.foreach_get('pass_index')",
+        "bpy.data.collections['Collection'].all_objects.foreach_get('pass_index')",
+        "bpy.context.scene.collection.all_objects.foreach_get('pass_index', [0] * 1536)",
+        "bpy.context.scene.objects.foreach_set('pass_index', [2] * 1536)",
+    ] {
+        let t = std::time::Instant::now();
+        let r = one(&mut s, src);
+        assert_eq!(r["status"], "FINISHED", "{src}: {r}");
+        let d = t.elapsed();
+        assert!(d < std::time::Duration::from_secs(3), "{src}: {d:?}");
+    }
+    let r = val(
+        &mut s,
+        "bpy.context.scene.objects.foreach_get('pass_index')",
+    );
+    assert_eq!(r["len"], json!(1536), "{r}");
+    assert_eq!(r["$array"][1535], json!(2));
+}
+
 #[test]
 fn bulk_writes() {
     let mut s = session();

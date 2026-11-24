@@ -51,6 +51,9 @@ pub use context::{
 };
 pub use data::{ChangeLog, IdMap, Main, RenameMode, RenameResult};
 pub use eval::{EvaluatedObject, EvaluatedPose, ModifierStatus};
+/// Node types whose `mute` writes Blender ignores (`typeinfo->no_muting`), for the session's
+/// `set` echo (M8S10-4).
+pub use frap_nodes::rna::no_muting as node_no_muting;
 pub use host::{
     EvalError, EvalMode, Evaluator, FuncArgs, Host, HostRead, RNA_FUNCS, RNA_HOOKS, RnaFuncImpl,
     RnaFuncReg, RnaGetHook, RnaHookReg, RnaSetHook, Snapshot, find_func, find_hook,

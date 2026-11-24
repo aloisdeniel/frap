@@ -250,3 +250,118 @@ fn needs_hook(ptr: &RnaPtr, prop: &PropDef) -> FrapError {
         ),
     )
 }
+
+/// The value of a `coll[key] = value` assignment, as `pyrna_prop_collection_ass_subscript`
+/// sorts it.
+pub enum ItemValue<'a> {
+    /// `None`.
+    None,
+    /// An RNA struct or ID.
+    Struct(&'a RnaPtr),
+    /// Anything else (its Python type name).
+    Other(&'static str),
+}
+
+/// `coll[key] = value` (`pyrna_prop_collection_ass_subscript`, verified on 5.2.4): the value
+/// is checked first (a struct of the item type, or `None`), then the key (an `int`), then the
+/// index range; only a collection with an RNA `assignint` callback takes the value, and of
+/// frap's bound collections that is `IDMaterials` (`mesh.materials[i] = m`,
+/// `rna_IDMaterials_assign_int`: `None` empties the slot; every object using the mesh sees it,
+/// as for a `DATA` `material_slots[i].material` write). Every other collection answers
+/// Blender's IndexError "failed assignment (unknown reason)". A slice (`coll[a:b]`) is a
+/// Python list: assigning into it changes no data. Returns the slot written (`None`: a slice).
+pub fn assign_item(
+    host: &mut dyn Host,
+    c: &super::CollPlace,
+    seg: &frap_lang::PathSeg,
+    v: ItemValue<'_>,
+) -> Result<Option<usize>, FrapError> {
+    use frap_lang::PathSeg;
+    if let Some((a, b)) = c.range {
+        return match seg {
+            PathSeg::Index(i) => super::norm_index(*i, b - a)
+                .map(|_| None)
+                .ok_or_else(|| super::index_error("list assignment index out of range")),
+            PathSeg::Slice(..) => Ok(None),
+            _ => Err(super::type_error(
+                "list indices must be integers or slices, not str",
+            )),
+        };
+    }
+    let item_type = match c.prop.kind {
+        frap_rna::PropKind::Collection { item_type, .. } => item_type,
+        _ => c.prop.identifier,
+    };
+    let value = match v {
+        ItemValue::Other(t) => {
+            return Err(super::type_error(format!(
+                "bpy_prop_collection[key] = value: invalid, expected a StructRNA type or None, \
+                 not a {t}"
+            )));
+        }
+        ItemValue::None => None,
+        ItemValue::Struct(p) if !p.srna.is_a(item_type) => {
+            return Err(super::type_error(format!(
+                "bpy_prop_collection[key] = value: invalid, expected a '{item_type}' type or \
+                 None, not a '{}'",
+                p.srna.identifier
+            )));
+        }
+        ItemValue::Struct(p) => Some(p),
+    };
+    let i = match seg {
+        PathSeg::Index(i) => *i,
+        other => {
+            let t = match other {
+                PathSeg::Key(_) => "str",
+                PathSeg::KeyLib(..) => "tuple",
+                PathSeg::Slice(..) => "slice",
+                _ => "object",
+            };
+            return Err(super::type_error(format!(
+                "bpy_prop_collection[key]: invalid key, must be an int, not {t}"
+            )));
+        }
+    };
+    let len = super::coll_len(&*host, c)?;
+    let j = if i < 0 { i + len as i64 } else { i };
+    if j < 0 {
+        return Err(super::index_error(format!(
+            "bpy_prop_collection[{i}]: out of range."
+        )));
+    }
+    if j as usize >= len {
+        return Err(super::index_error(format!(
+            "bpy_prop_collection[index] = value: index {i} out of range, size {len}"
+        )));
+    }
+    let j = j as usize;
+    let mesh = match (c.ptr.root, c.ptr.path.is_empty(), c.prop.identifier) {
+        (Root::Id(id), true, "materials") => id.typed::<frap_rna::MeshId>(),
+        _ => None,
+    };
+    let Some(me) = mesh else {
+        return Err(super::index_error(format!(
+            "bpy_prop_collection[index] = value: index {j} failed assignment (unknown reason)"
+        )));
+    };
+    refuse_detached(host.main(), &c.ptr)?;
+    let m = match value {
+        None => None,
+        Some(p) => match (p.root, p.path.is_empty()) {
+            (Root::Id(a), true) => a.typed::<frap_rna::MaterialId>(),
+            _ => None,
+        }
+        .map(Some)
+        .ok_or_else(|| stale("the material is not an ID pointer"))?,
+    };
+    let (main, log) = host.main_mut();
+    let mesh = main
+        .meshes
+        .get_mut(me, log)
+        .ok_or_else(|| stale("the mesh no longer exists"))?;
+    if let Some(slot) = mesh.materials.get_mut(j) {
+        *slot = m;
+    }
+    Ok(Some(j))
+}

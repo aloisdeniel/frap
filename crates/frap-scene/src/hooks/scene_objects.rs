@@ -5,6 +5,8 @@
 //! `['zz_master', 'Cube', 'Light', 'Camera', 'aa_coll', 'mm_child', 'dd_top2']`). Unlike the
 //! view layer's bases, excluded collections are included.
 
+use std::collections::HashSet;
+
 use frap_rna::{CollRef, Field, IdRef, ObjectId, PropDef, RnaError, RnaPtr, rna_hook};
 
 use crate::HostRead;
@@ -15,23 +17,29 @@ use crate::id::{Collection, Scene};
 
 /// The objects of `scene` (see the module docs).
 pub fn scene_objects(main: &Main, scene: &Scene) -> Vec<IdRef<ObjectId>> {
-    fn walk(main: &Main, c: &Collection, depth: usize, out: &mut Vec<IdRef<ObjectId>>) {
+    fn walk(
+        main: &Main,
+        c: &Collection,
+        depth: usize,
+        seen: &mut HashSet<IdRef<ObjectId>>,
+        out: &mut Vec<IdRef<ObjectId>>,
+    ) {
         if depth > 256 {
             return;
         }
         for o in &c.objects {
-            if !out.contains(o) && main.objects.contains(*o) {
+            if main.objects.contains(*o) && seen.insert(*o) {
                 out.push(*o);
             }
         }
         for ch in &c.children {
             if let Some(cc) = main.collections.get(*ch) {
-                walk(main, cc, depth + 1, out);
+                walk(main, cc, depth + 1, seen, out);
             }
         }
     }
     let mut out = Vec::new();
-    walk(main, &scene.collection, 0, &mut out);
+    walk(main, &scene.collection, 0, &mut HashSet::new(), &mut out);
     out
 }
 
