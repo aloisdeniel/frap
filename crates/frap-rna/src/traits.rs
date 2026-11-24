@@ -113,7 +113,8 @@ pub trait RnaMut: Rna {
 }
 
 /// Dense bulk buffer for `foreach_get`/`foreach_set` (§13.3, F-TR-7): 4 bytes per scalar
-/// instead of one `Value` each. Flat, row-major; the item length is `prop.array_len()`.
+/// instead of one `Value` each. Flat, in Blender's raw memory order (a `MATRIX` item is
+/// column-major, [`PropDef::reorder_raw`]); the item length is `prop.array_len()`.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum Bulk {
@@ -138,11 +139,17 @@ impl Bulk {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
-    fn push_value(&mut self, v: &Value) -> Result<(), RnaError> {
+    /// Appends one item's value of `prop`, a matrix in Blender's raw (column-major) order
+    /// ([`PropDef::reorder_raw`]).
+    pub fn push_value(&mut self, prop: &PropDef, v: &Value) -> Result<(), RnaError> {
         match (self, v) {
             (Bulk::F32(b), Value::Float(f)) => b.push(*f),
             (Bulk::F32(b), Value::Double(f)) => b.push(*f as f32),
-            (Bulk::F32(b), Value::FloatArray { data, .. }) => b.extend_from_slice(data),
+            (Bulk::F32(b), Value::FloatArray { data, .. }) => {
+                let at = b.len();
+                b.extend_from_slice(data);
+                prop.reorder_raw(&mut b[at..], true);
+            }
             (Bulk::I32(b), Value::Int(i)) => b.push(*i as i32),
             (Bulk::I32(b), Value::IntArray(a)) => b.extend(a.iter().map(|i| *i as i32)),
             (Bulk::Bool(b), Value::Bool(x)) => b.push(*x),
@@ -157,11 +164,15 @@ impl Bulk {
         let r = i * n..i * n + n;
         match self {
             Bulk::F32(b) if scalar => Value::Float(b[r.start]),
-            Bulk::F32(b) => Value::FloatArray {
-                data: SmallVec::from_slice(&b[r]),
-                shape: prop.array,
-                tag: MathTag::for_subtype(prop.subtype),
-            },
+            Bulk::F32(b) => {
+                let mut data = SmallVec::from_slice(&b[r]);
+                prop.reorder_raw(&mut data, false);
+                Value::FloatArray {
+                    data,
+                    shape: prop.array,
+                    tag: MathTag::for_subtype(prop.subtype),
+                }
+            }
             Bulk::I32(b) if scalar => Value::Int(b[r.start] as i64),
             Bulk::I32(b) => Value::IntArray(b[r].iter().map(|x| *x as i64).collect()),
             Bulk::Bool(b) if scalar => Value::Bool(b[r.start]),
@@ -217,7 +228,7 @@ pub trait RnaColl {
                 return Err(bulk_type_error());
             };
             match s.get(prop)? {
-                Field::Value(v) => out.push_value(&v)?,
+                Field::Value(v) => out.push_value(prop, &v)?,
                 _ => return Err(bulk_type_error()),
             }
         }
@@ -1125,8 +1136,9 @@ impl<X: IdField + Sync> RnaColl for IdVecCollMut<'_, X> {
 
 impl<X: IdField + Sync> RnaCollMut for IdVecCollMut<'_, X> {
     fn item_mut(&mut self, i: usize) -> Result<RnaMutGuard<'_>, RnaError> {
+        // NotImplemented: a bulk write falls back to item writes through each ID's own root.
         Err(RnaError::new(
-            RnaErrorKind::Other,
+            RnaErrorKind::NotImplemented,
             PyExc::TypeError,
             format!(
                 "{}[{i}] is a datablock: access it through its own root",

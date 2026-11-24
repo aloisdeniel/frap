@@ -108,7 +108,11 @@ pub(crate) fn generic_get<K: SoaKind + ?Sized>(
         let Field::Value(v) = K::get(m, ctx, i, prop)? else {
             return Err(array_error());
         };
-        push(&mut out, &v)?;
+        let n = push(&mut out, &v)?;
+        if let Bulk::F32(b) = &mut out {
+            let at = b.len() - n;
+            prop.reorder_raw(&mut b[at..], true);
+        }
     }
     Ok(out)
 }
@@ -229,11 +233,15 @@ pub(crate) fn value_at(prop: &PropDef, data: &Bulk, i: usize, per: usize) -> Val
     let scalar_prop = matches!(prop.array, ArrayShape::Scalar);
     match prop.kind {
         PropKind::Float { .. } if scalar_prop => Value::Float(float_at(data, r.start)),
-        PropKind::Float { .. } => Value::FloatArray {
-            data: r.map(|k| float_at(data, k)).collect(),
-            shape: prop.array,
-            tag: MathTag::for_subtype(prop.subtype),
-        },
+        PropKind::Float { .. } => {
+            let mut item: smallvec::SmallVec<[f32; 16]> = r.map(|k| float_at(data, k)).collect();
+            prop.reorder_raw(&mut item, false);
+            Value::FloatArray {
+                data: item,
+                shape: prop.array,
+                tag: MathTag::for_subtype(prop.subtype),
+            }
+        }
         PropKind::Int { .. } if scalar_prop => Value::Int(int_at(prop, data, r.start)),
         PropKind::Int { .. } => Value::IntArray(r.map(|k| int_at(prop, data, k)).collect()),
         PropKind::Bool { .. } if scalar_prop => Value::Bool(bool_at(data, r.start)),

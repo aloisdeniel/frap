@@ -1,0 +1,51 @@
+# M8 stabilization round 8: `foreach_get` / `foreach_set` argument and buffer checks.
+# Keyword arguments raise TypeError; a string buffer for `foreach_get` gets the size check
+# before the mutability one. Keyframe enums (`interpolation`, `easing`, `type`, handle types)
+# go through Blender's raw-array path: a longer buffer raises. INT8 and INT16_2D attribute
+# data refuse an integer outside the raw type's range (TypeError; Blender writes -1 first,
+# D-173, so those lines run on a second cube removed before the end). The property is looked
+# up on the first item's own type (`lights` 'energy', `modifiers` 'levels' with a SUBSURF
+# modifier first); an item without it raises the size error.
+# golden: startup=factory tier=T0 compare=objects
+import bpy
+bpy.data.meshes['Cube'].vertices.foreach_get(attr='co', seq=[0.0] * 24)
+bpy.data.meshes['Cube'].vertices.foreach_get('co', seq=[0.0] * 24)
+bpy.data.meshes['Cube'].vertices.foreach_set('co', [0.0] * 24, x=1)
+bpy.data.meshes['Cube'].vertices.foreach_get('co', 'abc')
+bpy.data.meshes['Cube'].vertices.foreach_get('co', 'a' * 24)
+bpy.data.meshes['Cube'].vertices.foreach_set('co', 'abc')
+bpy.data.meshes['Cube'].vertices.foreach_get('co', [])
+bpy.data.objects['Cube'].keyframe_insert('location', frame=1)
+bpy.data.objects['Cube'].keyframe_insert('location', frame=10)
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_set('easing', [1, 2, 3])
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_get('interpolation', [0] * 3)
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_get('type', [0] * 3)
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_set('handle_left_type', [0] * 3)
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_get('handle_right_type', [0] * 3)
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_set('easing', [1, 2])
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_get('easing', [0] * 2)
+bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points.foreach_get('interpolation', [0] * 2)
+bpy.ops.mesh.primitive_cube_add()
+bpy.data.meshes['Cube.001'].attributes.new('i8', 'INT8', 'POINT')
+bpy.data.meshes['Cube.001'].attributes['i8'].data.foreach_set('value', [300] * 8)
+bpy.data.meshes['Cube.001'].attributes['i8'].data.foreach_set('value', [128] * 8)
+bpy.data.meshes['Cube.001'].attributes['i8'].data.foreach_set('value', [-129] * 8)
+bpy.data.meshes['Cube.001'].attributes.new('s2', 'INT16_2D', 'POINT')
+bpy.data.meshes['Cube.001'].attributes['s2'].data.foreach_set('value', [70000] * 16)
+bpy.data.meshes['Cube.001'].attributes['s2'].data.foreach_set('value', [-32769] * 16)
+bpy.data.objects.remove(bpy.data.objects['Cube.001'])
+bpy.data.meshes.remove(bpy.data.meshes['Cube.001'])
+bpy.data.meshes['Cube'].attributes.new('i8', 'INT8', 'POINT')
+bpy.data.meshes['Cube'].attributes['i8'].data.foreach_set('value', [127, -128] * 4)
+bpy.data.meshes['Cube'].attributes.new('s2', 'INT16_2D', 'POINT')
+bpy.data.meshes['Cube'].attributes['s2'].data.foreach_set('value', [32767, -32768] * 8)
+bpy.data.lights.foreach_get('energy', [0.0])
+bpy.data.lights.foreach_set('energy', [5.0])
+bpy.data.lights.foreach_get('shadow_soft_size', [0.0])
+bpy.data.objects['Cube'].modifiers.new('S', 'SUBSURF')
+bpy.data.objects['Cube'].modifiers.foreach_get('levels', [0])
+bpy.data.objects['Cube'].modifiers.foreach_set('levels', [2])
+bpy.data.objects['Cube'].modifiers.new('B', 'BEVEL')
+bpy.data.objects['Cube'].modifiers.foreach_get('levels', [0, 0])
+bpy.data.objects['Cube'].modifiers.foreach_get('width', [0.0, 0.0])
+bpy.data.objects['Cube'].modifiers.foreach_get('show_viewport', [0, 0])

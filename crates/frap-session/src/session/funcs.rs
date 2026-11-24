@@ -787,6 +787,14 @@ impl Session {
         args: Vec<CallArg>,
     ) -> Result<Py, FrapError> {
         let set = which == CollFunc::ForeachSet;
+        // Blender's `foreach_get/set` take positional arguments only (verified on 5.2.4:
+        // `foreach_get(attr='co', seq=…)` and `foreach_get('co', seq=…)` raise).
+        if args.iter().any(|a| a.name.is_some()) {
+            return Err(type_err(format!(
+                "{}() takes no keyword arguments",
+                which.name()
+            )));
+        }
         let positional: Vec<&Py> = args.iter().map(|a| &a.value).collect();
         // frap extension (D-09): foreach_get(attr) returns a bulk array.
         if positional.len() != 2 && (set || positional.len() != 1) {
@@ -807,8 +815,12 @@ impl Session {
         };
         // An empty buffer returns None before the attribute is looked up (verified on 5.2.4:
         // `vertices.foreach_get('foo', [])` and `foreach_set('co', [])` are no-ops).
+        // frap answers a two-argument `foreach_get` with the buffer: an empty list stays `[]`.
         if positional.len() == 2 && positional[1].items().is_some_and(|v| v.is_empty()) {
-            return Ok(Py::None);
+            return Ok(match positional[1] {
+                Py::List(_) if !set => Py::List(Vec::new()),
+                _ => Py::None,
+            });
         }
         // A buffer for an empty collection raises before the attribute is looked up
         // (verified on 5.2.4: a new mesh's `vertices.foreach_get('co', [0.0] * 3)` and
@@ -829,7 +841,19 @@ impl Session {
             (Root::Data, true) => "BlendData",
             _ => c.ptr.srna.identifier,
         };
-        let Some(prop) = item_type.find_prop(&attr) else {
+        // Blender looks the property up on the first item's own type (verified on 5.2.4:
+        // `lights.foreach_get('energy', …)`, `modifiers.foreach_get('levels', …)` with a
+        // SUBSURF modifier first); every item must then have it.
+        let first_type = if item_type.find_prop(&attr).is_none() && end > start {
+            Some(self.foreach_item(&c, 0)?.srna)
+        } else {
+            None
+        };
+        let refined = first_type.is_some_and(|t| t.find_prop(&attr).is_some());
+        let Some(prop) = item_type
+            .find_prop(&attr)
+            .or_else(|| first_type.and_then(|t| t.find_prop(&attr)))
+        else {
             return Err(FrapError::new(
                 PyExc::AttributeError,
                 RNA_NO_ATTRIBUTE,
@@ -862,7 +886,7 @@ impl Session {
         let fits = |n: usize| if raw { n == needed } else { n >= needed };
         let is_enum = matches!(prop.kind, PropKind::Enum { .. });
         if !set {
-            let bulk = self.foreach_read(&c, prop, (start, end), is_enum)?;
+            let bulk = self.foreach_read(&c, prop, (start, end), is_enum || refined)?;
             if positional.len() == 1 {
                 // A variable-length array (`polygons.foreach_get('vertices')`) answers flat,
                 // paged by whole faces.
@@ -874,17 +898,25 @@ impl Session {
                     lens.as_deref(),
                 )));
             }
-            let Some(mut seq) = positional[1].items() else {
-                return Err(type_err("couldn't access the py sequence"));
+            // A string is a sequence of its characters: Blender checks its size first
+            // (verified on 5.2.4: `foreach_get('co', 'abc')` raises the size error).
+            let n = match positional[1] {
+                Py::Str(t) => t.chars().count(),
+                other => match other.items() {
+                    Some(v) => v.len(),
+                    None => return Err(type_err("couldn't access the py sequence")),
+                },
             };
-            if !fits(seq.len()) {
+            if !fits(n) {
                 return Err(runtime_err("internal error setting the array"));
             }
             // The values are written into the buffer, which must be mutable (verified on
-            // 5.2.4: a tuple of the right size raises; a short one raises the size error).
-            if !matches!(positional[1], Py::List(_)) {
+            // 5.2.4: a tuple or a string of the right size raises; a short one raises the
+            // size error).
+            let Py::List(seq) = positional[1] else {
                 return Err(type_err("couldn't access the py sequence"));
-            }
+            };
+            let mut seq = seq.clone();
             let vals: Vec<Py> = match &bulk {
                 Bulk::F32(v) => v.iter().map(|x| Py::Float(*x as f64)).collect(),
                 Bulk::I32(v) => v.iter().map(|x| Py::Int(*x as i64)).collect(),
@@ -902,7 +934,8 @@ impl Session {
         // Every item is converted before the size or the read-only flag is looked at
         // (verified on 5.2.4: `foreach_set('co', [[1, 1, 1]] * 8)`, `('vertices', [..., 1.5])`,
         // `('select', [2] * 8)` and the read-only `('index', [0.5] * 30)` raise TypeError).
-        let mut bulk = foreach_buffer(prop, &seq)?;
+        let int_range = raw_int_range(c.ptr.srna.identifier, c.prop.identifier, prop.identifier);
+        let mut bulk = foreach_buffer(prop, &seq, int_range)?;
         if prop.flags.contains(PropFlags::READONLY) {
             // Blender ignores writes to a read-only property here (`foreach_set('index', …)`
             // returns None, verified); frap says so.
@@ -941,6 +974,7 @@ impl Session {
         };
         let whole_rna = c.range.is_none()
             && enum_vals.is_none()
+            && !refined
             && !(c.ptr.root == Root::Data && c.ptr.path.is_empty());
         if whole_rna {
             let r = resolve::with_coll_mut(&mut self.host, &c.ptr, c.prop, &mut |cm| {
@@ -962,12 +996,25 @@ impl Session {
                 Err(_) => {}
             }
         }
-        // Item by item (slices, `bpy.data` collections, hook collections, enums).
-        // Indexed from the slice's own start (`polygons[1:3][0]` is face 1; `start` is 0
-        // without a slice).
-        let mut at = 0;
+        // Item by item (slices, `bpy.data` collections, hook collections, enums, items of
+        // several types). Indexed from the slice's own start (`polygons[1:3][0]` is face 1;
+        // `start` is 0 without a slice). Every item must have the property: Blender raises the
+        // size error at the first one without it (after writing the ones before, which frap
+        // does not, D-173).
+        let mut items = Vec::with_capacity(end - start);
         for n in 0..end - start {
             let ptr = self.foreach_item(&c, n)?;
+            let p = if refined {
+                ptr.srna
+                    .find_prop(prop.identifier)
+                    .ok_or_else(|| runtime_err("internal error setting the array"))?
+            } else {
+                prop
+            };
+            items.push((ptr, p));
+        }
+        let mut at = 0;
+        for (n, (ptr, prop)) in items.into_iter().enumerate() {
             let v = match &enum_vals {
                 Some(vals) => vals[n].clone(),
                 None => {
@@ -998,18 +1045,20 @@ impl Session {
     /// read answers when it can; ID items (`scene.objects`, `view_layer.objects`,
     /// `collection.all_objects`), hook-served properties and enums (as their item numbers,
     /// `material_slots.foreach_get('link', …)`) are read item by item (verified on 5.2.4).
+    /// `item_by_item` skips the bulk read (enums, items of several types, each read through
+    /// its own type's property of that name).
     fn foreach_read(
         &self,
         c: &CollPlace,
         prop: &'static PropDef,
         (start, end): (usize, usize),
-        is_enum: bool,
+        item_by_item: bool,
     ) -> Result<Bulk, FrapError> {
         let host = &self.host;
         // Blender answers a property that has no bulk form (strings, pointers) with the
         // same error as a wrong buffer length.
         let no_bulk = || runtime_err("internal error setting the array");
-        if !is_enum {
+        if !item_by_item {
             let r = with_coll(host, &c.ptr, c.prop, &mut |v| {
                 v.foreach_get(prop, start..end).map_err(FrapError::from)
             });
@@ -1027,6 +1076,12 @@ impl Session {
         };
         for n in 0..end - start {
             let ptr = self.foreach_item(c, n)?;
+            // Items of several types (`modifiers`): each one's own property of that name.
+            let prop = if item_by_item {
+                ptr.srna.find_prop(prop.identifier).ok_or_else(no_bulk)?
+            } else {
+                prop
+            };
             let v = resolve::with_struct(host, &ptr, &mut |s| match resolve::get_field(
                 host, s, &ptr, prop,
             )? {
@@ -1177,11 +1232,15 @@ fn bulk_item(b: &Bulk, prop: &PropDef, r: std::ops::Range<usize>) -> Value {
     let scalar = matches!(prop.array, frap_rna::ArrayShape::Scalar);
     match b {
         Bulk::F32(v) if scalar => Value::Float(v[r.start]),
-        Bulk::F32(v) => Value::FloatArray {
-            data: v[r].iter().copied().collect(),
-            shape: prop.array,
-            tag: frap_rna::MathTag::for_subtype(prop.subtype),
-        },
+        Bulk::F32(v) => {
+            let mut data: smallvec::SmallVec<[f32; 16]> = v[r].iter().copied().collect();
+            prop.reorder_raw(&mut data, false);
+            Value::FloatArray {
+                data,
+                shape: prop.array,
+                tag: frap_rna::MathTag::for_subtype(prop.subtype),
+            }
+        }
         Bulk::I32(v) if scalar => Value::Int(v[r.start] as i64),
         Bulk::I32(v) => Value::IntArray(v[r].iter().map(|x| *x as i64).collect()),
         Bulk::Bool(v) if scalar => Value::Bool(v[r.start]),
@@ -1195,7 +1254,10 @@ fn bulk_item(b: &Bulk, prop: &PropDef, r: std::ops::Range<usize>) -> Value {
 /// iterated in place, a property without its own getter). There a `foreach_get` /
 /// `foreach_set` buffer must hold exactly the values, while the item-by-item path takes a
 /// longer one. Each entry was verified on 5.2.4 by a buffer one value too long (raises
-/// `RuntimeError: internal error setting the array` and writes nothing); the other properties
+/// `RuntimeError: internal error setting the array` and writes nothing), enum properties
+/// included (DNA `char` fields: keyframe `interpolation` / `easing` / `type` / handle types,
+/// curve-map and Bézier point handle types; `CurveProfile` points' handle types take the
+/// longer buffer); the other properties
 /// of these collections (`edges.foreach_set('select', …)`, `polygons…('material_index', …)`,
 /// `color_attributes[…].data…('color_srgb', …)`, `ByteColorAttribute` data, `ShapeKey.data`,
 /// `MeshUVLoopLayer.data`, `MeshLoopColorLayer.data`) and ID collections take the longer one.
@@ -1227,9 +1289,30 @@ const RAW_ARRAY: &[(&str, &str, &str)] = &[
     ("FCurve", "keyframe_points", "amplitude"),
     ("FCurve", "keyframe_points", "back"),
     ("FCurve", "keyframe_points", "period"),
+    ("FCurve", "keyframe_points", "interpolation"),
+    ("FCurve", "keyframe_points", "easing"),
+    ("FCurve", "keyframe_points", "type"),
+    ("FCurve", "keyframe_points", "handle_left_type"),
+    ("FCurve", "keyframe_points", "handle_right_type"),
+    ("CurveMap", "points", "handle_type"),
+    ("Spline", "bezier_points", "handle_left_type"),
+    ("Spline", "bezier_points", "handle_right_type"),
     ("CurveMap", "points", "location"),
     ("CurveProfile", "points", "location"),
 ];
+
+/// The integer range of a raw array narrower than 32 bits (`int8_t` for INT8 attribute data,
+/// `int16_t` for INT16_2D): Blender converts each item to that type and refuses one out of
+/// its range with `TypeError: couldn't access the py sequence` (verified on 5.2.4:
+/// `foreach_set('value', [128] * 8)` on an INT8 attribute, `[32768] * 16` on an INT16_2D
+/// one raise; `127`, `-128`, `32767` are written).
+fn raw_int_range(owner: &str, coll: &str, prop: &str) -> Option<(i64, i64)> {
+    match (owner, coll, prop) {
+        ("ByteIntAttribute", "data", "value") => Some((i8::MIN.into(), i8::MAX.into())),
+        ("Short2Attribute", "data", "value") => Some((i16::MIN.into(), i16::MAX.into())),
+        _ => None,
+    }
+}
 
 /// Whether `owner.coll.foreach_*(prop, …)` goes through Blender's raw-array fast path
 /// ([`RAW_ARRAY`]).
@@ -1242,7 +1325,12 @@ fn raw_array_access(owner: &str, coll: &str, prop: &str) -> bool {
 /// 5.2.4): a float property takes numbers and booleans, an int or enum property integers in
 /// the 32-bit range and booleans (not `1.5`, not `2**40`), a boolean property booleans and
 /// the integers 0 and 1 (not `2`, `-1` or `1.0`); a nested list or a string is refused.
-fn foreach_buffer(prop: &PropDef, seq: &[Py]) -> Result<Bulk, FrapError> {
+/// `int_range` narrows the integer range to the raw array's item type ([`raw_int_range`]).
+fn foreach_buffer(
+    prop: &PropDef,
+    seq: &[Py],
+    int_range: Option<(i64, i64)>,
+) -> Result<Bulk, FrapError> {
     let bad = || type_err("couldn't access the py sequence");
     Ok(match &prop.kind {
         PropKind::Float { .. } => Bulk::F32(
@@ -1259,6 +1347,9 @@ fn foreach_buffer(prop: &PropDef, seq: &[Py]) -> Result<Bulk, FrapError> {
             seq.iter()
                 .map(|x| match x {
                     Py::Bool(b) => Ok(*b as i32),
+                    Py::Int(i) if int_range.is_some_and(|(lo, hi)| !(lo..=hi).contains(i)) => {
+                        Err(bad())
+                    }
                     Py::Int(i) => i32::try_from(*i).map_err(|_| bad()),
                     _ => Err(bad()),
                 })
@@ -1318,13 +1409,6 @@ fn enum_from_int(prop: &PropDef, items: &[frap_rna::EnumItem], x: i32) -> Option
 /// Appends one item's value of `prop` to a bulk buffer; false when it has no bulk form.
 fn push_bulk(out: &mut Bulk, prop: &PropDef, v: &Value) -> bool {
     match (out, v) {
-        (Bulk::F32(b), Value::Float(f)) => b.push(*f),
-        (Bulk::F32(b), Value::Double(f)) => b.push(*f as f32),
-        (Bulk::F32(b), Value::FloatArray { data, .. }) => b.extend_from_slice(data),
-        (Bulk::I32(b), Value::Int(i)) => b.push(*i as i32),
-        (Bulk::I32(b), Value::IntArray(a)) => b.extend(a.iter().map(|i| *i as i32)),
-        (Bulk::Bool(b), Value::Bool(x)) => b.push(*x),
-        (Bulk::Bool(b), Value::BoolArray(a)) => b.extend_from_slice(a),
         (Bulk::I32(b), Value::Enum(_) | Value::EnumSet(_)) => {
             let PropKind::Enum { items, .. } = &prop.kind else {
                 return false;
@@ -1334,7 +1418,7 @@ fn push_bulk(out: &mut Bulk, prop: &PropDef, v: &Value) -> bool {
                 None => return false,
             }
         }
-        _ => return false,
+        (out, v) => return out.push_value(prop, v).is_ok(),
     }
     true
 }

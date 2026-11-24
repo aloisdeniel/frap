@@ -149,15 +149,10 @@ impl AttrData {
             AttrData::String(_) => "STRING",
         }
     }
-    /// A column of `len` default values of the same type (`0`, `false`, identity quaternion
-    /// and matrix as Blender's `CPPType::default_value`).
+    /// A column of `len` default values of the same type (`0`, `false`, identity quaternion,
+    /// zero matrix as Blender's `CPPType::default_value`: `float4x4` value-initialises to
+    /// zero, verified on 5.2.4 by `vertices.add` on a mesh with a FLOAT4X4 attribute).
     pub fn default_of_len(&self, len: usize) -> AttrData {
-        let ident4 = [
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ];
         match self {
             AttrData::Float(_) => AttrData::Float(Arc::new(vec![0.0; len])),
             AttrData::Int(_) => AttrData::Int(Arc::new(vec![0; len])),
@@ -173,7 +168,7 @@ impl AttrData {
             AttrData::Quaternion(_) => {
                 AttrData::Quaternion(Arc::new(vec![[1.0, 0.0, 0.0, 0.0]; len]))
             }
-            AttrData::Float4x4(_) => AttrData::Float4x4(Arc::new(vec![ident4; len])),
+            AttrData::Float4x4(_) => AttrData::Float4x4(Arc::new(vec![[[0.0; 4]; 4]; len])),
             AttrData::String(_) => AttrData::String(Arc::new(vec![SmolStr::default(); len])),
         }
     }

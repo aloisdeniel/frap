@@ -126,6 +126,38 @@ impl PropDef {
             ArrayShape::Matrix(r, c) => r as usize * c as usize,
         }
     }
+    /// `(rows, cols)` of a `MATRIX` array. Blender keeps it column-major in memory and its
+    /// `foreach_get/set` copy that memory (verified on 5.2.4: `objects.foreach_get(
+    /// 'matrix_world', …)` has the translation at items 12-14), while a frap `Value` is
+    /// row-major.
+    pub fn raw_matrix(&self) -> Option<(usize, usize)> {
+        match (self.array, self.subtype) {
+            (ArrayShape::Matrix(r, c), Subtype::Matrix) => Some((r as usize, c as usize)),
+            _ => None,
+        }
+    }
+    /// Reorders the scalars of one item of this property between frap's row-major `Value`
+    /// order and Blender's `foreach` (raw memory) order: `to_raw` row-major → column-major,
+    /// else back. A no-op for anything but a `MATRIX` array of the full length.
+    pub fn reorder_raw<T: Copy>(&self, item: &mut [T], to_raw: bool) {
+        let Some((r, c)) = self.raw_matrix() else {
+            return;
+        };
+        if item.len() != r * c {
+            return;
+        }
+        let src = item.to_vec();
+        for i in 0..r {
+            for j in 0..c {
+                let (row_major, col_major) = (i * c + j, j * r + i);
+                if to_raw {
+                    item[col_major] = src[row_major];
+                } else {
+                    item[row_major] = src[col_major];
+                }
+            }
+        }
+    }
     /// True for `READONLY` props.
     pub fn is_readonly(&self) -> bool {
         self.flags.contains(PropFlags::READONLY)

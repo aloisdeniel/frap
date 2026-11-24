@@ -914,8 +914,14 @@ impl Dumper<'_> {
             // items are still read through RNA one by one. A panic is never a shortcut miss.
             match self.read(&expr) {
                 Ok(v) => {
+                    // A matrix item (16 or 9 values) comes flat in Blender's column order:
+                    // read the items one by one, as rows.
                     if let Ok(items) = bulk_items(&v)
                         && items.len() == n
+                        && !items
+                            .first()
+                            .and_then(J::as_array)
+                            .is_some_and(|a| matches!(a.len(), 9 | 16))
                     {
                         return Ok(items);
                     }

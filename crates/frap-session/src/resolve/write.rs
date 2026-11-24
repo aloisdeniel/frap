@@ -85,9 +85,24 @@ fn walk_mut<R>(
             walk_mut(&mut *item, &rest[1..], f)
         }
         _ => {
-            let mut g = cur
-                .struct_mut(prop)
-                .map_err(|e| binding_err(e, srna, prop))?;
+            let mut g = cur.struct_mut(prop).map_err(|e| {
+                // A struct served by a get hook (`Object.pose`) has no mutable binding: its
+                // properties are written through their own set hooks, and a bulk write
+                // (`pose.bones.foreach_set`) falls back to them item by item.
+                if find_hook(srna, prop.identifier).is_some_and(|h| h.get.is_some()) {
+                    FrapError::new(
+                        PyExc::NotImplementedError,
+                        frap_rna::codes::RNA_NOT_IMPLEMENTED,
+                        format!(
+                            "frap: {}.{} is served by an RNA hook and cannot be written \
+                             through as a struct",
+                            srna.identifier, prop.identifier
+                        ),
+                    )
+                } else {
+                    binding_err(e, srna, prop)
+                }
+            })?;
             walk_mut(&mut *g, rest, f)
         }
     }

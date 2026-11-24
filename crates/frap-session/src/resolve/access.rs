@@ -363,7 +363,7 @@ impl CollView<'_> {
                 for id in &ids[range] {
                     let r = main.main().id(*id).ok_or_else(bulk_type)?;
                     match r.get(prop)? {
-                        Field::Value(v) => push_bulk(&mut out, &v)?,
+                        Field::Value(v) => out.push_value(prop, &v)?,
                         _ => return Err(bulk_type()),
                     }
                 }
@@ -380,21 +380,6 @@ fn bulk_type() -> RnaError {
         PyExc::TypeError,
         "foreach_get/foreach_set: property type does not match the buffer type",
     )
-}
-
-fn push_bulk(b: &mut Bulk, v: &frap_rna::Value) -> Result<(), RnaError> {
-    use frap_rna::Value;
-    match (b, v) {
-        (Bulk::F32(b), Value::Float(f)) => b.push(*f),
-        (Bulk::F32(b), Value::Double(f)) => b.push(*f as f32),
-        (Bulk::F32(b), Value::FloatArray { data, .. }) => b.extend_from_slice(data),
-        (Bulk::I32(b), Value::Int(i)) => b.push(*i as i32),
-        (Bulk::I32(b), Value::IntArray(a)) => b.extend(a.iter().map(|i| *i as i32)),
-        (Bulk::Bool(b), Value::Bool(x)) => b.push(*x),
-        (Bulk::Bool(b), Value::BoolArray(a)) => b.extend_from_slice(a),
-        _ => return Err(bulk_type()),
-    }
-    Ok(())
 }
 
 /// Runs `f` on the collection `prop` of the struct at `owner` (`bpy.data.<coll>` when the

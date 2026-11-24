@@ -615,13 +615,14 @@ fn bulk_reads_slices_and_truncation() {
         let (e, _, m) = err(&mut s, src);
         assert_eq!((e.as_str(), m.as_str()), (exc, msg), "{src}");
     }
-    // An empty buffer short-circuits before the attribute lookup (Blender 5.2.4, verified).
+    // An empty buffer short-circuits before the attribute lookup (Blender 5.2.4, verified);
+    // frap answers the (empty) buffer, as for every two-argument `foreach_get` (M8S8-1).
     assert_eq!(
         val(
             &mut s,
             "bpy.data.meshes['Cube'].vertices.foreach_get('foo', [])"
         ),
-        J::Null
+        json!([])
     );
     assert_eq!(
         val(
@@ -1004,6 +1005,227 @@ fn raw_array_buffers_ids_enums_and_buffer_types() {
     assert_eq!(
         val(&mut s, "bpy.data.objects['Cube'].rotation_mode"),
         json!("AXIS_ANGLE")
+    );
+}
+
+/// M8 stabilization round 8 (values verified on Blender 5.2.4, factory startup): matrices in
+/// column order, item writes on ID-list and pose collections, keyframe enums on the raw path,
+/// narrow integer attributes, argument checks, subclass items, `MeshVertices.add` & co.,
+/// FLOAT4X4 defaults.
+#[test]
+fn foreach_matrices_items_and_mesh_element_add() {
+    let mut s = session();
+    let runtime = ("RuntimeError", "internal error setting the array");
+    let typ = ("TypeError", "couldn't access the py sequence");
+    // Column order: the camera's translation is at items 12-14.
+    let m = val(
+        &mut s,
+        "bpy.data.objects.foreach_get('matrix_world', [0.0] * 48)",
+    );
+    let m: Vec<f64> = m
+        .as_array()
+        .expect("list")
+        .iter()
+        .map(|x| x.as_f64().expect("number"))
+        .collect();
+    let close = |a: f64, b: f64| (a - b).abs() < 1e-5;
+    assert!(
+        close(m[0], 0.6859207) && close(m[1], 0.7276763) && m[3] == 0.0,
+        "{m:?}"
+    );
+    assert!(
+        close(m[12], 7.3588915) && close(m[13], -6.9257908) && m[15] == 1.0,
+        "{m:?}"
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects.foreach_set('matrix_basis', [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 5, 6, 7, 1] * 3)"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.objects['Cube'].location[:]"),
+        json!([5, 6, 7])
+    );
+    // ID lists bound as vectors and pose bones write item by item.
+    for src in [
+        "bpy.data.collections['Collection'].objects.foreach_set('location', [2.0] * 9)",
+        "bpy.data.scenes['Scene'].collection.children.foreach_set('hide_render', [True])",
+        "bpy.data.meshes['Cube'].materials.foreach_set('roughness', [0.25])",
+    ] {
+        assert_eq!(val(&mut s, src), J::Null, "{src}");
+    }
+    assert_eq!(
+        val(&mut s, "bpy.data.objects['Light'].location[:]"),
+        json!([2, 2, 2])
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.collections['Collection'].hide_render"),
+        json!(true)
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.materials['Material'].roughness"),
+        json!(0.25)
+    );
+    one(&mut s, "bpy.ops.object.armature_add()");
+    one(
+        &mut s,
+        "bpy.data.objects['Armature'].pose.bones.foreach_set('matrix_basis', [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 5, 6, 7, 1])",
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Armature'].pose.bones['Bone'].location[:]"
+        ),
+        json!([5, 6, 7])
+    );
+    one(
+        &mut s,
+        "bpy.data.objects['Armature'].pose.bones.foreach_set('location', [1.0] * 3)",
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Armature'].pose.bones['Bone'].location[:]"
+        ),
+        json!([1, 1, 1])
+    );
+    // Bone.matrix (3x3) in column order.
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.armatures['Armature'].bones.foreach_get('matrix', [0.0] * 9)"
+        ),
+        json!([1, 0, 0, 0, 0, 1, 0, -1, 0])
+    );
+    // Keyframe enums take exactly their size.
+    one(
+        &mut s,
+        "bpy.data.objects['Cube'].keyframe_insert('location', frame=1)",
+    );
+    one(
+        &mut s,
+        "bpy.data.objects['Cube'].keyframe_insert('location', frame=10)",
+    );
+    let kp = "bpy.data.actions[0].layers[0].strips[0].channelbags[0].fcurves[0].keyframe_points";
+    one(&mut s, "bpy.ops.mesh.primitive_cube_add()");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube.001'].attributes.new('i8', 'INT8', 'POINT')",
+    );
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube.001'].attributes.new('s2', 'INT16_2D', 'POINT')",
+    );
+    for (src, want) in [
+        (format!("{kp}.foreach_set('easing', [1, 2, 3])"), runtime),
+        (
+            format!("{kp}.foreach_get('interpolation', [0] * 3)"),
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube.001'].attributes['i8'].data.foreach_set('value', [300] * 8)"
+                .to_owned(),
+            typ,
+        ),
+        (
+            "bpy.data.meshes['Cube.001'].attributes['s2'].data.foreach_set('value', [70000] * 16)"
+                .to_owned(),
+            typ,
+        ),
+        (
+            "bpy.data.meshes['Cube'].vertices.foreach_get(attr='co', seq=[0.0] * 24)".to_owned(),
+            ("TypeError", "foreach_get() takes no keyword arguments"),
+        ),
+        (
+            "bpy.data.meshes['Cube'].vertices.foreach_get('co', 'abc')".to_owned(),
+            runtime,
+        ),
+    ] {
+        let (e, _, m) = err(&mut s, &src);
+        assert_eq!((e.as_str(), m.as_str()), want, "{src}");
+    }
+    assert_eq!(
+        val(
+            &mut s,
+            &format!("{kp}.foreach_get('interpolation', [0] * 2)")
+        ),
+        json!([2, 2])
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube.001'].attributes['i8'].data.foreach_get('value', [9] * 8)"
+        ),
+        json!([0, 0, 0, 0, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].vertices.foreach_get('co', [])"
+        ),
+        json!([])
+    );
+    // The first item's own type.
+    assert_eq!(
+        val(&mut s, "bpy.data.lights.foreach_get('energy', [0.0])"),
+        json!([1000])
+    );
+    one(
+        &mut s,
+        "bpy.data.objects['Cube'].modifiers.new('S', 'SUBSURF')",
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].modifiers.foreach_get('levels', [0])"
+        ),
+        json!([1])
+    );
+    // Building a mesh with `add` + `foreach_set`.
+    for src in [
+        "bpy.data.meshes.new('Q')",
+        "bpy.data.meshes['Q'].vertices.add(4)",
+        "bpy.data.meshes['Q'].vertices.foreach_set('co', [0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])",
+        "bpy.data.meshes['Q'].loops.add(4)",
+        "bpy.data.meshes['Q'].loops.foreach_set('vertex_index', [0, 1, 2, 3])",
+        "bpy.data.meshes['Q'].polygons.add(1)",
+        "bpy.data.meshes['Q'].polygons.foreach_set('loop_start', [0])",
+        "bpy.data.meshes['Q'].update(calc_edges=True)",
+    ] {
+        one(&mut s, src);
+    }
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Q'].polygons[0].vertices[:]"),
+        json!([0, 1, 2, 3])
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Q'].edges.foreach_get('vertices', [0] * 8)"
+        ),
+        json!([0, 3, 0, 1, 1, 2, 2, 3])
+    );
+    assert_eq!(val(&mut s, "bpy.data.meshes['Q'].validate()"), json!(false));
+    one(&mut s, "bpy.data.meshes.new('R')");
+    one(&mut s, "bpy.data.meshes['R'].loops.add(4)");
+    one(&mut s, "bpy.data.meshes['R'].polygons.add(2)");
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['R'].polygons.foreach_get('loop_total', [0] * 2)"
+        ),
+        json!([0, 4])
+    );
+    // A new FLOAT4X4 attribute holds zero matrices.
+    one(
+        &mut s,
+        "bpy.data.meshes['Q'].attributes.new('m', 'FLOAT4X4', 'POINT')",
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Q'].attributes['m'].data[1].value"),
+        json!([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
     );
 }
 

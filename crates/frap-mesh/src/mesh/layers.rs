@@ -33,7 +33,10 @@ use std::sync::Arc;
 
 use smol_str::SmolStr;
 
-use super::{AttrData, Attribute, AttributeSet, Domain, Mesh, POSITION};
+use super::{
+    AttrData, Attribute, AttributeSet, CORNER_EDGE, CORNER_VERT, DeformVert, Domain, EDGE_VERTS,
+    Mesh, POSITION, SELECT_EDGE, SELECT_POLY, SELECT_VERT,
+};
 
 /// `MAX_MTFACE`: the most UV maps a mesh can have.
 pub const MAX_UV_MAPS: usize = 8;
@@ -73,14 +76,9 @@ impl AttributeError {
 }
 
 /// A column of `len` CustomData default values of a data type (`CD_SET_DEFAULT`: white for
-/// colours, identity for quaternions and matrices, zero otherwise).
+/// colours, identity for quaternions, zero otherwise: a FLOAT4X4 attribute starts as zero
+/// matrices on every domain, verified on 5.2.4).
 pub fn default_column(data_type: &str, len: usize) -> Option<AttrData> {
-    let ident4 = [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0],
-    ];
     Some(match data_type {
         "FLOAT" => AttrData::Float(Arc::new(vec![0.0; len])),
         "INT" => AttrData::Int(Arc::new(vec![0; len])),
@@ -94,7 +92,7 @@ pub fn default_column(data_type: &str, len: usize) -> Option<AttrData> {
         "INT16_2D" => AttrData::Int16x2(Arc::new(vec![[0; 2]; len])),
         "INT32_2D" => AttrData::Int32x2(Arc::new(vec![[0; 2]; len])),
         "QUATERNION" => AttrData::Quaternion(Arc::new(vec![[1.0, 0.0, 0.0, 0.0]; len])),
-        "FLOAT4X4" => AttrData::Float4x4(Arc::new(vec![ident4; len])),
+        "FLOAT4X4" => AttrData::Float4x4(Arc::new(vec![[[0.0; 4]; 4]; len])),
         "STRING" => AttrData::String(Arc::new(vec![SmolStr::default(); len])),
         _ => return None,
     })
@@ -258,6 +256,105 @@ impl Mesh {
             self.calc_edges(calc_edges, true);
         }
         let _ = self.attributes_mut(); // clears the caches
+    }
+
+    /// `vertices.add(count)` / `edges.add` / `polygons.add` / `loops.add` (`mesh_add_verts`,
+    /// `mesh_add_edges`, `mesh_add_polys`, `mesh_add_loops`, `editors/mesh/mesh_data.cc`):
+    /// appends `count` elements to `domain` (nothing for `count <= 0`). Verified on 5.2.4:
+    /// - every attribute of the domain grows; new vertices take the CustomData defaults
+    ///   (identity quaternion, zero elsewhere, colours included), new edges, faces and corners
+    ///   are zero (a QUATERNION too); new vertices sit at the origin, new edges are `(0, 0)`,
+    ///   new corners use vertex 0 and edge 0;
+    /// - new vertices, edges and faces are selected: `.select_vert` / `.select_edge` /
+    ///   `.select_poly` is created when missing (before `position` / `.edge_verts` on an
+    ///   empty mesh); corners create `.corner_vert` then `.corner_edge`;
+    /// - new faces start where the last face ended and the last of them takes the corners
+    ///   after it (`[(0, 3)]` + 1 → `[(0, 3), (3, 0)]`; no face and 4 corners + 2 →
+    ///   `[(0, 0), (0, 4)]`); new corners belong to the last face;
+    /// - vertex-group weights grow (empty), shape keys keep their length.
+    pub fn add_elements(&mut self, domain: Domain, count: i64) {
+        let Ok(n) = usize::try_from(count) else {
+            return;
+        };
+        if n == 0 {
+            return;
+        }
+        let old = self.domain_size(domain);
+        let new = old + n;
+        let select = match domain {
+            Domain::Point => Some(SELECT_VERT),
+            Domain::Edge => Some(SELECT_EDGE),
+            Domain::Face => Some(SELECT_POLY),
+            Domain::Corner => None,
+        };
+        let builtin: &[(&str, &str)] = match domain {
+            Domain::Point => &[(POSITION, "FLOAT_VECTOR")],
+            Domain::Edge => &[(EDGE_VERTS, "INT32_2D")],
+            Domain::Face => &[],
+            Domain::Corner => &[(CORNER_VERT, "INT"), (CORNER_EDGE, "INT")],
+        };
+        let attrs = self.attributes_mut();
+        if let Some(sel) = select
+            && attrs.get(sel).is_none()
+        {
+            attrs.insert(Attribute {
+                name: sel.into(),
+                domain,
+                data: AttrData::Bool(Arc::new(vec![false; old])),
+            });
+        }
+        for (name, ty) in builtin {
+            if attrs.get(name).is_none()
+                && let Some(data) = default_column(ty, old)
+            {
+                attrs.insert(Attribute {
+                    name: (*name).into(),
+                    domain,
+                    data,
+                });
+            }
+        }
+        let keep: Vec<usize> = (0..old).collect();
+        for a in attrs.iter_mut().filter(|a| a.domain == domain) {
+            a.data = a.data.gather_with_default(&keep, new);
+            // Only new vertices take the CustomData defaults: the other domains are
+            // zero-filled, a QUATERNION too.
+            if domain != Domain::Point
+                && let AttrData::Quaternion(v) = &mut a.data
+            {
+                Arc::make_mut(v)[old..].fill([0.0; 4]);
+            }
+        }
+        if let Some(sel) = select
+            && let Some(a) = attrs.get_mut(sel)
+            && let AttrData::Bool(v) = &mut a.data
+        {
+            Arc::make_mut(v)[old..].fill(true);
+        }
+        match domain {
+            Domain::Point => {
+                if let Some(dv) = self.deform_verts.as_mut() {
+                    Arc::make_mut(dv).resize(new, DeformVert::default());
+                }
+            }
+            Domain::Face => {
+                let corners = self.corners_num() as i32;
+                let offs = Arc::make_mut(&mut self.face_offsets);
+                let last = *offs.last().unwrap_or(&0);
+                offs.truncate(old);
+                offs.extend(std::iter::repeat_n(last, n));
+                offs.push(corners);
+            }
+            Domain::Corner => {
+                // The last face takes the new corners (no face: nothing to extend).
+                if self.face_offsets.len() > 1
+                    && let Some(last) = Arc::make_mut(&mut self.face_offsets).last_mut()
+                {
+                    *last = new as i32;
+                }
+            }
+            Domain::Edge => {}
+        }
     }
 
     /// `BKE_mesh_transform` without shape keys: positions by `m` (column-major 4×4).
