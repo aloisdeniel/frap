@@ -84,11 +84,11 @@ fn huge_taa_render_samples_time_out_at_the_deadline() {
         }
         assert_eq!(r["error"]["code"], "TIMEOUT", "{r}");
         assert_eq!(r["error"]["detail"]["stmt_timeout_ms"], 2000, "{r}");
-        // The deadline plus process start-up and GPU initialisation; never minutes.
-        assert!(
-            elapsed < Duration::from_secs(15),
-            "{samples} samples took {elapsed:?}"
-        );
+        // The deadline plus process start-up and GPU initialisation; never minutes. Windows CI
+        // only has WARP, whose cold FXC compile of the EEVEE shaders on a loaded 4-core runner
+        // took 17.8 s once (decision log M56CI-8).
+        let bound = Duration::from_secs(if cfg!(windows) { 45 } else { 15 });
+        assert!(elapsed < bound, "{samples} samples took {elapsed:?}");
         // The session survives and the scene is unchanged by the rolled-back render.
         assert_eq!(rs[6]["value"], samples, "{}", rs[6]);
         assert!(!dir.join("out.png").exists());

@@ -548,7 +548,7 @@ fn deterministic_and_cached() {
 /// uber-shader plus 64 samples rasterised on the CPU take 85-105 s on the Windows runner;
 /// decision log M56CI-3). The adapter, cold and warm times are printed and appended to
 /// `FRAP_RENDER_TIMINGS` (gpu.yml's per-adapter timings artifact), as Workbench's
-/// `cold_first_render_time` does.
+/// `cold_first_render_time` does. `FRAP_EEVEE_COLD_BUDGET_S=off` only measures.
 #[test]
 fn cold_start_within_budget() {
     let start = std::time::Instant::now();
@@ -570,8 +570,11 @@ fn cold_start_within_budget() {
     let warm = t1.elapsed().as_secs_f64();
     let a = gpu.summary();
     let software = gpu.info.device_type == wgpu::DeviceType::Cpu;
-    let budget: f64 = std::env::var("FRAP_EEVEE_COLD_BUDGET_S")
-        .ok()
+    // `off`: measured and printed, not gated (ci.yml's workspace run, where every test crate
+    // shares the 4-core runner; gpu.yml gates it in a step of its own, decision log M56CI-8).
+    let budget_env = std::env::var("FRAP_EEVEE_COLD_BUDGET_S").ok();
+    let gated = budget_env.as_deref() != Some("off");
+    let budget: f64 = budget_env
         .and_then(|v| v.parse().ok())
         .unwrap_or(if software { 180.0 } else { 60.0 });
     eprintln!(
@@ -599,7 +602,7 @@ fn cold_start_within_budget() {
         .expect("FRAP_RENDER_TIMINGS write");
     }
     assert!(
-        cold < budget,
+        !gated || cold < budget,
         "cold start {cold:.1} s > budget {budget} s ({} adapter)",
         a.device_type
     );

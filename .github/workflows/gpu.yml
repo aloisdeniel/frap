@@ -93,7 +93,18 @@ jobs:
           FRAP_EXPECT_ADAPTER: ${{ matrix.expect_adapter }}
           # Cold first-render time per adapter (WP 1.7 acceptance), one JSON line per run.
           FRAP_RENDER_TIMINGS: ${{ github.workspace }}/render-timings.jsonl
-        run: cargo test --locked -p frap-render -- --nocapture
+        # The cold-start budget is measured alone below: run beside the other tests (the IBL
+        # bakes in particular) on the 4-core runners its time measures the contention
+        # (321 s on WARP vs 69-102 s alone; decision log M56CI-8).
+        run: cargo test --locked -p frap-render -- --nocapture --skip cold_start_within_budget
+
+      - name: EEVEE cold-start budget, alone (${{ matrix.backend }})
+        if: success() || failure()
+        env:
+          FRAP_WGPU_BACKEND: ${{ matrix.backend }}
+          FRAP_EXPECT_ADAPTER: ${{ matrix.expect_adapter }}
+          FRAP_RENDER_TIMINGS: ${{ github.workspace }}/render-timings.jsonl
+        run: cargo test --locked -p frap-render --lib -- --exact eevee::pipeline::tests::cold_start_within_budget --nocapture
 
       # WP 1.24: Workbench self-goldens (SSIM >= 0.995 against the frap-blessed PNGs, gating on
       # every adapter; SSIM against Blender is printed) and render.render through a session.
