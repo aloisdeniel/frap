@@ -643,6 +643,69 @@ fn bulk_reads_slices_and_truncation() {
     );
 }
 
+/// `polygons.foreach_get('vertices')` (variable-length, one index per corner) answers flat
+/// with `len` counting the values, while `range`/`truncated` page whole faces (M8
+/// stabilization round 5: the cube's 24 values used to answer `[8, 3]`, len 8). Values are
+/// Blender 5.2.4's.
+#[test]
+fn variable_length_bulk_reads_are_flat_and_page_whole_faces() {
+    let mut s = session();
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].polygons.foreach_get('vertices')",
+    );
+    assert_eq!(v["shape"], json!([24]));
+    assert_eq!(v["len"], 24);
+    assert_eq!(v["range"], json!([0, 6]));
+    assert_eq!(v["truncated"], false);
+    assert_eq!(
+        v["$array"],
+        json!([
+            0, 4, 6, 2, 3, 2, 6, 7, 7, 6, 4, 5, 5, 1, 3, 7, 1, 0, 2, 3, 5, 4, 0, 1
+        ])
+    );
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].polygons[2:4].foreach_get('vertices')",
+    );
+    assert_eq!(v["shape"], json!([8]));
+    assert_eq!(v["range"], json!([2, 4]));
+    assert_eq!(v["$array"], json!([7, 6, 4, 5, 5, 1, 3, 7]));
+    // A mixed mesh: a 6-sided cone has 6 triangles and a hexagon, 24 values in 7 faces.
+    one(&mut s, "bpy.ops.mesh.primitive_cone_add(vertices=6)");
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cone'].polygons.foreach_get('vertices')",
+    );
+    assert_eq!(v["shape"], json!([24]));
+    assert_eq!(v["len"], 24);
+    assert_eq!(v["range"], json!([0, 7]));
+    assert_eq!(
+        v["$array"],
+        json!([
+            0, 6, 1, 1, 6, 2, 2, 6, 3, 3, 6, 4, 0, 1, 2, 3, 4, 5, 4, 6, 5, 5, 6, 0
+        ])
+    );
+    // Paging: 10 scalars hold three triangles, never part of a face.
+    let mut s = session_with(|o| o.max_array = 10);
+    one(&mut s, "bpy.ops.mesh.primitive_cone_add(vertices=6)");
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cone'].polygons.foreach_get('vertices')",
+    );
+    assert_eq!(v["shape"], json!([9]));
+    assert_eq!(v["len"], 9);
+    assert_eq!(v["range"], json!([0, 3]));
+    assert_eq!(v["truncated"], true);
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].polygons.foreach_get('vertices')",
+    );
+    assert_eq!(v["shape"], json!([8]));
+    assert_eq!(v["range"], json!([0, 2]));
+    assert_eq!(v["truncated"], true);
+}
+
 #[test]
 fn bulk_writes() {
     let mut s = session();

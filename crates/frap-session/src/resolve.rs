@@ -1868,7 +1868,7 @@ fn coll_json(host: &dyn HostRead, c: &CollPlace, caps: Caps) -> Result<J, FrapEr
             let bulk = with_coll(host, &c.ptr, c.prop, &mut |v| {
                 v.foreach_get(prop, a..b).map_err(access::rna_err)
             })?;
-            return Ok(bulk_json(&bulk, prop, a, caps.max_array));
+            return Ok(bulk_json(&bulk, prop, a, caps.max_array, None));
         }
         let n = (b - a).min(caps.max_items);
         let mut items = Vec::with_capacity(n);
@@ -1904,17 +1904,44 @@ fn coll_json(host: &dyn HostRead, c: &CollPlace, caps: Caps) -> Result<J, FrapEr
 
 /// `{"$array": [...], "shape", "dtype", "len", "range", "truncated"}`: flat row-major, capped
 /// at `max_array` scalars (whole items only).
-pub fn bulk_json(bulk: &Bulk, prop: &PropDef, start: usize, max_array: usize) -> J {
-    // A variable-length array (`MeshPolygon.vertices`, dumped as `[3]`) answers its
-    // concatenated values; when they do not split into whole items, it is answered flat
-    // instead of being cut to `[n, 3]` (WP 1.19: a plane's quad read as one triangle).
-    let flat = !bulk.len().is_multiple_of(prop.array_len().max(1));
-    let k = if flat { 1 } else { prop.array_len().max(1) };
-    let total_items = bulk.len() / k;
-    // At least one whole item, so a page always advances (even with `--max-array` below the
-    // item width).
-    let kept = total_items.min((max_array / k).max(1));
-    let scalars = kept * k;
+///
+/// `item_lens` gives the scalars of each item of a variable-length array property
+/// (`MeshPolygon.vertices`, see [`variable_length`]): the answer is then always flat, `shape`
+/// `[n_values]` and `len` the number of values, while `range` and `truncated` still count the
+/// items (polygons) that came back, so a page ends on a whole item.
+pub fn bulk_json(
+    bulk: &Bulk,
+    prop: &PropDef,
+    start: usize,
+    max_array: usize,
+    item_lens: Option<&[usize]>,
+) -> J {
+    let (scalars, kept, total_items, flat) = match item_lens {
+        Some(lens) if lens.iter().sum::<usize>() == bulk.len() => {
+            // Whole items up to `max_array` scalars, at least one so a page always advances.
+            let mut scalars = 0;
+            let mut kept = 0;
+            for &n in lens {
+                if kept > 0 && scalars + n > max_array {
+                    break;
+                }
+                scalars += n;
+                kept += 1;
+            }
+            (scalars, kept, lens.len(), true)
+        }
+        _ => {
+            // Without the item lengths, values that do not split into whole items are
+            // answered flat instead of being cut to `[n, 3]` (WP 1.19: a plane's quad).
+            let flat = item_lens.is_some() || !bulk.len().is_multiple_of(prop.array_len().max(1));
+            let k = if flat { 1 } else { prop.array_len().max(1) };
+            let total_items = bulk.len() / k;
+            // At least one whole item, so a page always advances (even with `--max-array`
+            // below the item width).
+            let kept = total_items.min((max_array / k).max(1));
+            (kept * k, kept, total_items, flat)
+        }
+    };
     let (data, dtype): (Vec<J>, &str) = match bulk {
         Bulk::F32(v) => (
             v[..scalars].iter().map(|x| f32_json(*x)).collect(),
@@ -1924,15 +1951,26 @@ pub fn bulk_json(bulk: &Bulk, prop: &PropDef, start: usize, max_array: usize) ->
         Bulk::Bool(v) => (v[..scalars].iter().map(|x| J::from(*x)).collect(), "bool"),
         _ => (Vec::new(), "unknown"),
     };
-    let shape = if flat || matches!(prop.array, ArrayShape::Scalar) {
-        json!([kept])
+    let (shape, len) = if item_lens.is_some() {
+        (json!([scalars]), scalars)
+    } else if flat || matches!(prop.array, ArrayShape::Scalar) {
+        (json!([kept]), kept)
     } else {
-        json!([kept, k])
+        (json!([kept, prop.array_len()]), kept)
     };
     json!({
-        "$array": data, "shape": shape, "dtype": dtype, "len": kept,
+        "$array": data, "shape": shape, "dtype": dtype, "len": len,
         "range": [start, start + kept], "truncated": kept < total_items,
     })
+}
+
+/// True for an array property whose items have their own length (`MeshPolygon.vertices`,
+/// one index per corner; the RNA dump records it as `[3]`): a bulk read answers the
+/// concatenation of the items' arrays (see [`bulk_json`]).
+pub fn variable_length(prop: &PropDef) -> bool {
+    frap_spec_rna::MESH_POLYGON
+        .find_prop("vertices")
+        .is_some_and(|p| std::ptr::eq(p, prop))
 }
 
 /// A dynamic array longer than `max_array` (`Image.pixels`: four floats per pixel, 4,194,304
@@ -1958,7 +1996,7 @@ pub fn long_array_json(prop: &PropDef, whole: &Value, elem: Elem, max_array: usi
         Value::BoolArray(a) => Bulk::Bool(a[s..e].to_vec()),
         _ => return None,
     };
-    Some(bulk_json(&bulk, prop, s, max_array))
+    Some(bulk_json(&bulk, prop, s, max_array, None))
 }
 
 /// The echo of an assignment to a dynamic array longer than `max_array` (`Image.pixels = …`):
@@ -1997,7 +2035,7 @@ pub fn long_value_json(prop: &PropDef, v: &Value, start: usize, max_array: usize
         },
         _ => return None,
     };
-    Some(bulk_json(&bulk, prop, start, max_array))
+    Some(bulk_json(&bulk, prop, start, max_array, None))
 }
 
 /// The ID repr of an `IdAny` (`bpy.data.objects['Cube']`).
@@ -2116,7 +2154,13 @@ mod tests {
     #[test]
     fn bulk_pages_hold_at_least_one_item() {
         let prop = frap_spec_rna::MESH_VERTEX.find_prop("co").expect("co");
-        let j = bulk_json(&Bulk::F32(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]), prop, 0, 2);
+        let j = bulk_json(
+            &Bulk::F32(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+            prop,
+            0,
+            2,
+            None,
+        );
         assert_eq!(j["len"], 1);
         assert_eq!(j["$array"], json!([1, 2, 3]));
         assert_eq!(j["truncated"], true);
@@ -2129,8 +2173,44 @@ mod tests {
         let prop = frap_spec_rna::MESH_POLYGON
             .find_prop("vertices")
             .expect("vertices");
-        let j = bulk_json(&Bulk::I32(vec![0, 1, 3, 2]), prop, 0, 1000);
+        let j = bulk_json(&Bulk::I32(vec![0, 1, 3, 2]), prop, 0, 1000, None);
         assert_eq!(j["$array"], json!([0, 1, 3, 2]));
         assert_eq!(j["shape"], json!([4]));
+        assert!(variable_length(prop));
+        assert!(!variable_length(
+            frap_spec_rna::MESH_EDGE.find_prop("vertices").unwrap()
+        ));
+    }
+
+    #[test]
+    fn variable_length_bulk_counts_values_and_pages_whole_items() {
+        let prop = frap_spec_rna::MESH_POLYGON
+            .find_prop("vertices")
+            .expect("vertices");
+        // The default cube: 6 quads, 24 values that divide by 3 (was `[8, 3]`, len 8).
+        let cube = Bulk::I32((0..24).collect());
+        let j = bulk_json(&cube, prop, 0, 65536, Some(&[4; 6]));
+        assert_eq!(j["shape"], json!([24]));
+        assert_eq!(j["len"], 24);
+        assert_eq!(j["range"], json!([0, 6]));
+        assert_eq!(j["truncated"], false);
+        // Mixed faces: 3 + 4 + 5 + 3 = 15 values (divides by 3).
+        let lens = [3, 4, 5, 3];
+        let mixed = Bulk::I32((0..15).collect());
+        let j = bulk_json(&mixed, prop, 10, 65536, Some(&lens));
+        assert_eq!(j["shape"], json!([15]));
+        assert_eq!(j["len"], 15);
+        assert_eq!(j["range"], json!([10, 14]));
+        // Paging: 8 scalars hold the first two faces (7 values), never half a face.
+        let j = bulk_json(&mixed, prop, 0, 8, Some(&lens));
+        assert_eq!(j["$array"], json!([0, 1, 2, 3, 4, 5, 6]));
+        assert_eq!(j["shape"], json!([7]));
+        assert_eq!(j["len"], 7);
+        assert_eq!(j["range"], json!([0, 2]));
+        assert_eq!(j["truncated"], true);
+        // A page narrower than the first face still returns that face.
+        let j = bulk_json(&mixed, prop, 0, 2, Some(&lens));
+        assert_eq!(j["len"], 3);
+        assert_eq!(j["range"], json!([0, 1]));
     }
 }

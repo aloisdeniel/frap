@@ -842,7 +842,27 @@ impl Session {
                 })
             })?;
             if positional.len() == 1 {
-                return Ok(Py::Json(bulk_json(&bulk, prop, start, self.opts.max_array)));
+                // A variable-length array (`polygons.foreach_get('vertices')`) answers flat,
+                // paged by whole faces (`loop_total` gives each face's length).
+                let totals = match item_type.find_prop("loop_total") {
+                    Some(total) if resolve::variable_length(prop) => {
+                        Some(with_coll(host, &c.ptr, c.prop, &mut |v| {
+                            v.foreach_get(total, start..end).map_err(FrapError::from)
+                        })?)
+                    }
+                    _ => None,
+                };
+                let lens: Option<Vec<usize>> = match totals {
+                    Some(Bulk::I32(t)) => Some(t.iter().map(|&n| n as usize).collect()),
+                    _ => None,
+                };
+                return Ok(Py::Json(bulk_json(
+                    &bulk,
+                    prop,
+                    start,
+                    self.opts.max_array,
+                    lens.as_deref(),
+                )));
             }
             let Some(mut seq) = positional[1].items() else {
                 return Err(type_err("couldn't access the py sequence"));

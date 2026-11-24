@@ -9,13 +9,15 @@
 //! choosing between the "smaller" and "bigger" passes so that the total face count is minimal
 //! (maximal with `select_bigger`). The selection is replaced by the faces of the kept regions
 //! (hidden faces stay unselected) and flushed; the selection history is cleared. Selected
-//! edges are visited from those with the most faces to those with the fewest (Blender's
-//! `qsort`; frap sorts stably, which only matters between edges with equal face counts).
+//! edges are visited from those with the most faces to those with the fewest, sorted with the
+//! macOS C library `qsort` Blender calls (`frap_uv::pack::qsort_libc`): it is not stable, and
+//! the order of edges with equal face counts decides which regions are found first.
 
 use frap_bmesh::{BMesh, EdgeId, FaceId, LoopId};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;
+use frap_uv::pack::qsort_libc;
 use rustc_hash::FxHashSet;
 
 use super::select_more::common;
@@ -63,8 +65,10 @@ fn loop_find_regions(bm: &BMesh, face_tag: &mut FxHashSet<FaceId>, selbigger: bo
         .filter(|&e| common::selected(bm, e))
         .collect();
     let mut edge_tag: FxHashSet<EdgeId> = edges.iter().copied().collect();
-    // Sort edges by radial cycle length, longest first.
-    edges.sort_by_key(|&e| std::cmp::Reverse(bm.edge_face_count(e)));
+    // Sort edges by radial cycle length, longest first (`qsort(edges, …, verg_radial)`).
+    qsort_libc(&mut edges, &mut |&a: &EdgeId, &b: &EdgeId| {
+        bm.edge_face_count(b).cmp(&bm.edge_face_count(a))
+    });
     let mut count = 0;
     for e in edges {
         if !edge_tag.contains(&e) {

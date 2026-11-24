@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Helpers of the mesh layer hooks (`UVLoopLayers.active*`, `AttributeGroupMesh.active_color*`,
-//! `default_color_name`, `render_color_index`). Not a concept: the leading underscore keeps it
-//! out of the §10.5 file checks.
+//! Helpers of the mesh layer hooks (`UVLoopLayers.active*`, `LoopColors.active*`,
+//! `AttributeGroupMesh.active_color*`, `default_color_name`, `render_color_index`). Not a
+//! concept: the leading underscore keeps it out of the §10.5 file checks.
 
 use frap_mesh::{AttrData, Attribute, Domain, Mesh};
 use frap_rna::{
@@ -106,6 +106,16 @@ pub(crate) fn uv_names(m: &Mesh) -> Vec<SmolStr> {
 pub(crate) fn is_color(a: &Attribute) -> bool {
     matches!(a.data, AttrData::FloatColor(_) | AttrData::ByteColor(_))
         && matches!(a.domain, Domain::Point | Domain::Corner)
+}
+
+/// Legacy vertex colour layer names in collection order (`mesh.vertex_colors`: every
+/// BYTE_COLOR attribute on CORNER).
+pub(crate) fn loop_color_names(m: &Mesh) -> Vec<SmolStr> {
+    m.attributes()
+        .iter()
+        .filter(|a| a.domain == Domain::Corner && matches!(a.data, AttrData::ByteColor(_)))
+        .map(|a| a.name.clone())
+        .collect()
 }
 
 /// Colour attribute names in collection order.

@@ -666,7 +666,6 @@ pub const KNOWN: &[Known] = &[
     gap(POLLS, "bpy.ops.transform.", "locked").with(&["shape_key_lock"]),
     line(POLLS, "object.transform_apply", "aborting"),
     // --- geometry differences ---
-    mesh(GEOMETRY, "mesh.loop_to_region", ANY),
     mesh(GEOMETRY, "mesh.flatten", ANY),
     mesh(GEOMETRY, "mesh.vert_connect_nonplanar", ANY),
     // (Faces wound the other way: whatever later follows the normals differs too.)
