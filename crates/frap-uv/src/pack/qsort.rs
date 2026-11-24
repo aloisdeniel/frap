@@ -425,7 +425,8 @@ mod tests {
     }
 
     /// The reference program: the system `qsort` on the patterns of [`pattern_key`], one line
-    /// `pattern n fnv1a64(permutation)` per case.
+    /// `pattern n fnv1a64(permutation)` per case. macOS only, like the test that compiles it.
+    #[cfg(target_os = "macos")]
     const REFERENCE_C: &str = r#"#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -490,7 +491,7 @@ int main(void) {
             .filter(|&n| n <= 300 || n % 17 == 0 || is_pow2(n) || is_pow2(n + 1) || is_pow2(n - 1))
     }
 
-    /// `key(p, n, i, &rng)` of [`REFERENCE_C`].
+    /// `key(p, n, i, &rng)` of `REFERENCE_C`.
     fn pattern_key(p: u32, n: i64, i: i64, rng: &mut u32) -> i32 {
         let r = n - 1 - i;
         (match p {
