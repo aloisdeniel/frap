@@ -20,6 +20,7 @@ frap-uv.workspace = true
 frap-geom.workspace = true
 frap-math.workspace = true
 glam.workspace = true
+flate2.workspace = true
 libm.workspace = true
 linkme.workspace = true
 automod.workspace = true

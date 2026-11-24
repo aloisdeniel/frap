@@ -22,12 +22,69 @@
 //! bit-exact port of Eigen's `SparseLU` (golden `armature/heat/occluded_part` pins the case
 //! where both succeed).
 //!
+//! `--stmt-timeout` (ARCHITECTURE §12): the assembly loops are cancellation points; `faer`'s
+//! sparse LU cannot be interrupted, so with a deadline it runs on a worker thread while the
+//! statement's thread waits for it until the deadline and then unwinds with `TIMEOUT` (the
+//! abandoned worker finishes its factorization and its result is dropped; at most
+//! [`MAX_LU_WORKERS`] run at once, a further one runs inline).
+//!
 //! Ported from blender/intern/eigen/intern/linear_solver.cc (Blender 5.2.4,
 //! GPL-2.0-or-later).
 
 use faer::linalg::solvers::Solve;
 use faer::sparse::{SparseColMat, Triplet};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use frap_math::budget;
+
+/// Abandoned or running LU workers at most (see the module documentation).
+const MAX_LU_WORKERS: usize = 2;
+
+/// LU workers running now.
+static LU_WORKERS: AtomicUsize = AtomicUsize::new(0);
+
+type SparseLu = faer::sparse::linalg::solvers::Lu<usize, f64>;
+
+/// `mat.sp_lu()`, on a worker thread while the statement has a deadline: unwinds with
+/// `TIMEOUT` at the deadline instead of waiting for the factorization.
+fn sp_lu_within_deadline(mat: SparseColMat<usize, f64>) -> Option<SparseLu> {
+    let Some(deadline) = budget::deadline() else {
+        return mat.sp_lu().ok();
+    };
+    budget::check_now();
+    if LU_WORKERS.fetch_add(1, Ordering::SeqCst) >= MAX_LU_WORKERS {
+        LU_WORKERS.fetch_sub(1, Ordering::SeqCst);
+        return mat.sp_lu().ok();
+    }
+    struct Slot;
+    impl Drop for Slot {
+        fn drop(&mut self) {
+            LU_WORKERS.fetch_sub(1, Ordering::SeqCst);
+        }
+    }
+    let slot = Slot;
+    let (tx, rx) = std::sync::mpsc::channel();
+    // `mat` moves into the closure; if the thread cannot start, the closure (and `mat`) is
+    // dropped with the error, so the factorization then fails like a singular matrix would.
+    let spawned = std::thread::Builder::new()
+        .name("frap-heat-lu".into())
+        .spawn(move || {
+            let _slot = slot;
+            let _ = tx.send(mat.sp_lu().ok());
+        });
+    if spawned.is_err() {
+        return None;
+    }
+    loop {
+        let left = deadline.saturating_duration_since(std::time::Instant::now());
+        match rx.recv_timeout(left) {
+            Ok(lu) => return lu,
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => budget::check_now(),
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => return None,
+        }
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum State {
@@ -85,6 +142,7 @@ impl LeastSquares {
     fn factorize(&mut self) -> bool {
         let mut rows: Vec<Vec<(usize, f64)>> = vec![Vec::new(); self.n];
         for &(r, c, v) in &self.triplets {
+            budget::check();
             let row = &mut rows[r];
             if let Some(e) = row.iter_mut().find(|e| e.0 == c) {
                 e.1 += v;
@@ -95,6 +153,7 @@ impl LeastSquares {
         self.triplets = Vec::new();
         let mut mtm: HashMap<(usize, usize), f64> = HashMap::with_capacity(self.n * 8);
         for row in &rows {
+            budget::check_n(u32::try_from(row.len() * row.len()).unwrap_or(u32::MAX));
             for &(ci, vi) in row {
                 for &(cj, vj) in row {
                     *mtm.entry((ci, cj)).or_insert(0.0) += vi * vj;
@@ -111,12 +170,12 @@ impl LeastSquares {
         else {
             return false;
         };
-        match mat.sp_lu() {
-            Ok(lu) => {
+        match sp_lu_within_deadline(mat) {
+            Some(lu) => {
                 self.lu = Some(lu);
                 true
             }
-            Err(_) => false,
+            None => false,
         }
     }
 
@@ -135,6 +194,7 @@ impl LeastSquares {
         if let (true, Some(lu)) = (result, &self.lu) {
             let mut mtb = faer::Mat::<f64>::zeros(self.n, 1);
             for (r, row) in self.rows.iter().enumerate() {
+                budget::check();
                 let br = self.b[r];
                 for &(c, v) in row {
                     mtb[(c, 0)] += v * br;

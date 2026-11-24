@@ -464,3 +464,92 @@ fn modifiers_over_max_elements_are_modifier_errors() {
         );
     }
 }
+
+/// M8 stabilization round 4: `parent_set(type='ARMATURE_AUTO')` on a 256 × 128 UV sphere (a
+/// bone-heat solve of about 1 s in release, its sparse LU alone 15 s unoptimised) answers
+/// `TIMEOUT` shortly after a 200 ms deadline: the visibility, assembly and per-bone loops are
+/// cancellation points and the LU runs on a worker the statement stops waiting for.
+#[test]
+fn stmt_timeout_cancels_bone_heat() {
+    let mut s = session();
+    for src in [
+        "bpy.ops.object.armature_add(location=(0, 0, -0.5))",
+        "bpy.ops.mesh.primitive_uv_sphere_add(segments=256, ring_count=128)",
+        "bpy.data.objects['Armature'].select_set(True)",
+        "bpy.context.view_layer.objects.active = bpy.data.objects['Armature']",
+    ] {
+        assert_eq!(one(&mut s, src)["ok"], true, "{src}");
+    }
+    let mut limits = s.options().limits.clone();
+    limits.stmt_timeout = Some(Duration::from_millis(200));
+    s.set_limits(limits);
+    let before = s.state_dump();
+    let t = Instant::now();
+    let r = one(&mut s, "bpy.ops.object.parent_set(type='ARMATURE_AUTO')");
+    let took = t.elapsed();
+    assert_eq!(r["error"]["code"], "TIMEOUT", "{r}");
+    assert_eq!(r["state"], "unchanged", "{r}");
+    assert!(took < Duration::from_millis(700), "{took:?}");
+    // The rolled-back state equals the one before, up to the lazily filled bounds caches of
+    // the meshes the operator read.
+    assert_eq!(without_bounds(&s.state_dump()), without_bounds(&before));
+}
+
+/// A state dump without the meshes' `bounds` runtime caches (the last field of
+/// `MeshRuntime`).
+fn without_bounds(dump: &str) -> String {
+    let mut out = String::with_capacity(dump.len());
+    let mut rest = dump;
+    while let Some(i) = rest.find("bounds: OnceLock(") {
+        out.push_str(&rest[..i]);
+        rest = &rest[i..];
+        rest = &rest[rest.find(" }").unwrap_or(rest.len())..];
+    }
+    out.push_str(rest);
+    out
+}
+
+/// M8 stabilization round 4: `uv.export_layout(mode='PNG')` past its deadline answers
+/// `TIMEOUT` from the rasteriser (per scanline) and leaves no file, neither the PNG nor its
+/// temporary sibling; over `--max-elements` it answers `LIMIT_EXCEEDED` before drawing.
+#[test]
+fn stmt_timeout_cancels_uv_layout_png() {
+    let dir = std::env::temp_dir().join(format!("frap-layout-timeout-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let mut s = session_with(|o| o.cwd = dir.clone());
+    assert_eq!(
+        one(&mut s, "bpy.ops.object.mode_set(mode='EDIT')")["ok"],
+        true
+    );
+    let t = Instant::now();
+    let (_, code, msg) = err(
+        &mut s,
+        "bpy.ops.uv.export_layout(filepath='big.png', mode='PNG', size=(32768, 32768))",
+    );
+    assert!(t.elapsed() < Duration::from_secs(2), "{:?}", t.elapsed());
+    assert_eq!(code, "LIMIT_EXCEEDED");
+    assert_eq!(
+        msg,
+        "Error: frap: limit exceeded (max_elements): the uv.export_layout image would need 4294967296 bytes (limit 1600000000 bytes, 32 per --max-elements unit)"
+    );
+    let mut limits = s.options().limits.clone();
+    limits.stmt_timeout = Some(Duration::from_millis(200));
+    s.set_limits(limits);
+    let before = s.state_dump();
+    let t = Instant::now();
+    let r = one(
+        &mut s,
+        "bpy.ops.uv.export_layout(filepath='big.png', mode='PNG', size=(16384, 16384))",
+    );
+    let took = t.elapsed();
+    assert_eq!(r["error"]["code"], "TIMEOUT", "{r}");
+    assert_eq!(r["state"], "unchanged", "{r}");
+    assert!(took < Duration::from_millis(1500), "{took:?}");
+    assert_eq!(s.state_dump(), before);
+    let left: Vec<_> = std::fs::read_dir(&dir)
+        .unwrap()
+        .map(|e| e.unwrap().file_name())
+        .collect();
+    assert!(left.is_empty(), "{left:?}");
+    let _ = std::fs::remove_dir_all(&dir);
+}

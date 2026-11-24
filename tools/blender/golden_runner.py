@@ -224,6 +224,8 @@ NORMALISE = {
     "D-168": ("cases", "select_similar_region cases avoid regions next to n-gons of five or more sides"),
     "D-169": ("cases", "no case unwraps a non-finite mesh with MINIMUM_STRETCH (Blender crashes)"),
     "D-170": None,
+    "D-171": ("cases", "object/add_m8/make_real compares within the default 1e-5 tolerance, which covers the 1-ulp rotation"),
+    "D-172": ("cases", "no case runs uv.stitch without stitchable UVs (Blender crashes)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

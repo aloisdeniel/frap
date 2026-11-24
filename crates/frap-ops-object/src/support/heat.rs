@@ -129,8 +129,10 @@ impl<'a> HeatSystem<'a> {
         };
         sys.ray_tree_create();
         sys.calc_vnormals();
+        // `--stmt-timeout`: one ray cast per vertex and heat source.
+        let sources = u32::try_from(inp.roots.len()).unwrap_or(u32::MAX);
         for a in 0..n {
-            frap_math::budget::check();
+            frap_math::budget::check_n(sources.saturating_mul(2));
             sys.set_h(a);
         }
         sys.construct_end();
@@ -140,6 +142,7 @@ impl<'a> HeatSystem<'a> {
     /// `heat_ray_tree_create`
     fn ray_tree_create(&mut self) {
         for (a, tri) in self.tris.iter().enumerate() {
+            frap_math::budget::check();
             // `INIT_MINMAX` + `minmax_v3v3_v3`
             let mut lo = [f32::MAX; 3];
             let mut hi = [-f32::MAX; 3];
@@ -275,6 +278,7 @@ impl<'a> HeatSystem<'a> {
         let mut varea = vec![0.0f32; n];
         let right = 90.0f32 * (std::f64::consts::PI / 180.0) as f32;
         for &[i1, i2, i3] in self.tris {
+            frap_math::budget::check();
             let (v1, v2, v3) = (verts[i1], verts[i2], verts[i3]);
             let mut t1 = math::cotangent_tri_weight(v1, v2, v3);
             let mut t2 = math::cotangent_tri_weight(v2, v3, v1);
@@ -314,6 +318,7 @@ impl<'a> HeatSystem<'a> {
         }
         // `laplacian_triangle_weights`
         for &[i1, i2, i3] in self.tris {
+            frap_math::budget::check();
             let (v1, v2, v3) = (verts[i1], verts[i2], verts[i3]);
             let count = |a: usize, b: usize| edges[&key(a, b)] as f32;
             let t1 = math::cotangent_tri_weight(v1, v2, v3) / count(i2, i3);
@@ -369,6 +374,8 @@ pub fn heat_bone_weighting(dverts: &mut [DeformVert], inp: &HeatInput<'_>) -> Op
     };
     let mut error = None;
     for j in 0..numbones {
+        // `--stmt-timeout`: per bone (each one is a visibility pass and a solve).
+        frap_math::budget::check_now();
         if !inp.selected[j] {
             continue;
         }

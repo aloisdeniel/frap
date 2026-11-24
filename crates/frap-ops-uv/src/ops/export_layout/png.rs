@@ -11,17 +11,39 @@
 //!   the edges (black, smooth), every fragment blended `src·a + dst·(1 - a)` (alpha:
 //!   `a + dst_a·(1 - a)`) and stored as 8 bits;
 //! - written as the OpenImageIO PNG writer does: top row first (v = 1 at the top), colour
-//!   un-premultiplied by alpha, RGBA 8 bits.
+//!   un-premultiplied by alpha, RGBA 8 bits, deflated at zlib level 6 (imbuf's default PNG
+//!   `compress` of 15 % → `int(15 / 11.1111)` would be 1; OIIO's writer, which the add-on's
+//!   `image.save()` reaches, uses zlib's default level 6).
+//!
+//! The framebuffer is `width × height × 4` bytes: [`buffer_bytes`] is checked against
+//! `--max-elements` before it is allocated (`LIMIT_EXCEEDED`, like `images.new`), and the
+//! rasteriser and the encoder are cancellation points of `--stmt-timeout` (per scanline).
 //!
 //! The image is compared by SSIM with Blender's (`image_ssim`), not byte for byte.
 
 use super::vector::Poly;
 
-/// An RGBA8 premultiplied framebuffer, rows from the top.
+use std::io::Write as _;
+
+use frap_math::budget;
+
+/// The `what` of the framebuffer's `LIMIT_EXCEEDED`.
+pub(crate) const BUFFER: &str = "uv.export_layout image";
+
+/// The bytes of the RGBA8 framebuffer of a `width × height` export (`None`: it overflows).
+pub(crate) fn buffer_bytes(width: i32, height: i32) -> Option<u64> {
+    let (w, h) = (
+        u64::from(width.max(1).unsigned_abs()),
+        u64::from(height.max(1).unsigned_abs()),
+    );
+    w.checked_mul(h)?.checked_mul(4)
+}
+
+/// An RGBA8 premultiplied framebuffer, rows from the top, four bytes per pixel.
 struct Fb {
     w: usize,
     h: usize,
-    px: Vec<[u8; 4]>,
+    px: Vec<u8>,
 }
 
 /// Float to unorm8 (round to nearest).
@@ -33,15 +55,17 @@ fn unorm8(v: f32) -> u8 {
 impl Fb {
     /// `GPU_BLEND_ALPHA` of one fragment.
     fn blend(&mut self, x: usize, y: usize, rgb: [f32; 3], a: f32) {
-        let d = &mut self.px[y * self.w + x];
+        let i = (y * self.w + x) * 4;
+        let d = &mut self.px[i..i + 4];
         let inv = 1.0 - a;
         let c = |s: f32, dv: u8| s * a + f32::from(dv) / 255.0 * inv;
-        *d = [
+        let out = [
             unorm8(c(rgb[0], d[0])),
             unorm8(c(rgb[1], d[1])),
             unorm8(c(rgb[2], d[2])),
             unorm8(a + f32::from(d[3]) / 255.0 * inv),
         ];
+        d.copy_from_slice(&out);
     }
 
     /// The pixels whose centre lies inside triangle `t` (top-left rule), in raster order.
@@ -66,7 +90,10 @@ impl Fb {
         if x1 < 0 || y1 < 0 {
             return;
         }
+        let span = u32::try_from(x1 as usize + 1 - x0.min(x1 as usize + 1)).unwrap_or(u32::MAX);
         for y in y0..=y1 as usize {
+            // `--stmt-timeout`: one cancellation point per scanline.
+            budget::check_n(span);
             let cy = y as f64 + 0.5;
             for x in x0..=x1 as usize {
                 let cx = x as f64 + 0.5;
@@ -93,7 +120,9 @@ fn to_px(uv: [f64; 2], tile: (i64, i64), w: f32, h: f32) -> [f32; 2] {
     [(ndc_x + 1.0) * 0.5 * w, (ndc_y + 1.0) * 0.5 * h]
 }
 
-/// `export_uv_png.export`: the RGBA8 image (un-premultiplied, top row first).
+/// `export_uv_png.export`: the RGBA8 image (un-premultiplied, top row first). Unwinds with
+/// `LIMIT_EXCEEDED` when the image is over `--max-elements` ([`buffer_bytes`]) and with
+/// `TIMEOUT` past the statement's deadline.
 pub(crate) fn draw(
     tile: (i64, i64),
     polys: &[Poly],
@@ -101,11 +130,12 @@ pub(crate) fn draw(
     height: i32,
     opacity: f64,
 ) -> Vec<u8> {
+    budget::check_buffer(BUFFER, buffer_bytes(width, height));
     let (w, h) = (width.max(1) as usize, height.max(1) as usize);
     let mut fb = Fb {
         w,
         h,
-        px: vec![[0; 4]; w * h],
+        px: vec![0; w * h * 4],
     };
     let (wf, hf) = (w as f32, h as f32);
     let alpha = opacity as f32;
@@ -123,6 +153,7 @@ pub(crate) fn draw(
         } else {
             frap_geom::polyfill::polyfill_calc(&uv32, 0)
         };
+        budget::check_now();
         for t in tris {
             let tri = [pts[t[0] as usize], pts[t[1] as usize], pts[t[2] as usize]];
             let mut frags = Vec::new();
@@ -134,6 +165,7 @@ pub(crate) fn draw(
     }
     // `draw_lines`: every edge of every face, black, smooth, one pixel wide.
     for p in polys {
+        budget::check_now();
         let n = p.uvs.len();
         for i in 0..n {
             let a = to_px(p.uvs[i], tile, wf, hf);
@@ -141,21 +173,22 @@ pub(crate) fn draw(
             line(&mut fb, a, b);
         }
     }
-    // OpenImageIO un-premultiplies before writing the PNG.
-    let mut out = Vec::with_capacity(w * h * 4);
-    for px in &fb.px {
-        let a = px[3];
-        if a == 0 {
-            out.extend_from_slice(&[px[0], px[1], px[2], 0]);
-            continue;
+    // OpenImageIO un-premultiplies before writing the PNG (in place, row by row).
+    let mut px = fb.px;
+    for row in px.chunks_mut(w * 4) {
+        budget::check_n(u32::try_from(w).unwrap_or(u32::MAX));
+        for p in row.chunks_exact_mut(4) {
+            let a = p[3];
+            if a == 0 {
+                continue;
+            }
+            let af = f32::from(a) / 255.0;
+            for c in &mut p[..3] {
+                *c = unorm8(f32::from(*c) / 255.0 / af);
+            }
         }
-        let af = f32::from(a) / 255.0;
-        for &c in &px[..3] {
-            out.push(unorm8(f32::from(c) / 255.0 / af));
-        }
-        out.push(a);
     }
-    out
+    px
 }
 
 /// One `POLYLINE_UNIFORM_COLOR` segment: a quad `±1` pixel around `a`–`b`, alpha
@@ -209,42 +242,23 @@ fn crc32(data: &[u8]) -> u32 {
     c ^ 0xffff_ffff
 }
 
-/// Adler-32 (zlib).
-fn adler32(data: &[u8]) -> u32 {
-    let (mut a, mut b) = (1u32, 0u32);
-    for &x in data {
-        a = (a + u32::from(x)) % 65521;
-        b = (b + a) % 65521;
+/// `IDAT`: the rows of `rgba` (filter `None`) deflated at zlib level 6, one cancellation
+/// point of `--stmt-timeout` per row.
+fn idat(rgba: &[u8], width: u32) -> Vec<u8> {
+    let mut z = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::new(6));
+    let stride = (width as usize * 4).max(1);
+    for row in rgba.chunks(stride) {
+        budget::check_n(width);
+        // Writing into a `Vec` cannot fail.
+        let _ = z.write_all(&[0]);
+        let _ = z.write_all(row);
     }
-    (b << 16) | a
-}
-
-/// A zlib stream of stored (uncompressed) deflate blocks.
-fn zlib_stored(data: &[u8]) -> Vec<u8> {
-    let mut out = vec![0x78, 0x01];
-    let mut chunks = data.chunks(65_535).peekable();
-    if chunks.peek().is_none() {
-        out.extend_from_slice(&[1, 0, 0, 0xff, 0xff]);
-    }
-    while let Some(c) = chunks.next() {
-        let last = chunks.peek().is_none();
-        out.push(u8::from(last));
-        let n = c.len() as u16;
-        out.extend_from_slice(&n.to_le_bytes());
-        out.extend_from_slice(&(!n).to_le_bytes());
-        out.extend_from_slice(c);
-    }
-    out.extend_from_slice(&adler32(data).to_be_bytes());
-    out
+    z.finish().unwrap_or_default()
 }
 
 /// An RGBA8 PNG of `rgba` (top row first).
 pub(crate) fn encode(rgba: &[u8], width: u32, height: u32) -> Vec<u8> {
-    let mut raw = Vec::with_capacity((width as usize * 4 + 1) * height as usize);
-    for row in rgba.chunks(width as usize * 4) {
-        raw.push(0);
-        raw.extend_from_slice(row);
-    }
+    let data = idat(rgba, width);
     let mut out = b"\x89PNG\r\n\x1a\n".to_vec();
     let mut chunk = |kind: &[u8; 4], data: &[u8]| {
         out.extend_from_slice(&(data.len() as u32).to_be_bytes());
@@ -258,7 +272,7 @@ pub(crate) fn encode(rgba: &[u8], width: u32, height: u32) -> Vec<u8> {
     ihdr.extend_from_slice(&height.to_be_bytes());
     ihdr.extend_from_slice(&[8, 6, 0, 0, 0]);
     chunk(b"IHDR", &ihdr);
-    chunk(b"IDAT", &zlib_stored(&raw));
+    chunk(b"IDAT", &data);
     chunk(b"IEND", &[]);
     out
 }
@@ -270,7 +284,6 @@ mod tests {
     #[test]
     fn checksums() {
         assert_eq!(crc32(b"IEND"), 0xae42_6082);
-        assert_eq!(adler32(b"Wikipedia"), 0x11e6_0398);
     }
 
     #[test]
@@ -288,5 +301,40 @@ mod tests {
         assert!((159..=160).contains(&at(0, 4)[3]));
         let png = encode(&img, 8, 8);
         assert_eq!(&png[..8], b"\x89PNG\r\n\x1a\n");
+        // The IDAT inflates back to the filtered rows.
+        let len = u32::from_be_bytes(png[33..37].try_into().unwrap()) as usize;
+        assert_eq!(&png[37..41], b"IDAT");
+        let mut raw = Vec::new();
+        std::io::Read::read_to_end(
+            &mut flate2::read::ZlibDecoder::new(&png[41..41 + len]),
+            &mut raw,
+        )
+        .unwrap();
+        assert_eq!(raw.len(), 8 * (8 * 4 + 1));
+        assert_eq!(&raw[1..33], &img[..32]);
+    }
+
+    #[test]
+    fn compressed() {
+        // 512 × 512 of the default cube's layout: deflated, far below the 1 MiB of raw rows.
+        let poly = Poly {
+            uvs: vec![[0.375, 0.0], [0.625, 0.0], [0.625, 0.25], [0.375, 0.25]],
+            color: [0.8, 0.8, 0.8],
+        };
+        let img = draw((0, 0), &[poly], 512, 512, 0.25);
+        assert!(encode(&img, 512, 512).len() < 20_000);
+    }
+
+    #[test]
+    fn buffer_size() {
+        assert_eq!(buffer_bytes(32768, 32768), Some(4_294_967_296));
+        assert_eq!(buffer_bytes(0, -3), Some(4));
+        // Over the default `--max-elements` (50,000,000 × 32 bytes) in a scope.
+        let _s = budget::scope(budget::Budget {
+            timeout: None,
+            max_elements: 50_000_000,
+        });
+        assert!(budget::reserve_buffer(BUFFER, buffer_bytes(32768, 32768)).is_err());
+        assert!(budget::reserve_buffer(BUFFER, buffer_bytes(1024, 1024)).is_ok());
     }
 }

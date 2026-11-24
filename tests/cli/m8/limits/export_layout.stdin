@@ -1,0 +1,7 @@
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.export_layout(filepath='big.png', mode='PNG', size=(32768, 32768))
+print(bpy.context.mode)
+bpy.ops.uv.export_layout(filepath='small.png', mode='PNG', size=(512, 512))
+bpy.data.images.load('small.png')
+print(bpy.data.images['small.png'].size[:])
+bpy.data.images.load('big.png')

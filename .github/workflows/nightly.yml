@@ -10,9 +10,12 @@
 #   them to crates/frap-golden/src/fuzz/regress/ with the fix.
 # - differential: `cargo xtask golden fuzz` replays seeded random sequences over the
 #   catalogue (>= 150 operators and the RNA statements) in frap and in Blender 5.2.4 for one
-#   hour and fails on any mismatch docs/deviations.md does not explain, and on a run that did
-#   not compare the tools (no clean trial, or Blender failing on more than 5% of the trials:
-#   report.json `healthy`); the minimised cases and report.json are uploaded. It runs on macOS arm64 like the fixtures (D-67, D-94).
+#   hour. It is report-only for mismatches (decision log M8S3-2, M8S4-2: the zero-unexplained
+#   bar is M9): unexplained signatures are listed in the job summary as a warning and their
+#   minimised cases and report.json are uploaded, but they do not fail the job. The job still
+#   fails on a run that did not compare the tools (no report, no clean trial, or Blender
+#   failing on more than 5% of the trials: report.json `healthy`). It runs on macOS arm64 like
+#   the fixtures (D-67, D-94).
 
 name: nightly
 
@@ -125,6 +128,8 @@ jobs:
           hdiutil detach "$RUNNER_TEMP/blender"
       - name: Blender version
         run: ~/Applications/Blender-5.2.app/Contents/MacOS/Blender -b --factory-startup --version
+      # Report-only (M8S3-2, M8S4-2): a non-zero exit (unexplained signatures) does not fail
+      # the job; the next step fails it when the run did not compare the tools.
       - name: differential fuzzing
         env:
           MINUTES: ${{ inputs.minutes || '60' }}
@@ -132,8 +137,10 @@ jobs:
         run: |
           set -o pipefail
           seed="${SEED:-$(date -u +%Y%m%d)}"
+          status=0
           cargo xtask golden fuzz --minutes "$MINUTES" --seed "$seed" \
-            --out "$RUNNER_TEMP/fuzz-cases" | tee "$RUNNER_TEMP/fuzz.out"
+            --out "$RUNNER_TEMP/fuzz-cases" | tee "$RUNNER_TEMP/fuzz.out" || status=$?
+          echo "frap-golden fuzz exit status: $status (report-only)"
       - name: check the run compared the tools
         run: |
           set -eu
@@ -141,6 +148,17 @@ jobs:
           jq '{trials, clean, healthy, health_problem, blender_failures}' "$r"
           test "$(jq -r '.healthy' "$r")" = true
           test "$(jq -r '.clean' "$r")" -gt 0
+      - name: report unexplained signatures
+        if: always()
+        run: |
+          r="$RUNNER_TEMP/fuzz-cases/report.json"
+          [ -f "$r" ] || exit 0
+          n="$(jq '.findings | length' "$r")"
+          if [ "$n" -gt 0 ]; then
+            echo "::warning::differential fuzzing: $n unexplained signature(s) (report-only, M8S3-2)"
+            { echo "### $n unexplained signature(s) (report-only)"; echo '```';
+              jq -r '.findings[] | "\(.signature) (hits \(.hits), seed \(.seed))"' "$r" | head -n 40; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: job summary
         if: always()
         run: |

@@ -211,6 +211,26 @@ fn write_error(e: &std::io::Error, path: &str) -> OpError {
     ))
 }
 
+/// Writes `bytes` to `path` through a temporary sibling renamed into place, so a failed write
+/// or a statement past its `--stmt-timeout` never leaves a partial file (the temporary one is
+/// removed before unwinding with `TIMEOUT`).
+fn write_file(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
+    let mut tmp = path.as_os_str().to_owned();
+    tmp.push(".frap-tmp");
+    let tmp = std::path::PathBuf::from(tmp);
+    if let Err(e) = std::fs::write(&tmp, bytes) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(e);
+    }
+    if frap_math::budget::expired() {
+        let _ = std::fs::remove_file(&tmp);
+        frap_math::budget::check_now();
+    }
+    std::fs::rename(&tmp, path).inspect_err(|_| {
+        let _ = std::fs::remove_file(&tmp);
+    })
+}
+
 #[operator(
     poll = LAYOUT_POLL,
     tier = T1,
@@ -220,6 +240,14 @@ fn write_error(e: &std::io::Error, path: &str) -> OpError {
     ]
 )]
 fn exec(cx: &mut OpCtx, p: uv::ExportLayout) -> OpResult {
+    // `LIMIT_EXCEEDED` before anything runs when the PNG is over `--max-elements` (as
+    // `images.new` answers); `png::draw` checks it again before allocating.
+    if p.mode.value == Mode::Png {
+        frap_math::budget::check_buffer(
+            png::BUFFER,
+            png::buffer_bytes(p.size.value[0], p.size.value[1]),
+        );
+    }
     let active = poll::active(&cx.ctx()).map(|(ob, o)| (ob, o.mode));
     let is_editmode = active.is_some_and(|(_, m)| m == ObjectMode::Edit);
     if is_editmode {
@@ -307,7 +335,7 @@ fn exec(cx: &mut OpCtx, p: uv::ExportLayout) -> OpResult {
             }
         };
         let abs = cx.services().paths().resolve(&path);
-        std::fs::write(&abs, bytes).map_err(|e| write_error(&e, &path))?;
+        write_file(&abs, &bytes).map_err(|e| write_error(&e, &path))?;
     }
     if is_editmode {
         mode_set(cx, "EDIT")?;

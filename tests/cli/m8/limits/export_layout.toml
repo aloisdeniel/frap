@@ -1,0 +1,10 @@
+# M8 stabilization round 4: uv.export_layout(mode='PNG') checks its RGBA8 framebuffer
+# (width × height × 4 bytes) against --max-elements before drawing: 32768 × 32768 answers
+# LIMIT_EXCEEDED at once (as images.new(100000, 100000) does) under a 1 s --stmt-timeout,
+# leaves no file and stays in Edit Mode; the rasteriser and the encoder are --stmt-timeout
+# cancellation points (per scanline) and the file is written through a temporary sibling, so
+# a TIMEOUT leaves no file either (frap-session tests/limits.rs). A 512 × 512 layout is
+# deflated (zlib level 6), a few KB instead of 1 MiB of stored blocks. Statements on stdin.
+bin.name = "frap"
+args = ["--verbosity", "minimal", "--stmt-timeout", "1s"]
+fs.sandbox = true

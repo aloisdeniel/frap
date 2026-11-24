@@ -114,3 +114,77 @@ fn the_refusal_names_the_original() {
         "{msg}"
     );
 }
+
+/// M8 stabilization round 4: the mesh-layer hooks of an evaluated SUBSURF mesh read the
+/// evaluated mesh (they raised `frap internal: not a mesh`): `uv_layers.active` and
+/// `active_index` (Blender: `UVMap`, 0), the active layer's subdivided UVs, and
+/// `attributes.active` (`None` like the original's, D-74; Blender `position`); writes through
+/// the evaluated mesh are refused (D-41) and the original keeps its layers.
+#[test]
+fn evaluated_mesh_layer_hooks() {
+    let mut s = session();
+    val(
+        &mut s,
+        "bpy.data.objects['Cube'].modifiers.new(name='S', type='SUBSURF')",
+    );
+    let ev = "bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data";
+    let r = one(&mut s, &format!("{ev}.uv_layers.active"));
+    assert_eq!(r["status"], "FINISHED", "{r}");
+    assert_eq!(
+        r["value"]["$ptr"],
+        format!("{ev}.uv_layers[\"UVMap\"]"),
+        "{r}"
+    );
+    assert_eq!(
+        val(&mut s, &format!("{ev}.uv_layers.active_index")),
+        json!(0)
+    );
+    assert_eq!(
+        val(&mut s, &format!("{ev}.uv_layers.active.name")),
+        json!("UVMap")
+    );
+    assert_eq!(val(&mut s, &format!("{ev}.attributes.active")), json!(null));
+    assert_eq!(
+        val(&mut s, &format!("{ev}.attributes.active_index")),
+        json!(-1)
+    );
+    assert_eq!(
+        val(&mut s, &format!("{ev}.color_attributes.active_color_index")),
+        json!(-1)
+    );
+    // The subdivided UVs (96 corners), not the original's 24.
+    assert_eq!(
+        val(&mut s, &format!("{ev}.uv_layers.active.uv[5].vector")),
+        json!([0.8750001, 0.50000006])
+    );
+    assert_eq!(
+        val(&mut s, &format!("{ev}.uv_layers.active.data[95].uv")),
+        val(&mut s, &format!("{ev}.uv_layers.active.uv[95].vector"))
+    );
+    let (exc, _, _) = err(&mut s, &format!("{ev}.uv_layers.active.data[96].uv"));
+    assert_eq!(exc, "IndexError");
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].to_mesh().uv_layers.active_index"
+        ),
+        json!(0)
+    );
+    // D-41: the evaluated mesh is a read-only view.
+    for w in [
+        format!("{ev}.uv_layers.active_index = 0"),
+        format!("{ev}.uv_layers.active = None"),
+        format!("{ev}.attributes.active_index = 0"),
+    ] {
+        let (exc, code, _) = err(&mut s, &w);
+        assert_eq!(
+            (exc.as_str(), code.as_str()),
+            ("NotImplementedError", "NOT_IMPLEMENTED"),
+            "{w}"
+        );
+    }
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].uv_layers.active.name"),
+        json!("UVMap")
+    );
+}

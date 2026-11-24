@@ -1,0 +1,9 @@
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
+{"seq":1,"line":1,"kind":"op","op":"object.mode_set","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.objects['Cube']"],"renamed":[]},"hints":[]}
+{"seq":2,"line":2,"kind":"op","op":"uv.export_layout","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"LIMIT_EXCEEDED","message":"Error: frap: limit exceeded (max_elements): the uv.export_layout image would need 4294967296 bytes (limit 1600000000 bytes, 32 per --max-elements unit)","span":{"line":2,"col":1,"col_chars":1,"len":77},"detail":{"max_elements":50000000,"bytes":4294967296},"hint":"raise --max-elements, or use a smaller image"},"hints":[]}
+{"seq":3,"line":3,"kind":"print","ok":true,"status":"FINISHED","value":["EDIT_MESH"],"reports":[],"hints":[]}
+{"seq":4,"line":4,"kind":"op","op":"uv.export_layout","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.meshes['Cube']","bpy.data.objects['Cube']"],"renamed":[]},"hints":[]}
+{"seq":5,"line":5,"kind":"call","ok":true,"status":"FINISHED","func":"bpy.data.images.load","value":{"$ref":"bpy.data.images['small.png']"},"rna":{"type":"POINTER","subtype":"NONE"},"reports":[],"changes":{"added":["bpy.data.images['small.png']"],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"seq":6,"line":6,"kind":"print","ok":true,"status":"FINISHED","value":[[512,512]],"reports":[],"hints":[]}
+{"seq":7,"line":7,"kind":"call","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"RNA_RUNTIME","message":"Error: Cannot read 'big.png': No such file or directory/n","span":{"line":7,"col":1,"col_chars":1,"len":20},"detail":{},"hint":null},"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":7,"errors":2,"cancelled":0}}
