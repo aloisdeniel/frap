@@ -40,6 +40,9 @@ env:
   FRAP_GPU_OPTIONAL: "1"
   # The EEVEE scene goldens (about 35 min on WARP) render in gpu.yml only, on every adapter.
   FRAP_SKIP_EEVEE_SCENES: "1"
+  # The EEVEE cold-start budget is gated in gpu.yml, measured alone; beside every other test
+  # crate here it measures the contention (330-626 s on WARP; decision log M56CI-8).
+  FRAP_EEVEE_COLD_BUDGET_S: "off"
 
 jobs:
   test:
