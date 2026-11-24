@@ -202,14 +202,15 @@ impl Scene {
     /// `(struct, property)` pairs whose setter applies its own range: a caller coerces these
     /// without the generic hard-range clamp and passes the raw number to the setter
     /// (`Scene.frame_current`: `= 1000000000` reads back 1000000000 in Blender 5.2.4;
-    /// `VertexGroups.active_index`: `= -3` reads back -3; `LoopColors.active_index`: `= -1`
-    /// keeps the active layer, as an index past the end does; `ShapeKey.value`: clamped to the
-    /// block's `slider_min..slider_max`, the dumped `0..1` being the range at default sliders,
-    /// WP 6.3).
+    /// `VertexGroups.active_index`: `= -3` reads back -3; `LoopColors.active_index` and
+    /// `UVLoopLayers.active_index`: `= -1` keeps the active layer, as an index past the end
+    /// does; `ShapeKey.value`: clamped to the block's `slider_min..slider_max`, the dumped
+    /// `0..1` being the range at default sliders, WP 6.3).
     pub const UNCLAMPED: &'static [(&'static str, &'static str)] = &[
         ("Scene", "frame_current"),
         ("VertexGroups", "active_index"),
         ("LoopColors", "active_index"),
+        ("UVLoopLayers", "active_index"),
         ("ShapeKey", "value"),
     ];
 

@@ -102,7 +102,6 @@ NORMALISE = {
     "D-50": None,
     "D-51": ("comparator", "reports are not part of GoldenState, so they are never compared"),
     "D-52": None,
-    "D-53": None,
     "D-54": ("cases", "cases do not compare select_history after leaving and re-entering Edit Mode"),
     "D-55": None,
     "D-56": None,
@@ -227,6 +226,7 @@ NORMALISE = {
     "D-171": ("cases", "object/add_m8/make_real compares within the default 1e-5 tolerance, which covers the 1-ulp rotation"),
     "D-172": ("cases", "no case runs uv.stitch without stitchable UVs (Blender crashes)"),
     "D-173": ("cases", "no case compares a mesh after a failing foreach_set or the extra items of a longer foreach_get list"),
+    "D-174": ("cases", "no case foreach_sets an enum number that names no item"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

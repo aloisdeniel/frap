@@ -836,6 +836,177 @@ fn variable_length_bulk_buffers_hold_every_face() {
     }
 }
 
+/// M8 stabilization round 7 (verified on 5.2.4): properties Blender copies as a raw array need
+/// the exact buffer size both ways (a longer one raises and writes nothing); the item-by-item
+/// ones take more. Collections of IDs read item by item, enums go through as item numbers, and
+/// buffers are type-checked before their size.
+#[test]
+fn raw_array_buffers_ids_enums_and_buffer_types() {
+    let mut s = session();
+    let runtime = ("RuntimeError", "internal error setting the array");
+    let typ = ("TypeError", "couldn't access the py sequence");
+    one(
+        &mut s,
+        "bpy.data.meshes['Cube'].attributes.new('fv', 'FLOAT', 'FACE')",
+    );
+    for (src, want) in [
+        (
+            "bpy.data.meshes['Cube'].attributes['position'].data.foreach_set('vector', [0.5] * 25)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].attributes['position'].data.foreach_get('vector', [0.0] * 25)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].attributes['fv'].data.foreach_set('value', [1.5] * 7)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].polygons.foreach_set('loop_start', [0] * 7)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].polygons.foreach_get('loop_start', [0] * 7)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].edges.foreach_set('vertices', [0] * 25)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].vertex_normals.foreach_get('vector', [0.0] * 25)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].uv_layers[0].uv.foreach_get('vector', [0.0] * 49)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].polygons.foreach_get('vertices', (0,) * 24)",
+            typ,
+        ),
+        (
+            "bpy.data.meshes['Cube'].polygons.foreach_get('vertices', (0,) * 3)",
+            runtime,
+        ),
+        (
+            "bpy.data.meshes['Cube'].edges.foreach_set('vertices', [0] * 23 + [1.5])",
+            typ,
+        ),
+        (
+            "bpy.data.meshes['Cube'].vertices.foreach_set('co', [[1, 1, 1]] * 8)",
+            typ,
+        ),
+        (
+            "bpy.data.meshes['Cube'].vertices.foreach_set('select', [2] * 8)",
+            typ,
+        ),
+        (
+            "bpy.data.meshes['Cube'].vertices.foreach_set('index', [0.5] * 30)",
+            typ,
+        ),
+        (
+            "bpy.data.objects.foreach_set('rotation_mode', [1.0, 1, 1])",
+            typ,
+        ),
+        (
+            "bpy.data.objects.foreach_set('rotation_mode', [99, 1, 1])",
+            runtime,
+        ),
+        (
+            "bpy.data.objects.foreach_set('name', ['a', 'b', 'c'])",
+            runtime,
+        ),
+        (
+            "bpy.data.scenes['Scene'].objects.foreach_get('location', [0.0] * 8)",
+            runtime,
+        ),
+    ] {
+        let (e, _, m) = err(&mut s, src);
+        assert_eq!((e.as_str(), m.as_str()), want, "{src}");
+    }
+    // Nothing was written: the topology and the positions are the cube's.
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].polygons.foreach_get('loop_total', [0] * 6)"
+        ),
+        json!([4, 4, 4, 4, 4, 4])
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].vertices[0].co[:]"),
+        json!([1, 1, 1])
+    );
+    // Exact sizes work; an item-by-item property takes more.
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].edges.foreach_get('vertices', [0] * 24)",
+    );
+    assert_eq!(v.as_array().map(Vec::len), Some(24));
+    let v = val(
+        &mut s,
+        "bpy.data.meshes['Cube'].vertices.foreach_get('co', [0.0] * 25)",
+    );
+    assert_eq!(v.as_array().map(Vec::len), Some(25));
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].vertices.foreach_set('select', [0, 1] * 4)"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.meshes['Cube'].vertices[1].select"),
+        json!(true)
+    );
+    // An empty collection refuses a buffer before looking at the attribute.
+    one(&mut s, "bpy.data.meshes.new('E')");
+    let (e, _, m) = err(
+        &mut s,
+        "bpy.data.meshes['E'].vertices.foreach_get('foo', [0.0] * 3)",
+    );
+    assert_eq!(
+        (e.as_str(), m.as_str()),
+        (
+            "TypeError",
+            "foreach_get(..) sequence length mismatch given 3, needed 0"
+        )
+    );
+    // Collections of IDs and enums.
+    let loc = val(
+        &mut s,
+        "bpy.data.scenes['Scene'].objects.foreach_get('location', [0.0] * 10)",
+    );
+    assert_eq!(loc.as_array().map(Vec::len), Some(10));
+    assert_eq!(loc[3], json!(4.076245307922363));
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.context.view_layer.objects.foreach_get('type', [0] * 3)"
+        ),
+        json!([1, 10, 11])
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].material_slots.foreach_get('link', [''])"
+        ),
+        json!([0])
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects.foreach_set('rotation_mode', [0, -1, 1])"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(&mut s, "bpy.data.objects['Cube'].rotation_mode"),
+        json!("AXIS_ANGLE")
+    );
+}
+
 #[test]
 fn bulk_writes() {
     let mut s = session();

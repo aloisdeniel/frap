@@ -842,7 +842,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | `Object.shape_key_add(name, from_mix)/shape_key_remove/shape_key_clear` | M6 |  |
 | [x] | `Bone/EditBone/PoseBone` `.vector/.center/.x_axis/.y_axis/.z_axis/.basename/.parent_recursive/.children/.children_recursive/.children_recursive_basename`, `.translate(vec)`, `.parent_index(bone)` (Python-only), `EditBone.align_roll(vector)`, `bpy_struct.id_data` | M6 | M5+M6 stabilization (decision log M56S-3); `EditBone/Armature.transform`, `Bone.convert_local_to_pose`, `evaluate_envelope`, `Object.convert_space` are M8 (deviations §2) |
 | [ ] | `bpy_struct.path_resolve / path_from_id, repr` | M1 | byte-identical to Blender, incl. embedded roots |
-| [ ] | `<collection>.foreach_get(attr[, seq]) / foreach_set(attr, seq)`, slices `coll[a:b]` | M1 | one-argument `foreach_get` is a frap extension; bulk `$array` encoding |
+| [ ] | `<collection>.foreach_get(attr[, seq]) / foreach_set(attr, seq)`, slices `coll[a:b]` | M1 | one-argument `foreach_get` is a frap extension; bulk `$array` encoding; buffer sizes and types as Blender (raw-array properties exact, others at least; D-173, M8S7-1); collections of IDs read item by item, enums as item numbers (D-174) |
 | [ ] | `bpy.ops.<ns>.<op>.poll() / get_rna_type() / idname() / idname_py()` | M1 | poll returns bool + `unmet` requirements |
 | [x] | `bpy.data.scenes.new(name) / remove`, `context.window.scene = …` | M3 | WP 3.10 |
 | — | `bpy_struct.driver_add/driver_remove` | OUT | drivers out of scope |
