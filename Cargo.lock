@@ -1046,6 +1046,7 @@ name = "frap-color"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "flate2",
  "frap-math",
  "glam",
  "libm",
@@ -1735,6 +1736,7 @@ version = "0.1.0"
 dependencies = [
  "automod",
  "bytemuck",
+ "flate2",
  "frap-color",
  "frap-imbuf",
  "frap-material",
@@ -1798,6 +1800,7 @@ dependencies = [
  "approx",
  "automod",
  "bitflags",
+ "flate2",
  "frap-anim",
  "frap-bmesh",
  "frap-color",

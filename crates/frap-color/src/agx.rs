@@ -17,7 +17,7 @@ pub const BAKED: &[BakedLut] = &[(
     "AgX",
     "None",
     "sRGB",
-    include_str!("../../../assets/luts/agx.cube"),
+    include_bytes!("generated/agx.cube.deflate"),
 )];
 
 /// The AgX op pipelines: every display × AgX look.
@@ -29,14 +29,14 @@ pub(crate) const DATA: &[DataFile] = &[
     ("agx", BAKED[0].3),
     (
         "agx_base_p3",
-        include_str!("../../../assets/luts/agx_base_p3.cube"),
+        include_bytes!("generated/agx_base_p3.cube.deflate"),
     ),
     (
         "agx_base_rec2020",
-        include_str!("../../../assets/luts/agx_base_rec2020.cube"),
+        include_bytes!("generated/agx_base_rec2020.cube.deflate"),
     ),
     (
         "luminance_compensation_bt2020",
-        include_str!("../../../assets/luts/luminance_compensation_bt2020.cube"),
+        include_bytes!("generated/luminance_compensation_bt2020.cube.deflate"),
     ),
 ];

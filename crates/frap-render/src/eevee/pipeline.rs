@@ -71,8 +71,14 @@ pub const SHADOW_WGSL: &str = include_str!("../shaders/eevee_shadow.wgsl");
 /// RGBA half floats — blue noise, the LTC disk integral (A of layer 1), the LTC GGX matrices,
 /// the GGX BRDF split-sum and the 16 BSDF/BTDF layers — extracted from Blender 5.2.4's
 /// `eevee_lut.cc` (GPL-2.0-or-later) and stored as Blender uploads them (`SFLOAT_16_16_16_16`).
-pub const UTILITY_TX: &[u8] = include_bytes!("pipeline/utility_tx.bin");
-/// Layers of [`UTILITY_TX`].
+///
+/// Embedded deflate-packed (`src/generated/utility_tx.bin.deflate`, `cargo xtask codegen`;
+/// decision log BIN-1) and inflated on first use.
+pub fn utility_tx() -> &'static [u8] {
+    static TX: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
+    TX.get_or_init(|| super::unpack(include_bytes!("../generated/utility_tx.bin.deflate")))
+}
+/// Layers of [`utility_tx`].
 pub const UTILITY_LAYERS: u32 = 20;
 /// Depth format of the camera pass.
 pub const DEPTH_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
@@ -943,8 +949,9 @@ fn create_resources(gpu: &Gpu) -> Resources {
         wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
     );
     let layer_bytes = 64 * 64 * 8;
+    let tx = utility_tx();
     for l in 0..UTILITY_LAYERS {
-        let b = &UTILITY_TX[(l as usize) * layer_bytes..(l as usize + 1) * layer_bytes];
+        let b = &tx[(l as usize) * layer_bytes..(l as usize + 1) * layer_bytes];
         write_layer(gpu, &util, 0, l, [64, 64], b, 8);
     }
     let util_view = util.create_view(&wgpu::TextureViewDescriptor {

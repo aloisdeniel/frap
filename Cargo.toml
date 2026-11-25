@@ -246,6 +246,11 @@ large_enum_variant = "allow"
 
 [profile.release]
 panic = "unwind"
+# One optimisation unit across the whole program (decision log BIN-1): the release `frap` is
+# about 13 MB smaller (generic code instantiated in many crates is merged, unused code dropped)
+# for a longer release link. `linkme` registrations survive fat LTO (W0-15, the registry test).
+lto = "fat"
+codegen-units = 1
 
 [profile.dev]
 # Keep test binaries small and quick to link.

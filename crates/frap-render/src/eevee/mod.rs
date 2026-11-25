@@ -110,3 +110,14 @@ impl Engine for Eevee {
 pub fn link() {
     let _ = EEVEE_FEATURES.len();
 }
+
+/// Inflates an embedded deflate-packed asset from `src/generated/` (`cargo xtask codegen`;
+/// decision log BIN-1). Panics only on a file codegen did not write (the asset tests read each).
+pub(crate) fn unpack(packed: &[u8]) -> Vec<u8> {
+    use std::io::Read as _;
+    let mut out = Vec::new();
+    flate2::read::DeflateDecoder::new(packed)
+        .read_to_end(&mut out)
+        .expect("invariant: src/generated/*.deflate is valid deflate (cargo xtask codegen)");
+    out
+}

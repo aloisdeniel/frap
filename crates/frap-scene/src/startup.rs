@@ -36,7 +36,19 @@ use crate::id::{
     Camera, Collection, Light, Material, Object, SHADER_NODETREE_NAME, Scene, World, layers,
 };
 
-const STARTUP_JSON: &str = include_str!("../../../spec/blender-5.2/startup.json");
+/// `spec/blender-5.2/startup.json`, deflate-packed by `cargo xtask codegen` (decision log BIN-1:
+/// 2.8 MB of JSON embed as about 30 KB).
+const STARTUP_DEFLATE: &[u8] = include_bytes!("generated/startup.json.deflate");
+
+/// The text of the factory dump (inflated on each call; [`factory_dump`] keeps the parse).
+fn startup_json() -> String {
+    use std::io::Read as _;
+    let mut text = String::new();
+    flate2::read::DeflateDecoder::new(STARTUP_DEFLATE)
+        .read_to_string(&mut text)
+        .expect("invariant: startup.json.deflate is deflated UTF-8 (cargo xtask codegen)");
+    text
+}
 
 /// Materials of the factory file that frap does not create (D-11).
 pub const OMITTED_MATERIALS: [&str; 1] = ["Dots Stroke"];
@@ -51,7 +63,8 @@ pub fn factory_dump() -> &'static J {
     static DUMP: OnceLock<J> = OnceLock::new();
     DUMP.get_or_init(|| {
         use serde::de::DeserializeSeed as _;
-        let mut de = serde_json::Deserializer::from_str(STARTUP_JSON);
+        let text = startup_json();
+        let mut de = serde_json::Deserializer::from_str(&text);
         let v = no_pixels::Seed
             .deserialize(&mut de)
             .and_then(|v| de.end().map(|()| v));
@@ -150,7 +163,7 @@ mod no_pixels {
 
         #[test]
         fn the_factory_dump_parses_like_serde_json() {
-            let mut want: J = serde_json::from_str(super::super::STARTUP_JSON).expect("parses");
+            let mut want: J = serde_json::from_str(&super::super::startup_json()).expect("parses");
             for im in want["ids"]["images"].as_array_mut().expect("images") {
                 if im.get("pixels").is_some() {
                     im["pixels"] = J::Null;

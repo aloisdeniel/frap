@@ -33,8 +33,15 @@ pub const LAYERS: usize = 1 + BSDF_LAYERS;
 /// Bytes of the asset.
 pub const ASSET_LEN: usize = LAYERS * SIZE * SIZE * 4 * 2;
 
-/// The asset (`assets/brdf_lut.bin`).
-pub static ASSET: &[u8] = include_bytes!("../../../../../assets/brdf_lut.bin");
+/// The asset (`assets/brdf_lut.bin`), deflate-packed by `cargo xtask codegen` (decision log
+/// BIN-1).
+static ASSET_DEFLATE: &[u8] = include_bytes!("../../generated/brdf_lut.bin.deflate");
+
+/// The asset (`assets/brdf_lut.bin`), inflated on first use.
+pub fn asset() -> &'static [u8] {
+    static ASSET: std::sync::OnceLock<Vec<u8>> = std::sync::OnceLock::new();
+    ASSET.get_or_init(|| crate::eevee::unpack(ASSET_DEFLATE))
+}
 
 /// The decoded tables.
 #[derive(Clone, Debug, PartialEq)]
@@ -57,9 +64,9 @@ pub struct BrdfData {
 }
 
 impl Lut {
-    /// Decodes [`ASSET`].
+    /// Decodes [`asset`].
     pub fn load() -> Lut {
-        Lut::from_bytes(ASSET)
+        Lut::from_bytes(asset())
     }
 
     /// Decodes an asset image (see the module documentation).
@@ -220,7 +227,7 @@ pub(crate) fn upload(gpu: &crate::gpu::Gpu) -> wgpu::Texture {
             view_formats: &[],
         },
         wgpu::util::TextureDataOrder::LayerMajor,
-        ASSET,
+        asset(),
     )
 }
 
@@ -275,7 +282,7 @@ mod tests {
             return;
         }
         assert!(
-            bytes == ASSET,
+            bytes == asset(),
             "assets/brdf_lut.bin differs from {}",
             p.display()
         );

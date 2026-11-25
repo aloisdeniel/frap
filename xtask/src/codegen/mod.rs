@@ -11,6 +11,7 @@
 //! | `gen_ops` | `crates/frap-spec-ops-<group>/src/generated/` (typed ops), `crates/frap-spec-catalog/src/generated/` (blob) |
 //! | `gen_plain` | `crates/frap-scene/src/generated/` (plain structs, `ModifierSettings`) |
 //! | `gen_nodes` | `crates/frap-nodes/src/generated/` (`NodeTypeDef` per `bl_idname`) |
+//! | `gen_packed` | `crates/frap-color/src/generated/`, `crates/frap-render/src/generated/`, `crates/frap-scene/src/generated/startup.json.deflate` (deflate-packed embedded data) |
 //!
 //! The WP 0.2 prototype this grew from is archived in `docs/design/rfc/0001-probe/codegen/`.
 
@@ -20,6 +21,7 @@ use std::path::{Path, PathBuf};
 pub mod audit;
 mod gen_nodes;
 mod gen_ops;
+pub mod gen_packed;
 mod gen_plain;
 mod gen_rna;
 pub mod model;
@@ -37,6 +39,8 @@ fn owned_dirs(root: &Path) -> Vec<PathBuf> {
         root.join(gen_ops::CATALOG_DIR),
         root.join(gen_plain::DIR),
         root.join(gen_nodes::DIR),
+        root.join(gen_packed::COLOR_DIR),
+        root.join(gen_packed::RENDER_DIR),
     ];
     for g in model::GROUPS {
         v.push(root.join(gen_ops::group_dir(g)));
@@ -53,6 +57,7 @@ pub fn generate(root: &Path) -> Result<Files, String> {
     gen_ops::generate_catalog(&spec, &mut files)?;
     gen_plain::generate(&spec, &mut files)?;
     gen_nodes::generate(&spec, &mut files)?;
+    gen_packed::generate(root, &mut files)?;
     let mut errors = audit::frap_options(&spec);
     errors.extend(audit::compat_4x(&spec));
     if !errors.is_empty() {

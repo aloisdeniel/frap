@@ -19,5 +19,5 @@ pub(crate) const PIPELINES: OpsFile = include_str!("../../../assets/luts/false_c
 /// LUT data of the False Color pipelines (besides the AgX base LUTs).
 pub(crate) const DATA: &[DataFile] = &[(
     "agx_false_color",
-    include_str!("../../../assets/luts/agx_false_color.lut1d"),
+    include_bytes!("generated/agx_false_color.lut1d.deflate"),
 )];

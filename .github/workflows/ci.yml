@@ -100,9 +100,7 @@ jobs:
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - name: tests
         run: cargo test --workspace --locked --no-fail-fast
-      - name: registry self-check and transcripts (release, fat LTO)
-        env:
-          CARGO_PROFILE_RELEASE_LTO: "fat"
+      - name: registry self-check and transcripts (release, fat LTO from the release profile)
         run: cargo test --release --locked -p frap-ops-all --test registry -p frap-cli --test transcripts
       - name: frap-uv packer goldens and invariants (release only; ignored in debug builds)
         run: cargo test --release --locked -p frap-uv --test blender_goldens --test pack_invariants

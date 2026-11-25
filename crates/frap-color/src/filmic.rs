@@ -22,34 +22,34 @@ pub(crate) const PIPELINES: OpsFile = include_str!("../../../assets/luts/filmic.
 pub(crate) const DATA: &[DataFile] = &[
     (
         "filmic_desat_33",
-        include_str!("../../../assets/luts/filmic_desat_33.cube"),
+        include_bytes!("generated/filmic_desat_33.cube.deflate"),
     ),
     (
         "filmic_to_0_35_1_30",
-        include_str!("../../../assets/luts/filmic_to_0_35_1_30.lut1d"),
+        include_bytes!("generated/filmic_to_0_35_1_30.lut1d.deflate"),
     ),
     (
         "filmic_to_0_48_1_09",
-        include_str!("../../../assets/luts/filmic_to_0_48_1_09.lut1d"),
+        include_bytes!("generated/filmic_to_0_48_1_09.lut1d.deflate"),
     ),
     (
         "filmic_to_0_60_1_04",
-        include_str!("../../../assets/luts/filmic_to_0_60_1_04.lut1d"),
+        include_bytes!("generated/filmic_to_0_60_1_04.lut1d.deflate"),
     ),
     (
         "filmic_to_0_70_1_03",
-        include_str!("../../../assets/luts/filmic_to_0_70_1_03.lut1d"),
+        include_bytes!("generated/filmic_to_0_70_1_03.lut1d.deflate"),
     ),
     (
         "filmic_to_0_85_1_011",
-        include_str!("../../../assets/luts/filmic_to_0_85_1_011.lut1d"),
+        include_bytes!("generated/filmic_to_0_85_1_011.lut1d.deflate"),
     ),
     (
         "filmic_to_0_99_1_0075",
-        include_str!("../../../assets/luts/filmic_to_0_99_1_0075.lut1d"),
+        include_bytes!("generated/filmic_to_0_99_1_0075.lut1d.deflate"),
     ),
     (
         "filmic_to_1_20_1_00",
-        include_str!("../../../assets/luts/filmic_to_1_20_1_00.lut1d"),
+        include_bytes!("generated/filmic_to_1_20_1_00.lut1d.deflate"),
     ),
 ];

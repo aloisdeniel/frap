@@ -51,8 +51,9 @@ fn copy_file(from: &Path, to: &Path) -> Result<(), String> {
 }
 
 /// Builds `shadow/` = the inputs of codegen (`spec/overlay`, `spec/frap`,
-/// `spec/current_milestone`, `docs/OPERATORS.md` without the §A rows of `drop_ops`) with
-/// `dumps/` as `spec/blender-5.2/`. Returns the operators whose rows were dropped.
+/// `spec/current_milestone`, `docs/OPERATORS.md` without the §A rows of `drop_ops`, the
+/// sources `gen_packed` packs) with `dumps/` as `spec/blender-5.2/`. Returns the operators
+/// whose rows were dropped.
 fn build_shadow(
     root: &Path,
     dumps: &Path,
@@ -96,6 +97,12 @@ fn build_shadow(
             copy_dir(&src, &spec.join(f.output()))?;
         } else if src.is_file() {
             copy_file(&src, &spec.join(f.output()))?;
+        }
+    }
+    // The packed data files (LUTs, EEVEE textures; the startup dump when the re-dump has none).
+    for (src, _) in crate::codegen::gen_packed::PACKED {
+        if !shadow.join(src).exists() {
+            copy_file(&root.join(src), &shadow.join(src))?;
         }
     }
     Ok(dropped)

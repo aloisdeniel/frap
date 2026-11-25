@@ -38,8 +38,9 @@ use crate::{aces, looks};
 /// One baked op file of a view family: its text (`include_str!` of `assets/luts/<family>.ops`).
 pub(crate) type OpsFile = &'static str;
 
-/// One baked LUT data file: `(name, text)`.
-pub(crate) type DataFile = (&'static str, &'static str);
+/// One baked LUT data file: `(name, deflate-packed text)` (`src/generated/`, decision log
+/// BIN-1; parsed through [`crate::lut::unpack`] on first use).
+pub(crate) type DataFile = (&'static str, &'static [u8]);
 
 /// Every `.ops` file, from the family modules.
 fn ops_files() -> [OpsFile; 6] {
@@ -311,7 +312,7 @@ enum LutData {
 
 struct DataEntry {
     name: &'static str,
-    text: &'static str,
+    packed: &'static [u8],
     parsed: OnceLock<Result<LutData, String>>,
 }
 
@@ -319,9 +320,9 @@ fn data(name: &str) -> Result<&'static LutData, String> {
     static ENTRIES: OnceLock<Vec<DataEntry>> = OnceLock::new();
     let entries = ENTRIES.get_or_init(|| {
         data_files()
-            .map(|(name, text)| DataEntry {
+            .map(|(name, packed)| DataEntry {
                 name,
-                text,
+                packed,
                 parsed: OnceLock::new(),
             })
             .collect()
@@ -333,12 +334,13 @@ fn data(name: &str) -> Result<&'static LutData, String> {
     entry
         .parsed
         .get_or_init(|| {
-            if entry.text.contains("LUT_3D_SIZE") {
-                CubeFile::parse(entry.text)
+            let text = crate::lut::unpack(entry.packed);
+            if text.contains("LUT_3D_SIZE") {
+                CubeFile::parse(&text)
                     .map(|c| LutData::Three(c.lut))
                     .map_err(|e| e.to_string())
             } else {
-                Lut1d::parse(entry.text).map(LutData::One)
+                Lut1d::parse(&text).map(LutData::One)
             }
         })
         .as_ref()

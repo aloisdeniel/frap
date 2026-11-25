@@ -19,5 +19,5 @@ pub(crate) const PIPELINES: OpsFile = include_str!("../../../assets/luts/pbr_neu
 /// LUT data of the Khronos PBR Neutral pipelines.
 pub(crate) const DATA: &[DataFile] = &[(
     "pbr_neutral",
-    include_str!("../../../assets/luts/pbr_neutral.cube"),
+    include_bytes!("generated/pbr_neutral.cube.deflate"),
 )];

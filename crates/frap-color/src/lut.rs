@@ -425,9 +425,22 @@ impl ViewLut {
     }
 }
 
-/// One baked LUT: `(view transform, look, display, .cube file contents)`. Each view-transform
-/// module (`agx`, `filmic`, `pbr_neutral`, `aces`, `false_color`; WP 5.3) lists its own.
-pub type BakedLut = (&'static str, &'static str, &'static str, &'static str);
+/// One baked LUT: `(view transform, look, display, deflate-packed .cube file)`. Each
+/// view-transform module (`agx`, `filmic`, `pbr_neutral`, `aces`, `false_color`; WP 5.3) lists
+/// its own. The packed copies live in `src/generated/` (`cargo xtask codegen` packs
+/// `assets/luts/`; decision log BIN-1); [`unpack`] restores the text.
+pub type BakedLut = (&'static str, &'static str, &'static str, &'static [u8]);
+
+/// The text of a deflate-packed LUT file from `src/generated/` (decision log BIN-1). Panics only
+/// on a file `cargo xtask codegen` did not write (the LUT tests parse every one).
+pub(crate) fn unpack(packed: &[u8]) -> String {
+    use std::io::Read as _;
+    let mut text = String::new();
+    flate2::read::DeflateDecoder::new(packed)
+        .read_to_string(&mut text)
+        .expect("invariant: src/generated/*.deflate is deflated UTF-8 (cargo xtask codegen)");
+    text
+}
 
 /// Every LUT checked in under `assets/luts/`, from the view-transform modules (M5+M6 W0: the
 /// extension point WP 5.3 fills without editing this file).
@@ -448,8 +461,8 @@ pub fn baked(view_transform: &str, look: &str, display: &str) -> Option<&'static
     static PARSED: OnceLock<Vec<ViewLut>> = OnceLock::new();
     let all = PARSED.get_or_init(|| {
         all_baked()
-            .map(|(v, l, d, text)| {
-                let lut = CubeFile::parse(text)
+            .map(|(v, l, d, packed)| {
+                let lut = CubeFile::parse(&unpack(packed))
                     .and_then(ViewLut::from_cube)
                     .unwrap_or_else(|e| panic!("assets/luts for {v}/{l}/{d} is corrupt: {e}"));
                 assert_eq!(
