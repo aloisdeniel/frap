@@ -82,7 +82,7 @@ impl Drop for Slot {
 fn acquire_slot(deadline: std::time::Instant, busy: &'static str) -> Slot {
     let mut n = workers();
     while *n >= MAX_WORKERS {
-        let left = deadline.saturating_duration_since(std::time::Instant::now());
+        let left = frap_math::budget::wait_slice(deadline);
         if left.is_zero() {
             drop(n);
             frap_math::budget::check_now_because(busy);
@@ -145,8 +145,7 @@ where
         )));
     }
     loop {
-        let left = deadline.saturating_duration_since(std::time::Instant::now());
-        match rx.recv_timeout(left) {
+        match rx.recv_timeout(frap_math::budget::wait_slice(deadline)) {
             Ok(r) => return r,
             Err(RecvTimeoutError::Timeout) => frap_math::budget::check_now(),
             Err(RecvTimeoutError::Disconnected) => {

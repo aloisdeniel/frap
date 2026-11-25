@@ -77,8 +77,7 @@ fn sp_lu_within_deadline(mat: SparseColMat<usize, f64>) -> Option<SparseLu> {
         return None;
     }
     loop {
-        let left = deadline.saturating_duration_since(std::time::Instant::now());
-        match rx.recv_timeout(left) {
+        match rx.recv_timeout(budget::wait_slice(deadline)) {
             Ok(lu) => return lu,
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => budget::check_now(),
             Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => return None,
