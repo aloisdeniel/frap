@@ -118,9 +118,20 @@ fn timeout_answers_within_50_ms_of_the_deadline() {
         // 20 ms: in the imports (about 60 ms per sphere in a release build, 700 ms in a debug
         // one); 400 ms and 1.5 s: in the imports or the kernels, depending on the build.
         for ms in [20u64, 400, 1500] {
-            if let Some(o) = overshoot(&s, work, Duration::from_millis(ms)) {
-                assert!(o < BOUND, "{work:?} at {ms} ms: {o:?} after the deadline");
+            // Best of three: a run descheduled on a loaded CI runner overshoots by the time
+            // slice it lost (macOS runner, 74 ms once), not by cancellation latency; a missing
+            // check in the kernels overshoots on every attempt (decision log M8CI-1).
+            let mut worst = Vec::new();
+            for _ in 0..3 {
+                match overshoot(&s, work, Duration::from_millis(ms)) {
+                    Some(o) if o >= BOUND => worst.push(o),
+                    _ => break,
+                }
             }
+            assert!(
+                worst.len() < 3,
+                "{work:?} at {ms} ms: {worst:?} after the deadline (3 attempts)"
+            );
         }
     }
 }
