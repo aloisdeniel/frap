@@ -134,6 +134,19 @@ pub fn deadline() -> Option<Instant> {
     ACTIVE.with(|a| a.get().and_then(|b| b.deadline.map(|(d, _)| d)))
 }
 
+/// The longest single wait of a thread blocked until a deadline (see [`wait_slice`]).
+pub const WAIT_SLICE: Duration = Duration::from_millis(5);
+
+/// How long a thread waiting for a worker until `deadline` blocks next: the time left, at most
+/// [`WAIT_SLICE`]. The OS may wake a timed wait late by a slack that grows with the wait (macOS
+/// timer coalescing: a throttled process woke 100-200 ms after a single 400 ms wait, decision
+/// log M8CI-3), so waiting in short slices keeps the `TIMEOUT` within a slice of the deadline.
+pub fn wait_slice(deadline: Instant) -> Duration {
+    deadline
+        .saturating_duration_since(Instant::now())
+        .min(WAIT_SLICE)
+}
+
 /// Whether the active deadline has passed (reads the clock).
 pub fn expired() -> bool {
     ACTIVE.with(|a| {

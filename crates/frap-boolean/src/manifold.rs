@@ -290,7 +290,7 @@ pub(crate) mod imp {
     fn acquire_slot(deadline: std::time::Instant) -> Slot {
         let mut n = workers();
         while *n >= MAX_WORKERS {
-            let left = deadline.saturating_duration_since(std::time::Instant::now());
+            let left = frap_math::budget::wait_slice(deadline);
             if left.is_zero() {
                 drop(n);
                 frap_math::budget::check_now_because(SLOTS_BUSY);
@@ -345,8 +345,7 @@ pub(crate) mod imp {
             )));
         }
         loop {
-            let left = deadline.saturating_duration_since(std::time::Instant::now());
-            match rx.recv_timeout(left) {
+            match rx.recv_timeout(frap_math::budget::wait_slice(deadline)) {
                 Ok(r) => return Ok(r),
                 Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
                     if std::time::Instant::now() >= deadline {
