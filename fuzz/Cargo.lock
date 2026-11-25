@@ -539,6 +539,7 @@ dependencies = [
 name = "frap-color"
 version = "0.1.0"
 dependencies = [
+ "flate2",
  "frap-math",
  "glam",
  "libm",
@@ -701,6 +702,7 @@ version = "0.1.0"
 dependencies = [
  "automod",
  "bitflags",
+ "flate2",
  "frap-anim",
  "frap-bmesh",
  "frap-color",
