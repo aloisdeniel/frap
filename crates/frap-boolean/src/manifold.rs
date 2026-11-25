@@ -306,8 +306,7 @@ pub(crate) mod imp {
         Slot
     }
 
-    /// The deadline-bound boolean workers running now (tests).
-    #[cfg(test)]
+    /// The deadline-bound boolean workers running now, abandoned ones included.
     pub(crate) fn running_workers() -> usize {
         *workers()
     }

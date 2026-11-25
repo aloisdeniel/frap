@@ -218,3 +218,18 @@ pub trait BooleanSolver: Send + Sync {
 pub fn default_solver() -> &'static dyn BooleanSolver {
     &manifold::ManifoldSolver
 }
+
+/// The deadline-bound boolean worker threads still running, those abandoned after a
+/// `TIMEOUT` included (each ends at its next cancellation point). The latency tests wait for
+/// none before they measure, so that earlier timed-out runs do not compete for the CPU.
+#[doc(hidden)]
+pub fn background_workers() -> usize {
+    #[cfg(feature = "manifold")]
+    {
+        manifold::imp::running_workers()
+    }
+    #[cfg(not(feature = "manifold"))]
+    {
+        0
+    }
+}

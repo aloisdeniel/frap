@@ -78,7 +78,7 @@ fn axes(p: &transform::Shear) -> (usize, usize) {
 /// `initShear` stores `tanf(angle)`, `apply_shear` takes it back through `atanf` and `tanf`
 /// (no snapping or numeric input in a non-interactive call).
 pub fn shear_value(angle: f32) -> f32 {
-    angle.tan().atan().tan()
+    libm::tanf(libm::atanf(libm::tanf(angle)))
 }
 
 /// The `orient_type`, `orient_matrix` and `orient_matrix_type` as `initTransInfo` combines
