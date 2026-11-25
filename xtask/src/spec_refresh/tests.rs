@@ -338,7 +338,12 @@ fn version_parsing_accepts_any_5_2_x() {
 #[test]
 fn locate_order_and_dump_command_line() {
     let d = scratch("locate");
-    let exe = d.join("blender");
+    // The PATH lookup wants `blender.exe` on Windows.
+    let exe = d.join(if cfg!(windows) {
+        "blender.exe"
+    } else {
+        "blender"
+    });
     std::fs::write(&exe, "").unwrap();
     let missing = d.join("nope");
     assert_eq!(
@@ -352,11 +357,7 @@ fn locate_order_and_dump_command_line() {
     );
     assert_eq!(
         blender::locate_from(None, Some(missing.into()), Some(d.clone().into()), None).unwrap(),
-        d.join(if cfg!(windows) {
-            "blender.exe"
-        } else {
-            "blender"
-        })
+        exe
     );
     let r = Path::new("/r");
     let a = blender::dump_args(r, Family::Ops, Some(Path::new("/s.py")), Path::new("/o"));
@@ -371,7 +372,7 @@ fn locate_order_and_dump_command_line() {
             "--python",
             "/s.py",
             "--python",
-            &Path::new("/r/tools/blender")
+            &r.join("tools/blender")
                 .join("dump_ops.py")
                 .to_string_lossy(),
             "--",

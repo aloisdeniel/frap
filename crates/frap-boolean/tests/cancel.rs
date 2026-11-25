@@ -70,6 +70,17 @@ enum Work {
 /// Runs `work` with `timeout`: how long after the deadline it unwound with `Interrupted`,
 /// or `None` when it finished first.
 fn overshoot(s: &(Sphere, Sphere), work: Work, timeout: Duration) -> Option<Duration> {
+    // The workers abandoned by earlier timed-out runs finish their uncancellable import
+    // first: on a 3-core CI runner they otherwise steal the CPU the measured run needs
+    // (macOS runner, Manifold at 400 ms: 130-150 ms on every attempt, decision log M8CI-1).
+    let idle = Instant::now();
+    while frap_boolean::background_workers() > 0 {
+        assert!(
+            idle.elapsed() < Duration::from_secs(120),
+            "boolean workers still running 120 s after their timeout"
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
     let (a, b) = s;
     let ops = [
         BoolMesh::new(&a.0, &a.1, &a.2),
